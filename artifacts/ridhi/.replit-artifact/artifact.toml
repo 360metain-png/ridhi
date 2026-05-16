@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Ridhi"
+version = "1.0.0"
+id = "artifacts/ridhi"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 26094
+
+[services.development]
+run = "pnpm --filter @workspace/ridhi run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ridhi", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/ridhi", "run", "serve" ]
+
+[services.env]
+PORT = "26094"
+BASE_PATH = "/"

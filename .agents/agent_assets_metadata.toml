@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "MORwc0M3ckz4fNDBHRsOr"
+uri = "file://artifacts/ridhi/assets/images/icon.png"
+type = "image"
+title = "ridhi_app_icon"
+
+[[generated]]
+id = "hgM-2ym7ZtkMgqqR9de1l"
+uri = "file://artifacts/ridhi/assets/images/sample_user1.png"
+type = "image"
+title = "sample_profile_1"
+
+[[generated]]
+id = "VPjsIMMQ30Jg5Y4mqQmTJ"
+uri = "file://artifacts/ridhi/assets/images/sample_user2.png"
+type = "image"
+title = "sample_profile_2"
+
+[[generated]]
+id = "-rp2742BBz0KYaM2rciBu"
+uri = "file://artifacts/ridhi/assets/images/feed_post1.png"
+type = "image"
+title = "feed_post_food"
+
+[[generated]]
+id = "Vd_yrMf6XSrHbPpjTkv56"
+uri = "file://artifacts/ridhi/assets/images/feed_post2.png"
+type = "image"
+title = "feed_post_wedding"
