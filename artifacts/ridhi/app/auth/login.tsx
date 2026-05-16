@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +16,8 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+
+const LOGO = require("../../assets/images/ridhi_logo.png");
 
 const { height } = Dimensions.get("window");
 
@@ -50,9 +53,9 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.content}>
-        <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.logoCircle}>
-          <Text style={styles.logoText}>R</Text>
-        </LinearGradient>
+        <View style={styles.logoCircle}>
+          <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
+        </View>
         <Text style={[styles.title, { color: colors.foreground }]}>Welcome to Ridhi</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
           India's fastest growing social community
@@ -128,18 +131,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 88,
+    height: 88,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#E91E8C",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 10,
   },
-  logoText: { fontSize: 36, fontFamily: "Inter_700Bold", color: "#fff" },
+  logoImage: { width: 88, height: 88 },
   title: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
   subtitle: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center" },
   tabRow: {

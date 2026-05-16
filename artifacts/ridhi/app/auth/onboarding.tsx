@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -14,6 +15,8 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+
+const LOGO = require("../../assets/images/ridhi_logo.png");
 
 const { width } = Dimensions.get("window");
 
@@ -61,6 +64,11 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.logoHeader, { paddingTop: insets.top + 16 }]}>
+        <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
+        <Text style={[styles.logoName, { color: colors.foreground }]}>Ridhi</Text>
+      </View>
+
       <FlatList
         ref={flatRef}
         data={SLIDES}
@@ -120,6 +128,15 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  logoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingBottom: 4,
+  },
+  logoImg: { width: 36, height: 36 },
+  logoName: { fontSize: 22, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
   slide: {
     flex: 1,
     alignItems: "center",

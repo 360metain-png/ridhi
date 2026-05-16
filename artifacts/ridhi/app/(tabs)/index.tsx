@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   FlatList,
+  Image,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -9,7 +10,6 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
@@ -18,6 +18,8 @@ import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { INITIAL_POSTS, STORIES } from "@/data/mockData";
+
+const LOGO = require("../../assets/images/ridhi_logo.png");
 
 export default function FeedScreen() {
   const colors = useColors();
@@ -57,9 +59,7 @@ export default function FeedScreen() {
           },
         ]}
       >
-        <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.logoMini}>
-          <Text style={styles.logoChar}>R</Text>
-        </LinearGradient>
+        <Image source={LOGO} style={styles.logoMini} resizeMode="contain" />
         <Text style={[styles.appName, { color: colors.foreground }]}>Ridhi</Text>
 
         <View style={styles.headerActions}>
@@ -117,13 +117,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoMini: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 34,
+    height: 34,
   },
-  logoChar: { color: "#fff", fontSize: 18, fontFamily: "Inter_700Bold" },
   appName: { fontSize: 20, fontFamily: "Inter_700Bold", flex: 1 },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   headerBtn: { padding: 6, position: "relative" },
