@@ -1,0 +1,148 @@
+export interface Community {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  members: number;
+  isPrivate: boolean;
+  language: string;
+  isJoined: boolean;
+  gradient: [string, string];
+  emoji: string;
+}
+
+export const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "regional", label: "Regional" },
+  { id: "music", label: "Music" },
+  { id: "fitness", label: "Fitness" },
+  { id: "food", label: "Food" },
+  { id: "tech", label: "Tech" },
+  { id: "spirituality", label: "Spiritual" },
+  { id: "business", label: "Business" },
+  { id: "gaming", label: "Gaming" },
+  { id: "art", label: "Art" },
+];
+
+export const COMMUNITIES: Community[] = [
+  {
+    id: "c1",
+    name: "Mumbai Vibes",
+    description: "Everything about Mumbai — food, events, people and culture",
+    category: "regional",
+    members: 84200,
+    isPrivate: false,
+    language: "Hindi",
+    isJoined: true,
+    gradient: ["#FF6B35", "#E91E8C"],
+    emoji: "🏙️",
+  },
+  {
+    id: "c2",
+    name: "Desi Music Lovers",
+    description: "From Bollywood to indie — share the music that moves you",
+    category: "music",
+    members: 152000,
+    isPrivate: false,
+    language: "Hindi",
+    isJoined: true,
+    gradient: ["#7B2FBE", "#E91E8C"],
+    emoji: "🎵",
+  },
+  {
+    id: "c3",
+    name: "Fit India",
+    description: "Workouts, yoga, nutrition, and wellness for every Indian body",
+    category: "fitness",
+    members: 63400,
+    isPrivate: false,
+    language: "English",
+    isJoined: false,
+    gradient: ["#34C759", "#4A90E2"],
+    emoji: "💪",
+  },
+  {
+    id: "c4",
+    name: "Indian Street Food",
+    description: "Discovering India one chaat at a time. Share your local gems!",
+    category: "food",
+    members: 228000,
+    isPrivate: false,
+    language: "Hindi",
+    isJoined: false,
+    gradient: ["#FFB800", "#FF6B35"],
+    emoji: "🍛",
+  },
+  {
+    id: "c5",
+    name: "Tamil Creators",
+    description: "A home for Tamil content creators, artists and storytellers",
+    category: "regional",
+    members: 41800,
+    isPrivate: false,
+    language: "Tamil",
+    isJoined: false,
+    gradient: ["#E91E8C", "#FF6B35"],
+    emoji: "🌟",
+  },
+  {
+    id: "c6",
+    name: "Tech & Startups India",
+    description: "Founders, developers and tech enthusiasts building the future",
+    category: "tech",
+    members: 92000,
+    isPrivate: false,
+    language: "English",
+    isJoined: true,
+    gradient: ["#4A90E2", "#7B2FBE"],
+    emoji: "🚀",
+  },
+  {
+    id: "c7",
+    name: "Bhakti Circle",
+    description: "Devotional songs, spiritual discussions and daily prayers",
+    category: "spirituality",
+    members: 175000,
+    isPrivate: false,
+    language: "Hindi",
+    isJoined: false,
+    gradient: ["#FF6B35", "#FFB800"],
+    emoji: "🙏",
+  },
+  {
+    id: "c8",
+    name: "Startup Founders India",
+    description: "Private network for entrepreneurs building in India",
+    category: "business",
+    members: 8400,
+    isPrivate: true,
+    language: "English",
+    isJoined: false,
+    gradient: ["#7B2FBE", "#4A90E2"],
+    emoji: "💼",
+  },
+  {
+    id: "c9",
+    name: "Bengali Culture Hub",
+    description: "Art, literature, music and food from Bengal and beyond",
+    category: "regional",
+    members: 54200,
+    isPrivate: false,
+    language: "Bengali",
+    isJoined: false,
+    gradient: ["#E91E8C", "#7B2FBE"],
+    emoji: "🎨",
+  },
+  {
+    id: "c10",
+    name: "PUBG & Free Fire India",
+    description: "Gaming tournaments, tips and squads for Indian gamers",
+    category: "gaming",
+    members: 310000,
+    isPrivate: false,
+    language: "Hindi",
+    isJoined: false,
+    gradient: ["#FF3B30", "#FF6B35"],
+    emoji: "🎮",
+  },
+];

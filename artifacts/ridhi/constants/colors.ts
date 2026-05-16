@@ -1,42 +1,49 @@
+const shared = {
+  primary: "#E91E8C",
+  primaryForeground: "#FFFFFF",
+  secondary: "#7B2FBE",
+  secondaryForeground: "#FFFFFF",
+  accent: "#FF6B35",
+  accentForeground: "#FFFFFF",
+  gold: "#FFB800",
+  goldForeground: "#FFFFFF",
+  destructive: "#FF3B30",
+  destructiveForeground: "#FFFFFF",
+  success: "#34C759",
+  successForeground: "#FFFFFF",
+};
+
 const colors = {
   light: {
+    ...shared,
     text: "#0A0A14",
     tint: "#E91E8C",
-
     background: "#FFFFFF",
     foreground: "#0A0A14",
-
     card: "#F8F7FE",
     cardForeground: "#0A0A14",
-
-    primary: "#E91E8C",
-    primaryForeground: "#FFFFFF",
-
-    secondary: "#7B2FBE",
-    secondaryForeground: "#FFFFFF",
-
     muted: "#F0EFF8",
     mutedForeground: "#8A8A9E",
-
-    accent: "#FF6B35",
-    accentForeground: "#FFFFFF",
-
-    gold: "#FFB800",
-    goldForeground: "#FFFFFF",
-
-    destructive: "#FF3B30",
-    destructiveForeground: "#FFFFFF",
-
-    success: "#34C759",
-    successForeground: "#FFFFFF",
-
     border: "#E8E7F4",
     input: "#F0EFF8",
-
     overlay: "rgba(10, 10, 20, 0.6)",
     surface: "#FFFFFF",
   },
-
+  dark: {
+    ...shared,
+    text: "#F0EFF8",
+    tint: "#E91E8C",
+    background: "#0A0A14",
+    foreground: "#F0EFF8",
+    card: "#16162A",
+    cardForeground: "#F0EFF8",
+    muted: "#1E1E36",
+    mutedForeground: "#6A6A8A",
+    border: "#2A2A44",
+    input: "#1E1E36",
+    overlay: "rgba(0, 0, 0, 0.75)",
+    surface: "#12121E",
+  },
   radius: 14,
 };
 

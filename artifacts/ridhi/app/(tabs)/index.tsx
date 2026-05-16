@@ -63,6 +63,12 @@ export default function FeedScreen() {
         <Text style={[styles.appName, { color: colors.foreground }]}>Ridhi</Text>
 
         <View style={styles.headerActions}>
+          <Pressable onPress={() => router.push("/explore")} style={styles.headerBtn}>
+            <Feather name="search" size={22} color={colors.foreground} />
+          </Pressable>
+          <Pressable onPress={() => router.push("/communities")} style={styles.headerBtn}>
+            <Feather name="users" size={22} color={colors.foreground} />
+          </Pressable>
           <Pressable onPress={() => router.push("/notifications")} style={styles.headerBtn}>
             <Feather name="bell" size={22} color={colors.foreground} />
             <View style={[styles.notifDot, { backgroundColor: colors.primary }]} />

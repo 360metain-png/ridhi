@@ -54,7 +54,7 @@ export default function ProfileScreen() {
           <View style={{ width: 40 }} />
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Profile</Text>
           <View style={styles.headerActions}>
-            <Pressable onPress={() => router.push("/notifications")} style={styles.headerBtn}>
+            <Pressable onPress={() => router.push("/settings")} style={styles.headerBtn}>
               <Feather name="settings" size={22} color={colors.foreground} />
             </Pressable>
           </View>
@@ -99,6 +99,27 @@ export default function ProfileScreen() {
         </View>
       </LinearGradient>
 
+      <View style={styles.quickLinks}>
+        {[
+          { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
+          { icon: "zap", label: "Creator Studio", route: "/creator-dashboard", color: "#E91E8C" },
+          { icon: "bar-chart-2", label: "Analytics", route: "/creator-dashboard", color: "#4A90E2" },
+          { icon: "globe", label: "Explore", route: "/explore", color: "#34C759" },
+        ].map((item) => (
+          <Pressable
+            key={item.label}
+            onPress={() => router.push(item.route as any)}
+            style={[styles.quickLink, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <View style={[styles.quickLinkIcon, { backgroundColor: item.color + "20" }]}>
+              <Feather name={item.icon as any} size={20} color={item.color} />
+            </View>
+            <Text style={[styles.quickLinkLabel, { color: colors.foreground }]}>{item.label}</Text>
+            <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
+          </Pressable>
+        ))}
+      </View>
+
       <View style={styles.interestSection}>
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Interests</Text>
         <View style={styles.interestTags}>
@@ -134,6 +155,14 @@ export default function ProfileScreen() {
       </View>
 
       <View style={[styles.logoutSection, { borderTopColor: colors.border }]}>
+        <Pressable
+          onPress={() => router.push("/settings")}
+          style={[styles.settingsBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}
+        >
+          <Feather name="settings" size={18} color={colors.foreground} />
+          <Text style={[styles.settingsBtnText, { color: colors.foreground }]}>Settings & Privacy</Text>
+          <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+        </Pressable>
         <Pressable
           onPress={logout}
           style={[styles.logoutBtn, { backgroundColor: colors.destructive + "12", borderColor: colors.destructive + "30" }]}
@@ -182,7 +211,28 @@ const styles = StyleSheet.create({
   gridHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 2 },
   gridItem: { alignItems: "center", justifyContent: "center", backgroundColor: "#ccc" },
-  logoutSection: { paddingHorizontal: 20, paddingTop: 24, borderTopWidth: StyleSheet.hairlineWidth, marginTop: 8 },
+  quickLinks: { paddingHorizontal: 16, paddingTop: 12, gap: 8 },
+  quickLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  quickLinkIcon: { width: 38, height: 38, borderRadius: 11, alignItems: "center", justifyContent: "center" },
+  quickLinkLabel: { flex: 1, fontSize: 14, fontFamily: "Inter_500Medium" },
+  logoutSection: { paddingHorizontal: 20, paddingTop: 24, borderTopWidth: StyleSheet.hairlineWidth, marginTop: 16, gap: 10 },
+  settingsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  settingsBtnText: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",

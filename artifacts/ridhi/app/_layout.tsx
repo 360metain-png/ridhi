@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AppProvider } from "@/contexts/AppContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -26,18 +27,14 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="auth" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="wallet"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="notifications"
-        options={{ headerShown: false, presentation: "card" }}
-      />
-      <Stack.Screen
-        name="chat"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="wallet" options={{ presentation: "card" }} />
+      <Stack.Screen name="notifications" options={{ presentation: "card" }} />
+      <Stack.Screen name="chat" />
+      <Stack.Screen name="explore" options={{ presentation: "card" }} />
+      <Stack.Screen name="communities" options={{ presentation: "card" }} />
+      <Stack.Screen name="settings" options={{ presentation: "card" }} />
+      <Stack.Screen name="creator-dashboard" options={{ presentation: "card" }} />
+      <Stack.Screen name="create-post" options={{ presentation: "modal" }} />
     </Stack>
   );
 }
@@ -61,15 +58,17 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </QueryClientProvider>
-        </AuthProvider>
+        <AppProvider>
+          <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </QueryClientProvider>
+          </AuthProvider>
+        </AppProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
