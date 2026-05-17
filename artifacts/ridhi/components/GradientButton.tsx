@@ -45,6 +45,9 @@ export function GradientButton({ label, onPress, loading, disabled, style, small
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           disabled={disabled || loading}
+          accessibilityRole="button"
+          accessibilityLabel={loading ? `${label}, loading` : label}
+          accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
           style={[
             styles.button,
             small && styles.small,
@@ -82,6 +85,9 @@ export function GradientButton({ label, onPress, loading, disabled, style, small
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         disabled={disabled || loading}
+        accessibilityRole="button"
+        accessibilityLabel={loading ? `${label}, loading` : label}
+        accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
       >
         <LinearGradient
           colors={["#E91E8C", "#9B2FCC", "#7B2FBE"]}

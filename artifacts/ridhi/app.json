@@ -3,6 +3,7 @@
     "name": "Ridhi",
     "slug": "ridhi",
     "version": "1.0.0",
+    "description": "India's #1 social networking and dating app — connect, share, and find love.",
     "orientation": "portrait",
     "icon": "./assets/images/ridhi_logo.png",
     "scheme": "ridhi",
@@ -14,9 +15,29 @@
       "backgroundColor": "#E91E8C"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ridhi.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Ridhi uses your location to show people and content near you.",
+        "NSCameraUsageDescription": "Ridhi needs camera access to let you post photos and videos.",
+        "NSPhotoLibraryUsageDescription": "Ridhi needs photo library access to let you share images.",
+        "NSMicrophoneUsageDescription": "Ridhi needs microphone access for video posts and voice messages."
+      }
     },
-    "android": {},
+    "android": {
+      "package": "com.ridhi.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO",
+        "VIBRATE"
+      ]
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
@@ -28,7 +49,13 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Ridhi uses your location to show people and content near you."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

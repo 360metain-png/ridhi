@@ -40,7 +40,7 @@ const colors = {
     card: "#0F0F1C",
     cardForeground: "#EEEEF5",
     muted: "#141424",
-    mutedForeground: "#55556A",
+    mutedForeground: "#8888A4",
     border: "rgba(255,255,255,0.07)",
     input: "#141424",
     overlay: "rgba(0, 0, 0, 0.85)",

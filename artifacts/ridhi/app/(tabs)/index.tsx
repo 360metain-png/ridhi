@@ -164,7 +164,7 @@ export default function FeedScreen() {
     return [...local, ...others];
   }, [posts, userCity]);
 
-  const nearYouPosts = localPosts.slice(0, 5);
+  const nearYouPosts = useMemo(() => localPosts.slice(0, 5), [localPosts]);
   const trendingLocalPosts = useMemo(() =>
     [...localPosts].sort((a, b) => b.likes - a.likes).slice(0, 6),
     [localPosts]

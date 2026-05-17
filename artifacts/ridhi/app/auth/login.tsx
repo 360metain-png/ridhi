@@ -36,6 +36,7 @@ export default function LoginScreen() {
   const { login } = useAuth();
   const [tab, setTab] = useState<"phone" | "email">("phone");
   const [value, setValue] = useState("");
+  const [inputError, setInputError] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
@@ -55,12 +56,34 @@ export default function LoginScreen() {
     ]).start();
   }, []);
 
+  const validate = (): boolean => {
+    const v = value.trim();
+    if (!v) {
+      setInputError(tab === "phone" ? "Please enter your phone number" : "Please enter your email");
+      return false;
+    }
+    if (tab === "phone") {
+      const digits = v.replace(/\D/g, "");
+      if (digits.length < 10) {
+        setInputError("Enter a valid 10-digit mobile number");
+        return false;
+      }
+    } else {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+        setInputError("Enter a valid email address");
+        return false;
+      }
+    }
+    setInputError("");
+    return true;
+  };
+
   const handleContinue = async () => {
-    if (!value.trim()) return;
+    if (!validate()) return;
     setLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
-    router.push({ pathname: "/auth/otp", params: { contact: value, type: tab } });
+    router.push({ pathname: "/auth/otp", params: { contact: value.trim(), type: tab } });
   };
 
   const handleSocialLogin = async (provider: string) => {
@@ -156,7 +179,7 @@ export default function LoginScreen() {
           <View style={[styles.tabRow, { backgroundColor: "#141424" }]}>
             <Pressable
               style={[styles.tabBtn, tab === "phone" && styles.tabBtnActive]}
-              onPress={() => setTab("phone")}
+              onPress={() => { setTab("phone"); setValue(""); setInputError(""); }}
             >
               {tab === "phone" && (
                 <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
@@ -166,7 +189,7 @@ export default function LoginScreen() {
             </Pressable>
             <Pressable
               style={[styles.tabBtn, tab === "email" && styles.tabBtnActive]}
-              onPress={() => setTab("email")}
+              onPress={() => { setTab("email"); setValue(""); setInputError(""); }}
             >
               {tab === "email" && (
                 <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
@@ -187,13 +210,17 @@ export default function LoginScreen() {
               placeholder={tab === "phone" ? "Enter mobile number" : "Enter email address"}
               placeholderTextColor={MUTED}
               value={value}
-              onChangeText={setValue}
+              onChangeText={(v) => { setValue(v); if (inputError) setInputError(""); }}
               keyboardType={tab === "phone" ? "phone-pad" : "email-address"}
               autoCapitalize="none"
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
+              accessibilityLabel={tab === "phone" ? "Mobile number" : "Email address"}
             />
           </View>
+          {!!inputError && (
+            <Text style={styles.errorText}>{inputError}</Text>
+          )}
 
           <GradientButton
             label="Get OTP →"
@@ -375,6 +402,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: TEXT,
   },
+  errorText: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#FF3B30", alignSelf: "flex-start", marginTop: -4, marginBottom: 4 },
   dividerRow: { flexDirection: "row", alignItems: "center", width: "100%", gap: 10 },
   dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: BORDER },
   dividerText: { fontSize: 12, fontFamily: "Inter_400Regular", color: MUTED },

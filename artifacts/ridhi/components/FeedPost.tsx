@@ -84,7 +84,7 @@ function HeartBurst({ visible }: { visible: boolean }) {
   );
 }
 
-export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) {
+export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) {
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showBurst, setShowBurst] = useState(false);
@@ -135,7 +135,12 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
           pointerEvents="none"
         />
 
-        <Pressable style={styles.header} onPress={() => onProfile(post.userId ?? "")}>
+        <Pressable
+          style={styles.header}
+          onPress={() => onProfile(post.userId ?? "")}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${post.userName}'s profile`}
+        >
           <Avatar name={post.userName} uri={post.userAvatar} size={40} hasStory />
           <View style={styles.headerText}>
             <View style={styles.nameRow}>
@@ -153,7 +158,11 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
               {post.userCity ? `${post.userCity} · ` : ""}{post.timeAgo}
             </Text>
           </View>
-          <Pressable style={[styles.more, { backgroundColor: colors.muted }]}>
+          <Pressable
+            style={[styles.more, { backgroundColor: colors.muted }]}
+            accessibilityRole="button"
+            accessibilityLabel="More options"
+          >
             <Feather name="more-horizontal" size={16} color={colors.mutedForeground} />
           </Pressable>
         </Pressable>
@@ -189,7 +198,13 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         <View style={styles.actions}>
-          <Pressable style={styles.action} onPress={handleLike}>
+          <Pressable
+            style={styles.action}
+            onPress={handleLike}
+            accessibilityRole="button"
+            accessibilityLabel={post.isLiked ? `Unlike, ${post.likes} likes` : `Like, ${post.likes} likes`}
+            accessibilityState={{ selected: post.isLiked }}
+          >
             <View style={{ position: "relative" }}>
               <Animated.View style={{ transform: [{ scale: likeScale }] }}>
                 {post.isLiked ? (
@@ -215,7 +230,12 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
             </Text>
           </Pressable>
 
-          <Pressable style={styles.action} onPress={() => onComment(post.id)}>
+          <Pressable
+            style={styles.action}
+            onPress={() => onComment(post.id)}
+            accessibilityRole="button"
+            accessibilityLabel={`Comment, ${post.comments} comments`}
+          >
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="message-circle" size={14} color={colors.mutedForeground} />
             </View>
@@ -224,7 +244,11 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
             </Text>
           </Pressable>
 
-          <Pressable style={styles.action}>
+          <Pressable
+            style={styles.action}
+            accessibilityRole="button"
+            accessibilityLabel={`Share, ${post.shares} shares`}
+          >
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="send" size={14} color={colors.mutedForeground} />
             </View>
@@ -235,7 +259,13 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
 
           <View style={{ flex: 1 }} />
 
-          <Pressable onPress={() => saveWithWatermark(post.imageUri)} disabled={saving}>
+          <Pressable
+            onPress={() => saveWithWatermark(post.imageUri)}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={saved ? "Saved" : "Save to gallery"}
+            accessibilityState={{ disabled: saving }}
+          >
             <View style={[styles.actionIcon, { backgroundColor: saved ? "#34C75920" : colors.muted }]}>
               <Feather
                 name={saved ? "check-circle" : "download"}
@@ -248,7 +278,7 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
       </View>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   cardWrap: {
