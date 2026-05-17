@@ -11,6 +11,7 @@ export interface Post {
   userId?: string;
   userName: string;
   userCity?: string;
+  language?: string;
   userAvatar?: string;
   isVerified?: boolean;
   content?: string;
