@@ -99,6 +99,68 @@ export default function ProfileScreen() {
         </View>
       </LinearGradient>
 
+      {/* Earn Money section */}
+      <View style={styles.earnSection}>
+        <Text style={[styles.earnTitle, { color: colors.foreground }]}>Earn on Ridhi</Text>
+        <View style={styles.earnCards}>
+          {/* Host card */}
+          <Pressable
+            onPress={() => router.push("/host-profile" as any)}
+            style={[styles.earnCard, { backgroundColor: colors.card, borderColor: user.isHost ? "#FFB800" : colors.border }]}
+          >
+            <LinearGradient colors={["#7B2FBE22", "#FFB80018"]} style={styles.earnCardGrad}>
+              <View style={[styles.earnCardIcon, { backgroundColor: "#FFB80022" }]}>
+                <Feather name="star" size={22} color="#FFB800" />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Host Profile</Text>
+                <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>
+                  {user.isHost ? "Earn from Lives & Calls" : "Up to ₹7L+/month"}
+                </Text>
+              </View>
+              {user.isHost ? (
+                <View style={styles.registeredBadge}>
+                  <Feather name="check-circle" size={12} color="#22C55E" />
+                  <Text style={styles.registeredText}>Active</Text>
+                </View>
+              ) : (
+                <View style={styles.applyBadge}>
+                  <Text style={styles.applyText}>Apply</Text>
+                </View>
+              )}
+            </LinearGradient>
+          </Pressable>
+
+          {/* Agent card */}
+          <Pressable
+            onPress={() => router.push("/agent-dashboard" as any)}
+            style={[styles.earnCard, { backgroundColor: colors.card, borderColor: user.isAgent ? "#00BCD4" : colors.border }]}
+          >
+            <LinearGradient colors={["#00BCD422", "#7B2FBE18"]} style={styles.earnCardGrad}>
+              <View style={[styles.earnCardIcon, { backgroundColor: "#00BCD422" }]}>
+                <Feather name="briefcase" size={22} color="#00BCD4" />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Agent Dashboard</Text>
+                <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>
+                  {user.isAgent ? "Manage Hosts & Earn Commission" : "2–10% host commission"}
+                </Text>
+              </View>
+              {user.isAgent ? (
+                <View style={[styles.registeredBadge, { backgroundColor: "#00BCD420" }]}>
+                  <Feather name="check-circle" size={12} color="#00BCD4" />
+                  <Text style={[styles.registeredText, { color: "#00BCD4" }]}>Active</Text>
+                </View>
+              ) : (
+                <View style={[styles.applyBadge, { backgroundColor: "#00BCD420" }]}>
+                  <Text style={[styles.applyText, { color: "#00BCD4" }]}>Apply</Text>
+                </View>
+              )}
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </View>
+
       <View style={styles.quickLinks}>
         {[
           { icon: "shield", label: "E-KYC Verification", route: "/kyc", color: "#22C55E" },
@@ -107,11 +169,9 @@ export default function ProfileScreen() {
           { icon: "zap", label: "Gaming Arena", route: "/games", color: "#4CAF50" },
           { icon: "award", label: "Tournaments", route: "/tournaments", color: "#FFB800" },
           { icon: "zap", label: "Creator Studio", route: "/creator-dashboard", color: "#E91E8C" },
-          { icon: "star", label: "Host Profile & Levels", route: "/host-profile", color: "#FFB800" },
           { icon: "video", label: "Go Live", route: "/live-stream", color: "#FF3B30" },
           { icon: "crosshair", label: "PK Battles", route: "/pk-battle", color: "#7B2FBE" },
           { icon: "phone", label: "Random Call", route: "/random-call", color: "#34C759" },
-          { icon: "briefcase", label: "Agent Dashboard", route: "/agent-dashboard", color: "#00BCD4" },
           { icon: "award", label: "Leaderboard", route: "/leaderboard", color: "#FF6B35" },
           { icon: "gift", label: "Referral & Rewards", route: "/referral", color: "#FF6B35" },
           { icon: "headphones", label: "Audio Rooms", route: "/audio-room", color: "#4A90E2" },
@@ -223,6 +283,18 @@ const styles = StyleSheet.create({
   gridHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 2 },
   gridItem: { alignItems: "center", justifyContent: "center", backgroundColor: "#ccc" },
+  earnSection: { paddingHorizontal: 16, paddingTop: 16, gap: 10 },
+  earnTitle: { fontSize: 16, fontFamily: "Inter_700Bold", paddingHorizontal: 2 },
+  earnCards: { gap: 10 },
+  earnCard: { borderRadius: 18, borderWidth: 1.5, overflow: "hidden" },
+  earnCardGrad: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
+  earnCardIcon: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  earnCardTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  earnCardSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  registeredBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 9, paddingVertical: 5, borderRadius: 10, backgroundColor: "#22C55E20" },
+  registeredText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#22C55E" },
+  applyBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, backgroundColor: "#FFB80020" },
+  applyText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#FFB800" },
   quickLinks: { paddingHorizontal: 16, paddingTop: 12, gap: 8 },
   quickLink: {
     flexDirection: "row",

@@ -72,7 +72,10 @@ export default function HostProfileScreen() {
   const [regCity, setRegCity]       = useState(user?.city ?? "");
   const [regAgreed, setRegAgreed]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const gateAnim = useRef(new Animated.Value(0)).current;
+  const [submitted, setSubmitted]   = useState(false);
+  const gateAnim    = useRef(new Animated.Value(0)).current;
+  const successAnim = useRef(new Animated.Value(0)).current;
+  const checkAnim   = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!user?.isHost) {
@@ -86,9 +89,15 @@ export default function HostProfileScreen() {
     if (!regCity.trim())  { Alert.alert("Required", "Please enter your city."); return; }
     if (!regAgreed)       { Alert.alert("Required", "Please accept the Host Agreement to continue."); return; }
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    await updateProfile({ isHost: true, hostRegisteredAt: new Date().toISOString(), name: regName.trim(), phone: regPhone.trim(), city: regCity.trim() });
+    await new Promise((r) => setTimeout(r, 1000));
     setSubmitting(false);
+    setSubmitted(true);
+    Animated.parallel([
+      Animated.timing(successAnim, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.spring(checkAnim, { toValue: 1, useNativeDriver: true, tension: 80, friction: 6, delay: 200 }),
+    ]).start();
+    await new Promise((r) => setTimeout(r, 2400));
+    await updateProfile({ isHost: true, hostRegisteredAt: new Date().toISOString(), name: regName.trim(), phone: regPhone.trim(), city: regCity.trim() });
   };
 
   // ── Pre-compute progress (must be before any conditional return) ────────────
@@ -180,6 +189,23 @@ export default function HostProfileScreen() {
               </View>
             ))}
           </View>
+
+          {/* Success overlay */}
+          {submitted && (
+            <Animated.View style={[regStyles.successOverlay, { opacity: successAnim }]}>
+              <LinearGradient colors={["#7B2FBE", "#22C55E"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={regStyles.successGrad}>
+                <Animated.View style={[regStyles.successCheck, { transform: [{ scale: checkAnim }] }]}>
+                  <Feather name="check" size={40} color="#fff" />
+                </Animated.View>
+                <Text style={regStyles.successTitle}>Application Submitted! 🎉</Text>
+                <Text style={regStyles.successSub}>
+                  Welcome to the Ridhi Host family, {regName.split(" ")[0]}!{"\n"}
+                  You'll be notified within 24–48 hours.
+                </Text>
+                <Text style={regStyles.successSub2}>Opening your Host Dashboard…</Text>
+              </LinearGradient>
+            </Animated.View>
+          )}
 
           {/* Registration form */}
           <View style={[regStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -556,4 +582,10 @@ const regStyles = StyleSheet.create({
   checkbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 },
   agreeText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
   disclaimer: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 16, marginTop: 8, marginBottom: 8 },
+  successOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99 },
+  successGrad: { flex: 1, minHeight: 500, alignItems: "center", justifyContent: "center", gap: 16, padding: 40 },
+  successCheck: { width: 96, height: 96, borderRadius: 48, backgroundColor: "rgba(255,255,255,0.22)", alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  successTitle: { color: "#fff", fontSize: 26, fontFamily: "Inter_700Bold", textAlign: "center" },
+  successSub: { color: "rgba(255,255,255,0.88)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 22 },
+  successSub2: { color: "rgba(255,255,255,0.55)", fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 8 },
 });
