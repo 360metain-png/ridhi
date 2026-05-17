@@ -33,7 +33,7 @@ const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: s
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 
-const FEED_TABS = ["Local", "For You", "Trending", "Community", "Following"] as const;
+const FEED_TABS = ["For You", "Local", "Trending", "Community", "Following"] as const;
 type FeedTab = typeof FEED_TABS[number];
 
 const LOCAL_TRENDING_TAGS: Record<string, string[]> = {
@@ -141,7 +141,7 @@ export default function FeedScreen() {
   const { language: appLang } = useApp();
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<FeedTab>("Local");
+  const [activeTab, setActiveTab] = useState<FeedTab>("For You");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 66;
