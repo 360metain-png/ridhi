@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
+  Animated,
+  Easing,
   FlatList,
   Platform,
   Pressable,
@@ -18,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
+import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -45,10 +48,80 @@ const CHAT_MESSAGES = [
   { id: "m6", user: "Kavya", text: "Sent Bolt x2", time: "17s", isGift: true, giftColor: "#7B2FBE" },
 ];
 
+// ── Big gift flying overlay (for expensive gifts) ──────────────────────────────
+function BigGiftOverlay({ gift, onDone }: { gift: typeof LIVE_GIFTS[0]; onDone: () => void }) {
+  const scale = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const glow = useRef(new Animated.Value(0)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 70, friction: 5 }),
+        Animated.timing(glow, { toValue: 1, duration: 400, useNativeDriver: false }),
+        Animated.timing(rotate, { toValue: 1, duration: 600, useNativeDriver: true }),
+      ]),
+      Animated.delay(1200),
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 1.3, duration: 500, useNativeDriver: true }),
+      ]),
+    ]).start(() => onDone());
+  }, []);
+
+  const rotateInterp = rotate.interpolate({ inputRange: [0, 1], outputRange: ["-15deg", "15deg"] });
+  const shadowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.6] });
+
+  return (
+    <Animated.View
+      style={[StyleSheet.absoluteFillObject, styles.bigGiftOverlay, { opacity }]}
+      pointerEvents="none"
+    >
+      <Animated.View
+        style={[
+          styles.bigGiftBg,
+          { backgroundColor: gift.color + "40", transform: [{ scale }, { rotate: rotateInterp }] },
+        ]}
+      >
+        <Text style={styles.bigGiftEmoji}>{gift.emoji}</Text>
+      </Animated.View>
+      <Animated.View style={[styles.bigGiftPill, { borderColor: gift.color, transform: [{ scale }] }]}>
+        <Text style={styles.bigGiftPillText}>{gift.name}</Text>
+        <Text style={{ fontSize: 11, color: "#FFB800" }}>🪙 {gift.cost.toLocaleString()} coins</Text>
+      </Animated.View>
+    </Animated.View>
+  );
+}
+
+// ── Host coin counter pill (animates when coins arrive) ───────────────────────
+function HostCoinPill({ coins }: { coins: number }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const prevCoins = useRef(coins);
+
+  useEffect(() => {
+    if (coins === prevCoins.current) return;
+    prevCoins.current = coins;
+    Animated.sequence([
+      Animated.spring(scale, { toValue: 1.25, useNativeDriver: true, tension: 120, friction: 4 }),
+      Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 80, friction: 6 }),
+    ]).start();
+  }, [coins]);
+
+  return (
+    <Animated.View style={[styles.hostCoinPill, { transform: [{ scale }] }]}>
+      <Text style={{ fontSize: 13 }}>🪙</Text>
+      <Text style={[styles.hostCoinText, { color: "#FFB800" }]}>{coins.toLocaleString()}</Text>
+    </Animated.View>
+  );
+}
+
 export default function LiveStreamScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();
+  const { toasts, fire, remove } = useCoinToasts();
+
   const [view, setView] = useState<"browse" | "watch" | "host">("browse");
   const [selectedRoom, setSelectedRoom] = useState<typeof LIVE_ROOMS[0] | null>(null);
   const [message, setMessage] = useState("");
@@ -59,20 +132,57 @@ export default function LiveStreamScreen() {
   const [isLive, setIsLive] = useState(false);
   const [hostDuration, setHostDuration] = useState(0);
   const [showGifts, setShowGifts] = useState(false);
+  const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
+  const prevLiveCoins = useRef(0);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  // Auto-coin events in host mode
   useEffect(() => {
     if (view === "watch" && selectedRoom) setViewers(selectedRoom.viewers);
     if (isLive) {
       const t = setInterval(() => {
         setHostDuration((d) => d + 1);
-        if (Math.random() > 0.7) setViewers((v) => v + Math.floor(Math.random() * 5));
-        if (Math.random() > 0.85) setLiveCoins((c) => c + Math.floor(Math.random() * 50));
+        if (Math.random() > 0.65) setViewers((v) => v + Math.floor(Math.random() * 5));
+        if (Math.random() > 0.75) {
+          const earned = Math.floor(Math.random() * 80) + 10;
+          setLiveCoins((c) => {
+            const next = c + earned;
+            return next;
+          });
+          // Host credit toast
+          fire({
+            type: "credit",
+            amount: earned,
+            label: "Gift Received",
+            sublabel: "Host Earnings",
+            bottom: 120,
+          });
+        }
       }, 3000);
       return () => clearInterval(t);
     }
   }, [view, selectedRoom, isLive]);
+
+  // Auto-simulate incoming gifts in watch mode
+  const autoGiftRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (view === "watch") {
+      const names = ["Riya", "Vikram", "Pooja", "Sai", "Naina", "Dev"];
+      const pickGift = () => LIVE_GIFTS[Math.floor(Math.random() * 3)];
+      autoGiftRef.current = setInterval(() => {
+        const g = pickGift();
+        const sender = names[Math.floor(Math.random() * names.length)];
+        setMessages((prev) => [
+          ...prev,
+          { id: `am_${Date.now()}`, user: sender, text: `Sent ${g.name}`, time: "now", isGift: true, giftColor: g.color },
+        ]);
+        // Show credit animation as if we're the host receiving
+        fire({ type: "credit", amount: g.cost, label: `${g.emoji} ${g.name}`, sublabel: `From ${sender}`, bottom: 130 });
+      }, 4000 + Math.random() * 3000);
+    }
+    return () => { if (autoGiftRef.current) clearInterval(autoGiftRef.current); };
+  }, [view]);
 
   const sendGift = (gift: typeof LIVE_GIFTS[0]) => {
     if ((user?.coins ?? 0) < gift.cost) return;
@@ -87,10 +197,17 @@ export default function LiveStreamScreen() {
     };
     setMessages((prev) => [...prev, newMsg]);
     setShowGifts(false);
+
+    // Debit toast for user
+    fire({ type: "debit", amount: gift.cost, label: `${gift.emoji} ${gift.name}`, sublabel: "Gift Sent", large: gift.cost >= 1000, bottom: 150 });
+
+    // Big gift overlay for premium gifts
+    if (gift.cost >= 5000) setBigGift(gift);
   };
 
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
+  // ── Browse ──────────────────────────────────────────────────────────────────
   if (view === "browse") {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -111,9 +228,7 @@ export default function LiveStreamScreen() {
               <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
                 <Text style={styles.liveBadgeText}>LIVE</Text>
               </View>
-              <Text style={[styles.featuredHost, { color: colors.foreground }]}>
-                {LIVE_ROOMS[0].host}
-              </Text>
+              <Text style={[styles.featuredHost, { color: colors.foreground }]}>{LIVE_ROOMS[0].host}</Text>
               <Text style={[styles.featuredTitle, { color: colors.mutedForeground }]}>{LIVE_ROOMS[0].title}</Text>
               <View style={styles.featuredMeta}>
                 <Feather name="eye" size={14} color={colors.mutedForeground} />
@@ -167,6 +282,7 @@ export default function LiveStreamScreen() {
     );
   }
 
+  // ── Watch ──────────────────────────────────────────────────────────────────
   if (view === "watch" && selectedRoom) {
     return (
       <View style={[styles.container, { backgroundColor: "#000" }]}>
@@ -264,10 +380,14 @@ export default function LiveStreamScreen() {
             <Feather name="send" size={16} color="#fff" />
           </Pressable>
         </View>
+
+        {bigGift && <BigGiftOverlay gift={bigGift} onDone={() => setBigGift(null)} />}
+        <CoinFountainOverlay toasts={toasts} onRemove={remove} />
       </View>
     );
   }
 
+  // ── Host ──────────────────────────────────────────────────────────────────
   if (view === "host") {
     return (
       <View style={[styles.container, { backgroundColor: "#000" }]}>
@@ -301,7 +421,7 @@ export default function LiveStreamScreen() {
                 style={{ marginTop: 8 }}
               />
               <Text style={[styles.liveDisclaimer, { color: colors.mutedForeground }]}>
-                By going live you agree to community guidelines. Keep streams respectful and appropriate.
+                By going live you agree to community guidelines.
               </Text>
             </View>
           </View>
@@ -312,11 +432,12 @@ export default function LiveStreamScreen() {
                 <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
                   <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
                 </View>
-                <View style={styles.hostStats}>
-                  <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
-                  <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
-                  <Feather name="star" size={14} color={colors.gold} />
-                  <Text style={[styles.hostStatText, { color: colors.gold }]}>{liveCoins.toLocaleString()}</Text>
+                <View style={styles.hostHudRight}>
+                  <View style={styles.hostStats}>
+                    <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                    <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+                  </View>
+                  <HostCoinPill coins={liveCoins} />
                 </View>
               </View>
               <Text style={styles.hostVideoText}>Your camera</Text>
@@ -342,6 +463,7 @@ export default function LiveStreamScreen() {
                 <Feather name="settings" size={22} color={colors.foreground} />
               </Pressable>
             </View>
+            <CoinFountainOverlay toasts={toasts} onRemove={remove} />
           </View>
         )}
       </View>
@@ -408,11 +530,20 @@ const styles = StyleSheet.create({
   liveDisclaimer: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 18 },
   hostVideo: { flex: 1, justifyContent: "space-between", padding: 16 },
   hostHud: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  hostHudRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   hostStats: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   hostStatText: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  hostCoinPill: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#FFB80050" },
+  hostCoinText: { fontSize: 14, fontFamily: "Inter_700Bold" },
   hostVideoText: { color: "rgba(255,255,255,0.4)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
   hostControls: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 16, padding: 20, borderTopWidth: 1 },
   controlBtn2: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
   endLiveBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24 },
   endLiveText: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
+  // Big gift overlay
+  bigGiftOverlay: { alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.55)" },
+  bigGiftBg: { width: 160, height: 160, borderRadius: 80, alignItems: "center", justifyContent: "center" },
+  bigGiftEmoji: { fontSize: 72 },
+  bigGiftPill: { marginTop: 20, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24, borderWidth: 2, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", gap: 4 },
+  bigGiftPillText: { color: "#fff", fontSize: 20, fontFamily: "Inter_700Bold" },
 });
