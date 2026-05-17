@@ -33,8 +33,22 @@ const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: s
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 
-const FEED_TABS = ["For You", "Local", "Trending", "Community", "Following"] as const;
+const FEED_TABS = ["Local", "For You", "Trending", "Community", "Following"] as const;
 type FeedTab = typeof FEED_TABS[number];
+
+const LOCAL_TRENDING_TAGS: Record<string, string[]> = {
+  Mumbai:    ["#MumbaiRains", "#MarathiManus", "#MumbaiStreetFood", "#DabbawalaLife", "#AmchiMumbai"],
+  Delhi:     ["#DilliHatke", "#DelhiFoods", "#DelhiDiaries", "#DilliWali", "#MetroLife"],
+  Bangalore: ["#NammaBengaluru", "#TechCity", "#BengaluruRains", "#KannadaOoru", "#GardenCity"],
+  Chennai:   ["#ChennaiLife", "#TamilCulture", "#MarinaDrive", "#BriyaniTime", "#NammaChennai"],
+  Hyderabad: ["#HyderabadiDum", "#NizamCity", "#TeluguVibes", "#PearlCity", "#Cyberabad"],
+  Kolkata:   ["#KolkataStreetFood", "#DurgaPuja", "#BengaliVibes", "#CityofJoy", "#EastIndia"],
+  Pune:      ["#PuneVibes", "#MarathiPride", "#PuneMonsoon", "#PunekarsOnly", "#FilmCity"],
+  Kochi:     ["#GodZone", "#MalayaliDiaries", "#BackwaterLife", "#KeralaTourism", "#KochiDiaries"],
+  Ahmedabad: ["#AmdavadVibes", "#GujaratiFood", "#NavratriSpecial", "#KhichdiDay", "#AavoAmdavad"],
+  Jaipur:    ["#PinkCity", "#RajasthanDiaries", "#JaipurFood", "#HeritageCraft", "#GharKiGali"],
+};
+const DEFAULT_TAGS = ["#RidhiIndia", "#DesiVibes", "#LocalTalent", "#IndianCreators", "#ShareYourStory"];
 
 const TRENDING_POSTS: Post[] = [
   {
@@ -127,7 +141,7 @@ export default function FeedScreen() {
   const { language: appLang } = useApp();
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<FeedTab>("For You");
+  const [activeTab, setActiveTab] = useState<FeedTab>("Local");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 66;
@@ -151,6 +165,11 @@ export default function FeedScreen() {
   }, [posts, userCity]);
 
   const nearYouPosts = localPosts.slice(0, 5);
+  const trendingLocalPosts = useMemo(() =>
+    [...localPosts].sort((a, b) => b.likes - a.likes).slice(0, 6),
+    [localPosts]
+  );
+  const localTags = LOCAL_TRENDING_TAGS[userCity] ?? DEFAULT_TAGS;
 
   const headerAnim = useRef(new Animated.Value(0)).current;
   const liveIndicator = useRef(new Animated.Value(0.4)).current;
@@ -300,6 +319,7 @@ export default function FeedScreen() {
     if (activeTab === "Local") {
       return (
         <View style={styles.localBannerWrap}>
+          {/* City hero card */}
           <LinearGradient
             colors={[colors.secondary, colors.primary]}
             start={{ x: 0, y: 0 }}
@@ -317,15 +337,147 @@ export default function FeedScreen() {
                 </Text>
               </View>
             </View>
-            <View style={[styles.localBannerBadge, { backgroundColor: "rgba(255,255,255,0.22)" }]}>
-              <Text style={styles.localBannerBadgeText}>{localPosts.length} posts</Text>
+            <View style={{ alignItems: "flex-end", gap: 6 }}>
+              <View style={[styles.localBannerBadge, { backgroundColor: "rgba(255,255,255,0.22)" }]}>
+                <Text style={styles.localBannerBadgeText}>🔥 Trending</Text>
+              </View>
+              <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 11, fontFamily: "Inter_500Medium" }}>
+                {localPosts.length} local posts
+              </Text>
             </View>
           </LinearGradient>
-          <View style={[styles.localSubBanner, { backgroundColor: colors.secondary + "10", borderColor: colors.secondary + "30" }]}>
-            <Feather name="info" size={12} color={colors.secondary} />
-            <Text style={[styles.localSubBannerText, { color: colors.mutedForeground }]}>
-              Showing posts from <Text style={{ color: colors.secondary, fontFamily: "Inter_600SemiBold" }}>{userCity}</Text> and in <Text style={{ color: colors.secondary, fontFamily: "Inter_600SemiBold" }}>{userLang}</Text>
-            </Text>
+
+          {/* Trending hashtag chips */}
+          <View style={styles.trendTagsHeader}>
+            <Feather name="hash" size={13} color={colors.primary} />
+            <Text style={[styles.trendTagsTitle, { color: colors.foreground }]}>Trending in {userCity}</Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.trendTagsScroll}
+          >
+            {localTags.map((tag, i) => (
+              <Pressable
+                key={tag}
+                onPress={() => router.push("/explore")}
+                style={[
+                  styles.trendTag,
+                  {
+                    backgroundColor: i === 0 ? colors.primary : colors.card,
+                    borderColor: i === 0 ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                {i === 0 && (
+                  <Text style={{ fontSize: 10 }}>🔥</Text>
+                )}
+                <Text style={[styles.trendTagText, { color: i === 0 ? "#fff" : colors.foreground }]}>
+                  {tag}
+                </Text>
+                {i === 0 && (
+                  <View style={[styles.trendTagHot, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+                    <Text style={{ color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold" }}>HOT</Text>
+                  </View>
+                )}
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {/* Top trending local posts horizontal preview */}
+          {trendingLocalPosts.length > 0 && (
+            <View style={{ gap: 8 }}>
+              <View style={styles.trendTopHeader}>
+                <LinearGradient colors={[colors.destructive + "28", colors.primary + "18"]} style={styles.trendTopIcon}>
+                  <Feather name="trending-up" size={12} color={colors.destructive} />
+                </LinearGradient>
+                <Text style={[styles.trendTopTitle, { color: colors.foreground }]}>
+                  Top Posts in {userCity}
+                </Text>
+                <Pressable onPress={() => {}} style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
+                  <Text style={[styles.seeAllText, { color: colors.primary }]}>See all</Text>
+                </Pressable>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.trendTopScroll}
+              >
+                {trendingLocalPosts.map((post, idx) => (
+                  <Pressable
+                    key={post.id}
+                    style={[styles.trendTopCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                  >
+                    <LinearGradient
+                      colors={idx === 0
+                        ? [colors.destructive + "18", colors.primary + "08"]
+                        : [colors.secondary + "10", "transparent"]}
+                      style={StyleSheet.absoluteFill}
+                    />
+                    {/* Rank badge */}
+                    <View style={[
+                      styles.trendRankBadge,
+                      { backgroundColor: idx === 0 ? colors.destructive : idx === 1 ? colors.primary : colors.secondary }
+                    ]}>
+                      <Text style={styles.trendRankText}>#{idx + 1}</Text>
+                    </View>
+
+                    <View style={styles.trendTopCardTop}>
+                      <Avatar name={post.userName} size={26} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.trendTopCardName, { color: colors.foreground }]} numberOfLines={1}>
+                          {post.userName}
+                        </Text>
+                        {post.userCity && (
+                          <View style={styles.nearYouCityRow}>
+                            <Feather name="map-pin" size={8} color={colors.secondary} />
+                            <Text style={[styles.nearYouCityText, { color: colors.secondary }]}>{post.userCity}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+
+                    <Text style={[styles.trendTopCardContent, { color: colors.foreground }]} numberOfLines={3}>
+                      {post.content}
+                    </Text>
+
+                    {post.hashtags && post.hashtags.length > 0 && (
+                      <Text style={[styles.trendTopCardHashtag, { color: colors.primary }]} numberOfLines={1}>
+                        {post.hashtags[0]}
+                      </Text>
+                    )}
+
+                    <View style={styles.trendTopCardFooter}>
+                      <View style={styles.trendTopCardStat}>
+                        <Feather name="heart" size={11} color={colors.destructive} />
+                        <Text style={[styles.trendTopCardStatText, { color: colors.mutedForeground }]}>
+                          {post.likes >= 1000 ? `${(post.likes / 1000).toFixed(1)}k` : post.likes}
+                        </Text>
+                      </View>
+                      <View style={styles.trendTopCardStat}>
+                        <Feather name="message-circle" size={11} color={colors.mutedForeground} />
+                        <Text style={[styles.trendTopCardStatText, { color: colors.mutedForeground }]}>
+                          {post.comments}
+                        </Text>
+                      </View>
+                      <Text style={[styles.trendTopCardTime, { color: colors.mutedForeground }]}>
+                        {post.timeAgo}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          {/* Divider with label */}
+          <View style={styles.allPostsDivider}>
+            <View style={[styles.allPostsDividerLine, { backgroundColor: colors.border }]} />
+            <View style={[styles.allPostsDividerLabel, { backgroundColor: colors.muted }]}>
+              <Feather name="list" size={11} color={colors.mutedForeground} />
+              <Text style={[styles.allPostsDividerText, { color: colors.mutedForeground }]}>All local posts</Text>
+            </View>
+            <View style={[styles.allPostsDividerLine, { backgroundColor: colors.border }]} />
           </View>
         </View>
       );
@@ -729,4 +881,94 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter_600SemiBold",
   },
+
+  // Trending hashtag chips
+  trendTagsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 4,
+    paddingTop: 12,
+    paddingBottom: 6,
+  },
+  trendTagsTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  trendTagsScroll: { gap: 8, paddingBottom: 4 },
+  trendTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  trendTagText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  trendTagHot: {
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+
+  // Top trending local posts
+  trendTopHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 4,
+    paddingTop: 14,
+  },
+  trendTopIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  trendTopTitle: { fontSize: 13, fontFamily: "Inter_700Bold", flex: 1 },
+  trendTopScroll: { gap: 10, paddingBottom: 4, paddingTop: 4 },
+  trendTopCard: {
+    width: 190,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 12,
+    gap: 8,
+    overflow: "hidden",
+    position: "relative",
+  },
+  trendRankBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  trendRankText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" },
+  trendTopCardTop: { flexDirection: "row", alignItems: "center", gap: 8, paddingRight: 28 },
+  trendTopCardName: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  trendTopCardContent: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+  trendTopCardHashtag: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  trendTopCardFooter: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 2 },
+  trendTopCardStat: { flexDirection: "row", alignItems: "center", gap: 3 },
+  trendTopCardStatText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  trendTopCardTime: { fontSize: 10, fontFamily: "Inter_400Regular", marginLeft: "auto" },
+
+  // All posts divider
+  allPostsDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  allPostsDividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  allPostsDividerLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  allPostsDividerText: { fontSize: 11, fontFamily: "Inter_500Medium" },
 });
