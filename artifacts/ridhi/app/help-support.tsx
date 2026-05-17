@@ -54,7 +54,7 @@ const FAQS = [
   },
   {
     q: "Is my personal information secure?",
-    a: "Ridhi uses reasonable security measures to protect user information. For detailed information, please review the Privacy Policy available in Settings or at www.ridhi.app.",
+    a: "Ridhi uses reasonable security measures to protect user information. For detailed information, please review the Privacy Policy available in Settings or at ridhi.app.",
   },
   {
     q: "How can creators or performers earn on Ridhi?",
@@ -192,7 +192,7 @@ export default function HelpSupportScreen() {
           <Text style={[s.sectionTitle, { color: colors.foreground }]}>Contact Support</Text>
           <ContactBtn icon="mail" label="Customer Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
           <ContactBtn icon="briefcase" label="Business Inquiries" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
-          <ContactBtn icon="globe" label="Website" value="www.ridhi.app" href="https://www.ridhi.app" />
+          <ContactBtn icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
         </View>
 
         {/* FAQs */}
@@ -275,7 +275,7 @@ export default function HelpSupportScreen() {
             ].map((item) => (
               <Pressable
                 key={item.label}
-                onPress={() => item.route ? router.push(item.route as any) : Linking.openURL("https://www.ridhi.app")}
+                onPress={() => item.route ? router.push(item.route as any) : Linking.openURL("https://ridhi.app/")}
                 style={[s.legalLink, { borderColor: colors.border }]}
               >
                 <Feather name="chevron-right" size={14} color={colors.primary} />

@@ -48,7 +48,7 @@ const SECTIONS: Section[] = [
       <>
         <InfoRow label="Platform Name" value="Ridhi" />
         <InfoRow label="Company" value="Krilo Digitech Pvt Ltd" />
-        <InfoRow label="Website" value="https://www.ridhi.app" link />
+        <InfoRow label="Website" value="https://ridhi.app/" link />
         <InfoRow label="Support Email" value="support@ridhi.app" link />
         <InfoRow label="Business Email" value="hey@ridhi.app" link />
       </>
@@ -249,7 +249,7 @@ const SECTIONS: Section[] = [
     color: "#FF6B35",
     content: (
       <>
-        <PP>Ridhi may update this Privacy Policy periodically. Updated versions will be published on <LinkText href="https://www.ridhi.app">www.ridhi.app</LinkText>.</PP>
+        <PP>Ridhi may update this Privacy Policy periodically. Updated versions will be published on <LinkText href="https://ridhi.app/">ridhi.app</LinkText>.</PP>
         <PP>Continued use of the platform after updates constitutes acceptance of the revised policy.</PP>
       </>
     ),
@@ -263,7 +263,7 @@ const SECTIONS: Section[] = [
       <>
         <ContactRow icon="mail" label="Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
         <ContactRow icon="briefcase" label="Business" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
-        <ContactRow icon="globe" label="Website" value="www.ridhi.app" href="https://www.ridhi.app" />
+        <ContactRow icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
       </>
     ),
   },
@@ -397,8 +397,8 @@ export default function PrivacyPolicyScreen() {
           <View style={[s.footerDivider, { backgroundColor: colors.border }]} />
           <Text style={[s.footerText, { color: colors.mutedForeground }]}>© 2025 Krilo Digitech Pvt. Ltd.</Text>
           <Text style={[s.footerText, { color: colors.mutedForeground }]}>All rights reserved.</Text>
-          <Pressable onPress={() => Linking.openURL("https://www.ridhi.app")} style={{ marginTop: 6 }}>
-            <Text style={[s.footerLink, { color: colors.primary }]}>www.ridhi.app</Text>
+          <Pressable onPress={() => Linking.openURL("https://ridhi.app/")} style={{ marginTop: 6 }}>
+            <Text style={[s.footerLink, { color: colors.primary }]}>ridhi.app</Text>
           </Pressable>
         </View>
       </Animated.ScrollView>

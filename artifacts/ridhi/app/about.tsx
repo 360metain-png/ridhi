@@ -193,9 +193,9 @@ export default function AboutScreen() {
             <Text style={[s.contactBtnText, { color: colors.foreground }]}>support@ridhi.app</Text>
             <Feather name="external-link" size={13} color={colors.mutedForeground} />
           </Pressable>
-          <Pressable onPress={() => Linking.openURL("https://www.ridhi.app")} style={[s.contactBtn, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <Pressable onPress={() => Linking.openURL("https://ridhi.app/")} style={[s.contactBtn, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <Feather name="globe" size={16} color={colors.primary} />
-            <Text style={[s.contactBtnText, { color: colors.foreground }]}>www.ridhi.app</Text>
+            <Text style={[s.contactBtnText, { color: colors.foreground }]}>ridhi.app</Text>
             <Feather name="external-link" size={13} color={colors.mutedForeground} />
           </Pressable>
         </View>

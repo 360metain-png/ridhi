@@ -302,7 +302,7 @@ const SECTIONS: SectionDef[] = [
     num: "22", title: "Changes to Terms", icon: "edit-3", color: "#FFB800",
     body: () => (
       <>
-        <PP>We may update or modify these Terms at any time. Updated versions will be posted on <Text style={{ color: "#E91E8C" }} onPress={() => Linking.openURL("https://www.ridhi.app")}>www.ridhi.app</Text>.</PP>
+        <PP>We may update or modify these Terms at any time. Updated versions will be posted on <Text style={{ color: "#E91E8C" }} onPress={() => Linking.openURL("https://ridhi.app/")}>ridhi.app</Text>.</PP>
         <PP>Continued use of Ridhi after updates constitutes acceptance of revised Terms.</PP>
       </>
     ),
@@ -311,7 +311,7 @@ const SECTIONS: SectionDef[] = [
     num: "23", title: "Contact Information", icon: "mail", color: "#7B2FBE",
     body: () => (
       <>
-        <ContactRow icon="globe" label="Website" value="www.ridhi.app" href="https://www.ridhi.app" />
+        <ContactRow icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
         <ContactRow icon="mail" label="Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
         <ContactRow icon="briefcase" label="Business" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
       </>
@@ -406,7 +406,7 @@ export default function TermsScreen() {
         <View style={[s.infoStrip, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <InfoRow label="Company" value="Krilo Digitech Pvt Ltd" />
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
-          <InfoRow label="Website" value="https://www.ridhi.app" link />
+          <InfoRow label="Website" value="https://ridhi.app/" link />
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
           <InfoRow label="Support" value="support@ridhi.app" link />
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
