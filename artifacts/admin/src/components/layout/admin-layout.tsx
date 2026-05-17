@@ -21,6 +21,7 @@ import {
   Phone,
   Cpu,
   ScanFace,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,7 @@ const NAV_SECTIONS = [
       { name: "Marketing", href: "/marketing", icon: Megaphone },
       { name: "Settings", href: "/settings", icon: Settings },
       { name: "Super Admin", href: "/super-admin", icon: ShieldCheck },
+      { name: "Handbook", href: "/handbook", icon: BookOpen },
     ],
   },
 ];
@@ -124,6 +126,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/calls": "Audio & Video Calls",
     "/ai-hub": "AI Hub",
     "/kyc": "E-KYC Verification",
+    "/handbook": "Platform Handbook",
   };
 
   return (
