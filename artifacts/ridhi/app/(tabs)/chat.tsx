@@ -40,7 +40,7 @@ export default function ChatScreen() {
       >
         <Text style={[styles.title, { color: colors.foreground }]}>Messages</Text>
         <Pressable
-          onPress={() => router.push("/group-chat")}
+          onPress={() => router.push("/chatrooms")}
           style={[styles.composeBtn, { backgroundColor: colors.muted }]}
         >
           <Feather name="edit-2" size={18} color={colors.primary} />
@@ -63,15 +63,15 @@ export default function ChatScreen() {
 
       {tab === "groups" ? (
         <Pressable
-          onPress={() => router.push("/group-chat")}
+          onPress={() => router.push("/chatrooms")}
           style={[styles.groupsShortcut, { backgroundColor: colors.card, borderColor: colors.border }]}
         >
           <View style={[styles.groupsIcon, { backgroundColor: colors.secondary + "20" }]}>
             <Feather name="users" size={22} color={colors.secondary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.groupsTitle, { color: colors.foreground }]}>Open Group Chats</Text>
-            <Text style={[styles.groupsSub, { color: colors.mutedForeground }]}>Bollywood, Foodies, Cricket & more</Text>
+            <Text style={[styles.groupsTitle, { color: colors.foreground }]}>Open Chatrooms</Text>
+            <Text style={[styles.groupsSub, { color: colors.mutedForeground }]}>Bollywood, Cricket, Gaming & more</Text>
           </View>
           <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
         </Pressable>
