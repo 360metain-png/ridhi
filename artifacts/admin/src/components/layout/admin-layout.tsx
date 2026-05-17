@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard,
@@ -78,11 +78,28 @@ const NAV_SECTIONS = [
   },
 ];
 
+type RoleInfo = { label: string; badge: string; color: string; initial: string; name: string };
+
+function getRoleInfo(role: string | null, email: string | null): RoleInfo {
+  if (role === "host") return { label: "Host · Full Access", badge: "Host L5", color: "bg-pink-500", initial: "H", name: email?.split("@")[0]?.replace("host.", "") ?? "Host User" };
+  if (role === "agent") return { label: "Agent · Full Access", badge: "Agent A3", color: "bg-blue-500", initial: "A", name: email?.split("@")[0]?.replace("agent.", "") ?? "Agent User" };
+  return { label: "Super Admin", badge: "Super Admin", color: "bg-primary", initial: "A", name: "Arjun Mehta" };
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation] = useLocation();
+  const [roleInfo, setRoleInfo] = useState<RoleInfo>(getRoleInfo(null, null));
+
+  useEffect(() => {
+    const role = localStorage.getItem("ridhi_admin_role");
+    const email = localStorage.getItem("ridhi_admin_email");
+    setRoleInfo(getRoleInfo(role, email));
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem("ridhi_admin_logged_in");
+    localStorage.removeItem("ridhi_admin_role");
+    localStorage.removeItem("ridhi_admin_email");
     setLocation("/login");
   };
 
@@ -155,12 +172,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         <div className="p-3 border-t border-sidebar-border space-y-1.5">
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm text-muted-foreground">
-            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-primary font-bold text-xs">A</span>
+            <div className={`w-6 h-6 rounded-full ${roleInfo.color} flex items-center justify-center flex-shrink-0`}>
+              <span className="text-white font-bold text-xs">{roleInfo.initial}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate text-xs">Arjun Mehta</p>
-              <p className="text-xs text-muted-foreground">Super Admin</p>
+              <p className="font-medium text-foreground truncate text-xs capitalize">{roleInfo.name}</p>
+              <p className="text-xs text-muted-foreground">{roleInfo.label}</p>
             </div>
           </div>
           <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-8 text-xs" onClick={handleLogout}>
