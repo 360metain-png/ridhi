@@ -224,7 +224,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert("Help & Support", "📧  support@ridhi.app\n📞  1800-103-7777 (Toll Free)\n🕐  Mon – Sat, 9 AM – 6 PM IST\n\nWe typically respond within 2 hours.", [{ text: "OK" }])} />
           <SettingRow icon="info" label="About Ridhi" subtitle="Version 1.0.0" onPress={() => router.push("/about" as any)} />
-          <SettingRow icon="file-text" label="Terms of Service" onPress={() => Alert.alert("Terms of Service", "By using Ridhi you agree to:\n\n• Be 18+ years old\n• Not post harmful or illegal content\n• Respect other users\n• Follow Indian IT Act & laws\n\nFull terms: ridhi.app/terms", [{ text: "OK" }])} />
+          <SettingRow icon="file-text" label="Terms & Conditions" onPress={() => router.push("/terms" as any)} />
           <SettingRow icon="shield" label="Privacy Policy" onPress={() => router.push("/privacy-policy" as any)} />
         </View>
 
