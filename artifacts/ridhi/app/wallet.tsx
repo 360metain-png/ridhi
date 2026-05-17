@@ -189,6 +189,24 @@ export default function WalletScreen() {
               </View>
             ))}
           </View>
+
+          {/* ── Quick Actions ── */}
+          <View style={styles.quickActions}>
+            <Pressable
+              style={[styles.qaBtn, { backgroundColor: "rgba(255,255,255,0.22)" }]}
+              onPress={() => {}}
+            >
+              <Feather name="plus-circle" size={16} color="#fff" />
+              <Text style={styles.qaBtnText}>Recharge</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.qaBtn, { backgroundColor: "rgba(255,255,255,0.22)" }]}
+              onPress={() => router.push("/withdraw")}
+            >
+              <Feather name="arrow-down-left" size={16} color="#fff" />
+              <Text style={styles.qaBtnText}>Withdraw to Bank</Text>
+            </Pressable>
+          </View>
         </LinearGradient>
 
         {/* ── Live Activity Feed ── */}
@@ -426,4 +444,7 @@ const styles = StyleSheet.create({
   vipBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginTop: 4 },
   vipTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   vipSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  quickActions: { flexDirection: "row", gap: 10, marginTop: 20 },
+  qaBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 11, borderRadius: 14 },
+  qaBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });

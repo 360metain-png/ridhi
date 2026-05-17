@@ -204,3 +204,79 @@ export const mockManualCoinLogs: ManualCoinLog[] = [
   { id: "ml4", userId: "u2",  userName: "Diya Patel",   action: "debit",  coins: 200,  reason: "Correction: accidental duplicate credit",  adminName: "Super Admin", createdAt: new Date(Date.now() - 300000000).toISOString() },
   { id: "ml5", userId: "u15", userName: "Aarav Sharma 5",action:"credit", coins: 1000, reason: "Beta tester reward — Phase 2",             adminName: "Super Admin", createdAt: new Date(Date.now() - 350000000).toISOString() },
 ];
+
+// ─── Coin Withdrawal Requests (Users / Hosts / Agents) ──────────────────────
+
+export type CoinWithdrawal = {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole: "User" | "Host" | "Agent";
+  userPhone: string;
+  userCity: string;
+  kycVerified: boolean;
+  coinsRequested: number;
+  grossAmountInr: number;
+  netAmountInr: number;
+  method: "UPI" | "Bank";
+  upiId?: string;
+  bankAccount?: string;
+  ifscCode?: string;
+  accountHolder?: string;
+  bankName?: string;
+  requestedAt: string;
+  status: "Pending" | "Approved" | "Paid" | "Rejected";
+  rejectionReason?: string;
+  processedAt?: string;
+  txRef?: string;
+};
+
+const CITIES = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", "Kolkata", "Pune", "Kochi", "Ahmedabad", "Jaipur"];
+const NAMES  = ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao", "Arjun Gupta", "Ananya Reddy", "Sai Kumar", "Priya Das", "Krishna Iyer", "Riya Desai",
+                "Rohan Mehta", "Kavya Nair", "Dev Joshi", "Pooja Verma", "Rahul Tiwari", "Sneha Pillai", "Aditya Bose", "Meera Shah", "Kiran Reddy", "Natasha Roy"];
+
+function coinWithdrawal(id: string, idx: number, role: "User"|"Host"|"Agent", coins: number, method: "UPI"|"Bank", status: "Pending"|"Approved"|"Paid"|"Rejected", daysAgo: number): CoinWithdrawal {
+  const gross = coins * 0.5;
+  const net   = gross * 0.7;
+  const name  = NAMES[idx % NAMES.length];
+  const city  = CITIES[idx % CITIES.length];
+  return {
+    id, userId: `u${idx + 1}`, userName: name, userRole: role,
+    userPhone: `+91 98765${43200 + idx}`, userCity: city, kycVerified: true,
+    coinsRequested: coins, grossAmountInr: gross, netAmountInr: net,
+    method,
+    upiId: method === "UPI" ? `${name.split(" ")[0].toLowerCase()}@upi` : undefined,
+    bankAccount: method === "Bank" ? `00${(10000000 + idx * 123457) % 99999999}` : undefined,
+    ifscCode: method === "Bank" ? ["SBIN0001234","HDFC0002456","ICIC0003789","AXIS0004012"][idx % 4] : undefined,
+    accountHolder: method === "Bank" ? name : undefined,
+    bankName: method === "Bank" ? ["State Bank of India","HDFC Bank","ICICI Bank","Axis Bank"][idx % 4] : undefined,
+    requestedAt: new Date(Date.now() - daysAgo * 86400000).toISOString(),
+    status,
+    processedAt: status !== "Pending" ? new Date(Date.now() - (daysAgo - 1) * 86400000).toISOString() : undefined,
+    txRef: status === "Paid" ? `TXN${(100000 + idx * 7919) % 999999}` : undefined,
+    rejectionReason: status === "Rejected" ? "KYC documents mismatch" : undefined,
+  };
+}
+
+export const mockCoinWithdrawals: CoinWithdrawal[] = [
+  coinWithdrawal("cw1",  0,  "User",  1000,  "UPI",  "Pending",  0.2),
+  coinWithdrawal("cw2",  1,  "Host",  5000,  "Bank", "Pending",  0.5),
+  coinWithdrawal("cw3",  2,  "Agent", 10000, "UPI",  "Pending",  1),
+  coinWithdrawal("cw4",  3,  "User",  2500,  "UPI",  "Pending",  1),
+  coinWithdrawal("cw5",  4,  "Host",  8000,  "Bank", "Pending",  2),
+  coinWithdrawal("cw6",  5,  "User",  1500,  "UPI",  "Approved", 3),
+  coinWithdrawal("cw7",  6,  "Host",  12000, "Bank", "Approved", 4),
+  coinWithdrawal("cw8",  7,  "Agent", 20000, "UPI",  "Approved", 5),
+  coinWithdrawal("cw9",  8,  "User",  3000,  "Bank", "Approved", 6),
+  coinWithdrawal("cw10", 9,  "Host",  7500,  "UPI",  "Paid",     7),
+  coinWithdrawal("cw11", 10, "User",  2000,  "UPI",  "Paid",     8),
+  coinWithdrawal("cw12", 11, "Agent", 15000, "Bank", "Paid",     9),
+  coinWithdrawal("cw13", 12, "Host",  6000,  "Bank", "Paid",     10),
+  coinWithdrawal("cw14", 13, "User",  1000,  "UPI",  "Paid",     11),
+  coinWithdrawal("cw15", 14, "Host",  4000,  "Bank", "Rejected", 12),
+  coinWithdrawal("cw16", 15, "User",  1200,  "UPI",  "Rejected", 14),
+  coinWithdrawal("cw17", 16, "Agent", 8000,  "Bank", "Paid",     15),
+  coinWithdrawal("cw18", 17, "User",  2500,  "UPI",  "Pending",  0.3),
+  coinWithdrawal("cw19", 18, "Host",  9500,  "Bank", "Approved", 2),
+  coinWithdrawal("cw20", 19, "User",  1800,  "UPI",  "Paid",     5),
+];
