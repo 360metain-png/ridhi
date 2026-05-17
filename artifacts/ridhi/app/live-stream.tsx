@@ -20,12 +20,12 @@ import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 
 const LIVE_GIFTS = [
-  { id: "g1", icon: "heart", name: "Heart", cost: 5, color: "#FF3B6F" },
-  { id: "g2", icon: "star", name: "Star", cost: 20, color: "#FFB800" },
-  { id: "g3", icon: "zap", name: "Bolt", cost: 50, color: "#7B2FBE" },
-  { id: "g4", icon: "award", name: "Crown", cost: 100, color: "#E91E8C" },
-  { id: "g5", icon: "gift", name: "Super Gift", cost: 500, color: "#FF6B35" },
-  { id: "g6", icon: "diamond" as any, name: "Diamond", cost: 1000, color: "#00BCD4" },
+  { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
+  { id: "g2", emoji: "💗", name: "Heart", cost: 50, color: "#E91E8C" },
+  { id: "g3", emoji: "🎂", name: "Cake", cost: 100, color: "#FF6B35" },
+  { id: "g4", emoji: "🚗", name: "Car", cost: 5000, color: "#7B2FBE" },
+  { id: "g5", emoji: "🛥️", name: "Yacht", cost: 25000, color: "#00BCD4" },
+  { id: "g6", emoji: "✈️", name: "Jet", cost: 100000, color: "#FFB800" },
 ];
 
 const LIVE_ROOMS = [
@@ -227,12 +227,14 @@ export default function LiveStreamScreen() {
               {LIVE_GIFTS.map((g) => (
                 <Pressable key={g.id} onPress={() => sendGift(g)} style={styles.giftItem}>
                   <View style={[styles.giftIcon, { backgroundColor: g.color + "20" }]}>
-                    <Feather name={g.icon as any} size={24} color={g.color} />
+                    <Text style={{ fontSize: 24 }}>{g.emoji}</Text>
                   </View>
                   <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
                   <View style={styles.giftCost}>
-                    <Feather name="star" size={10} color={colors.gold} />
-                    <Text style={[styles.giftCostText, { color: colors.mutedForeground }]}>{g.cost}</Text>
+                    <Text style={{ fontSize: 10 }}>🪙</Text>
+                    <Text style={[styles.giftCostText, { color: colors.mutedForeground }]}>
+                      {g.cost >= 1000 ? `${(g.cost / 1000).toFixed(0)}K` : g.cost}
+                    </Text>
                   </View>
                 </Pressable>
               ))}

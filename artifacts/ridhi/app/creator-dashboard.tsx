@@ -178,6 +178,35 @@ export default function CreatorDashboardScreen() {
           </Pressable>
         </View>
 
+        <View style={[styles.section, { paddingBottom: 4 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Host Level Status</Text>
+          <LinearGradient
+            colors={["#FFB80025", "#FFB80008"]}
+            style={[styles.hostLevelCard, { borderColor: "#FFB80050" }]}
+          >
+            <View style={styles.hostLevelTop}>
+              <Text style={styles.hostLevelEmoji}>🥇</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.hostLevelName, { color: colors.foreground }]}>L3 Popular · Gold Badge</Text>
+                <Text style={[styles.hostLevelEarnings, { color: "#FFB800" }]}>Est. ₹25K–₹60K / month</Text>
+              </View>
+              <Pressable onPress={() => router.push("/host-profile" as any)} style={[styles.hostLevelBtn, { backgroundColor: "#FFB80025", borderColor: "#FFB80060" }]}>
+                <Text style={[styles.hostLevelBtnText, { color: "#FFB800" }]}>View</Text>
+                <Feather name="chevron-right" size={13} color="#FFB800" />
+              </Pressable>
+            </View>
+            <View style={styles.hostLevelProgress}>
+              <View style={styles.hostLevelProgressHeader}>
+                <Text style={[styles.hostLevelProgressLabel, { color: colors.mutedForeground }]}>Progress to L4 Platinum</Text>
+                <Text style={[styles.hostLevelProgressVal, { color: "#FFB800" }]}>1.8L / 3L coins</Text>
+              </View>
+              <View style={[styles.hostProgressBar, { backgroundColor: colors.muted }]}>
+                <LinearGradient colors={["#FFB800", "#FF6B35"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[styles.hostProgressFill, { width: "60%" }]} />
+              </View>
+            </View>
+          </LinearGradient>
+        </View>
+
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Creator Tools</Text>
           <View style={styles.toolsGrid}>
@@ -292,4 +321,25 @@ const styles = StyleSheet.create({
   },
   toolIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   toolLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  hostLevelCard: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 12, marginTop: 4 },
+  hostLevelTop: { flexDirection: "row", alignItems: "center", gap: 10 },
+  hostLevelEmoji: { fontSize: 28 },
+  hostLevelName: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  hostLevelEarnings: { fontSize: 12, fontFamily: "Inter_500Medium", marginTop: 2 },
+  hostLevelBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  hostLevelBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  hostLevelProgress: { gap: 7 },
+  hostLevelProgressHeader: { flexDirection: "row", justifyContent: "space-between" },
+  hostLevelProgressLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  hostLevelProgressVal: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  hostProgressBar: { height: 8, borderRadius: 4, overflow: "hidden" },
+  hostProgressFill: { height: "100%", borderRadius: 4 },
 });

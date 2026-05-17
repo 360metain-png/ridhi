@@ -1,0 +1,365 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar } from "@/components/Avatar";
+import { GradientButton } from "@/components/GradientButton";
+
+const { width } = Dimensions.get("window");
+
+const HOST_LEVELS = [
+  { level: 1, label: "Starter", badge: "Bronze", emoji: "🥉", target: 50000, color: "#CD7F32", earnings: "₹5K–₹10K" },
+  { level: 2, label: "Rising", badge: "Silver", emoji: "🥈", target: 100000, color: "#C0C0C0", earnings: "₹10K–₹25K" },
+  { level: 3, label: "Popular", badge: "Gold", emoji: "🥇", target: 300000, color: "#FFB800", earnings: "₹25K–₹60K" },
+  { level: 4, label: "Star Host", badge: "Platinum", emoji: "💎", target: 700000, color: "#E5E4E2", earnings: "₹60K–₹1.5L" },
+  { level: 5, label: "Elite", badge: "Diamond", emoji: "💠", target: 1500000, color: "#00BCD4", earnings: "₹1.5L–₹3L" },
+  { level: 6, label: "Celebrity", badge: "Crown", emoji: "👑", target: 3000000, color: "#E91E8C", earnings: "₹3L–₹7L" },
+  { level: 7, label: "Ridhi Icon", badge: "Royal Crown", emoji: "🏆", target: 5000000, color: "#FFB800", earnings: "₹7L+" },
+];
+
+const CURRENT_LEVEL = 3;
+const CURRENT_COINS = 180000;
+
+const EARNINGS_BREAKDOWN = [
+  { source: "Video Calls", amount: "₹14,200", coins: 71000, icon: "video", color: "#7B2FBE" },
+  { source: "Audio Calls", amount: "₹8,400", coins: 42000, icon: "phone", color: "#34C759" },
+  { source: "Virtual Gifts", amount: "₹19,600", coins: 98000, icon: "gift", color: "#E91E8C" },
+  { source: "Live Streams", amount: "₹11,000", coins: 55000, icon: "radio", color: "#FF6B35" },
+  { source: "Fan Clubs", amount: "₹4,800", icon: "heart", color: "#FF3B6F", coins: 24000 },
+];
+
+const GIFT_STATS = [
+  { emoji: "🌹", name: "Rose", count: 842, coins: 8420 },
+  { emoji: "💗", name: "Heart", count: 214, coins: 10700 },
+  { emoji: "🎂", name: "Cake", count: 87, coins: 8700 },
+  { emoji: "🚗", name: "Car", count: 4, coins: 20000 },
+];
+
+const MONTHLY_BARS = [0.3, 0.45, 0.6, 0.5, 0.72, 0.85, 0.92, 0.78, 0.88, 0.76, 0.95, 1.0];
+const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+
+export default function HostProfileScreen() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const [tab, setTab] = useState<"overview" | "earnings" | "levels">("overview");
+  const progressAnim = useRef(new Animated.Value(0)).current;
+
+  const currentLvl = HOST_LEVELS[CURRENT_LEVEL - 1];
+  const nextLvl = HOST_LEVELS[CURRENT_LEVEL] || HOST_LEVELS[CURRENT_LEVEL - 1];
+  const progress = CURRENT_COINS / nextLvl.target;
+  const progressPct = Math.min(progress, 1);
+
+  useEffect(() => {
+    Animated.timing(progressAnim, { toValue: progressPct, duration: 1200, useNativeDriver: false }).start();
+  }, []);
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0%", "100%"],
+  });
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <LinearGradient
+        colors={[currentLvl.color + "22", "transparent"]}
+        style={[styles.headerGlow, { height: topPad + 120 }]}
+      />
+
+      <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: colors.surface + "F0", borderBottomColor: colors.border }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Feather name="arrow-left" size={22} color={colors.foreground} />
+        </Pressable>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Host Profile</Text>
+        <LinearGradient colors={[currentLvl.color, currentLvl.color + "AA"]} style={styles.levelChip}>
+          <Text style={styles.levelChipEmoji}>{currentLvl.emoji}</Text>
+          <Text style={styles.levelChipText}>L{CURRENT_LEVEL}</Text>
+        </LinearGradient>
+      </View>
+
+      <View style={[styles.tabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        {(["overview", "earnings", "levels"] as const).map((t) => (
+          <Pressable key={t} style={styles.tabItem} onPress={() => setTab(t)}>
+            {t === tab && <LinearGradient colors={[colors.primary + "20", "transparent"]} style={StyleSheet.absoluteFill} />}
+            <Text style={[styles.tabText, { color: t === tab ? colors.primary : colors.mutedForeground }]}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </Text>
+            {t === tab && <View style={[styles.tabUnderline, { backgroundColor: colors.primary }]} />}
+          </Pressable>
+        ))}
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}>
+        {tab === "overview" && (
+          <>
+            <LinearGradient
+              colors={[currentLvl.color + "22", currentLvl.color + "08"]}
+              style={[styles.profileCard, { borderColor: currentLvl.color + "50" }]}
+            >
+              <View style={styles.profileCardTop}>
+                <View style={styles.avatarWrap}>
+                  <Avatar name={user?.name ?? "Host"} size={68} hasStory />
+                  <LinearGradient colors={[currentLvl.color, currentLvl.color + "AA"]} style={styles.avatarBadge}>
+                    <Text style={styles.avatarBadgeText}>{currentLvl.emoji}</Text>
+                  </LinearGradient>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.profileName, { color: colors.foreground }]}>{user?.name ?? "Your Name"}</Text>
+                  <Text style={[styles.profileLevel, { color: currentLvl.color }]}>
+                    L{CURRENT_LEVEL} {currentLvl.label} · {currentLvl.badge}
+                  </Text>
+                  <Text style={[styles.profileEarnings, { color: colors.mutedForeground }]}>
+                    Est. {currentLvl.earnings}/month
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.progressSection}>
+                <View style={styles.progressHeader}>
+                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>
+                    Progress to L{CURRENT_LEVEL + 1} ({nextLvl.badge})
+                  </Text>
+                  <Text style={[styles.progressValue, { color: currentLvl.color }]}>
+                    {(CURRENT_COINS / 1000).toFixed(0)}K / {(nextLvl.target / 1000).toFixed(0)}K coins
+                  </Text>
+                </View>
+                <View style={[styles.progressBarBg, { backgroundColor: colors.muted }]}>
+                  <Animated.View style={[styles.progressBarFill, { width: progressWidth }]}>
+                    <LinearGradient colors={[currentLvl.color, nextLvl.color]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />
+                  </Animated.View>
+                </View>
+              </View>
+            </LinearGradient>
+
+            <View style={styles.kpiGrid}>
+              {[
+                { label: "Live Hours", value: "142h", icon: "radio", color: colors.primary },
+                { label: "Total Calls", value: "1,847", icon: "phone", color: colors.success },
+                { label: "Gifts Received", value: "3,241", icon: "gift", color: colors.gold },
+                { label: "Fan Club Members", value: "284", icon: "heart", color: "#FF3B6F" },
+              ].map((k) => (
+                <View key={k.label} style={[styles.kpiCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <View style={[styles.kpiIcon, { backgroundColor: k.color + "20" }]}>
+                    <Feather name={k.icon as any} size={16} color={k.color} />
+                  </View>
+                  <Text style={[styles.kpiValue, { color: colors.foreground }]}>{k.value}</Text>
+                  <Text style={[styles.kpiLabel, { color: colors.mutedForeground }]}>{k.label}</Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={[styles.giftsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Top Gifts Received</Text>
+              <View style={styles.giftsList}>
+                {GIFT_STATS.map((g) => (
+                  <View key={g.name} style={[styles.giftRow, { borderBottomColor: colors.border }]}>
+                    <Text style={styles.giftEmoji}>{g.emoji}</Text>
+                    <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
+                    <Text style={[styles.giftCount, { color: colors.mutedForeground }]}>×{g.count}</Text>
+                    <Text style={[styles.giftCoins, { color: colors.gold }]}>🪙 {g.coins.toLocaleString()}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.withdrawRow}>
+              <GradientButton label="💸 Request Withdrawal" onPress={() => {}} style={{ flex: 1 }} />
+            </View>
+          </>
+        )}
+
+        {tab === "earnings" && (
+          <>
+            <View style={[styles.totalEarningsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>Total Earnings This Month</Text>
+              <Text style={[styles.totalAmount, { color: colors.success }]}>₹58,000</Text>
+              <Text style={[styles.totalCoins, { color: colors.gold }]}>🪙 290,000 coins</Text>
+            </View>
+
+            <View style={[styles.chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Monthly Coins Earned (2025)</Text>
+              <View style={styles.chartBars}>
+                {MONTHLY_BARS.map((h, i) => (
+                  <View key={i} style={styles.barWrap}>
+                    <View style={[styles.barBg, { backgroundColor: colors.muted }]}>
+                      <LinearGradient colors={[currentLvl.color, currentLvl.color + "60"]} style={[styles.barFill, { height: 90 * h }]} />
+                    </View>
+                    <Text style={[styles.barLabel, { color: colors.mutedForeground }]}>{MONTHS[i]}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {EARNINGS_BREAKDOWN.map((e) => (
+              <View key={e.source} style={[styles.earningRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={[styles.earningIcon, { backgroundColor: e.color + "20" }]}>
+                  <Feather name={e.icon as any} size={16} color={e.color} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.earningSource, { color: colors.foreground }]}>{e.source}</Text>
+                  <Text style={[styles.earningCoins, { color: colors.mutedForeground }]}>🪙 {e.coins.toLocaleString()}</Text>
+                </View>
+                <Text style={[styles.earningAmount, { color: colors.success }]}>{e.amount}</Text>
+              </View>
+            ))}
+          </>
+        )}
+
+        {tab === "levels" && (
+          <>
+            <Text style={[styles.levelsSubtitle, { color: colors.mutedForeground }]}>
+              Earn coins through calls, gifts & live streams to level up
+            </Text>
+            {HOST_LEVELS.map((lvl) => {
+              const isCurrent = lvl.level === CURRENT_LEVEL;
+              const isUnlocked = lvl.level < CURRENT_LEVEL;
+              return (
+                <LinearGradient
+                  key={lvl.level}
+                  colors={isCurrent ? [lvl.color + "25", lvl.color + "08"] : isUnlocked ? [colors.success + "08", colors.card] : [colors.card, colors.card]}
+                  style={[styles.levelCard, { borderColor: isCurrent ? lvl.color + "60" : isUnlocked ? colors.success + "30" : colors.border }]}
+                >
+                  <Text style={styles.levelEmoji}>{lvl.emoji}</Text>
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.levelCardHeader}>
+                      <Text style={[styles.levelCardTitle, { color: colors.foreground }]}>
+                        L{lvl.level} {lvl.label}
+                      </Text>
+                      {isCurrent && (
+                        <LinearGradient colors={[lvl.color, lvl.color + "AA"]} style={styles.currentBadge}>
+                          <Text style={styles.currentBadgeText}>YOU ARE HERE</Text>
+                        </LinearGradient>
+                      )}
+                      {isUnlocked && !isCurrent && (
+                        <View style={[styles.unlockedBadge, { backgroundColor: colors.success + "20" }]}>
+                          <Feather name="check" size={10} color={colors.success} />
+                          <Text style={[styles.unlockedText, { color: colors.success }]}>Unlocked</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.levelBadgeName, { color: lvl.color }]}>{lvl.badge} Badge</Text>
+                    <View style={styles.levelMeta}>
+                      <Text style={[styles.levelMetaText, { color: colors.mutedForeground }]}>
+                        🪙 {(lvl.target / 100000).toFixed(1)}L coins/month
+                      </Text>
+                      <Text style={[styles.levelMetaText, { color: colors.success }]}>{lvl.earnings}</Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+              );
+            })}
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  headerGlow: { position: "absolute", top: 0, left: 0, right: 0 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 12,
+  },
+  backBtn: { padding: 6 },
+  headerTitle: { flex: 1, fontSize: 18, fontFamily: "Inter_700Bold" },
+  levelChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
+  levelChipEmoji: { fontSize: 14 },
+  levelChipText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  tabBar: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth },
+  tabItem: { flex: 1, alignItems: "center", paddingVertical: 12, position: "relative", overflow: "hidden" },
+  tabText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  tabUnderline: { position: "absolute", bottom: 0, left: 16, right: 16, height: 2, borderRadius: 1 },
+  profileCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 14 },
+  profileCardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  avatarWrap: { position: "relative" },
+  avatarBadge: {
+    position: "absolute", bottom: -2, right: -2,
+    width: 22, height: 22, borderRadius: 11,
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 2, borderColor: "#08080F",
+  },
+  avatarBadgeText: { fontSize: 12 },
+  profileName: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  profileLevel: { fontSize: 14, fontFamily: "Inter_600SemiBold", marginTop: 3 },
+  profileEarnings: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  progressSection: { gap: 8 },
+  progressHeader: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: 4 },
+  progressLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  progressValue: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  progressBarBg: { height: 10, borderRadius: 5, overflow: "hidden" },
+  progressBarFill: { height: "100%", borderRadius: 5, overflow: "hidden" },
+  kpiGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  kpiCard: {
+    flex: 1,
+    minWidth: (width - 52) / 2,
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+    gap: 7,
+  },
+  kpiIcon: { width: 32, height: 32, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  kpiValue: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  kpiLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  giftsCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
+  sectionTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  giftsList: { gap: 0 },
+  giftRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  giftEmoji: { fontSize: 22 },
+  giftName: { flex: 1, fontSize: 14, fontFamily: "Inter_500Medium" },
+  giftCount: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  giftCoins: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  withdrawRow: { flexDirection: "row", gap: 10 },
+  totalEarningsCard: { borderRadius: 18, borderWidth: 1, padding: 20, alignItems: "center", gap: 6 },
+  totalLabel: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  totalAmount: { fontSize: 36, fontFamily: "Inter_700Bold" },
+  totalCoins: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  chartCard: { borderRadius: 18, borderWidth: 1, padding: 16 },
+  chartBars: { flexDirection: "row", alignItems: "flex-end", gap: 4, justifyContent: "space-between", marginTop: 12 },
+  barWrap: { flex: 1, alignItems: "center", gap: 5 },
+  barBg: { width: "100%", height: 90, borderRadius: 5, overflow: "hidden", justifyContent: "flex-end" },
+  barFill: { width: "100%", borderRadius: 5 },
+  barLabel: { fontSize: 9, fontFamily: "Inter_500Medium" },
+  earningRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1 },
+  earningIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  earningSource: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  earningCoins: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  earningAmount: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  levelsSubtitle: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  levelCard: { borderRadius: 16, borderWidth: 1, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 },
+  levelEmoji: { fontSize: 28 },
+  levelCardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" },
+  levelCardTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  currentBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  currentBadgeText: { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
+  unlockedBadge: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  unlockedText: { fontSize: 10, fontFamily: "Inter_500Medium" },
+  levelBadgeName: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 4 },
+  levelMeta: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
+  levelMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+});

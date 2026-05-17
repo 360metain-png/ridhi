@@ -103,13 +103,16 @@ export default function ProfileScreen() {
         {[
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
           { icon: "zap", label: "Creator Studio", route: "/creator-dashboard", color: "#E91E8C" },
+          { icon: "star", label: "Host Profile & Levels", route: "/host-profile", color: "#FFB800" },
           { icon: "video", label: "Go Live", route: "/live-stream", color: "#FF3B30" },
+          { icon: "crosshair", label: "PK Battles", route: "/pk-battle", color: "#7B2FBE" },
           { icon: "phone", label: "Random Call", route: "/random-call", color: "#34C759" },
-          { icon: "award", label: "Leaderboard", route: "/leaderboard", color: "#FFB800" },
+          { icon: "briefcase", label: "Agent Dashboard", route: "/agent-dashboard", color: "#00BCD4" },
+          { icon: "award", label: "Leaderboard", route: "/leaderboard", color: "#FF6B35" },
           { icon: "gift", label: "Referral & Rewards", route: "/referral", color: "#FF6B35" },
           { icon: "headphones", label: "Audio Rooms", route: "/audio-room", color: "#4A90E2" },
           { icon: "globe", label: "Explore", route: "/explore", color: "#5AC8FA" },
-          { icon: "award", label: "VIP & Plans", route: "/subscription", color: "#FFB800" },
+          { icon: "award", label: "VIP & Plans", route: "/subscription", color: "#E91E8C" },
         ].map((item) => (
           <Pressable
             key={item.label}
