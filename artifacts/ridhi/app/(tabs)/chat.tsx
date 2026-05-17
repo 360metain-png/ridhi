@@ -15,10 +15,13 @@ import { useColors } from "@/hooks/useColors";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
 
+type Tab = "direct" | "groups";
+
 export default function ChatScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<Tab>("direct");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
@@ -36,47 +39,82 @@ export default function ChatScreen() {
         ]}
       >
         <Text style={[styles.title, { color: colors.foreground }]}>Messages</Text>
-        <Pressable style={[styles.composeBtn, { backgroundColor: colors.muted }]}>
+        <Pressable
+          onPress={() => router.push("/group-chat")}
+          style={[styles.composeBtn, { backgroundColor: colors.muted }]}
+        >
           <Feather name="edit-2" size={18} color={colors.primary} />
         </Pressable>
       </View>
 
-      <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-        <Feather name="search" size={16} color={colors.mutedForeground} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.foreground }]}
-          placeholder="Search messages..."
-          placeholderTextColor={colors.mutedForeground}
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search.length > 0 && (
-          <Pressable onPress={() => setSearch("")}>
-            <Feather name="x" size={16} color={colors.mutedForeground} />
+      <View style={[styles.tabRow, { borderBottomColor: colors.border }]}>
+        {([["direct", "Direct"], ["groups", "Groups"]] as [Tab, string][]).map(([t, label]) => (
+          <Pressable
+            key={t}
+            onPress={() => setTab(t)}
+            style={[styles.tabBtn, tab === t && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
+          >
+            <Text style={[styles.tabLabel, { color: tab === t ? colors.primary : colors.mutedForeground }]}>
+              {label}
+            </Text>
           </Pressable>
-        )}
+        ))}
       </View>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(c) => c.id}
-        renderItem={({ item }) => (
-          <ChatItem
-            chat={item}
-            onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.id } })}
-          />
-        )}
-        ItemSeparatorComponent={() => (
-          <View style={[styles.separator, { backgroundColor: colors.border }]} />
-        )}
-        contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Feather name="message-circle" size={40} color={colors.muted} />
-            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No messages found</Text>
+      {tab === "groups" ? (
+        <Pressable
+          onPress={() => router.push("/group-chat")}
+          style={[styles.groupsShortcut, { backgroundColor: colors.card, borderColor: colors.border }]}
+        >
+          <View style={[styles.groupsIcon, { backgroundColor: colors.secondary + "20" }]}>
+            <Feather name="users" size={22} color={colors.secondary} />
           </View>
-        }
-      />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.groupsTitle, { color: colors.foreground }]}>Open Group Chats</Text>
+            <Text style={[styles.groupsSub, { color: colors.mutedForeground }]}>Bollywood, Foodies, Cricket & more</Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+        </Pressable>
+      ) : (
+        <>
+          <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            <Feather name="search" size={16} color={colors.mutedForeground} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.foreground }]}
+              placeholder="Search messages..."
+              placeholderTextColor={colors.mutedForeground}
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search.length > 0 && (
+              <Pressable onPress={() => setSearch("")}>
+                <Feather name="x" size={16} color={colors.mutedForeground} />
+              </Pressable>
+            )}
+          </View>
+
+          <FlatList
+            data={filtered}
+            keyExtractor={(c) => c.id}
+            renderItem={({ item }) => (
+              <ChatItem
+                chat={item}
+                onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.id } })}
+              />
+            )}
+            ItemSeparatorComponent={() => (
+              <View style={[styles.separator, { backgroundColor: colors.border }]} />
+            )}
+            contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Feather name="message-circle" size={40} color={colors.muted} />
+                <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No messages found</Text>
+              </View>
+            }
+          />
+        </>
+      )}
     </View>
   );
 }
@@ -93,6 +131,21 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 24, fontFamily: "Inter_700Bold" },
   composeBtn: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  tabRow: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth },
+  tabBtn: { flex: 1, alignItems: "center", paddingVertical: 12 },
+  tabLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  groupsShortcut: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    margin: 16,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  groupsIcon: { width: 46, height: 46, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  groupsTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  groupsSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",

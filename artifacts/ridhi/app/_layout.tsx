@@ -35,6 +35,13 @@ function RootLayoutNav() {
       <Stack.Screen name="settings" options={{ presentation: "card" }} />
       <Stack.Screen name="creator-dashboard" options={{ presentation: "card" }} />
       <Stack.Screen name="create-post" options={{ presentation: "modal" }} />
+      <Stack.Screen name="random-call" options={{ presentation: "card" }} />
+      <Stack.Screen name="live-stream" options={{ presentation: "card" }} />
+      <Stack.Screen name="leaderboard" options={{ presentation: "card" }} />
+      <Stack.Screen name="referral" options={{ presentation: "card" }} />
+      <Stack.Screen name="audio-room" options={{ presentation: "card" }} />
+      <Stack.Screen name="story-viewer" options={{ presentation: "modal" }} />
+      <Stack.Screen name="group-chat" options={{ presentation: "card" }} />
     </Stack>
   );
 }

@@ -11,7 +11,8 @@ import {
   Megaphone,
   Settings,
   LogOut,
-  Menu
+  Radio,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +35,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Communities", href: "/communities", icon: UsersRound },
     { name: "Coins", href: "/coins", icon: Coins },
     { name: "Payouts", href: "/payouts", icon: IndianRupee },
+    { name: "Live Streams", href: "/live-streams", icon: Radio },
+    { name: "Revenue & Ads", href: "/revenue", icon: BarChart3 },
     { name: "Analytics", href: "/analytics", icon: LineChart },
     { name: "Marketing", href: "/marketing", icon: Megaphone },
     { name: "Settings", href: "/settings", icon: Settings },

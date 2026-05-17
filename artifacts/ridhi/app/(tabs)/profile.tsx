@@ -103,8 +103,12 @@ export default function ProfileScreen() {
         {[
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
           { icon: "zap", label: "Creator Studio", route: "/creator-dashboard", color: "#E91E8C" },
-          { icon: "bar-chart-2", label: "Analytics", route: "/creator-dashboard", color: "#4A90E2" },
-          { icon: "globe", label: "Explore", route: "/explore", color: "#34C759" },
+          { icon: "video", label: "Go Live", route: "/live-stream", color: "#FF3B30" },
+          { icon: "phone", label: "Random Call", route: "/random-call", color: "#34C759" },
+          { icon: "award", label: "Leaderboard", route: "/leaderboard", color: "#FFB800" },
+          { icon: "gift", label: "Referral & Rewards", route: "/referral", color: "#FF6B35" },
+          { icon: "headphones", label: "Audio Rooms", route: "/audio-room", color: "#4A90E2" },
+          { icon: "globe", label: "Explore", route: "/explore", color: "#5AC8FA" },
         ].map((item) => (
           <Pressable
             key={item.label}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dimensions,
   Platform,
@@ -26,6 +26,8 @@ const POST_TYPES = [
   { id: "video", icon: "video", label: "Video", desc: "Share a video up to 5 minutes" },
   { id: "reel", icon: "play", label: "Reel", desc: "Create a short vertical video" },
   { id: "story", icon: "circle", label: "Story", desc: "Visible for 24 hours" },
+  { id: "audio", icon: "mic", label: "Audio", desc: "Share a voice note or audio clip" },
+  { id: "gif", icon: "film", label: "GIF", desc: "Share an animated GIF" },
   { id: "poll", icon: "bar-chart-2", label: "Poll", desc: "Ask your followers a question" },
 ] as const;
 
@@ -40,6 +42,7 @@ export default function CreatePostScreen() {
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [audience, setAudience] = useState<"public" | "followers" | "private">("public");
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -47,6 +50,22 @@ export default function CreatePostScreen() {
     setHashtags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  const AI_CAPTIONS = [
+    "Living my best life, one moment at a time ✨ #DesiVibes",
+    "Chai, conversations, and good company — that's all you need ☕",
+    "India is beautiful. Every corner has a story 🇮🇳",
+    "Creating memories that last a lifetime 📸 #IndiaFirst",
+    "The best things in life are the people we love and the moments we share 💫",
+    "Happiness is homemade 🏠 #ChaiTime #MonsoonMagic",
+  ];
+
+  const generateAiCaption = async () => {
+    setAiLoading(true);
+    await new Promise((r) => setTimeout(r, 1400));
+    setText(AI_CAPTIONS[Math.floor(Math.random() * AI_CAPTIONS.length)]);
+    setAiLoading(false);
   };
 
   const handlePost = async () => {
@@ -152,7 +171,17 @@ export default function CreatePostScreen() {
           autoFocus={selectedType === "text"}
         />
 
-        {selectedType !== "text" && (
+        <Pressable
+          onPress={generateAiCaption}
+          style={[styles.aiBtn, { backgroundColor: colors.secondary + "15", borderColor: colors.secondary + "30" }]}
+        >
+          <Feather name="zap" size={14} color={colors.secondary} />
+          <Text style={[styles.aiBtnText, { color: colors.secondary }]}>
+            {aiLoading ? "Generating..." : "AI Caption"}
+          </Text>
+        </Pressable>
+
+        {selectedType !== "text" && selectedType !== "poll" && (
           <Pressable
             style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: colors.border }]}
           >
@@ -160,15 +189,23 @@ export default function CreatePostScreen() {
               colors={[colors.primary + "20", colors.secondary + "10"]}
               style={styles.mediaUploadInner}
             >
-              <Feather name="upload-cloud" size={32} color={colors.primary} />
+              <Feather
+                name={selectedType === "audio" ? "mic" : selectedType === "gif" ? "film" : "upload-cloud"}
+                size={32}
+                color={colors.primary}
+              />
               <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
-                Tap to add {selectedType}
+                {selectedType === "audio" ? "Tap to record audio" : selectedType === "gif" ? "Search GIFs" : `Tap to add ${selectedType}`}
               </Text>
               <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>
                 {selectedType === "reel" || selectedType === "story"
                   ? "Max 60 seconds"
                   : selectedType === "video"
                   ? "Max 5 minutes"
+                  : selectedType === "audio"
+                  ? "MP3, WAV up to 10MB"
+                  : selectedType === "gif"
+                  ? "Powered by GIPHY"
                   : "JPG, PNG up to 20MB"}
               </Text>
             </LinearGradient>
@@ -312,6 +349,19 @@ const styles = StyleSheet.create({
   pollOptions: { paddingHorizontal: 16, gap: 10, marginVertical: 8 },
   pollOption: { borderRadius: 14, borderWidth: 1, overflow: "hidden" },
   pollInput: { padding: 14, fontSize: 15, fontFamily: "Inter_400Regular" },
+  aiBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  aiBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   hashtagSection: { paddingHorizontal: 16, paddingTop: 16, gap: 10 },
   hashtagTitle: { fontSize: 12, fontFamily: "Inter_500Medium" },
   hashtagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

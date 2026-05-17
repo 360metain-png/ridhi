@@ -1,0 +1,416 @@
+import React, { useState, useEffect } from "react";
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar } from "@/components/Avatar";
+import { CoinBadge } from "@/components/CoinBadge";
+import { GradientButton } from "@/components/GradientButton";
+
+const LIVE_GIFTS = [
+  { id: "g1", icon: "heart", name: "Heart", cost: 5, color: "#FF3B6F" },
+  { id: "g2", icon: "star", name: "Star", cost: 20, color: "#FFB800" },
+  { id: "g3", icon: "zap", name: "Bolt", cost: 50, color: "#7B2FBE" },
+  { id: "g4", icon: "award", name: "Crown", cost: 100, color: "#E91E8C" },
+  { id: "g5", icon: "gift", name: "Super Gift", cost: 500, color: "#FF6B35" },
+  { id: "g6", icon: "diamond" as any, name: "Diamond", cost: 1000, color: "#00BCD4" },
+];
+
+const LIVE_ROOMS = [
+  { id: "l1", host: "Priya Sharma", viewers: 2847, city: "Mumbai", title: "Bollywood Night", coins: 12400, language: "Hindi" },
+  { id: "l2", host: "Rahul Verma", viewers: 1203, city: "Delhi", title: "Gaming Live", coins: 4800, language: "Hindi" },
+  { id: "l3", host: "Kavya R", viewers: 892, city: "Hyderabad", title: "Telugu Songs", coins: 3200, language: "Telugu" },
+  { id: "l4", host: "Meera K", viewers: 541, city: "Kochi", title: "Cooking Malayalam", coins: 1900, language: "Malayalam" },
+  { id: "l5", host: "Dev Patel", viewers: 2100, city: "Bangalore", title: "Tech Talk", coins: 8700, language: "English" },
+];
+
+const CHAT_MESSAGES = [
+  { id: "m1", user: "Ananya", text: "Amazing performance! 🔥", time: "2s" },
+  { id: "m2", user: "Rahul", text: "Sent Heart x5", time: "5s", isGift: true, giftColor: "#FF3B6F" },
+  { id: "m3", user: "Priya", text: "Love this song!", time: "8s" },
+  { id: "m4", user: "Arjun", text: "Sent Star", time: "11s", isGift: true, giftColor: "#FFB800" },
+  { id: "m5", user: "Meera", text: "You're the best!", time: "14s" },
+  { id: "m6", user: "Kavya", text: "Sent Bolt x2", time: "17s", isGift: true, giftColor: "#7B2FBE" },
+];
+
+export default function LiveStreamScreen() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { user, addCoins } = useAuth();
+  const [view, setView] = useState<"browse" | "watch" | "host">("browse");
+  const [selectedRoom, setSelectedRoom] = useState<typeof LIVE_ROOMS[0] | null>(null);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState(CHAT_MESSAGES);
+  const [viewers, setViewers] = useState(0);
+  const [liveCoins, setLiveCoins] = useState(0);
+  const [hostTitle, setHostTitle] = useState("");
+  const [isLive, setIsLive] = useState(false);
+  const [hostDuration, setHostDuration] = useState(0);
+  const [showGifts, setShowGifts] = useState(false);
+
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  useEffect(() => {
+    if (view === "watch" && selectedRoom) setViewers(selectedRoom.viewers);
+    if (isLive) {
+      const t = setInterval(() => {
+        setHostDuration((d) => d + 1);
+        if (Math.random() > 0.7) setViewers((v) => v + Math.floor(Math.random() * 5));
+        if (Math.random() > 0.85) setLiveCoins((c) => c + Math.floor(Math.random() * 50));
+      }, 3000);
+      return () => clearInterval(t);
+    }
+  }, [view, selectedRoom, isLive]);
+
+  const sendGift = (gift: typeof LIVE_GIFTS[0]) => {
+    if ((user?.coins ?? 0) < gift.cost) return;
+    addCoins(-gift.cost);
+    const newMsg = {
+      id: `m${Date.now()}`,
+      user: user?.name?.split(" ")[0] ?? "You",
+      text: `Sent ${gift.name}`,
+      time: "now",
+      isGift: true,
+      giftColor: gift.color,
+    };
+    setMessages((prev) => [...prev, newMsg]);
+    setShowGifts(false);
+  };
+
+  const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  if (view === "browse") {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <LinearGradient
+          colors={[colors.primary + "25", colors.secondary + "15", "transparent"]}
+          style={[styles.header, { paddingTop: topPad + 10 }]}
+        >
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <Feather name="arrow-left" size={24} color={colors.foreground} />
+          </Pressable>
+          <Text style={[styles.headerTitle, { color: colors.foreground }]}>Live Streams</Text>
+          <GradientButton label="Go Live" onPress={() => setView("host")} small />
+        </LinearGradient>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+          <View style={[styles.featuredBanner, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={styles.featuredInner}>
+              <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                <Text style={styles.liveBadgeText}>LIVE</Text>
+              </View>
+              <Text style={[styles.featuredHost, { color: colors.foreground }]}>
+                {LIVE_ROOMS[0].host}
+              </Text>
+              <Text style={[styles.featuredTitle, { color: colors.mutedForeground }]}>{LIVE_ROOMS[0].title}</Text>
+              <View style={styles.featuredMeta}>
+                <Feather name="eye" size={14} color={colors.mutedForeground} />
+                <Text style={[styles.featuredMetaText, { color: colors.mutedForeground }]}>
+                  {LIVE_ROOMS[0].viewers.toLocaleString()} watching
+                </Text>
+                <Feather name="star" size={14} color={colors.gold} style={{ marginLeft: 12 }} />
+                <Text style={[styles.featuredMetaText, { color: colors.gold }]}>
+                  {LIVE_ROOMS[0].coins.toLocaleString()} coins
+                </Text>
+              </View>
+              <GradientButton
+                label="Join Stream"
+                onPress={() => { setSelectedRoom(LIVE_ROOMS[0]); setView("watch"); }}
+                small
+                style={{ alignSelf: "flex-start", marginTop: 8 }}
+              />
+            </LinearGradient>
+          </View>
+
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>All Live Rooms</Text>
+          {LIVE_ROOMS.map((room) => (
+            <Pressable
+              key={room.id}
+              onPress={() => { setSelectedRoom(room); setView("watch"); }}
+              style={[styles.roomCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <Avatar name={room.host} size={52} hasStory />
+              <View style={{ flex: 1 }}>
+                <View style={styles.roomTop}>
+                  <Text style={[styles.roomHost, { color: colors.foreground }]}>{room.host}</Text>
+                  <View style={[styles.liveBadgeSm, { backgroundColor: colors.destructive }]}>
+                    <Text style={styles.liveBadgeSmText}>LIVE</Text>
+                  </View>
+                </View>
+                <Text style={[styles.roomTitle, { color: colors.mutedForeground }]}>{room.title}</Text>
+                <View style={styles.roomMeta}>
+                  <Feather name="map-pin" size={12} color={colors.mutedForeground} />
+                  <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}>{room.city}</Text>
+                  <Feather name="eye" size={12} color={colors.mutedForeground} style={{ marginLeft: 8 }} />
+                  <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}>{room.viewers.toLocaleString()}</Text>
+                  <Feather name="star" size={12} color={colors.gold} style={{ marginLeft: 8 }} />
+                  <Text style={[styles.roomMetaText, { color: colors.gold }]}>{room.coins.toLocaleString()}</Text>
+                </View>
+              </View>
+              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  if (view === "watch" && selectedRoom) {
+    return (
+      <View style={[styles.container, { backgroundColor: "#000" }]}>
+        <LinearGradient
+          colors={[colors.secondary + "80", colors.primary + "50", "transparent"]}
+          style={styles.watchVideo}
+        >
+          <View style={[styles.watchHeader, { paddingTop: topPad + 8 }]}>
+            <Pressable onPress={() => setView("browse")} style={styles.backBtnWhite}>
+              <Feather name="arrow-left" size={22} color="#fff" />
+            </Pressable>
+            <View style={styles.watchMeta}>
+              <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                <Text style={styles.liveBadgeText}>LIVE</Text>
+              </View>
+              <Feather name="eye" size={14} color="rgba(255,255,255,0.8)" />
+              <Text style={styles.watchViewers}>{viewers.toLocaleString()}</Text>
+            </View>
+          </View>
+          <View style={styles.hostInfo}>
+            <Avatar name={selectedRoom.host} size={44} hasStory />
+            <View>
+              <Text style={styles.watchHostName}>{selectedRoom.host}</Text>
+              <Text style={styles.watchHostTitle}>{selectedRoom.title}</Text>
+            </View>
+            <Pressable style={[styles.followBtn, { backgroundColor: colors.primary }]}>
+              <Text style={styles.followBtnText}>Follow</Text>
+            </Pressable>
+          </View>
+        </LinearGradient>
+
+        <View style={styles.watchChat}>
+          <FlatList
+            data={messages}
+            keyExtractor={(m) => m.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <View style={styles.chatRow}>
+                <Text style={[styles.chatUser, { color: item.isGift ? item.giftColor : colors.primary }]}>
+                  {item.user}
+                </Text>
+                <Text style={[styles.chatText, { color: item.isGift ? item.giftColor : colors.foreground }]}>
+                  {item.isGift ? "  " : " "}{item.text}
+                </Text>
+              </View>
+            )}
+            contentContainerStyle={{ paddingVertical: 8 }}
+          />
+        </View>
+
+        {showGifts && (
+          <View style={[styles.giftsPanel, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+            <View style={styles.giftsPanelHeader}>
+              <Text style={[styles.giftsPanelTitle, { color: colors.foreground }]}>Send a Gift</Text>
+              <CoinBadge amount={user?.coins ?? 0} size="sm" />
+            </View>
+            <View style={styles.giftsGrid}>
+              {LIVE_GIFTS.map((g) => (
+                <Pressable key={g.id} onPress={() => sendGift(g)} style={styles.giftItem}>
+                  <View style={[styles.giftIcon, { backgroundColor: g.color + "20" }]}>
+                    <Feather name={g.icon as any} size={24} color={g.color} />
+                  </View>
+                  <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
+                  <View style={styles.giftCost}>
+                    <Feather name="star" size={10} color={colors.gold} />
+                    <Text style={[styles.giftCostText, { color: colors.mutedForeground }]}>{g.cost}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
+        <View style={[styles.watchInput, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+          <TextInput
+            style={[styles.chatInput, { backgroundColor: colors.muted, color: colors.foreground }]}
+            placeholder="Say something..."
+            placeholderTextColor={colors.mutedForeground}
+            value={message}
+            onChangeText={setMessage}
+          />
+          <Pressable onPress={() => setShowGifts((v) => !v)} style={[styles.giftBtn, { backgroundColor: colors.gold + "20" }]}>
+            <Feather name="gift" size={20} color={colors.gold} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              if (!message.trim()) return;
+              setMessages((p) => [...p, { id: `m${Date.now()}`, user: user?.name?.split(" ")[0] ?? "Me", text: message, time: "now" }]);
+              setMessage("");
+            }}
+            style={[styles.sendBtn, { backgroundColor: colors.primary }]}
+          >
+            <Feather name="send" size={16} color="#fff" />
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  if (view === "host") {
+    return (
+      <View style={[styles.container, { backgroundColor: "#000" }]}>
+        {!isLive ? (
+          <View style={[styles.goLiveSetup, { backgroundColor: colors.background }]}>
+            <LinearGradient
+              colors={[colors.secondary + "25", colors.primary + "15", "transparent"]}
+              style={[styles.header, { paddingTop: topPad + 10 }]}
+            >
+              <Pressable onPress={() => setView("browse")} style={styles.backBtn}>
+                <Feather name="arrow-left" size={24} color={colors.foreground} />
+              </Pressable>
+              <Text style={[styles.headerTitle, { color: colors.foreground }]}>Go Live</Text>
+              <View style={{ width: 40 }} />
+            </LinearGradient>
+            <View style={styles.goLiveContent}>
+              <View style={[styles.cameraPreview, { backgroundColor: colors.muted }]}>
+                <Feather name="video" size={48} color={colors.mutedForeground} />
+                <Text style={[styles.cameraPreviewText, { color: colors.mutedForeground }]}>Camera preview</Text>
+              </View>
+              <TextInput
+                style={[styles.titleInput, { backgroundColor: colors.card, color: colors.foreground, borderColor: colors.border }]}
+                placeholder="Give your stream a title..."
+                placeholderTextColor={colors.mutedForeground}
+                value={hostTitle}
+                onChangeText={setHostTitle}
+              />
+              <GradientButton
+                label="Start Live Stream"
+                onPress={() => { setIsLive(true); setViewers(0); setLiveCoins(0); }}
+                style={{ marginTop: 8 }}
+              />
+              <Text style={[styles.liveDisclaimer, { color: colors.mutedForeground }]}>
+                By going live you agree to community guidelines. Keep streams respectful and appropriate.
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <View style={{ flex: 1 }}>
+            <LinearGradient colors={[colors.secondary + "80", colors.primary + "50"]} style={styles.hostVideo}>
+              <View style={[styles.hostHud, { paddingTop: topPad + 8 }]}>
+                <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                  <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
+                </View>
+                <View style={styles.hostStats}>
+                  <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                  <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+                  <Feather name="star" size={14} color={colors.gold} />
+                  <Text style={[styles.hostStatText, { color: colors.gold }]}>{liveCoins.toLocaleString()}</Text>
+                </View>
+              </View>
+              <Text style={styles.hostVideoText}>Your camera</Text>
+            </LinearGradient>
+            <View style={[styles.hostControls, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+                <Feather name="mic" size={22} color={colors.foreground} />
+              </Pressable>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+                <Feather name="camera" size={22} color={colors.foreground} />
+              </Pressable>
+              <Pressable
+                onPress={() => { setIsLive(false); setView("browse"); }}
+                style={[styles.endLiveBtn, { backgroundColor: colors.destructive }]}
+              >
+                <Feather name="x" size={20} color="#fff" />
+                <Text style={styles.endLiveText}>End Live</Text>
+              </Pressable>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+                <Feather name="share-2" size={22} color={colors.foreground} />
+              </Pressable>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+                <Feather name="settings" size={22} color={colors.foreground} />
+              </Pressable>
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  return null;
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 16 },
+  backBtn: { padding: 4 },
+  backBtnWhite: { padding: 4 },
+  headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  featuredBanner: { margin: 16, borderRadius: 16, borderWidth: 1, overflow: "hidden" },
+  featuredInner: { padding: 20, gap: 6 },
+  liveBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, alignSelf: "flex-start" },
+  liveBadgeText: { color: "#fff", fontSize: 11, fontFamily: "Inter_700Bold", letterSpacing: 1 },
+  featuredHost: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  featuredTitle: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  featuredMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  featuredMetaText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 16, marginBottom: 8 },
+  roomCard: { flexDirection: "row", alignItems: "center", gap: 12, marginHorizontal: 16, marginBottom: 10, padding: 14, borderRadius: 14, borderWidth: 1 },
+  roomTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  roomHost: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  liveBadgeSm: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  liveBadgeSmText: { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold", letterSpacing: 0.8 },
+  roomTitle: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
+  roomMeta: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  roomMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  watchVideo: { height: 300, justifyContent: "space-between", padding: 16 },
+  watchHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  watchMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
+  watchViewers: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  hostInfo: { flexDirection: "row", alignItems: "center", gap: 10 },
+  watchHostName: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+  watchHostTitle: { color: "rgba(255,255,255,0.7)", fontSize: 13, fontFamily: "Inter_400Regular" },
+  followBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
+  followBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  watchChat: { flex: 1, paddingHorizontal: 12 },
+  chatRow: { flexDirection: "row", paddingVertical: 3 },
+  chatUser: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  chatText: { fontSize: 13, fontFamily: "Inter_400Regular", flexShrink: 1 },
+  giftsPanel: { borderTopWidth: 1, padding: 16 },
+  giftsPanelHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  giftsPanelTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  giftsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  giftItem: { alignItems: "center", gap: 6, width: 64 },
+  giftIcon: { width: 52, height: 52, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  giftName: { fontSize: 11, fontFamily: "Inter_500Medium", textAlign: "center" },
+  giftCost: { flexDirection: "row", alignItems: "center", gap: 3 },
+  giftCostText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  watchInput: { flexDirection: "row", gap: 8, padding: 12, borderTopWidth: 1 },
+  chatInput: { flex: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, fontSize: 14, fontFamily: "Inter_400Regular" },
+  giftBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  goLiveSetup: { flex: 1 },
+  goLiveContent: { padding: 20, gap: 16 },
+  cameraPreview: { height: 220, borderRadius: 16, alignItems: "center", justifyContent: "center", gap: 12 },
+  cameraPreviewText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  titleInput: { borderRadius: 12, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, fontFamily: "Inter_400Regular" },
+  liveDisclaimer: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 18 },
+  hostVideo: { flex: 1, justifyContent: "space-between", padding: 16 },
+  hostHud: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  hostStats: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  hostStatText: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  hostVideoText: { color: "rgba(255,255,255,0.4)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
+  hostControls: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 16, padding: 20, borderTopWidth: 1 },
+  controlBtn2: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
+  endLiveBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24 },
+  endLiveText: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
+});

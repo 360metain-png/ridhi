@@ -16,6 +16,8 @@ import Payouts from "@/pages/payouts";
 import Analytics from "@/pages/analytics";
 import Marketing from "@/pages/marketing";
 import Settings from "@/pages/settings";
+import LiveStreams from "@/pages/live-streams";
+import Revenue from "@/pages/revenue";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -52,6 +54,8 @@ function Router() {
       <Route path="/analytics" component={() => <ProtectedRoute component={Analytics} />} />
       <Route path="/marketing" component={() => <ProtectedRoute component={Marketing} />} />
       <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
+      <Route path="/live-streams" component={() => <ProtectedRoute component={LiveStreams} />} />
+      <Route path="/revenue" component={() => <ProtectedRoute component={Revenue} />} />
       <Route component={NotFound} />
     </Switch>
   );
