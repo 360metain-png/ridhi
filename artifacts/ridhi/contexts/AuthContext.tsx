@@ -10,6 +10,7 @@ export interface UserProfile {
   gender: "male" | "female" | "other";
   bio: string;
   city: string;
+  state?: string;
   language: string;
   interests: string[];
   avatar?: string;
@@ -19,6 +20,8 @@ export interface UserProfile {
   posts: number;
   isVerified: boolean;
   createdAt: string;
+  locationCoords?: { latitude: number; longitude: number };
+  registeredAt?: string;
   isHost?: boolean;
   isAgent?: boolean;
   hostRegisteredAt?: string;
