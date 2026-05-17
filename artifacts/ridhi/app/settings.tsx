@@ -223,7 +223,7 @@ export default function SettingsScreen() {
         <SectionHeader title="Support" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert("Help & Support", "📧  support@ridhi.app\n📞  1800-103-7777 (Toll Free)\n🕐  Mon – Sat, 9 AM – 6 PM IST\n\nWe typically respond within 2 hours.", [{ text: "OK" }])} />
-          <SettingRow icon="info" label="About Ridhi" subtitle="Version 1.0.0" onPress={() => Alert.alert("About Ridhi", "🎉  Ridhi v1.0.0\n\nIndia's #1 social networking & dating app. Built with ❤️ for Bharat.\n\n© 2025 Ridhi Technologies Pvt. Ltd.\nAll rights reserved.", [{ text: "OK" }])} />
+          <SettingRow icon="info" label="About Ridhi" subtitle="Version 1.0.0" onPress={() => router.push("/about" as any)} />
           <SettingRow icon="file-text" label="Terms of Service" onPress={() => Alert.alert("Terms of Service", "By using Ridhi you agree to:\n\n• Be 18+ years old\n• Not post harmful or illegal content\n• Respect other users\n• Follow Indian IT Act & laws\n\nFull terms: ridhi.app/terms", [{ text: "OK" }])} />
           <SettingRow icon="shield" label="Privacy Policy" onPress={() => Alert.alert("Privacy Policy", "We collect only what's needed:\n\n• Profile info you provide\n• Usage data to improve the app\n• City-level location only\n\nWe never sell your data.\nFull policy: ridhi.app/privacy", [{ text: "OK" }])} />
         </View>
