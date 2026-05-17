@@ -23,14 +23,15 @@ type MsgRole = "user" | "ai";
 interface Msg { id: string; role: MsgRole; text: string; time: string }
 
 const QUICK_CMDS = [
-  { icon: "globe", label: "Translate", color: "#3B82F6", prompt: "Translate my last message to Hindi" },
-  { icon: "zap", label: "Caption", color: "#E91E8C", prompt: "Generate a creative caption for my photo" },
-  { icon: "hash", label: "Hashtags", color: "#7B2FBE", prompt: "Suggest trending hashtags for my post" },
-  { icon: "feather", label: "Content Ideas", color: "#F59E0B", prompt: "Give me 5 viral content ideas for India" },
-  { icon: "shield", label: "Check Content", color: "#10B981", prompt: "Is my post safe to publish?" },
-  { icon: "mic", label: "Voice Note", color: "#EF4444", prompt: "Transcribe this voice message" },
-  { icon: "star", label: "Match Tips", color: "#8B5CF6", prompt: "How can I improve my dating profile?" },
-  { icon: "trending-up", label: "Grow Profile", color: "#06B6D4", prompt: "Help me grow my followers on Ridhi" },
+  { icon: "aperture", label: "AI Avatar", color: "#E91E8C", prompt: "Generate an AI avatar for my profile", route: "/ai-avatar" as const },
+  { icon: "globe", label: "Translate", color: "#3B82F6", prompt: "Translate my last message to Hindi", route: null },
+  { icon: "zap", label: "Caption", color: "#E91E8C", prompt: "Generate a creative caption for my photo", route: null },
+  { icon: "hash", label: "Hashtags", color: "#7B2FBE", prompt: "Suggest trending hashtags for my post", route: null },
+  { icon: "feather", label: "Content Ideas", color: "#F59E0B", prompt: "Give me 5 viral content ideas for India", route: null },
+  { icon: "shield", label: "Check Content", color: "#10B981", prompt: "Is my post safe to publish?", route: null },
+  { icon: "mic", label: "Voice Note", color: "#EF4444", prompt: "Transcribe this voice message", route: null },
+  { icon: "star", label: "Match Tips", color: "#8B5CF6", prompt: "How can I improve my dating profile?", route: null },
+  { icon: "trending-up", label: "Grow Profile", color: "#06B6D4", prompt: "Help me grow my followers on Ridhi", route: null },
 ];
 
 const AI_RESPONSES: Record<string, string> = {
@@ -208,7 +209,7 @@ export default function AIAssistantScreen() {
           {QUICK_CMDS.map((cmd) => (
             <Pressable
               key={cmd.label}
-              onPress={() => sendMessage(cmd.prompt)}
+              onPress={() => cmd.route ? router.push(cmd.route) : sendMessage(cmd.prompt)}
               style={[styles.quickCard, { backgroundColor: colors.card, borderColor: colors.border }]}
             >
               <View style={[styles.quickIcon, { backgroundColor: cmd.color + "20" }]}>
