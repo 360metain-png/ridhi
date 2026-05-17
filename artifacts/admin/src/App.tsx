@@ -23,6 +23,7 @@ import Gaming from "@/pages/gaming";
 import Agents from "@/pages/agents";
 import Hosts from "@/pages/hosts";
 import Calls from "@/pages/calls";
+import AIHub from "@/pages/ai-hub";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -66,6 +67,7 @@ function Router() {
       <Route path="/agents" component={() => <ProtectedRoute component={Agents} />} />
       <Route path="/hosts" component={() => <ProtectedRoute component={Hosts} />} />
       <Route path="/calls" component={() => <ProtectedRoute component={Calls} />} />
+      <Route path="/ai-hub" component={() => <ProtectedRoute component={AIHub} />} />
       <Route component={NotFound} />
     </Switch>
   );

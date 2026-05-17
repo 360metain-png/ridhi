@@ -20,7 +20,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
+import { Avatar } from "@/components/Avatar";
 import { INITIAL_POSTS, STORIES } from "@/data/mockData";
+
+const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: string; tag: string }> = [
+  { id: "ai1", userName: "Priya Sharma", reason: "Based on your interest in Dance", preview: "New Bollywood challenge taking India by storm 💃🔥", tag: "#RidhiDance" },
+  { id: "ai2", userName: "Mumbai Foodies", reason: "You liked similar food posts", preview: "10 street food spots you MUST visit this monsoon 🍛", tag: "#MumbaiFoodGuide" },
+  { id: "ai3", userName: "Tech With Rohan", reason: "Trending in your city", preview: "India's startup ecosystem is growing faster than ever 🚀", tag: "#StartupIndia" },
+  { id: "ai4", userName: "Desi Fitness", reason: "Matches your fitness interest", preview: "5-minute morning yoga routine for busy Indians 🧘", tag: "#FitIndia" },
+];
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 
@@ -220,12 +228,43 @@ export default function FeedScreen() {
         )}
         ListHeaderComponent={
           activeTab === "For You" ? (
-            <StoryRow
-              stories={STORIES}
-              onAddStory={() => {}}
-              onStory={() => {}}
-              selfName={user?.name ?? "Me"}
-            />
+            <>
+              <StoryRow
+                stories={STORIES}
+                onAddStory={() => {}}
+                onStory={() => {}}
+                selfName={user?.name ?? "Me"}
+              />
+              <View style={styles.aiPicksSection}>
+                <View style={styles.aiPicksHeader}>
+                  <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.aiPicksIcon}>
+                    <Feather name="cpu" size={11} color="#fff" />
+                  </LinearGradient>
+                  <Text style={[styles.aiPicksTitle, { color: colors.foreground }]}>✨ AI Picks for You</Text>
+                  <Pressable onPress={() => router.push("/ai-assistant")} style={[styles.aiPicksBtn, { backgroundColor: colors.muted }]}>
+                    <Text style={[styles.aiPicksBtnText, { color: colors.primary }]}>Tune</Text>
+                  </Pressable>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiPicksScroll}>
+                  {AI_PICKS.map((pick) => (
+                    <Pressable key={pick.id} style={[styles.aiPickCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                      <LinearGradient colors={[colors.secondary + "18", colors.primary + "08"]} style={StyleSheet.absoluteFill} />
+                      <View style={styles.aiPickCardTop}>
+                        <Avatar name={pick.userName} size={28} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.aiPickCardName, { color: colors.foreground }]} numberOfLines={1}>{pick.userName}</Text>
+                          <Text style={[styles.aiPickCardReason, { color: colors.primary }]} numberOfLines={1}>{pick.reason}</Text>
+                        </View>
+                      </View>
+                      <Text style={[styles.aiPickCardPreview, { color: colors.foreground }]} numberOfLines={2}>{pick.preview}</Text>
+                      <View style={[styles.aiPickCardTag, { backgroundColor: colors.primary + "18" }]}>
+                        <Text style={[styles.aiPickCardTagText, { color: colors.primary }]}>{pick.tag}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            </>
           ) : (
             <View style={[styles.tabBanner, { backgroundColor: activeTab === "Trending" ? colors.destructive + "12" : colors.secondary + "10" }]}>
               <LinearGradient
@@ -331,4 +370,21 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   tabBannerText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  aiPicksSection: { paddingTop: 4, paddingBottom: 8 },
+  aiPicksHeader: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingBottom: 10 },
+  aiPicksIcon: { width: 24, height: 24, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  aiPicksTitle: { fontSize: 14, fontFamily: "Inter_700Bold", flex: 1 },
+  aiPicksBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
+  aiPicksBtnText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  aiPicksScroll: { paddingHorizontal: 12, gap: 10, paddingRight: 16 },
+  aiPickCard: {
+    width: 200, borderRadius: 16, borderWidth: 1, padding: 12,
+    gap: 8, overflow: "hidden",
+  },
+  aiPickCardTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  aiPickCardName: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  aiPickCardReason: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  aiPickCardPreview: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  aiPickCardTag: { alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  aiPickCardTagText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 });

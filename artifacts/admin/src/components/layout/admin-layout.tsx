@@ -19,6 +19,7 @@ import {
   Star,
   Bell,
   Phone,
+  Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +63,12 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: "AI & Intelligence",
+    items: [
+      { name: "AI Hub", href: "/ai-hub", icon: Cpu, badge: "7" },
+    ],
+  },
+  {
     label: "Platform",
     items: [
       { name: "Marketing", href: "/marketing", icon: Megaphone },
@@ -96,6 +103,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/agents": "Agent Management",
     "/hosts": "Host Management",
     "/calls": "Audio & Video Calls",
+    "/ai-hub": "AI Hub",
   };
 
   return (
