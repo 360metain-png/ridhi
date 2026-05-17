@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -142,6 +142,13 @@ export default function WalletScreen() {
     return () => { clearTimeout(base); clearInterval(interval); };
   }, []);
 
+  const scrollRef = useRef<ScrollView>(null);
+  const rechargeSectionY = useRef(0);
+
+  const scrollToRecharge = useCallback(() => {
+    scrollRef.current?.scrollTo({ y: rechargeSectionY.current, animated: true });
+  }, []);
+
   const onClaimReward = () => {
     addCoins(10);
     fire({ type: "credit", amount: 10, label: "Daily Reward", sublabel: "User", bottom: 200 });
@@ -155,7 +162,7 @@ export default function WalletScreen() {
 
   return (
     <View style={[styles.outerWrap, { backgroundColor: colors.background }]}>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         {/* ── Wallet Card ── */}
         <LinearGradient colors={[colors.primary, colors.secondary]} style={[styles.walletCard, { paddingTop: topPad + 16 }]}>
           <View style={styles.walletHeader}>
@@ -194,7 +201,7 @@ export default function WalletScreen() {
           <View style={styles.quickActions}>
             <Pressable
               style={[styles.qaBtn, { backgroundColor: "rgba(255,255,255,0.22)" }]}
-              onPress={() => {}}
+              onPress={scrollToRecharge}
             >
               <Feather name="plus-circle" size={16} color="#fff" />
               <Text style={styles.qaBtnText}>Recharge</Text>
@@ -261,7 +268,10 @@ export default function WalletScreen() {
         </View>
 
         {/* ── Recharge Coins ── */}
-        <View style={styles.section}>
+        <View
+          style={styles.section}
+          onLayout={(e) => { rechargeSectionY.current = e.nativeEvent.layout.y; }}
+        >
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recharge Coins</Text>
           <View style={styles.packGrid}>
             {COIN_PACKAGES.map((pack) => (
