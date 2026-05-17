@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
+  Animated,
+  Easing,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,267 +20,680 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 
+const { width: SW } = Dimensions.get("window");
+
+// ─── data ────────────────────────────────────────────────────────────────────
+
+const CATEGORIES = ["All", "Music", "Tech", "Cinema", "Business", "Stories", "Spirituality"];
+
 const AUDIO_ROOMS = [
   {
-    id: "ar1", title: "Bollywood Hits Discussion", host: "Priya Sharma", language: "Hindi",
-    listeners: 1284, speakers: 6, topic: "Best songs of 2025 so far", joined: false,
-    tags: ["Music", "Bollywood"],
+    id: "ar1", title: "Bollywood Hits Discussion", host: "Priya Sharma", hostAvatar: "PS",
+    language: "Hindi", listeners: 1284, speakers: 6,
+    topic: "Best songs of 2025 so far", joined: false,
+    tags: ["Music", "Bollywood"], gradientA: "#7B2FBE", gradientB: "#E91E8C",
+    category: "Music",
   },
   {
-    id: "ar2", title: "Tech Talk India", host: "Dev Kumar", language: "English",
-    listeners: 842, speakers: 4, topic: "AI startups disrupting India", joined: false,
-    tags: ["Technology", "Startups"],
+    id: "ar2", title: "Tech Talk India", host: "Dev Kumar", hostAvatar: "DK",
+    language: "English", listeners: 842, speakers: 4,
+    topic: "AI startups disrupting India", joined: false,
+    tags: ["Tech", "Startups"], gradientA: "#0F4C81", gradientB: "#1976D2",
+    category: "Tech",
   },
   {
-    id: "ar3", title: "Telugu Cinema Club", host: "Kavya Reddy", language: "Telugu",
-    listeners: 632, speakers: 5, topic: "Tollywood blockbusters review", joined: true,
-    tags: ["Cinema", "Telugu"],
+    id: "ar3", title: "Telugu Cinema Club", host: "Kavya Reddy", hostAvatar: "KR",
+    language: "Telugu", listeners: 632, speakers: 5,
+    topic: "Tollywood blockbusters review", joined: true,
+    tags: ["Cinema", "Telugu"], gradientA: "#B5451B", gradientB: "#FF6F00",
+    category: "Cinema",
   },
   {
-    id: "ar4", title: "Startup Founders Network", host: "Rahul Verma", language: "English",
-    listeners: 421, speakers: 3, topic: "Fundraising in 2025 India", joined: false,
-    tags: ["Business", "Finance"],
+    id: "ar4", title: "Startup Founders Network", host: "Rahul Verma", hostAvatar: "RV",
+    language: "English", listeners: 421, speakers: 3,
+    topic: "Fundraising in 2025 India", joined: false,
+    tags: ["Business", "Finance"], gradientA: "#1B5E20", gradientB: "#2E7D32",
+    category: "Business",
   },
   {
-    id: "ar5", title: "Malayalam Kadha Kootam", host: "Meera Pillai", language: "Malayalam",
-    listeners: 318, speakers: 4, topic: "Short stories by listeners", joined: false,
-    tags: ["Stories", "Creative"],
+    id: "ar5", title: "Malayalam Kadha Kootam", host: "Meera Pillai", hostAvatar: "MP",
+    language: "Malayalam", listeners: 318, speakers: 4,
+    topic: "Short stories by listeners", joined: false,
+    tags: ["Stories", "Creative"], gradientA: "#4A148C", gradientB: "#880E4F",
+    category: "Stories",
+  },
+  {
+    id: "ar6", title: "Morning Bhajan Satsang", host: "Pandit Ji", hostAvatar: "PJ",
+    language: "Hindi", listeners: 912, speakers: 2,
+    topic: "Devotional music & chanting", joined: false,
+    tags: ["Spirituality", "Music"], gradientA: "#E65100", gradientB: "#F9A825",
+    category: "Spirituality",
   },
 ];
 
 const SPEAKERS = [
-  { id: "s1", name: "Priya S", speaking: true, muted: false, isHost: true },
+  { id: "s1", name: "Priya S",  speaking: true,  muted: false, isHost: true  },
   { id: "s2", name: "Rahul M", speaking: false, muted: false, isHost: false },
-  { id: "s3", name: "Kavya R", speaking: true, muted: false, isHost: false },
-  { id: "s4", name: "Arjun K", speaking: false, muted: true, isHost: false },
+  { id: "s3", name: "Kavya R", speaking: true,  muted: false, isHost: false },
+  { id: "s4", name: "Arjun K", speaking: false, muted: true,  isHost: false },
   { id: "s5", name: "Meera P", speaking: false, muted: false, isHost: false },
-  { id: "s6", name: "Dev T", speaking: false, muted: true, isHost: false },
+  { id: "s6", name: "Dev T",   speaking: false, muted: true,  isHost: false },
 ];
 
+// ─── animated helpers ─────────────────────────────────────────────────────────
+
+function useLoop(toValue: number, duration: number, delay = 0) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.timing(anim, { toValue, duration, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(anim, { toValue: 0, duration, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+  return anim;
+}
+
+// Floating orb — just a blurred circle drifting up
+function FloatingOrb({ color, size, x, delay }: { color: string; size: number; x: number; delay: number }) {
+  const y = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.parallel([
+          Animated.timing(y, { toValue: -200, duration: 4000, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+          Animated.sequence([
+            Animated.timing(opacity, { toValue: 0.35, duration: 600, useNativeDriver: true }),
+            Animated.timing(opacity, { toValue: 0, duration: 1500, useNativeDriver: true }),
+          ]),
+        ]),
+        Animated.timing(y, { toValue: 0, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        bottom: 80,
+        left: x,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        transform: [{ translateY: y }],
+        opacity,
+      }}
+    />
+  );
+}
+
+// Animated waveform bars
+function WaveBar({ delay, color }: { delay: number; color: string }) {
+  const h = useRef(new Animated.Value(4)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.timing(h, { toValue: 18 + Math.random() * 14, duration: 300 + Math.random() * 200, easing: Easing.inOut(Easing.ease), useNativeDriver: false }),
+        Animated.timing(h, { toValue: 4, duration: 300, easing: Easing.inOut(Easing.ease), useNativeDriver: false }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
+  return (
+    <Animated.View style={{ width: 3, height: h, borderRadius: 2, backgroundColor: color, marginHorizontal: 1.5 }} />
+  );
+}
+
+// Speaker avatar with animated rings when speaking
+function SpeakerBubble({ speaker, colors }: { speaker: typeof SPEAKERS[0]; colors: ReturnType<typeof useColors> }) {
+  const ring1 = useRef(new Animated.Value(1)).current;
+  const ring2 = useRef(new Animated.Value(1)).current;
+  const ring1Op = useRef(new Animated.Value(0.6)).current;
+  const ring2Op = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    if (!speaker.speaking) return;
+    const r1 = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(ring1, { toValue: 1.55, duration: 800, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+          Animated.timing(ring1Op, { toValue: 0, duration: 800, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ring1, { toValue: 1, duration: 0, useNativeDriver: true }),
+          Animated.timing(ring1Op, { toValue: 0.6, duration: 0, useNativeDriver: true }),
+        ]),
+      ])
+    );
+    const r2 = Animated.loop(
+      Animated.sequence([
+        Animated.delay(300),
+        Animated.parallel([
+          Animated.timing(ring2, { toValue: 1.85, duration: 900, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+          Animated.timing(ring2Op, { toValue: 0, duration: 900, useNativeDriver: true }),
+        ]),
+        Animated.parallel([
+          Animated.timing(ring2, { toValue: 1, duration: 0, useNativeDriver: true }),
+          Animated.timing(ring2Op, { toValue: 0.4, duration: 0, useNativeDriver: true }),
+        ]),
+      ])
+    );
+    r1.start(); r2.start();
+    return () => { r1.stop(); r2.stop(); };
+  }, [speaker.speaking]);
+
+  const ringColor = speaker.isHost ? colors.gold : colors.primary;
+
+  return (
+    <View style={styles.speakerItem}>
+      <View style={{ alignItems: "center", justifyContent: "center", width: 68, height: 68 }}>
+        {speaker.speaking && (
+          <>
+            <Animated.View style={[styles.speakRing, { borderColor: ringColor, transform: [{ scale: ring2 }], opacity: ring2Op }]} />
+            <Animated.View style={[styles.speakRing, { borderColor: ringColor, transform: [{ scale: ring1 }], opacity: ring1Op }]} />
+          </>
+        )}
+        <View style={[
+          styles.speakerAvatarWrap,
+          { backgroundColor: colors.card, borderColor: speaker.speaking ? ringColor : "transparent", borderWidth: speaker.speaking ? 2.5 : 0 },
+        ]}>
+          <Avatar name={speaker.name} size={52} />
+        </View>
+        {speaker.muted && (
+          <View style={[styles.mutedBadge, { backgroundColor: colors.destructive }]}>
+            <Feather name="mic-off" size={9} color="#fff" />
+          </View>
+        )}
+        {speaker.isHost && (
+          <View style={[styles.hostBadge, { backgroundColor: colors.gold }]}>
+            <Feather name="star" size={9} color="#fff" />
+          </View>
+        )}
+      </View>
+      <Text style={[styles.speakerName, { color: colors.foreground }]} numberOfLines={1}>{speaker.name}</Text>
+      {speaker.speaking && (
+        <View style={styles.waveBars}>
+          {[0, 80, 160, 240, 320].map((d) => (
+            <WaveBar key={d} delay={d} color={ringColor} />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ─── Room card ────────────────────────────────────────────────────────────────
+
+function RoomCard({ room, onPress, colors }: {
+  room: typeof AUDIO_ROOMS[0];
+  onPress: () => void;
+  colors: ReturnType<typeof useColors>;
+}) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const livePulse = useLoop(1, 700, Math.random() * 400);
+
+  const press = () => {
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 0.97, duration: 80, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 1,    duration: 150, useNativeDriver: true }),
+    ]).start(onPress);
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }], marginHorizontal: 16, marginBottom: 14 }}>
+      <Pressable onPress={press}>
+        <LinearGradient
+          colors={[room.gradientA + "22", room.gradientB + "12", colors.card]}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+          style={[styles.roomCard, { borderColor: room.gradientA + "40" }]}
+        >
+          {/* accent bar */}
+          <LinearGradient
+            colors={[room.gradientA, room.gradientB]}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            style={styles.accentBar}
+          />
+          <View style={styles.roomCardInner}>
+            {/* top row */}
+            <View style={styles.roomCardTop}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.roomCardTitle, { color: colors.foreground }]} numberOfLines={2}>
+                  {room.title}
+                </Text>
+                <Text style={[styles.roomCardTopic, { color: colors.mutedForeground }]} numberOfLines={1}>
+                  {room.topic}
+                </Text>
+              </View>
+              <View style={[styles.langPill, { backgroundColor: room.gradientA + "22", borderColor: room.gradientA + "55" }]}>
+                <Text style={[styles.langPillText, { color: room.gradientA }]}>{room.language}</Text>
+              </View>
+            </View>
+
+            {/* tags */}
+            <View style={styles.tagRow}>
+              {room.tags.map((tag) => (
+                <View key={tag} style={[styles.tag, { backgroundColor: room.gradientB + "18" }]}>
+                  <Text style={[styles.tagText, { color: room.gradientB }]}>#{tag}</Text>
+                </View>
+              ))}
+              {room.joined && (
+                <View style={[styles.tag, { backgroundColor: "#4CAF5022" }]}>
+                  <Text style={[styles.tagText, { color: "#4CAF50" }]}>✓ Joined</Text>
+                </View>
+              )}
+            </View>
+
+            {/* footer */}
+            <View style={styles.roomCardFooter}>
+              <Avatar name={room.hostAvatar} size={22} />
+              <Text style={[styles.hostLabel, { color: colors.mutedForeground }]}>{room.host}</Text>
+              <View style={{ flex: 1 }} />
+              {/* animated live dot */}
+              <Animated.View style={[styles.liveDot, { backgroundColor: "#FF4444", transform: [{ scale: livePulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.6] }) }] }]} />
+              <View style={styles.metaGroup}>
+                <Feather name="mic"        size={11} color={colors.mutedForeground} />
+                <Text style={[styles.metaNum, { color: colors.mutedForeground }]}>{room.speakers}</Text>
+                <Feather name="headphones" size={11} color={colors.mutedForeground} style={{ marginLeft: 8 }} />
+                <Text style={[styles.metaNum, { color: colors.mutedForeground }]}>{room.listeners.toLocaleString()}</Text>
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+// ─── Live mic button ──────────────────────────────────────────────────────────
+
+function MicButton({ muted, onToggle, colors }: { muted: boolean; onToggle: () => void; colors: ReturnType<typeof useColors> }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const glow  = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!muted) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(glow, { toValue: 1, duration: 900, useNativeDriver: true }),
+          Animated.timing(glow, { toValue: 0, duration: 900, useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      glow.setValue(0);
+    }
+  }, [muted]);
+
+  const press = () => {
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 0.88, duration: 80, useNativeDriver: true }),
+      Animated.spring(scale,  { toValue: 1, useNativeDriver: true, friction: 3 }),
+    ]).start(onToggle);
+  };
+
+  const glowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.45] });
+  const glowScale   = glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.7] });
+
+  return (
+    <Pressable onPress={press}>
+      <Animated.View style={{ alignItems: "center", justifyContent: "center", transform: [{ scale }] }}>
+        {!muted && (
+          <Animated.View style={[styles.micGlow, { backgroundColor: colors.primary, transform: [{ scale: glowScale }], opacity: glowOpacity }]} />
+        )}
+        <LinearGradient
+          colors={muted ? [colors.card, colors.card] : [colors.secondary, colors.primary]}
+          style={styles.micBtn}
+        >
+          <Feather name={muted ? "mic-off" : "mic"} size={28} color={muted ? colors.mutedForeground : "#fff"} />
+        </LinearGradient>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
+
 export default function AudioRoomScreen() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const colors  = useColors();
+  const insets  = useSafeAreaInsets();
   const { user } = useAuth();
-  // Block screenshots & screen recordings in audio rooms
   usePreventScreenCapture();
-  const [activeRoom, setActiveRoom] = useState<typeof AUDIO_ROOMS[0] | null>(null);
-  const [muted, setMuted] = useState(true);
-  const [raised, setRaised] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  if (activeRoom) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <LinearGradient
-          colors={[colors.secondary + "30", colors.primary + "15", "transparent"]}
-          style={[styles.roomHeader, { paddingTop: topPad + 10 }]}
-        >
-          <View style={styles.roomHeaderTop}>
-            <Pressable onPress={() => setActiveRoom(null)} style={styles.leaveBtn}>
-              <Feather name="arrow-left" size={20} color={colors.foreground} />
-              <Text style={[styles.leaveBtnText, { color: colors.foreground }]}>Leave</Text>
-            </Pressable>
-            <View style={[styles.liveIndicator, { backgroundColor: colors.destructive + "20" }]}>
-              <View style={[styles.liveDot, { backgroundColor: colors.destructive }]} />
-              <Text style={[styles.liveText, { color: colors.destructive }]}>LIVE</Text>
-            </View>
-            <Pressable style={styles.shareBtn}>
-              <Feather name="share-2" size={20} color={colors.foreground} />
-            </Pressable>
-          </View>
-          <Text style={[styles.roomTitle, { color: colors.foreground }]}>{activeRoom.title}</Text>
-          <Text style={[styles.roomTopic, { color: colors.mutedForeground }]}>{activeRoom.topic}</Text>
-          <View style={styles.roomStats}>
-            <Feather name="mic" size={13} color={colors.mutedForeground} />
-            <Text style={[styles.roomStatText, { color: colors.mutedForeground }]}>{activeRoom.speakers} speakers</Text>
-            <Feather name="headphones" size={13} color={colors.mutedForeground} style={{ marginLeft: 12 }} />
-            <Text style={[styles.roomStatText, { color: colors.mutedForeground }]}>{activeRoom.listeners.toLocaleString()} listening</Text>
-          </View>
-        </LinearGradient>
+  const [activeRoom, setActiveRoom]     = useState<typeof AUDIO_ROOMS[0] | null>(null);
+  const [muted, setMuted]               = useState(true);
+  const [raised, setRaised]             = useState(false);
+  const [category, setCategory]         = useState("All");
+  const [reaction, setReaction]         = useState<string | null>(null);
+  const reactionAnim                    = useRef(new Animated.Value(0)).current;
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-          <Text style={[styles.speakersLabel, { color: colors.mutedForeground }]}>ON STAGE</Text>
+  // header wave
+  const headerWave = useLoop(1, 1200);
+
+  const sendReaction = (emoji: string) => {
+    setReaction(emoji);
+    reactionAnim.setValue(0);
+    Animated.sequence([
+      Animated.timing(reactionAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(700),
+      Animated.timing(reactionAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start(() => setReaction(null));
+  };
+
+  const filtered = category === "All" ? AUDIO_ROOMS : AUDIO_ROOMS.filter((r) => r.category === category);
+
+  // ── inside a room ──────────────────────────────────────────────────────────
+  if (activeRoom) {
+    const gr = activeRoom;
+    return (
+      <View style={[styles.root, { backgroundColor: "#0A0010" }]}>
+        {/* deep gradient backdrop */}
+        <LinearGradient
+          colors={[gr.gradientA + "55", gr.gradientB + "30", "#0A0010"]}
+          locations={[0, 0.4, 1]}
+          style={StyleSheet.absoluteFillObject}
+        />
+
+        {/* floating orbs */}
+        <FloatingOrb color={gr.gradientA} size={80}  x={40}    delay={0}    />
+        <FloatingOrb color={gr.gradientB} size={50}  x={SW - 90} delay={1200} />
+        <FloatingOrb color={gr.gradientA} size={35}  x={SW / 2 - 17} delay={600} />
+
+        {/* header */}
+        <View style={[styles.roomHdr, { paddingTop: topPad + 8 }]}>
+          <Pressable onPress={() => setActiveRoom(null)} style={styles.backCircle}>
+            <Feather name="chevron-left" size={22} color="#fff" />
+          </Pressable>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <View style={styles.liveChip}>
+              <View style={styles.livePulse} />
+              <Text style={styles.liveChipText}>LIVE</Text>
+            </View>
+          </View>
+          <Pressable style={styles.backCircle}>
+            <Feather name="share-2" size={18} color="#fff" />
+          </Pressable>
+        </View>
+
+        {/* room info */}
+        <View style={styles.roomInfo}>
+          <Text style={styles.roomBigTitle} numberOfLines={2}>{gr.title}</Text>
+          <Text style={styles.roomBigTopic}>{gr.topic}</Text>
+          <View style={styles.roomInfoStats}>
+            <Feather name="mic"        size={13} color="rgba(255,255,255,0.5)" />
+            <Text style={styles.roomInfoStat}>{gr.speakers} speakers</Text>
+            <Feather name="headphones" size={13} color="rgba(255,255,255,0.5)" style={{ marginLeft: 10 }} />
+            <Text style={styles.roomInfoStat}>{gr.listeners.toLocaleString()} listening</Text>
+          </View>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
+          {/* on stage */}
+          <Text style={styles.stageLabel}>ON STAGE</Text>
           <View style={styles.speakersGrid}>
             {SPEAKERS.map((sp) => (
-              <View key={sp.id} style={styles.speakerItem}>
-                <View style={[
-                  styles.speakerAvatar,
-                  sp.speaking && { borderColor: colors.primary, borderWidth: 3 },
-                  { backgroundColor: colors.card },
-                ]}>
-                  <Avatar name={sp.name} size={52} />
-                  {sp.muted && (
-                    <View style={[styles.mutedBadge, { backgroundColor: colors.destructive }]}>
-                      <Feather name="mic-off" size={10} color="#fff" />
-                    </View>
-                  )}
-                  {sp.isHost && (
-                    <View style={[styles.hostBadge, { backgroundColor: colors.gold }]}>
-                      <Feather name="star" size={10} color="#fff" />
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.speakerName, { color: colors.foreground }]} numberOfLines={1}>
-                  {sp.name}
-                </Text>
-              </View>
+              <SpeakerBubble key={sp.id} speaker={sp} colors={colors} />
             ))}
           </View>
 
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <Text style={[styles.speakersLabel, { color: colors.mutedForeground }]}>AUDIENCE</Text>
+          {/* global waveform */}
+          <View style={styles.globalWave}>
+            {Array.from({ length: 28 }).map((_, i) => (
+              <WaveBar key={i} delay={i * 60} color={gr.gradientA + "CC"} />
+            ))}
+          </View>
+
+          {/* audience */}
+          <Text style={styles.stageLabel}>AUDIENCE</Text>
           <View style={styles.audienceGrid}>
             {Array.from({ length: 12 }).map((_, i) => (
-              <View key={i} style={styles.audienceItem}>
-                <Avatar name={`User ${i + 1}`} size={36} />
-              </View>
+              <Avatar key={i} name={`User ${i + 1}`} size={38} />
             ))}
-            <View style={[styles.audienceMore, { backgroundColor: colors.muted }]}>
-              <Text style={[styles.audienceMoreText, { color: colors.mutedForeground }]}>
-                +{activeRoom.listeners - 12}
-              </Text>
+            <View style={[styles.audMore, { backgroundColor: "rgba(255,255,255,0.08)" }]}>
+              <Text style={styles.audMoreText}>+{gr.listeners - 12}</Text>
             </View>
           </View>
         </ScrollView>
 
-        <View style={[styles.roomControls, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-          <Pressable
-            onPress={() => setRaised((v) => !v)}
-            style={[styles.handBtn, { backgroundColor: raised ? colors.gold + "20" : colors.muted, borderColor: raised ? colors.gold : colors.border }]}
-          >
-            <Text style={{ fontSize: 20 }}>✋</Text>
-            <Text style={[styles.handBtnText, { color: raised ? colors.gold : colors.mutedForeground }]}>
-              {raised ? "Lower" : "Raise"}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setMuted((v) => !v)}
-            style={[styles.micBtn, { backgroundColor: muted ? colors.card : colors.primary }]}
-          >
-            <Feather name={muted ? "mic-off" : "mic"} size={26} color={muted ? colors.mutedForeground : "#fff"} />
-          </Pressable>
-          <Pressable
-            style={[styles.leaveRoomBtn, { backgroundColor: colors.destructive + "15", borderColor: colors.destructive + "30" }]}
-            onPress={() => setActiveRoom(null)}
-          >
-            <Feather name="phone-off" size={20} color={colors.destructive} />
-            <Text style={[styles.leaveRoomText, { color: colors.destructive }]}>Leave</Text>
-          </Pressable>
-        </View>
+        {/* floating reaction */}
+        {reaction && (
+          <Animated.Text style={[styles.floatReaction, {
+            opacity: reactionAnim,
+            transform: [{
+              translateY: reactionAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -60] }),
+            }],
+          }]}>{reaction}</Animated.Text>
+        )}
+
+        {/* controls */}
+        <LinearGradient
+          colors={["transparent", "#0A0010CC", "#0A0010"]}
+          style={[styles.controlsWrap, { paddingBottom: insets.bottom + 16 }]}
+        >
+          {/* quick reactions */}
+          <View style={styles.reactRow}>
+            {["❤️", "🔥", "👏", "😂", "🎵"].map((e) => (
+              <Pressable key={e} onPress={() => sendReaction(e)} style={styles.reactBtn}>
+                <Text style={{ fontSize: 22 }}>{e}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View style={styles.ctrlRow}>
+            {/* raise hand */}
+            <Pressable
+              onPress={() => setRaised((v) => !v)}
+              style={[styles.sideCtrlBtn, { borderColor: raised ? "#FFD700" : "rgba(255,255,255,0.15)" }]}
+            >
+              <Text style={{ fontSize: 22 }}>{raised ? "✋" : "🖐️"}</Text>
+              <Text style={[styles.sideCtrlLabel, { color: raised ? "#FFD700" : "rgba(255,255,255,0.6)" }]}>
+                {raised ? "Lower" : "Raise"}
+              </Text>
+            </Pressable>
+
+            {/* mic */}
+            <MicButton muted={muted} onToggle={() => setMuted((v) => !v)} colors={colors} />
+
+            {/* leave */}
+            <Pressable
+              onPress={() => setActiveRoom(null)}
+              style={[styles.sideCtrlBtn, { borderColor: "rgba(244,67,54,0.35)" }]}
+            >
+              <Feather name="phone-off" size={22} color="#F44336" />
+              <Text style={[styles.sideCtrlLabel, { color: "#F44336" }]}>Leave</Text>
+            </Pressable>
+          </View>
+        </LinearGradient>
       </View>
     );
   }
 
+  // ── rooms list ─────────────────────────────────────────────────────────────
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      {/* header */}
       <LinearGradient
-        colors={[colors.secondary + "25", colors.primary + "15", "transparent"]}
-        style={[styles.header, { paddingTop: topPad + 10 }]}
+        colors={[colors.secondary + "30", colors.primary + "18", "transparent"]}
+        style={[styles.listHeader, { paddingTop: topPad + 4 }]}
       >
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
+        <Pressable onPress={() => router.back()} style={styles.hdrBack}>
+          <Feather name="arrow-left" size={22} color={colors.foreground} />
         </Pressable>
-        <Text style={[styles.title, { color: colors.foreground }]}>Audio Rooms</Text>
-        <GradientButton label="Create" onPress={() => { const { Alert } = require("react-native"); Alert.alert("Create Audio Room", "Start a live audio room for your community.", [{ text: "Cancel", style: "cancel" }, { text: "Create Room 🎤", onPress: () => Alert.alert("Room Created! 🎤", "Your audio room is now live. Others can join from the Audio Rooms list.", [{ text: "OK" }]) }]); }} small />
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.hdrTitle, { color: colors.foreground }]}>Audio Rooms</Text>
+          <Text style={[styles.hdrSub, { color: colors.mutedForeground }]}>
+            <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>6</Text> rooms live now
+          </Text>
+        </View>
+        <GradientButton
+          label="+ Create"
+          small
+          onPress={() => {
+            const { Alert } = require("react-native");
+            Alert.alert("Create Audio Room", "Start a live room for your community.", [
+              { text: "Cancel", style: "cancel" },
+              { text: "Create 🎤", onPress: () => Alert.alert("Room Live! 🎤", "Your room is now live.", [{ text: "OK" }]) },
+            ]);
+          }}
+        />
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
-        <LinearGradient
-          colors={[colors.secondary + "20", colors.primary + "10"]}
-          style={styles.banner}
-        >
-          <Feather name="headphones" size={32} color={colors.secondary} />
-          <View>
-            <Text style={[styles.bannerTitle, { color: colors.foreground }]}>Live Audio Rooms</Text>
-            <Text style={[styles.bannerSub, { color: colors.mutedForeground }]}>Join conversations in your language</Text>
+      {/* hero banner */}
+      <LinearGradient
+        colors={[colors.secondary + "28", colors.primary + "18"]}
+        start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+        style={styles.heroBanner}
+      >
+        <View style={styles.heroLeft}>
+          <Text style={[styles.heroTitle, { color: colors.foreground }]}>Live Audio Rooms</Text>
+          <Text style={[styles.heroSub, { color: colors.mutedForeground }]}>
+            Join conversations in your language
+          </Text>
+          <View style={styles.heroWave}>
+            {Array.from({ length: 18 }).map((_, i) => (
+              <WaveBar key={i} delay={i * 70} color={colors.primary} />
+            ))}
           </View>
-        </LinearGradient>
+        </View>
+        <View style={[styles.heroIcon, { backgroundColor: colors.secondary + "20" }]}>
+          <Feather name="headphones" size={36} color={colors.secondary} />
+        </View>
+      </LinearGradient>
 
-        {AUDIO_ROOMS.map((room) => (
-          <Pressable
-            key={room.id}
-            onPress={() => setActiveRoom(room)}
-            style={[styles.roomCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-          >
-            <View style={styles.roomCardTop}>
-              <Text style={[styles.roomCardTitle, { color: colors.foreground }]}>{room.title}</Text>
-              <View style={[styles.langBadge, { backgroundColor: colors.secondary + "18" }]}>
-                <Text style={[styles.langText, { color: colors.secondary }]}>{room.language}</Text>
-              </View>
-            </View>
-            <Text style={[styles.roomCardTopic, { color: colors.mutedForeground }]}>{room.topic}</Text>
-            <View style={styles.roomCardTags}>
-              {room.tags.map((tag) => (
-                <View key={tag} style={[styles.tag, { backgroundColor: colors.primary + "12" }]}>
-                  <Text style={[styles.tagText, { color: colors.primary }]}>{tag}</Text>
-                </View>
-              ))}
-            </View>
-            <View style={styles.roomCardMeta}>
-              <Avatar name={room.host} size={24} />
-              <Text style={[styles.hostName, { color: colors.mutedForeground }]}>{room.host}</Text>
-              <View style={{ flex: 1 }} />
-              <Feather name="mic" size={12} color={colors.mutedForeground} />
-              <Text style={[styles.metaCount, { color: colors.mutedForeground }]}>{room.speakers}</Text>
-              <Feather name="headphones" size={12} color={colors.mutedForeground} style={{ marginLeft: 8 }} />
-              <Text style={[styles.metaCount, { color: colors.mutedForeground }]}>{room.listeners.toLocaleString()}</Text>
-            </View>
-          </Pressable>
+      {/* category filter */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.catScroll}
+      >
+        {CATEGORIES.map((cat) => {
+          const active = cat === category;
+          return (
+            <Pressable
+              key={cat}
+              onPress={() => setCategory(cat)}
+              style={[
+                styles.catChip,
+                {
+                  backgroundColor: active ? colors.primary : colors.card,
+                  borderColor: active ? colors.primary : colors.border,
+                },
+              ]}
+            >
+              <Text style={[styles.catChipText, { color: active ? "#fff" : colors.foreground }]}>
+                {cat}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40, paddingTop: 8 }}>
+        {filtered.map((room) => (
+          <RoomCard key={room.id} room={room} onPress={() => setActiveRoom(room)} colors={colors} />
         ))}
+        {filtered.length === 0 && (
+          <View style={{ alignItems: "center", marginTop: 60 }}>
+            <Feather name="headphones" size={40} color={colors.mutedForeground} />
+            <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No rooms in this category</Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
 }
 
+// ─── styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 16 },
-  backBtn: { padding: 4 },
-  title: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  banner: { margin: 16, flexDirection: "row", alignItems: "center", gap: 16, padding: 18, borderRadius: 16 },
-  bannerTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
-  bannerSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
-  roomCard: { marginHorizontal: 16, marginBottom: 10, borderRadius: 16, borderWidth: 1, padding: 16, gap: 8 },
-  roomCardTop: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  roomCardTitle: { fontSize: 15, fontFamily: "Inter_700Bold", flex: 1, marginRight: 8 },
-  langBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  langText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
-  roomCardTopic: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
-  roomCardTags: { flexDirection: "row", gap: 6 },
-  tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  tagText: { fontSize: 12, fontFamily: "Inter_500Medium" },
-  roomCardMeta: { flexDirection: "row", alignItems: "center", gap: 6 },
-  hostName: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  metaCount: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  roomHeader: { paddingHorizontal: 20, paddingBottom: 20, gap: 8 },
-  roomHeaderTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  leaveBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
-  leaveBtnText: { fontSize: 15, fontFamily: "Inter_500Medium" },
-  liveIndicator: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
-  liveDot: { width: 8, height: 8, borderRadius: 4 },
-  liveText: { fontSize: 12, fontFamily: "Inter_700Bold", letterSpacing: 1 },
-  shareBtn: { padding: 4 },
-  roomTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  roomTopic: { fontSize: 14, fontFamily: "Inter_400Regular" },
-  roomStats: { flexDirection: "row", alignItems: "center", gap: 4 },
-  roomStatText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  speakersLabel: { fontSize: 11, fontFamily: "Inter_700Bold", letterSpacing: 1, paddingHorizontal: 20, marginTop: 20, marginBottom: 12 },
-  speakersGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 20, gap: 16 },
-  speakerItem: { alignItems: "center", gap: 6, width: 70 },
-  speakerAvatar: { borderRadius: 30, position: "relative", borderWidth: 0 },
-  mutedBadge: { position: "absolute", bottom: 0, right: 0, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
-  hostBadge: { position: "absolute", top: 0, right: 0, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
-  speakerName: { fontSize: 12, fontFamily: "Inter_500Medium", textAlign: "center" },
-  divider: { height: 1, marginHorizontal: 20, marginTop: 20 },
-  audienceGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 20, gap: 10 },
-  audienceItem: {},
-  audienceMore: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  audienceMoreText: { fontSize: 11, fontFamily: "Inter_700Bold" },
-  roomControls: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 16, padding: 20, borderTopWidth: 1, position: "absolute", bottom: 0, left: 0, right: 0 },
-  handBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, borderWidth: 1 },
-  handBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  micBtn: { width: 60, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center" },
-  leaveRoomBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, borderWidth: 1 },
-  leaveRoomText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  root: { flex: 1 },
+
+  // list
+  listHeader: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingBottom: 14 },
+  hdrBack:    { padding: 4 },
+  hdrTitle:   { fontSize: 19, fontFamily: "Inter_700Bold" },
+  hdrSub:     { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  heroBanner: { marginHorizontal: 16, marginBottom: 14, borderRadius: 20, flexDirection: "row", alignItems: "center", padding: 18 },
+  heroLeft:   { flex: 1, gap: 4 },
+  heroTitle:  { fontSize: 17, fontFamily: "Inter_700Bold" },
+  heroSub:    { fontSize: 12, fontFamily: "Inter_400Regular" },
+  heroWave:   { flexDirection: "row", alignItems: "center", marginTop: 8, height: 24 },
+  heroIcon:   { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginLeft: 12 },
+
+  catScroll: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: "row" },
+  catChip:   { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
+  catChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+
+  // room card
+  roomCard:     { borderRadius: 18, borderWidth: 1, overflow: "hidden" },
+  accentBar:    { height: 4 },
+  roomCardInner: { padding: 14, gap: 10 },
+  roomCardTop:  { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  roomCardTitle: { fontSize: 15, fontFamily: "Inter_700Bold", lineHeight: 20 },
+  roomCardTopic: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 3 },
+  langPill:     { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, borderWidth: 1 },
+  langPillText: { fontSize: 11, fontFamily: "Inter_700Bold" },
+  tagRow:       { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  tag:          { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10 },
+  tagText:      { fontSize: 11, fontFamily: "Inter_500Medium" },
+  roomCardFooter: { flexDirection: "row", alignItems: "center", gap: 6 },
+  hostLabel:    { fontSize: 12, fontFamily: "Inter_400Regular" },
+  liveDot:      { width: 7, height: 7, borderRadius: 4 },
+  metaGroup:    { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaNum:      { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+
+  emptyText: { fontSize: 14, fontFamily: "Inter_500Medium", marginTop: 12 },
+
+  // inside room
+  roomHdr:      { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingBottom: 8 },
+  backCircle:   { width: 38, height: 38, borderRadius: 19, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  liveChip:     { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "rgba(255,68,68,0.2)", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "rgba(255,68,68,0.35)" },
+  livePulse:    { width: 8, height: 8, borderRadius: 4, backgroundColor: "#FF4444" },
+  liveChipText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#FF4444", letterSpacing: 1.2 },
+
+  roomInfo:     { paddingHorizontal: 20, paddingBottom: 16, gap: 4 },
+  roomBigTitle: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff", lineHeight: 26 },
+  roomBigTopic: { fontSize: 13, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)" },
+  roomInfoStats: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  roomInfoStat: { fontSize: 12, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.5)" },
+
+  stageLabel:   { fontSize: 11, fontFamily: "Inter_700Bold", letterSpacing: 1.2, color: "rgba(255,255,255,0.4)", paddingHorizontal: 20, marginTop: 4, marginBottom: 16 },
+  speakersGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 16, gap: 12 },
+  speakerItem:  { alignItems: "center", gap: 5, width: 72 },
+  speakRing:    { position: "absolute", width: 64, height: 64, borderRadius: 32, borderWidth: 2 },
+  speakerAvatarWrap: { width: 60, height: 60, borderRadius: 30, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  mutedBadge:   { position: "absolute", bottom: 2, right: 2, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  hostBadge:    { position: "absolute", top: 2, right: 2, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  speakerName:  { fontSize: 11, fontFamily: "Inter_500Medium", color: "#fff", textAlign: "center" },
+  waveBars:     { flexDirection: "row", alignItems: "center", height: 16 },
+
+  globalWave:   { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 20, height: 56 },
+
+  audienceGrid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 20, gap: 8 },
+  audMore:      { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  audMoreText:  { fontSize: 10, fontFamily: "Inter_700Bold", color: "rgba(255,255,255,0.6)" },
+
+  floatReaction: { position: "absolute", bottom: 180, alignSelf: "center", fontSize: 48 },
+
+  controlsWrap: { position: "absolute", bottom: 0, left: 0, right: 0, paddingTop: 32, paddingHorizontal: 20 },
+  reactRow:     { flexDirection: "row", justifyContent: "center", gap: 12, marginBottom: 16 },
+  reactBtn:     { width: 46, height: 46, borderRadius: 23, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  ctrlRow:      { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 8 },
+  sideCtrlBtn:  { alignItems: "center", gap: 5, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, borderWidth: 1 },
+  sideCtrlLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+
+  micBtn:  { width: 68, height: 68, borderRadius: 34, alignItems: "center", justifyContent: "center" },
+  micGlow: { position: "absolute", width: 68, height: 68, borderRadius: 34 },
 });
