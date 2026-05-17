@@ -23,7 +23,7 @@ type MsgRole = "user" | "ai";
 interface Msg { id: string; role: MsgRole; text: string; time: string }
 
 const QUICK_CMDS = [
-  { icon: "aperture", label: "AI Avatar", color: "#E91E8C", prompt: "Generate an AI avatar for my profile", route: "/ai-avatar" as const },
+
   { icon: "globe", label: "Translate", color: "#3B82F6", prompt: "Translate my last message to Hindi", route: null },
   { icon: "zap", label: "Caption", color: "#E91E8C", prompt: "Generate a creative caption for my photo", route: null },
   { icon: "hash", label: "Hashtags", color: "#7B2FBE", prompt: "Suggest trending hashtags for my post", route: null },
