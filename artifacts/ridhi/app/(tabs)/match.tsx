@@ -27,6 +27,19 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.28;
 type Profile = typeof MATCH_PROFILES[0];
 
 const GENDER_OPTIONS = ["Everyone", "Women", "Men", "Non-binary"];
+
+function defaultShowMe(userGender?: string): string {
+  if (userGender === "male") return "Women";
+  if (userGender === "female") return "Men";
+  return "Everyone";
+}
+
+function profileMatchesGender(profile: Profile, showMe: string): boolean {
+  if (showMe === "Everyone") return true;
+  if (showMe === "Women") return profile.gender === "female";
+  if (showMe === "Men") return profile.gender === "male";
+  return true;
+}
 const LANGUAGE_OPTIONS = [
   "All Languages", "Hindi", "Bengali", "Telugu", "Marathi", "Tamil",
   "Gujarati", "Kannada", "Malayalam", "Punjabi", "Odia", "English",
@@ -141,14 +154,22 @@ export default function MatchScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const userLanguage = user?.language ?? "Hindi";
-  const sameLanguageProfiles = MATCH_PROFILES.filter((p) => p.language === userLanguage);
-  const [profiles, setProfiles] = useState<Profile[]>(
-    sameLanguageProfiles.length > 0 ? sameLanguageProfiles : MATCH_PROFILES
-  );
+
+  // Smart gender default: male users see women, female users see men
+  const smartShowMe = defaultShowMe(user?.gender);
+  const initialFilters: DiscoverFilters = { ...DEFAULT_FILTERS, gender: smartShowMe };
+
+  const buildPool = (showMe: string, language: string): Profile[] => {
+    const byGender = MATCH_PROFILES.filter((p) => profileMatchesGender(p, showMe));
+    const byLang = byGender.filter((p) => p.language === language);
+    return byLang.length > 0 ? byLang : byGender;
+  };
+
+  const [profiles, setProfiles] = useState<Profile[]>(() => buildPool(smartShowMe, userLanguage));
   const [matched, setMatched] = useState<Profile | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState<DiscoverFilters>(DEFAULT_FILTERS);
-  const [draft, setDraft] = useState<DiscoverFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<DiscoverFilters>(initialFilters);
+  const [draft, setDraft] = useState<DiscoverFilters>(initialFilters);
 
   const position = useRef(new Animated.ValueXY()).current;
   const rotateAnim = position.x.interpolate({
@@ -207,12 +228,15 @@ export default function MatchScreen() {
   };
 
   const applyFilters = () => {
-    setFilters({ ...draft });
+    const applied = { ...draft };
+    setFilters(applied);
+    // Rebuild the profile pool with the new gender + language filters
+    setProfiles(buildPool(applied.gender, applied.language === "All Languages" ? userLanguage : applied.language));
     setShowFilters(false);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const resetFilters = () => setDraft({ ...DEFAULT_FILTERS });
+  const resetFilters = () => setDraft({ ...initialFilters });
 
   const toggleInterest = (tag: string) => {
     setDraft((prev) => ({
