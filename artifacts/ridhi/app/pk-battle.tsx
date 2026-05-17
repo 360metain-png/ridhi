@@ -15,7 +15,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { usePreventScreenCapture } from "expo-screen-capture";
+import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -90,8 +90,12 @@ export default function PKBattleScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  // Block screenshots & screen recordings during PK battles
-  usePreventScreenCapture();
+  // Block screenshots & screen recordings during PK battles (native only)
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    ScreenCapture.preventScreenCaptureAsync("ridhi-pk");
+    return () => { ScreenCapture.allowScreenCaptureAsync("ridhi-pk"); };
+  }, []);
   const [view, setView] = useState<"browse" | "battle">("browse");
   const [activeBattle, setActiveBattle] = useState<typeof LIVE_BATTLES[0] | null>(null);
   const [leftCoins, setLeftCoins] = useState(0);
