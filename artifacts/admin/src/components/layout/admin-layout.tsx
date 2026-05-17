@@ -18,6 +18,7 @@ import {
   Briefcase,
   Star,
   Bell,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ const NAV_SECTIONS = [
     items: [
       { name: "Hosts", href: "/hosts", icon: Star },
       { name: "Agents", href: "/agents", icon: Briefcase },
+      { name: "Calls", href: "/calls", icon: Phone },
       { name: "Gaming", href: "/gaming", icon: Gamepad2 },
       { name: "Live Streams", href: "/live-streams", icon: Radio },
     ],
@@ -93,6 +95,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/gaming": "Gaming Management",
     "/agents": "Agent Management",
     "/hosts": "Host Management",
+    "/calls": "Audio & Video Calls",
   };
 
   return (

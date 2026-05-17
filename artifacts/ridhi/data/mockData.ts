@@ -242,18 +242,25 @@ export const NOTIFICATIONS = [
 ];
 
 export const COIN_PACKAGES = [
-  { id: "cp1", coins: 100, price: 49, popular: false, label: "Starter" },
-  { id: "cp2", coins: 300, price: 119, popular: true, label: "Popular" },
-  { id: "cp3", coins: 700, price: 249, popular: false, label: "Value" },
-  { id: "cp4", coins: 1500, price: 499, popular: false, label: "Premium" },
+  { id: "cp1", coins: 100,   price: 99,    popular: false, label: "Starter",   bonus: 0,    perCoin: "₹0.99" },
+  { id: "cp2", coins: 500,   price: 499,   popular: false, label: "Popular",   bonus: 25,   perCoin: "₹0.99" },
+  { id: "cp3", coins: 1000,  price: 999,   popular: true,  label: "Best Value",bonus: 100,  perCoin: "₹0.99" },
+  { id: "cp4", coins: 5000,  price: 4499,  popular: false, label: "Premium",   bonus: 750,  perCoin: "₹0.89" },
+  { id: "cp5", coins: 10000, price: 8999,  popular: false, label: "Elite",     bonus: 2000, perCoin: "₹0.89" },
+  { id: "cp6", coins: 50000, price: 39999, popular: false, label: "Royal",     bonus: 12000, perCoin: "₹0.79" },
 ];
 
 export const COIN_TRANSACTIONS = [
-  { id: "t1", type: "credit", amount: 50, desc: "Referral bonus — Rahul M joined", time: "Today, 9:00 AM" },
-  { id: "t2", type: "debit", amount: 50, desc: "Unlocked chat with Shreya K", time: "Today, 8:30 AM" },
-  { id: "t3", type: "credit", amount: 10, desc: "Daily login reward", time: "Today, 7:00 AM" },
-  { id: "t4", type: "debit", amount: 100, desc: "Profile boost — 24 hours", time: "Yesterday, 4:00 PM" },
-  { id: "t5", type: "credit", amount: 300, desc: "Coin purchase — Popular Pack", time: "Yesterday, 12:00 PM" },
-  { id: "t6", type: "debit", amount: 20, desc: "Gift sent to Ananya S", time: "2 days ago" },
-  { id: "t7", type: "credit", amount: 10, desc: "Daily login reward", time: "2 days ago" },
+  { id: "t1",  type: "credit", amount: 50,   desc: "Referral bonus — Rahul M joined",         time: "Today, 9:00 AM",       icon: "users" },
+  { id: "t2",  type: "debit",  amount: 80,   desc: "🎙️ Audio call — Priya S (Popular, 4 min)", time: "Today, 8:45 AM",       icon: "phone" },
+  { id: "t3",  type: "debit",  amount: 50,   desc: "Unlocked chat with Shreya K",              time: "Today, 8:30 AM",       icon: "message-circle" },
+  { id: "t4",  type: "credit", amount: 10,   desc: "Daily login reward",                       time: "Today, 7:00 AM",       icon: "gift" },
+  { id: "t5",  type: "debit",  amount: 200,  desc: "📹 Video call — Kavya R (VIP, 2 min)",     time: "Yesterday, 6:15 PM",   icon: "video" },
+  { id: "t6",  type: "debit",  amount: 100,  desc: "Profile boost — 24 hours",                 time: "Yesterday, 4:00 PM",   icon: "trending-up" },
+  { id: "t7",  type: "credit", amount: 1100, desc: "🎁 Coin purchase — Best Value Pack (₹999)", time: "Yesterday, 12:00 PM",  icon: "star" },
+  { id: "t8",  type: "debit",  amount: 50,   desc: "🎁 Gift sent to Ananya S — Heart",         time: "Yesterday, 10:00 AM",  icon: "heart" },
+  { id: "t9",  type: "credit", amount: 200,  desc: "🎲 Ludo win — Gold room",                  time: "2 days ago, 4:00 PM",  icon: "award" },
+  { id: "t10", type: "debit",  amount: 500,  desc: "🎲 Game entry — Gold room (Ludo)",         time: "2 days ago, 3:50 PM",  icon: "play" },
+  { id: "t11", type: "credit", amount: 10,   desc: "Daily login reward",                       time: "2 days ago, 9:00 AM",  icon: "gift" },
+  { id: "t12", type: "debit",  amount: 25,   desc: "📹 Video call preview — Dev K (New Host)", time: "3 days ago, 8:00 PM",  icon: "video" },
 ];

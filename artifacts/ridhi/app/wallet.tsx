@@ -90,6 +90,7 @@ export default function WalletScreen() {
           {COIN_PACKAGES.map((pack) => (
             <Pressable
               key={pack.id}
+              onPress={() => addCoins(pack.coins + (pack.bonus ?? 0))}
               style={[
                 styles.packCard,
                 {
@@ -100,21 +101,33 @@ export default function WalletScreen() {
             >
               {pack.popular && (
                 <View style={[styles.popularBadge, { backgroundColor: colors.gold }]}>
-                  <Text style={styles.popularText}>Best Value</Text>
+                  <Text style={styles.popularText}>⭐ Best Value</Text>
                 </View>
               )}
-              <Feather name="star" size={28} color={pack.popular ? "#fff" : colors.gold} />
+              <Feather name="star" size={26} color={pack.popular ? "#fff" : colors.gold} />
               <Text style={[styles.packCoins, { color: pack.popular ? "#fff" : colors.foreground }]}>
-                {pack.coins}
+                {pack.coins.toLocaleString()}
               </Text>
+              {(pack as any).bonus > 0 && (
+                <View style={[styles.bonusBadge, { backgroundColor: pack.popular ? "rgba(255,255,255,0.25)" : colors.success + "20" }]}>
+                  <Text style={[styles.bonusText, { color: pack.popular ? "#fff" : colors.success }]}>
+                    +{(pack as any).bonus} bonus
+                  </Text>
+                </View>
+              )}
               <Text style={[styles.packLabel, { color: pack.popular ? "rgba(255,255,255,0.8)" : colors.mutedForeground }]}>
                 {pack.label}
               </Text>
               <View style={[styles.packPrice, { backgroundColor: pack.popular ? "rgba(255,255,255,0.2)" : colors.muted }]}>
                 <Text style={[styles.packPriceText, { color: pack.popular ? "#fff" : colors.foreground }]}>
-                  ₹{pack.price}
+                  ₹{pack.price.toLocaleString()}
                 </Text>
               </View>
+              {(pack as any).perCoin && (
+                <Text style={[styles.perCoinText, { color: pack.popular ? "rgba(255,255,255,0.65)" : colors.mutedForeground }]}>
+                  {(pack as any).perCoin}/coin
+                </Text>
+              )}
             </Pressable>
           ))}
         </View>
@@ -249,8 +262,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 12,
   },
   popularText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" },
-  packCoins: { fontSize: 28, fontFamily: "Inter_700Bold" },
-  packLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  packCoins: { fontSize: 26, fontFamily: "Inter_700Bold" },
+  bonusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  bonusText: { fontSize: 10, fontFamily: "Inter_700Bold" },
+  perCoinText: { fontSize: 9, fontFamily: "Inter_400Regular", marginTop: -2 },
+  packLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
   packPrice: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, marginTop: 4 },
   packPriceText: { fontSize: 14, fontFamily: "Inter_700Bold" },
   txItem: {

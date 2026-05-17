@@ -22,6 +22,7 @@ import SuperAdmin from "@/pages/super-admin";
 import Gaming from "@/pages/gaming";
 import Agents from "@/pages/agents";
 import Hosts from "@/pages/hosts";
+import Calls from "@/pages/calls";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/gaming" component={() => <ProtectedRoute component={Gaming} />} />
       <Route path="/agents" component={() => <ProtectedRoute component={Agents} />} />
       <Route path="/hosts" component={() => <ProtectedRoute component={Hosts} />} />
+      <Route path="/calls" component={() => <ProtectedRoute component={Calls} />} />
       <Route component={NotFound} />
     </Switch>
   );
