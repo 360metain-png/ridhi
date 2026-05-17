@@ -29,13 +29,17 @@ const TRENDING_HASHTAGS = [
   { tag: "#YogaDay", posts: "920K" },
   { tag: "#MonsoonMagic", posts: "431K" },
   { tag: "#CricketIndia", posts: "3.8M" },
+  { tag: "#RidhiVibes", posts: "312K" },
+  { tag: "#DesiContent", posts: "789K" },
 ];
 
-const SUGGESTED_USERS = [
-  { id: "su1", name: "Priya Kapoor", city: "Mumbai", followers: "128K", isVerified: true },
-  { id: "su2", name: "Raj Nair", city: "Kochi", followers: "54K", isVerified: false },
-  { id: "su3", name: "Anjali Singh", city: "Delhi", followers: "210K", isVerified: true },
-  { id: "su4", name: "Vikram Rao", city: "Bangalore", followers: "87K", isVerified: true },
+const INITIAL_USERS = [
+  { id: "su1", name: "Priya Kapoor", city: "Mumbai", followers: "128K", isVerified: true, isFollowing: false },
+  { id: "su2", name: "Raj Nair", city: "Kochi", followers: "54K", isVerified: false, isFollowing: false },
+  { id: "su3", name: "Anjali Singh", city: "Delhi", followers: "210K", isVerified: true, isFollowing: true },
+  { id: "su4", name: "Vikram Rao", city: "Bangalore", followers: "87K", isVerified: true, isFollowing: false },
+  { id: "su5", name: "Sneha Patel", city: "Ahmedabad", followers: "42K", isVerified: false, isFollowing: false },
+  { id: "su6", name: "Arjun Kumar", city: "Hyderabad", followers: "95K", isVerified: true, isFollowing: false },
 ];
 
 const TRENDING_POSTS = [
@@ -52,10 +56,36 @@ export default function ExploreScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"trending" | "people" | "hashtags">("trending");
+  const [users, setUsers] = useState(INITIAL_USERS);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   const tabs = ["trending", "people", "hashtags"] as const;
+
+  const q = query.toLowerCase().trim();
+
+  const filteredPosts = q
+    ? TRENDING_POSTS.filter((p) => p.emoji.includes(q) || p.id.includes(q))
+    : TRENDING_POSTS;
+
+  const filteredUsers = q
+    ? users.filter(
+        (u) =>
+          u.name.toLowerCase().includes(q) ||
+          u.city.toLowerCase().includes(q)
+      )
+    : users;
+
+  const filteredHashtags = q
+    ? TRENDING_HASHTAGS.filter((h) => h.tag.toLowerCase().includes(q))
+    : TRENDING_HASHTAGS;
+
+  const toggleFollow = (id: string) => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, isFollowing: !u.isFollowing } : u
+      )
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -77,6 +107,7 @@ export default function ExploreScreen() {
             value={query}
             onChangeText={setQuery}
             autoFocus
+            returnKeyType="search"
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")}>
@@ -108,69 +139,112 @@ export default function ExploreScreen() {
         {activeTab === "trending" && (
           <View>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Trending Now</Text>
-            <View style={styles.postGrid}>
-              {TRENDING_POSTS.map((post, i) => (
-                <Pressable
-                  key={post.id}
-                  style={[
-                    styles.gridCard,
-                    { width: CARD_W, height: post.tall ? CARD_W * 1.5 : CARD_W },
-                  ]}
-                >
-                  <LinearGradient colors={post.gradient} style={StyleSheet.absoluteFill} />
-                  <Text style={styles.gridEmoji}>{post.emoji}</Text>
-                </Pressable>
-              ))}
-            </View>
+            {filteredPosts.length === 0 ? (
+              <View style={styles.emptyResult}>
+                <Feather name="search" size={32} color={colors.muted} />
+                <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No posts match "{query}"</Text>
+              </View>
+            ) : (
+              <View style={styles.postGrid}>
+                {filteredPosts.map((post) => (
+                  <Pressable
+                    key={post.id}
+                    onPress={() => router.push("/(tabs)" as any)}
+                    style={[
+                      styles.gridCard,
+                      { width: CARD_W, height: post.tall ? CARD_W * 1.5 : CARD_W },
+                    ]}
+                    accessibilityLabel={`Trending post ${post.emoji}`}
+                  >
+                    <LinearGradient colors={post.gradient} style={StyleSheet.absoluteFill} />
+                    <Text style={styles.gridEmoji}>{post.emoji}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
         {activeTab === "people" && (
           <View>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Suggested for You</Text>
-            {SUGGESTED_USERS.map((u) => (
-              <View key={u.id} style={[styles.personRow, { borderBottomColor: colors.border }]}>
-                <Avatar name={u.name} size={48} />
-                <View style={{ flex: 1 }}>
-                  <View style={styles.nameRow}>
-                    <Text style={[styles.personName, { color: colors.foreground }]}>{u.name}</Text>
-                    {u.isVerified && <Feather name="check-circle" size={14} color={colors.primary} />}
-                  </View>
-                  <Text style={[styles.personMeta, { color: colors.mutedForeground }]}>
-                    {u.city} · {u.followers} followers
-                  </Text>
-                </View>
-                <Pressable style={[styles.followBtn, { borderColor: colors.primary }]}>
-                  <Text style={[styles.followText, { color: colors.primary }]}>Follow</Text>
-                </Pressable>
+            {filteredUsers.length === 0 ? (
+              <View style={styles.emptyResult}>
+                <Feather name="users" size={32} color={colors.muted} />
+                <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No people match "{query}"</Text>
               </View>
-            ))}
+            ) : (
+              filteredUsers.map((u) => (
+                <View key={u.id} style={[styles.personRow, { borderBottomColor: colors.border }]}>
+                  <Pressable onPress={() => router.push("/(tabs)/profile" as any)}>
+                    <Avatar name={u.name} size={48} />
+                  </Pressable>
+                  <Pressable style={{ flex: 1 }} onPress={() => router.push("/(tabs)/profile" as any)}>
+                    <View style={styles.nameRow}>
+                      <Text style={[styles.personName, { color: colors.foreground }]}>{u.name}</Text>
+                      {u.isVerified && <Feather name="check-circle" size={14} color={colors.primary} />}
+                    </View>
+                    <Text style={[styles.personMeta, { color: colors.mutedForeground }]}>
+                      {u.city} · {u.followers} followers
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => toggleFollow(u.id)}
+                    style={[
+                      styles.followBtn,
+                      u.isFollowing
+                        ? { backgroundColor: colors.muted, borderColor: colors.border }
+                        : { borderColor: colors.primary },
+                    ]}
+                    accessibilityLabel={u.isFollowing ? `Unfollow ${u.name}` : `Follow ${u.name}`}
+                  >
+                    <Text
+                      style={[
+                        styles.followText,
+                        { color: u.isFollowing ? colors.mutedForeground : colors.primary },
+                      ]}
+                    >
+                      {u.isFollowing ? "Following" : "Follow"}
+                    </Text>
+                  </Pressable>
+                </View>
+              ))
+            )}
           </View>
         )}
 
         {activeTab === "hashtags" && (
           <View>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Trending Hashtags</Text>
-            {TRENDING_HASHTAGS.map((h, i) => (
-              <Pressable
-                key={h.tag}
-                style={[styles.hashtagRow, { borderBottomColor: colors.border }]}
-              >
-                <LinearGradient
-                  colors={[colors.primary, colors.secondary]}
-                  style={styles.hashtagRank}
+            {filteredHashtags.length === 0 ? (
+              <View style={styles.emptyResult}>
+                <Feather name="hash" size={32} color={colors.muted} />
+                <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No hashtags match "{query}"</Text>
+              </View>
+            ) : (
+              filteredHashtags.map((h, i) => (
+                <Pressable
+                  key={h.tag}
+                  onPress={() => setQuery(h.tag.replace("#", ""))}
+                  style={[styles.hashtagRow, { borderBottomColor: colors.border }]}
+                  accessibilityLabel={`${h.tag} with ${h.posts} posts`}
                 >
-                  <Text style={styles.hashtagRankText}>{i + 1}</Text>
-                </LinearGradient>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.hashtagTag, { color: colors.foreground }]}>{h.tag}</Text>
-                  <Text style={[styles.hashtagPosts, { color: colors.mutedForeground }]}>
-                    {h.posts} posts
-                  </Text>
-                </View>
-                <Feather name="trending-up" size={16} color={colors.success} />
-              </Pressable>
-            ))}
+                  <LinearGradient
+                    colors={[colors.primary, colors.secondary]}
+                    style={styles.hashtagRank}
+                  >
+                    <Text style={styles.hashtagRankText}>{i + 1}</Text>
+                  </LinearGradient>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.hashtagTag, { color: colors.foreground }]}>{h.tag}</Text>
+                    <Text style={[styles.hashtagPosts, { color: colors.mutedForeground }]}>
+                      {h.posts} posts
+                    </Text>
+                  </View>
+                  <Feather name="trending-up" size={16} color={colors.success} />
+                </Pressable>
+              ))
+            )}
           </View>
         )}
       </ScrollView>
@@ -241,4 +315,6 @@ const styles = StyleSheet.create({
   hashtagRankText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
   hashtagTag: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   hashtagPosts: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  emptyResult: { alignItems: "center", gap: 10, paddingTop: 48, paddingHorizontal: 32 },
+  emptyText: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
 });

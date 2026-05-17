@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
   FlatList,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -16,6 +19,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CATEGORIES, COMMUNITIES, Community } from "@/data/communities";
 
+const EMOJIS = ["🎵", "🎮", "💪", "🍛", "🌍", "📸", "💃", "🏏", "🎨", "📚", "🚀", "🌸"];
+const COMMUNITY_CATEGORIES = ["Social", "Gaming", "Fitness", "Food", "Travel", "Fashion", "Music", "Tech"];
+
 const { width } = Dimensions.get("window");
 
 function CommunityCard({ community, onJoin }: { community: Community; onJoin: (id: string) => void }) {
@@ -23,7 +29,12 @@ function CommunityCard({ community, onJoin }: { community: Community; onJoin: (i
   const fmtMembers = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(0)}K` : String(n);
 
   return (
-    <Pressable style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <Pressable
+      onPress={() => router.push("/chatrooms" as any)}
+      style={({ pressed }) => [styles.card, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1 }]}
+      accessibilityLabel={`Open ${community.name} community`}
+      accessibilityRole="button"
+    >
       <LinearGradient colors={community.gradient} style={styles.cardBanner}>
         <Text style={styles.cardEmoji}>{community.emoji}</Text>
         {community.isPrivate && (
@@ -76,6 +87,12 @@ export default function CommunitiesScreen() {
   const insets = useSafeAreaInsets();
   const [activeCategory, setActiveCategory] = useState("all");
   const [communities, setCommunities] = useState(COMMUNITIES);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newDesc, setNewDesc] = useState("");
+  const [newEmoji, setNewEmoji] = useState("🎵");
+  const [newCategory, setNewCategory] = useState("Social");
+  const [creating, setCreating] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -91,8 +108,105 @@ export default function CommunitiesScreen() {
     );
   };
 
+  const handleCreate = async () => {
+    if (!newName.trim()) return;
+    setCreating(true);
+    await new Promise((r) => setTimeout(r, 900));
+    const newCommunity: Community = {
+      id: `custom-${Date.now()}`,
+      name: newName.trim(),
+      description: newDesc.trim() || "A new community on Ridhi",
+      emoji: newEmoji,
+      gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
+      members: 1,
+      category: newCategory.toLowerCase(),
+      isPrivate: false,
+      isJoined: true,
+      language: "English",
+    };
+    setCommunities((prev) => [newCommunity, ...prev]);
+    setCreating(false);
+    setShowCreate(false);
+    setNewName("");
+    setNewDesc("");
+    setNewEmoji("🎵");
+    setNewCategory("Social");
+    Alert.alert("Community Created! 🎉", `"${newCommunity.name}" is now live. Share it with friends to grow your community.`, [{ text: "OK" }]);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Create Community</Text>
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Choose an emoji</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.emojiRow}>
+              {EMOJIS.map((e) => (
+                <Pressable
+                  key={e}
+                  onPress={() => setNewEmoji(e)}
+                  style={[styles.emojiBtn, newEmoji === e && { backgroundColor: colors.primary + "20", borderColor: colors.primary }]}
+                >
+                  <Text style={styles.emojiText}>{e}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Community Name *</Text>
+            <TextInput
+              style={[styles.modalInput, { color: colors.foreground, backgroundColor: colors.muted, borderColor: colors.border }]}
+              placeholder="e.g. Mumbai Chai Lovers"
+              placeholderTextColor={colors.mutedForeground}
+              value={newName}
+              onChangeText={setNewName}
+              maxLength={40}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Description</Text>
+            <TextInput
+              style={[styles.modalInput, styles.modalTextArea, { color: colors.foreground, backgroundColor: colors.muted, borderColor: colors.border }]}
+              placeholder="What is this community about?"
+              placeholderTextColor={colors.mutedForeground}
+              value={newDesc}
+              onChangeText={setNewDesc}
+              multiline
+              maxLength={120}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Category</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catSelectRow}>
+              {COMMUNITY_CATEGORIES.map((cat) => (
+                <Pressable
+                  key={cat}
+                  onPress={() => setNewCategory(cat)}
+                  style={[
+                    styles.catSelectPill,
+                    newCategory === cat
+                      ? { backgroundColor: colors.primary }
+                      : { backgroundColor: colors.muted, borderColor: colors.border, borderWidth: 1 },
+                  ]}
+                >
+                  <Text style={[styles.catSelectText, { color: newCategory === cat ? "#fff" : colors.foreground }]}>{cat}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            <Pressable
+              onPress={handleCreate}
+              disabled={!newName.trim() || creating}
+              style={[styles.createSubmitBtn, { backgroundColor: !newName.trim() ? colors.muted : colors.primary }]}
+            >
+              <Text style={[styles.createSubmitText, { color: !newName.trim() ? colors.mutedForeground : "#fff" }]}>
+                {creating ? "Creating..." : "Create Community"}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <View
         style={[
           styles.header,
@@ -107,7 +221,11 @@ export default function CommunitiesScreen() {
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </Pressable>
         <Text style={[styles.headerTitle, { color: colors.foreground }]}>Communities</Text>
-        <Pressable style={[styles.createBtn, { backgroundColor: colors.primary }]}>
+        <Pressable
+          onPress={() => setShowCreate(true)}
+          style={[styles.createBtn, { backgroundColor: colors.primary }]}
+          accessibilityLabel="Create a new community"
+        >
           <Feather name="plus" size={18} color="#fff" />
         </Pressable>
       </View>
@@ -118,7 +236,12 @@ export default function CommunitiesScreen() {
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>My Communities</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.myRow}>
               {joined.map((c) => (
-                <Pressable key={c.id} style={styles.myCard}>
+                <Pressable
+                  key={c.id}
+                  style={styles.myCard}
+                  onPress={() => router.push("/chatrooms" as any)}
+                  accessibilityLabel={`Open ${c.name}`}
+                >
                   <LinearGradient colors={c.gradient} style={styles.myCardBg}>
                     <Text style={styles.myCardEmoji}>{c.emoji}</Text>
                   </LinearGradient>
@@ -220,4 +343,25 @@ const styles = StyleSheet.create({
   cardMetaText: { fontSize: 10, fontFamily: "Inter_400Regular" },
   joinBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 14 },
   joinText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 36,
+    gap: 12,
+  },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 4 },
+  modalTitle: { fontSize: 20, fontFamily: "Inter_700Bold", marginBottom: 4 },
+  modalLabel: { fontSize: 12, fontFamily: "Inter_500Medium", textTransform: "uppercase", letterSpacing: 0.6 },
+  modalInput: { borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, fontFamily: "Inter_400Regular" },
+  modalTextArea: { minHeight: 72, textAlignVertical: "top" },
+  emojiRow: { gap: 8, paddingVertical: 4 },
+  emojiBtn: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: "transparent" },
+  emojiText: { fontSize: 22 },
+  catSelectRow: { gap: 8, paddingVertical: 4 },
+  catSelectPill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
+  catSelectText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  createSubmitBtn: { borderRadius: 14, paddingVertical: 14, alignItems: "center", marginTop: 8 },
+  createSubmitText: { fontSize: 16, fontFamily: "Inter_700Bold" },
 });

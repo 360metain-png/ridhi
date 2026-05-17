@@ -459,7 +459,7 @@ export default function FeedScreen() {
                 <Text style={[styles.trendTopTitle, { color: colors.foreground }]}>
                   Top Posts in {userCity}
                 </Text>
-                <Pressable onPress={() => {}} style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
+                <Pressable onPress={() => router.push("/explore" as any)} style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
                   <Text style={[styles.seeAllText, { color: colors.primary }]}>See all</Text>
                 </Pressable>
               </View>

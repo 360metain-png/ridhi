@@ -190,7 +190,11 @@ export default function CreatorDashboardScreen() {
             </View>
           ))}
 
-          <Pressable style={[styles.withdrawBtn, { backgroundColor: colors.primary }]}>
+          <Pressable
+            onPress={() => router.push("/withdraw" as any)}
+            style={[styles.withdrawBtn, { backgroundColor: colors.primary }]}
+            accessibilityLabel="Request withdrawal of earnings"
+          >
             <Feather name="arrow-up-circle" size={18} color="#fff" />
             <Text style={styles.withdrawText}>Request Withdrawal</Text>
           </Pressable>
@@ -229,14 +233,16 @@ export default function CreatorDashboardScreen() {
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Creator Tools</Text>
           <View style={styles.toolsGrid}>
             {[
-              { icon: "upload-cloud", label: "Upload Studio", color: "#E91E8C" },
-              { icon: "radio", label: "Go Live", color: "#FF3B30" },
-              { icon: "bar-chart-2", label: "Analytics", color: "#4A90E2" },
-              { icon: "users", label: "Fan Club", color: "#7B2FBE" },
+              { icon: "upload-cloud", label: "Upload Studio", color: "#E91E8C", route: "/create-post" },
+              { icon: "radio", label: "Go Live", color: "#FF3B30", route: "/live-stream" },
+              { icon: "bar-chart-2", label: "Analytics", color: "#4A90E2", route: "/creator-dashboard" },
+              { icon: "users", label: "Fan Club", color: "#7B2FBE", route: "/communities" },
             ].map((tool) => (
               <Pressable
                 key={tool.label}
+                onPress={() => router.push(tool.route as any)}
                 style={[styles.tool, { backgroundColor: colors.card, borderColor: colors.border }]}
+                accessibilityLabel={tool.label}
               >
                 <View style={[styles.toolIcon, { backgroundColor: tool.color + "20" }]}>
                   <Feather name={tool.icon as any} size={22} color={tool.color} />

@@ -116,7 +116,10 @@ export default function SettingsScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 32 }}>
         {user && (
-          <Pressable style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => Alert.alert("Edit Profile", "Update your name, photo, bio, and interests.", [{ text: "Cancel", style: "cancel" }, { text: "Edit Profile", onPress: () => router.push("/(tabs)/profile" as any) }])}
+            style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
             <Avatar name={user.name} size={52} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.profileName, { color: colors.foreground }]}>{user.name}</Text>
@@ -216,7 +219,7 @@ export default function SettingsScreen() {
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />
-          <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => Alert.alert("Linked Accounts", "Link your Google or Facebook account for one-tap login.\n\n• Google — Tap to connect\n• Facebook — Tap to connect\n\nComing in v1.1 update.", [{ text: "OK" }])} />
+          <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => Alert.alert("Linked Accounts", "Link your Google or Facebook account for one-tap login.\n\n• Google — Tap to connect\n• Facebook — Tap to connect", [{ text: "Connect Google", onPress: () => Alert.alert("Google Login", "Google sign-in will be available in the next update.", [{ text: "OK" }]) }, { text: "Close", style: "cancel" }])} />
           <SettingRow icon="download" label="Download My Data" onPress={() => Alert.alert("Download My Data", "Your full data export includes posts, chats, matches, and settings.", [{ text: "Cancel", style: "cancel" }, { text: "Request Export", onPress: () => Alert.alert("Export Requested ✓", "You'll receive a download link within 24 hours.", [{ text: "OK" }]) }])} />
         </View>
 
@@ -236,7 +239,31 @@ export default function SettingsScreen() {
             <Feather name="log-out" size={18} color={colors.destructive} />
             <Text style={[styles.logoutText, { color: colors.destructive }]}>Sign Out</Text>
           </Pressable>
-          <Pressable style={styles.deleteBtn}>
+          <Pressable
+            onPress={() =>
+              Alert.alert(
+                "Delete Account",
+                "This will permanently delete your account, posts, matches, and all data. This cannot be undone.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete Account",
+                    style: "destructive",
+                    onPress: () =>
+                      Alert.alert(
+                        "Are you absolutely sure?",
+                        "Type your phone number or email to confirm deletion.",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          { text: "Yes, Delete Everything", style: "destructive", onPress: logout },
+                        ]
+                      ),
+                  },
+                ]
+              )
+            }
+            style={styles.deleteBtn}
+          >
             <Text style={[styles.deleteText, { color: colors.mutedForeground }]}>Delete Account</Text>
           </Pressable>
         </View>

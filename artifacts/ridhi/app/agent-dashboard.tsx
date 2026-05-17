@@ -7,6 +7,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -394,7 +395,14 @@ export default function AgentDashboardScreen() {
               <Text style={[styles.hostsHeaderText, { color: colors.foreground }]}>
                 My Hosts ({MY_HOSTS.length})
               </Text>
-              <GradientButton label="+ Recruit" onPress={() => { const { Alert } = require("react-native"); Alert.alert("Recruit New Host", "Share your referral link to invite new hosts to your team and earn commission on their earnings.\n\n🔗 ridhi.app/join?agent=YOUR_CODE", [{ text: "Copy Link", onPress: () => {} }, { text: "Close", style: "cancel" }]); }} small />
+              <GradientButton label="+ Recruit" onPress={() => {
+                const referralLink = "https://ridhi.app/join?agent=YOUR_CODE";
+                Share.share({
+                  message: `Join my team on Ridhi and start earning! 🚀\n\n${referralLink}`,
+                  title: "Recruit a Host on Ridhi",
+                  url: referralLink,
+                }).catch(() => Alert.alert("Referral Link", referralLink, [{ text: "OK" }]));
+              }} small />
             </View>
             {MY_HOSTS.map((host) => (
               <View key={host.id} style={[styles.hostRow, { backgroundColor: colors.card, borderColor: colors.border }]}>

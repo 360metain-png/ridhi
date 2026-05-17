@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {
+  Alert,
   FlatList,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -95,6 +97,8 @@ function RoomCard({ room, onPress }: { room: Chatroom; onPress: () => void }) {
   );
 }
 
+const ROOM_EMOJIS = ["💬", "🎵", "🎮", "🍛", "💪", "📸", "🌍", "🏏", "🌸", "🚀", "💃", "🎨"];
+
 export default function ChatroomsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -103,6 +107,11 @@ export default function ChatroomsScreen() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [rooms, setRooms] = useState(CHATROOMS);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newRoomName, setNewRoomName] = useState("");
+  const [newRoomDesc, setNewRoomDesc] = useState("");
+  const [newRoomEmoji, setNewRoomEmoji] = useState("💬");
+  const [creating, setCreating] = useState(false);
 
   const filtered = rooms.filter((r) => {
     const matchesSearch =
@@ -115,8 +124,93 @@ export default function ChatroomsScreen() {
   const joined = filtered.filter((r) => r.isJoined);
   const discover = filtered.filter((r) => !r.isJoined);
 
+  const handleCreateRoom = async () => {
+    if (!newRoomName.trim()) return;
+    setCreating(true);
+    await new Promise((r) => setTimeout(r, 800));
+    const newRoom: Chatroom = {
+      id: `room-${Date.now()}`,
+      name: newRoomName.trim(),
+      description: newRoomDesc.trim() || "A new chatroom on Ridhi",
+      emoji: newRoomEmoji,
+      gradientStart: "#E91E8C",
+      gradientEnd: "#7B2FBE",
+      onlineCount: 1,
+      category: "Social",
+      isJoined: true,
+      isVerified: false,
+      isPinned: false,
+      language: "English",
+      memberCount: 1,
+      lastMessage: "Chatroom created",
+      lastMessageTime: "now",
+      lastMessageUser: "You",
+    };
+    setRooms((prev) => [newRoom, ...prev]);
+    setCreating(false);
+    setShowCreate(false);
+    setNewRoomName("");
+    setNewRoomDesc("");
+    setNewRoomEmoji("💬");
+    Alert.alert("Chatroom Created! 🎉", `"${newRoom.name}" is live. Invite friends to join.`, [{ text: "Open Room", onPress: () => router.push(`/chatroom/${newRoom.id}` as any) }, { text: "OK" }]);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>
+            <View style={[styles.modalHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Create Chatroom</Text>
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Room Emoji</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.emojiRow}>
+              {ROOM_EMOJIS.map((e) => (
+                <Pressable
+                  key={e}
+                  onPress={() => setNewRoomEmoji(e)}
+                  style={[styles.emojiBtn, { borderColor: colors.border, backgroundColor: colors.muted },
+                    newRoomEmoji === e && { backgroundColor: colors.primary + "20", borderColor: colors.primary }]}
+                >
+                  <Text style={styles.emojiText}>{e}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Room Name *</Text>
+            <TextInput
+              style={[styles.modalInput, { color: colors.foreground, backgroundColor: colors.muted, borderColor: colors.border }]}
+              placeholder="e.g. Bollywood Fans India"
+              placeholderTextColor={colors.mutedForeground}
+              value={newRoomName}
+              onChangeText={setNewRoomName}
+              maxLength={40}
+            />
+
+            <Text style={[styles.modalLabel, { color: colors.mutedForeground }]}>Description</Text>
+            <TextInput
+              style={[styles.modalInput, styles.modalTextArea, { color: colors.foreground, backgroundColor: colors.muted, borderColor: colors.border }]}
+              placeholder="What is this room about?"
+              placeholderTextColor={colors.mutedForeground}
+              value={newRoomDesc}
+              onChangeText={setNewRoomDesc}
+              multiline
+              maxLength={100}
+            />
+
+            <Pressable
+              onPress={handleCreateRoom}
+              disabled={!newRoomName.trim() || creating}
+              style={[styles.createSubmitBtn, { backgroundColor: !newRoomName.trim() ? colors.muted : colors.primary }]}
+            >
+              <Text style={[styles.createSubmitText, { color: !newRoomName.trim() ? colors.mutedForeground : "#fff" }]}>
+                {creating ? "Creating..." : "Create Room"}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <View
         style={[
           styles.header,
@@ -134,7 +228,7 @@ export default function ChatroomsScreen() {
         </View>
         <Pressable
           style={[styles.createBtn, { backgroundColor: colors.primary }]}
-          onPress={() => {}}
+          onPress={() => setShowCreate(true)}
           accessibilityLabel="Create chatroom"
         >
           <Feather name="plus" size={18} color="#fff" />
@@ -311,4 +405,22 @@ const styles = StyleSheet.create({
   timeText: { fontSize: 11, fontFamily: "Inter_400Regular", marginLeft: "auto" },
   empty: { alignItems: "center", gap: 8, paddingTop: 60 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 36,
+    gap: 12,
+  },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 4 },
+  modalTitle: { fontSize: 20, fontFamily: "Inter_700Bold", marginBottom: 4 },
+  modalLabel: { fontSize: 12, fontFamily: "Inter_500Medium", textTransform: "uppercase", letterSpacing: 0.6 },
+  modalInput: { borderRadius: 12, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, fontFamily: "Inter_400Regular" },
+  modalTextArea: { minHeight: 72, textAlignVertical: "top" },
+  emojiRow: { gap: 8, paddingVertical: 4 },
+  emojiBtn: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center", borderWidth: 1.5 },
+  emojiText: { fontSize: 22 },
+  createSubmitBtn: { borderRadius: 14, paddingVertical: 14, alignItems: "center", marginTop: 8 },
+  createSubmitText: { fontSize: 16, fontFamily: "Inter_700Bold" },
 });

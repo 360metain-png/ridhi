@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Platform,
@@ -10,6 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -102,6 +104,11 @@ export default function CreatePostScreen() {
   const [audience, setAudience] = useState<"public" | "followers" | "private">("public");
   const [loading, setLoading] = useState(false);
 
+  const [mediaUri, setMediaUri] = useState<string | null>(null);
+  const [location, setLocation] = useState<string | null>(null);
+  const [feeling, setFeeling] = useState<string | null>(null);
+  const [taggedPeople, setTaggedPeople] = useState<string[]>([]);
+
   const [showCaptionPanel, setShowCaptionPanel] = useState(false);
   const [captionTone, setCaptionTone] = useState<Tone>("casual");
   const [aiCaptionLoading, setAiCaptionLoading] = useState(false);
@@ -160,11 +167,66 @@ export default function CreatePostScreen() {
     Animated.timing(hashtagPanelAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setShowHashtagPanel(false));
   };
 
+  const pickMedia = async (type: "photo" | "video") => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow access to your gallery to upload photos and videos.", [{ text: "OK" }]);
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: true,
+      quality: 0.85,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setMediaUri(result.assets[0].uri);
+      if (type === "photo" && selectedType === "text") setSelectedType("photo");
+      if (type === "video" && selectedType === "text") setSelectedType("video");
+    }
+  };
+
+  const handleLocationTag = () => {
+    const cities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Kolkata", "Chennai", "Pune", "Jaipur"];
+    Alert.alert("Tag Location", "Choose your location:", [
+      ...cities.slice(0, 4).map((c) => ({ text: c, onPress: () => setLocation(c) })),
+      { text: "More cities…", onPress: () => {
+        Alert.alert("Pick City", "", [
+          ...cities.slice(4).map((c) => ({ text: c, onPress: () => setLocation(c) })),
+          { text: "Cancel", style: "cancel" },
+        ]);
+      }},
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const handleFeelingTag = () => {
+    const feelings = ["😊 Happy", "😂 Laughing", "❤️ In Love", "😢 Sad", "😎 Cool", "🙏 Grateful", "🔥 Excited", "😴 Tired"];
+    Alert.alert("How are you feeling?", "", [
+      ...feelings.slice(0, 4).map((f) => ({ text: f, onPress: () => setFeeling(f) })),
+      { text: "More feelings…", onPress: () => {
+        Alert.alert("Feeling", "", [
+          ...feelings.slice(4).map((f) => ({ text: f, onPress: () => setFeeling(f) })),
+          { text: "Cancel", style: "cancel" },
+        ]);
+      }},
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const handleTagPeople = () => {
+    Alert.alert("Tag People", "Enter a name or username to tag:", [
+      { text: "Priya Sharma", onPress: () => setTaggedPeople((p) => [...p, "Priya Sharma"]) },
+      { text: "Raj Nair", onPress: () => setTaggedPeople((p) => [...p, "Raj Nair"]) },
+      { text: "Anjali Singh", onPress: () => setTaggedPeople((p) => [...p, "Anjali Singh"]) },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
   const handlePost = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1200));
     setLoading(false);
-    router.back();
+    Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
   };
 
   return (
@@ -261,17 +323,60 @@ export default function CreatePostScreen() {
         </View>
 
         {selectedType !== "text" && selectedType !== "poll" && (
-          <Pressable style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => {
+              if (selectedType === "photo" || selectedType === "story") pickMedia("photo");
+              else if (selectedType === "video" || selectedType === "reel") pickMedia("video");
+              else if (selectedType === "audio") Alert.alert("Audio Recording", "Tap the microphone to start recording your voice note.", [{ text: "OK" }]);
+              else if (selectedType === "gif") Alert.alert("GIF Search", "Search for GIFs powered by GIPHY — coming soon!", [{ text: "OK" }]);
+            }}
+            style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: mediaUri ? colors.primary : colors.border }]}
+          >
             <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={styles.mediaUploadInner}>
-              <Feather name={selectedType === "audio" ? "mic" : selectedType === "gif" ? "film" : "upload-cloud"} size={32} color={colors.primary} />
-              <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
-                {selectedType === "audio" ? "Tap to record audio" : selectedType === "gif" ? "Search GIFs" : `Tap to add ${selectedType}`}
-              </Text>
-              <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>
-                {selectedType === "reel" || selectedType === "story" ? "Max 60 seconds" : selectedType === "video" ? "Max 5 minutes" : selectedType === "audio" ? "MP3, WAV up to 10MB" : selectedType === "gif" ? "Powered by GIPHY" : "JPG, PNG up to 20MB"}
-              </Text>
+              {mediaUri ? (
+                <>
+                  <Feather name="check-circle" size={32} color={colors.success ?? "#34C759"} />
+                  <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Media selected ✓</Text>
+                  <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Tap to change</Text>
+                </>
+              ) : (
+                <>
+                  <Feather name={selectedType === "audio" ? "mic" : selectedType === "gif" ? "film" : "upload-cloud"} size={32} color={colors.primary} />
+                  <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
+                    {selectedType === "audio" ? "Tap to record audio" : selectedType === "gif" ? "Search GIFs" : `Tap to add ${selectedType}`}
+                  </Text>
+                  <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>
+                    {selectedType === "reel" || selectedType === "story" ? "Max 60 seconds" : selectedType === "video" ? "Max 5 minutes" : selectedType === "audio" ? "MP3, WAV up to 10MB" : selectedType === "gif" ? "Powered by GIPHY" : "JPG, PNG up to 20MB"}
+                  </Text>
+                </>
+              )}
             </LinearGradient>
           </Pressable>
+        )}
+
+        {(location || feeling || taggedPeople.length > 0) && (
+          <View style={[styles.metaTagsRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            {location && (
+              <Pressable onPress={() => setLocation(null)} style={[styles.metaTag, { backgroundColor: colors.primary + "18" }]}>
+                <Feather name="map-pin" size={12} color={colors.primary} />
+                <Text style={[styles.metaTagText, { color: colors.primary }]}>{location}</Text>
+                <Feather name="x" size={10} color={colors.primary} />
+              </Pressable>
+            )}
+            {feeling && (
+              <Pressable onPress={() => setFeeling(null)} style={[styles.metaTag, { backgroundColor: colors.secondary + "18" }]}>
+                <Text style={styles.metaTagText}>{feeling}</Text>
+                <Feather name="x" size={10} color={colors.secondary} />
+              </Pressable>
+            )}
+            {taggedPeople.map((person) => (
+              <Pressable key={person} onPress={() => setTaggedPeople((p) => p.filter((x) => x !== person))} style={[styles.metaTag, { backgroundColor: "#4A90E218" }]}>
+                <Feather name="at-sign" size={12} color="#4A90E2" />
+                <Text style={[styles.metaTagText, { color: "#4A90E2" }]}>{person}</Text>
+                <Feather name="x" size={10} color="#4A90E2" />
+              </Pressable>
+            ))}
+          </View>
         )}
 
         {selectedType === "poll" && (
@@ -300,15 +405,25 @@ export default function CreatePostScreen() {
 
         <View style={[styles.toolbarRow, { borderTopColor: colors.border }]}>
           {[
-            { icon: "image", label: "Photo" },
-            { icon: "video", label: "Video" },
-            { icon: "map-pin", label: "Location" },
-            { icon: "tag", label: "Tag" },
-            { icon: "smile", label: "Feeling" },
+            { icon: "image", label: "Photo", active: !!mediaUri && (selectedType === "photo" || selectedType === "story"), onPress: () => pickMedia("photo") },
+            { icon: "video", label: "Video", active: !!mediaUri && (selectedType === "video" || selectedType === "reel"), onPress: () => pickMedia("video") },
+            { icon: "map-pin", label: location || "Location", active: !!location, onPress: handleLocationTag },
+            { icon: "tag", label: taggedPeople.length > 0 ? `${taggedPeople.length} tagged` : "Tag", active: taggedPeople.length > 0, onPress: handleTagPeople },
+            { icon: "smile", label: feeling ? feeling.split(" ")[0] : "Feeling", active: !!feeling, onPress: handleFeelingTag },
           ].map((tool) => (
-            <Pressable key={tool.icon} style={styles.toolbarBtn}>
-              <Feather name={tool.icon as any} size={20} color={colors.primary} />
-              <Text style={[styles.toolbarLabel, { color: colors.mutedForeground }]}>{tool.label}</Text>
+            <Pressable
+              key={tool.icon}
+              onPress={tool.onPress}
+              style={[styles.toolbarBtn, tool.active && { backgroundColor: colors.primary + "12", borderRadius: 8 }]}
+              accessibilityLabel={tool.label}
+            >
+              <Feather name={tool.icon as any} size={20} color={tool.active ? colors.primary : colors.primary} />
+              <Text
+                style={[styles.toolbarLabel, { color: tool.active ? colors.primary : colors.mutedForeground, fontFamily: tool.active ? "Inter_600SemiBold" : "Inter_400Regular" }]}
+                numberOfLines={1}
+              >
+                {tool.label}
+              </Text>
             </Pressable>
           ))}
         </View>
@@ -501,4 +616,23 @@ const styles = StyleSheet.create({
   hashtagPanelFooterText: { fontSize: 13, fontFamily: "Inter_400Regular" },
   doneBtn: { paddingHorizontal: 24, paddingVertical: 8, borderRadius: 20 },
   doneBtnText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  metaTagsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  metaTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  metaTagText: { fontSize: 12, fontFamily: "Inter_500Medium" },
 });
