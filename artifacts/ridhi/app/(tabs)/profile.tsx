@@ -102,6 +102,8 @@ export default function ProfileScreen() {
       <View style={styles.quickLinks}>
         {[
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
+          { icon: "zap", label: "Gaming Arena", route: "/games", color: "#4CAF50" },
+          { icon: "award", label: "Tournaments", route: "/tournaments", color: "#FFB800" },
           { icon: "zap", label: "Creator Studio", route: "/creator-dashboard", color: "#E91E8C" },
           { icon: "star", label: "Host Profile & Levels", route: "/host-profile", color: "#FFB800" },
           { icon: "video", label: "Go Live", route: "/live-stream", color: "#FF3B30" },
