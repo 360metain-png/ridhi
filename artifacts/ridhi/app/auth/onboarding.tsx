@@ -239,7 +239,9 @@ export default function OnboardingScreen() {
 
   const next = () => {
     if (activeIndex < SLIDES.length - 1) {
-      flatRef.current?.scrollToIndex({ index: activeIndex + 1 });
+      const nextIndex = activeIndex + 1;
+      setActiveIndex(nextIndex);
+      flatRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     } else {
       router.replace("/auth/login");
     }

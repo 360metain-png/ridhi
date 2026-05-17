@@ -3,13 +3,16 @@ import {
   Animated,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
+  TextInput,
   Text,
   View,
-  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -142,6 +145,11 @@ export default function FeedScreen() {
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<FeedTab>("For You");
+  const [commentPostId, setCommentPostId] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [localComments, setLocalComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
+  const [storyViewId, setStoryViewId] = useState<string | null>(null);
+  const storyProgress = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 66;
@@ -207,6 +215,50 @@ export default function FeedScreen() {
     );
   };
 
+  const handleOpenComments = (postId: string) => {
+    setCommentPostId(postId);
+    setCommentText("");
+  };
+
+  const handleSendComment = () => {
+    if (!commentText.trim() || !commentPostId) return;
+    const newComment = {
+      id: Date.now().toString(),
+      name: user?.name ?? "You",
+      text: commentText.trim(),
+      timeAgo: "just now",
+    };
+    setLocalComments((prev) => ({
+      ...prev,
+      [commentPostId]: [...(prev[commentPostId] ?? []), newComment],
+    }));
+    setPosts((prev) =>
+      prev.map((p) => p.id === commentPostId ? { ...p, comments: p.comments + 1 } : p)
+    );
+    setCommentText("");
+  };
+
+  const handleOpenStory = (storyId: string) => {
+    storyProgress.setValue(0);
+    setStoryViewId(storyId);
+    Animated.timing(storyProgress, { toValue: 1, duration: 4000, useNativeDriver: false }).start(({ finished }) => {
+      if (finished) {
+        const idx = STORIES.findIndex((s) => s.id === storyId);
+        const next = STORIES[idx + 1];
+        if (next) {
+          handleOpenStory(next.id);
+        } else {
+          setStoryViewId(null);
+        }
+      }
+    });
+  };
+
+  const handleCloseStory = () => {
+    storyProgress.stopAnimation();
+    setStoryViewId(null);
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await new Promise((r) => setTimeout(r, 1200));
@@ -230,7 +282,7 @@ export default function FeedScreen() {
           <StoryRow
             stories={STORIES}
             onAddStory={() => {}}
-            onStory={() => {}}
+            onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
           />
 
@@ -652,7 +704,7 @@ export default function FeedScreen() {
           <FeedPost
             post={item}
             onLike={handleLike}
-            onComment={() => {}}
+            onComment={handleOpenComments}
             onProfile={() => {}}
           />
         )}
@@ -670,6 +722,131 @@ export default function FeedScreen() {
         contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* ── Comment Sheet ── */}
+      <Modal
+        visible={commentPostId !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCommentPostId(null)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setCommentPostId(null)} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.commentSheet}>
+          <View style={[styles.commentSheetInner, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+            <View style={[styles.commentHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.commentTitle, { color: colors.foreground }]}>Comments</Text>
+              <Pressable onPress={() => setCommentPostId(null)} accessibilityRole="button" accessibilityLabel="Close comments">
+                <Feather name="x" size={20} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.commentList} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
+              {[
+                { id: "d1", name: "Ananya Singh", text: "This is so beautiful! 😍", timeAgo: "2m" },
+                { id: "d2", name: "Rahul Mehta", text: "Totally agree with this! ❤️", timeAgo: "5m" },
+                { id: "d3", name: "Kavya Reddy", text: "Wow, amazing post! Keep it up 🔥", timeAgo: "12m" },
+                { id: "d4", name: "Arjun Kumar", text: "भाई, क्या बात है! 👏", timeAgo: "18m" },
+              ].concat(localComments[commentPostId ?? ""] ?? []).map((c) => (
+                <View key={c.id} style={styles.commentItem}>
+                  <Avatar name={c.name} size={32} />
+                  <View style={styles.commentBubble}>
+                    <View style={[styles.commentBubbleInner, { backgroundColor: colors.muted }]}>
+                      <Text style={[styles.commentName, { color: colors.foreground }]}>{c.name}</Text>
+                      <Text style={[styles.commentText, { color: colors.foreground }]}>{c.text}</Text>
+                    </View>
+                    <Text style={[styles.commentTime, { color: colors.mutedForeground }]}>{c.timeAgo}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            <View style={[styles.commentInputRow, { borderTopColor: colors.border, backgroundColor: colors.card }]}>
+              <Avatar name={user?.name ?? "Me"} size={32} />
+              <TextInput
+                style={[styles.commentInput, { backgroundColor: colors.input, color: colors.foreground }]}
+                placeholder="Add a comment…"
+                placeholderTextColor={colors.mutedForeground}
+                value={commentText}
+                onChangeText={setCommentText}
+                returnKeyType="send"
+                onSubmitEditing={handleSendComment}
+                accessibilityLabel="Comment input"
+              />
+              <Pressable
+                onPress={handleSendComment}
+                disabled={!commentText.trim()}
+                accessibilityRole="button"
+                accessibilityLabel="Send comment"
+                style={[styles.sendBtn, { backgroundColor: commentText.trim() ? colors.primary : colors.muted }]}
+              >
+                <Feather name="send" size={14} color="#fff" />
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── Story Viewer ── */}
+      <Modal
+        visible={storyViewId !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseStory}
+      >
+        {storyViewId !== null && (() => {
+          const story = STORIES.find((s) => s.id === storyViewId);
+          const idx = STORIES.findIndex((s) => s.id === storyViewId);
+          if (!story) return null;
+          const GRAD_PAIRS: [string, string][] = [
+            ["#E91E8C", "#7B2FBE"], ["#FF6B35", "#E91E8C"], ["#7B2FBE", "#4A90E2"],
+            ["#00BCD4", "#7B2FBE"], ["#FF6B35", "#FFB800"], ["#E91E8C", "#FF6B35"],
+          ];
+          const [c1, c2] = GRAD_PAIRS[idx % GRAD_PAIRS.length];
+          return (
+            <View style={styles.storyViewer}>
+              <LinearGradient colors={["#000", "#0A0A18", "#000"]} style={StyleSheet.absoluteFill} />
+              <LinearGradient colors={[c1 + "40", "transparent", c2 + "30"]} style={StyleSheet.absoluteFill} />
+              <View style={[styles.storyProgressBar, { paddingTop: insets.top + 8 }]}>
+                {STORIES.map((s, i) => (
+                  <View key={s.id} style={[styles.storyProgressTrack, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
+                    {i < idx && <View style={[styles.storyProgressFill, { backgroundColor: "#fff", width: "100%" }]} />}
+                    {i === idx && (
+                      <Animated.View style={[styles.storyProgressFill, { backgroundColor: "#fff", width: storyProgress.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }) as any }]} />
+                    )}
+                  </View>
+                ))}
+              </View>
+              <View style={styles.storyUserRow}>
+                <Avatar name={story.userName} size={38} />
+                <View>
+                  <Text style={styles.storyUserName}>{story.userName}</Text>
+                  <Text style={styles.storyTimeAgo}>Just now</Text>
+                </View>
+                <Pressable onPress={handleCloseStory} style={{ marginLeft: "auto" }} accessibilityRole="button" accessibilityLabel="Close story">
+                  <Feather name="x" size={24} color="#fff" />
+                </Pressable>
+              </View>
+              <View style={styles.storyContent}>
+                <LinearGradient colors={[c1 + "30", c2 + "20"]} style={styles.storyContentCard}>
+                  <Feather name="image" size={48} color="#ffffff60" />
+                  <Text style={styles.storyContentText}>{story.userName}'s Story</Text>
+                  <Text style={styles.storyContentSub}>Tap right to advance • Tap left to go back</Text>
+                </LinearGradient>
+              </View>
+              <Pressable
+                style={styles.storyTapLeft}
+                onPress={() => {
+                  const prev = STORIES[idx - 1];
+                  if (prev) handleOpenStory(prev.id); else handleCloseStory();
+                }}
+              />
+              <Pressable style={styles.storyTapRight} onPress={() => {
+                const next = STORIES[idx + 1];
+                if (next) handleOpenStory(next.id); else handleCloseStory();
+              }} />
+            </View>
+          );
+        })()}
+      </Modal>
     </View>
   );
 }
@@ -986,4 +1163,93 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   allPostsDividerText: { fontSize: 11, fontFamily: "Inter_500Medium" },
+
+  // Comment Sheet
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
+  commentSheet: { justifyContent: "flex-end" },
+  commentSheetInner: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0,
+    maxHeight: 520,
+  },
+  commentHandle: { width: 36, height: 4, borderRadius: 2, alignSelf: "center", marginTop: 10, marginBottom: 4 },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  commentTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  commentList: { flex: 1, paddingHorizontal: 16, paddingTop: 12 },
+  commentItem: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  commentBubble: { flex: 1, gap: 3 },
+  commentBubbleInner: { borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8, gap: 2 },
+  commentName: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  commentText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  commentTime: { fontSize: 11, fontFamily: "Inter_400Regular", marginLeft: 4 },
+  commentInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  commentInput: {
+    flex: 1,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+  sendBtn: {
+    width: 36, height: 36, borderRadius: 18,
+    alignItems: "center", justifyContent: "center",
+  },
+
+  // Story Viewer
+  storyViewer: { flex: 1, backgroundColor: "#000" },
+  storyProgressBar: {
+    flexDirection: "row",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+    zIndex: 10,
+  },
+  storyProgressTrack: {
+    flex: 1,
+    height: 2,
+    borderRadius: 1,
+    overflow: "hidden",
+  },
+  storyProgressFill: { height: "100%", borderRadius: 1 },
+  storyUserRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    zIndex: 10,
+  },
+  storyUserName: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  storyTimeAgo: { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.6)" },
+  storyContent: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  storyContentCard: {
+    width: "100%",
+    aspectRatio: 0.75,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    maxHeight: 420,
+  },
+  storyContentText: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#fff", textAlign: "center" },
+  storyContentSub: { fontSize: 13, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)", textAlign: "center" },
+  storyTapLeft: { position: "absolute", left: 0, top: 0, bottom: 0, width: "40%" },
+  storyTapRight: { position: "absolute", right: 0, top: 0, bottom: 0, width: "60%" },
 });
