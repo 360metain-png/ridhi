@@ -18,6 +18,7 @@ import Marketing from "@/pages/marketing";
 import Settings from "@/pages/settings";
 import LiveStreams from "@/pages/live-streams";
 import Revenue from "@/pages/revenue";
+import SuperAdmin from "@/pages/super-admin";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -56,6 +57,7 @@ function Router() {
       <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
       <Route path="/live-streams" component={() => <ProtectedRoute component={LiveStreams} />} />
       <Route path="/revenue" component={() => <ProtectedRoute component={Revenue} />} />
+      <Route path="/super-admin" component={() => <ProtectedRoute component={SuperAdmin} />} />
       <Route component={NotFound} />
     </Switch>
   );

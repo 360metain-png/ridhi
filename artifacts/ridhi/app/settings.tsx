@@ -214,7 +214,7 @@ export default function SettingsScreen() {
 
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
-          <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => {}} />
+          <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />
           <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => {}} />
           <SettingRow icon="download" label="Download My Data" onPress={() => {}} />
         </View>

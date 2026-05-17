@@ -42,6 +42,7 @@ function RootLayoutNav() {
       <Stack.Screen name="audio-room" options={{ presentation: "card" }} />
       <Stack.Screen name="story-viewer" options={{ presentation: "modal" }} />
       <Stack.Screen name="group-chat" options={{ presentation: "card" }} />
+      <Stack.Screen name="subscription" options={{ presentation: "card" }} />
     </Stack>
   );
 }

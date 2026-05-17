@@ -13,6 +13,7 @@ import {
   LogOut,
   Radio,
   BarChart3,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +41,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { name: "Analytics", href: "/analytics", icon: LineChart },
     { name: "Marketing", href: "/marketing", icon: Megaphone },
     { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Super Admin", href: "/super-admin", icon: ShieldCheck },
   ];
 
   return (

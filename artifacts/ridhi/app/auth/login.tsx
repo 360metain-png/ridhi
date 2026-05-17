@@ -16,17 +16,19 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
-
 const { height } = Dimensions.get("window");
 
 export default function LoginScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { login } = useAuth();
   const [tab, setTab] = useState<"phone" | "email">("phone");
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
   const handleContinue = async () => {
     if (!value.trim()) return;
@@ -34,6 +36,50 @@ export default function LoginScreen() {
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
     router.push({ pathname: "/auth/otp", params: { contact: value, type: tab } });
+  };
+
+  const handleSocialLogin = async (provider: string) => {
+    setSocialLoading(provider);
+    await new Promise((r) => setTimeout(r, 1200));
+    setSocialLoading(null);
+    login({
+      id: "social_" + Date.now(),
+      name: provider === "google" ? "Google User" : provider === "apple" ? "Apple User" : "Facebook User",
+      phone: "",
+      email: provider + "@ridhi.app",
+      avatar: "",
+      city: "Mumbai",
+      age: 25,
+      gender: "other",
+      interests: [],
+      coins: 100,
+      followers: 0,
+      following: 0,
+      posts: 0,
+    });
+    router.replace("/(tabs)");
+  };
+
+  const handleGuestAccess = async () => {
+    setSocialLoading("guest");
+    await new Promise((r) => setTimeout(r, 600));
+    setSocialLoading(null);
+    login({
+      id: "guest_" + Date.now(),
+      name: "Guest User",
+      phone: "",
+      email: "guest@ridhi.app",
+      avatar: "",
+      city: "India",
+      age: 18,
+      gender: "other",
+      interests: [],
+      coins: 20,
+      followers: 0,
+      following: 0,
+      posts: 0,
+    });
+    router.replace("/(tabs)");
   };
 
   return (
@@ -108,6 +154,59 @@ export default function LoginScreen() {
           style={{ width: "100%" }}
         />
 
+        <View style={styles.dividerRow}>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          <Text style={[styles.dividerText, { color: colors.mutedForeground }]}>or continue with</Text>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+        </View>
+
+        <View style={styles.socialRow}>
+          <Pressable
+            onPress={() => handleSocialLogin("google")}
+            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            {socialLoading === "google" ? (
+              <Feather name="loader" size={20} color={colors.mutedForeground} />
+            ) : (
+              <Text style={styles.socialIcon}>G</Text>
+            )}
+            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Google</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleSocialLogin("apple")}
+            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            {socialLoading === "apple" ? (
+              <Feather name="loader" size={20} color={colors.mutedForeground} />
+            ) : (
+              <Feather name="smartphone" size={20} color={colors.foreground} />
+            )}
+            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Apple</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => handleSocialLogin("facebook")}
+            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            {socialLoading === "facebook" ? (
+              <Feather name="loader" size={20} color={colors.mutedForeground} />
+            ) : (
+              <Text style={[styles.socialIcon, { color: "#1877F2" }]}>f</Text>
+            )}
+            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Facebook</Text>
+          </Pressable>
+        </View>
+
+        <Pressable onPress={handleGuestAccess} style={styles.guestBtn}>
+          {socialLoading === "guest" ? (
+            <Feather name="loader" size={16} color={colors.mutedForeground} />
+          ) : (
+            <Feather name="user" size={16} color={colors.mutedForeground} />
+          )}
+          <Text style={[styles.guestText, { color: colors.mutedForeground }]}>Continue as Guest</Text>
+        </Pressable>
+
         <Text style={[styles.terms, { color: colors.mutedForeground }]}>
           By continuing, you agree to our{" "}
           <Text style={{ color: colors.primary }}>Terms of Service</Text> and{" "}
@@ -126,19 +225,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
-    gap: 20,
+    paddingTop: 12,
+    gap: 14,
     alignItems: "center",
   },
   logoCircle: {
-    width: 88,
-    height: 88,
+    width: 72,
+    height: 72,
     alignItems: "center",
     justifyContent: "center",
   },
-  logoImage: { width: 88, height: 88 },
-  title: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
-  subtitle: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center" },
+  logoImage: { width: 72, height: 72 },
+  title: { fontSize: 24, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
   tabRow: {
     flexDirection: "row",
     borderRadius: 12,
@@ -162,7 +261,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     overflow: "hidden",
     width: "100%",
-    height: 56,
+    height: 52,
   },
   countryCode: {
     paddingHorizontal: 14,
@@ -172,5 +271,28 @@ const styles = StyleSheet.create({
   },
   countryText: { fontSize: 15, fontFamily: "Inter_500Medium" },
   input: { flex: 1, paddingHorizontal: 14, fontSize: 16, fontFamily: "Inter_400Regular" },
-  terms: { fontSize: 12, textAlign: "center", lineHeight: 18, fontFamily: "Inter_400Regular" },
+  dividerRow: { flexDirection: "row", alignItems: "center", width: "100%", gap: 10 },
+  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
+  dividerText: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  socialRow: { flexDirection: "row", width: "100%", gap: 10 },
+  socialBtn: {
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 4,
+  },
+  socialIcon: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  socialLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  guestBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+  },
+  guestText: { fontSize: 14, fontFamily: "Inter_400Regular", textDecorationLine: "underline" },
+  terms: { fontSize: 11, textAlign: "center", lineHeight: 16, fontFamily: "Inter_400Regular" },
 });

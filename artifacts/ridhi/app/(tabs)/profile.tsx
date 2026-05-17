@@ -109,6 +109,7 @@ export default function ProfileScreen() {
           { icon: "gift", label: "Referral & Rewards", route: "/referral", color: "#FF6B35" },
           { icon: "headphones", label: "Audio Rooms", route: "/audio-room", color: "#4A90E2" },
           { icon: "globe", label: "Explore", route: "/explore", color: "#5AC8FA" },
+          { icon: "award", label: "VIP & Plans", route: "/subscription", color: "#FFB800" },
         ].map((item) => (
           <Pressable
             key={item.label}

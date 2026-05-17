@@ -120,6 +120,38 @@ export default function WalletScreen() {
         </View>
       </View>
 
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Pay Via</Text>
+        <View style={styles.paymentRow}>
+          {[
+            { label: "UPI", icon: "smartphone", color: "#00BCD4" },
+            { label: "Razorpay", icon: "credit-card", color: "#2962FF" },
+            { label: "GPay", icon: "globe", color: "#34A853" },
+            { label: "PhonePe", icon: "zap", color: "#5F259F" },
+            { label: "Paytm", icon: "shopping-bag", color: "#00BAF2" },
+          ].map((pm) => (
+            <Pressable
+              key={pm.label}
+              style={[styles.paymentMethod, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <Feather name={pm.icon as any} size={20} color={pm.color} />
+              <Text style={[styles.paymentLabel, { color: colors.foreground }]}>{pm.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Pressable
+          onPress={() => router.push("/subscription")}
+          style={[styles.vipBanner, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" }]}
+        >
+          <Feather name="award" size={20} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.vipTitle, { color: colors.foreground }]}>Upgrade to VIP</Text>
+            <Text style={[styles.vipSub, { color: colors.mutedForeground }]}>Get 500 coins/day + exclusive perks</Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={colors.primary} />
+        </Pressable>
+      </View>
+
       <View style={[styles.section, { marginBottom: 40 }]}>
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Transaction History</Text>
         {COIN_TRANSACTIONS.map((tx) => (
@@ -232,4 +264,27 @@ const styles = StyleSheet.create({
   txDesc: { fontSize: 14, fontFamily: "Inter_500Medium" },
   txTime: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   txAmount: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  paymentRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  paymentMethod: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    minWidth: 64,
+  },
+  paymentLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  vipBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 4,
+  },
+  vipTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  vipSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
 });
