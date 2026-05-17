@@ -103,6 +103,24 @@ export default function CreatorDashboardScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 32 }}
       >
+        {/* ── KYC Gate Banner ── */}
+        <Pressable
+          onPress={() => router.push("/kyc" as any)}
+          style={styles.kycBanner}
+        >
+          <View style={styles.kycBannerLeft}>
+            <Feather name="alert-triangle" size={18} color="#FFB800" />
+            <View>
+              <Text style={styles.kycBannerTitle}>Complete E-KYC to Unlock Earnings</Text>
+              <Text style={styles.kycBannerSub}>Upload identity + address proof · Pending admin approval</Text>
+            </View>
+          </View>
+          <View style={styles.kycBannerAction}>
+            <Text style={styles.kycBannerActionText}>Verify Now</Text>
+            <Feather name="arrow-right" size={14} color="#FFB800" />
+          </View>
+        </Pressable>
+
         <View style={styles.statsGrid}>
           {ANALYTICS.map((stat) => (
             <View key={stat.label} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -326,6 +344,25 @@ const styles = StyleSheet.create({
   hostLevelEmoji: { fontSize: 28 },
   hostLevelName: { fontSize: 14, fontFamily: "Inter_700Bold" },
   hostLevelEarnings: { fontSize: 12, fontFamily: "Inter_500Medium", marginTop: 2 },
+  kycBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 4,
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#FFB80040",
+    backgroundColor: "#FFB80012",
+    gap: 10,
+  },
+  kycBannerLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
+  kycBannerTitle: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#FFB800" },
+  kycBannerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#FFB800BB", marginTop: 2 },
+  kycBannerAction: { flexDirection: "row", alignItems: "center", gap: 4 },
+  kycBannerActionText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#FFB800" },
   hostLevelBtn: {
     flexDirection: "row",
     alignItems: "center",

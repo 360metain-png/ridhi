@@ -24,6 +24,7 @@ import Agents from "@/pages/agents";
 import Hosts from "@/pages/hosts";
 import Calls from "@/pages/calls";
 import AIHub from "@/pages/ai-hub";
+import KYC from "@/pages/kyc";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/hosts" component={() => <ProtectedRoute component={Hosts} />} />
       <Route path="/calls" component={() => <ProtectedRoute component={Calls} />} />
       <Route path="/ai-hub" component={() => <ProtectedRoute component={AIHub} />} />
+      <Route path="/kyc" component={() => <ProtectedRoute component={KYC} />} />
       <Route component={NotFound} />
     </Switch>
   );

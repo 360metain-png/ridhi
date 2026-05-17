@@ -20,6 +20,7 @@ import {
   Bell,
   Phone,
   Cpu,
+  ScanFace,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,6 +50,7 @@ const NAV_SECTIONS = [
     items: [
       { name: "Hosts", href: "/hosts", icon: Star },
       { name: "Agents", href: "/agents", icon: Briefcase },
+      { name: "E-KYC Verification", href: "/kyc", icon: ScanFace, badge: "4" },
       { name: "Calls", href: "/calls", icon: Phone },
       { name: "Gaming", href: "/gaming", icon: Gamepad2 },
       { name: "Live Streams", href: "/live-streams", icon: Radio },
@@ -121,6 +123,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/hosts": "Host Management",
     "/calls": "Audio & Video Calls",
     "/ai-hub": "AI Hub",
+    "/kyc": "E-KYC Verification",
   };
 
   return (

@@ -101,6 +101,7 @@ export default function ProfileScreen() {
 
       <View style={styles.quickLinks}>
         {[
+          { icon: "shield", label: "E-KYC Verification", route: "/kyc", color: "#22C55E" },
           { icon: "aperture", label: "AI Avatar", route: "/ai-avatar", color: "#E91E8C" },
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
           { icon: "zap", label: "Gaming Arena", route: "/games", color: "#4CAF50" },
