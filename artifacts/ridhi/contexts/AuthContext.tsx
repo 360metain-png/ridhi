@@ -19,6 +19,10 @@ export interface UserProfile {
   posts: number;
   isVerified: boolean;
   createdAt: string;
+  isHost?: boolean;
+  isAgent?: boolean;
+  hostRegisteredAt?: string;
+  agentRegisteredAt?: string;
 }
 
 interface AuthContextValue {

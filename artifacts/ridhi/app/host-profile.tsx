@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   Image,
 } from "react-native";
@@ -58,24 +61,182 @@ const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 export default function HostProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const [tab, setTab] = useState<"overview" | "earnings" | "levels">("overview");
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  const currentLvl = HOST_LEVELS[CURRENT_LEVEL - 1];
-  const nextLvl = HOST_LEVELS[CURRENT_LEVEL] || HOST_LEVELS[CURRENT_LEVEL - 1];
-  const progress = CURRENT_COINS / nextLvl.target;
-  const progressPct = Math.min(progress, 1);
+  // ── Registration gate state ─────────────────────────────────────────────────
+  const [regName, setRegName]       = useState(user?.name ?? "");
+  const [regPhone, setRegPhone]     = useState(user?.phone ?? "");
+  const [regCity, setRegCity]       = useState(user?.city ?? "");
+  const [regAgreed, setRegAgreed]   = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const gateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(progressAnim, { toValue: progressPct, duration: 1200, useNativeDriver: false }).start();
-  }, []);
+    if (!user?.isHost) {
+      Animated.spring(gateAnim, { toValue: 1, useNativeDriver: true, tension: 60, friction: 8 }).start();
+    }
+  }, [user?.isHost]);
 
-  const progressWidth = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
-  });
+  const handleHostRegister = async () => {
+    if (!regName.trim()) { Alert.alert("Required", "Please enter your full name."); return; }
+    if (!regPhone.trim()) { Alert.alert("Required", "Please enter your WhatsApp number."); return; }
+    if (!regCity.trim())  { Alert.alert("Required", "Please enter your city."); return; }
+    if (!regAgreed)       { Alert.alert("Required", "Please accept the Host Agreement to continue."); return; }
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    await updateProfile({ isHost: true, hostRegisteredAt: new Date().toISOString(), name: regName.trim(), phone: regPhone.trim(), city: regCity.trim() });
+    setSubmitting(false);
+  };
+
+  // ── Pre-compute progress (must be before any conditional return) ────────────
+  const currentLvl = HOST_LEVELS[CURRENT_LEVEL - 1];
+  const nextLvl    = HOST_LEVELS[CURRENT_LEVEL] || HOST_LEVELS[CURRENT_LEVEL - 1];
+  const progressPct = Math.min(CURRENT_COINS / nextLvl.target, 1);
+  const progressWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] });
+
+  useEffect(() => {
+    if (user?.isHost) {
+      Animated.timing(progressAnim, { toValue: progressPct, duration: 1200, useNativeDriver: false }).start();
+    }
+  }, [user?.isHost]);
+
+  // ── Show registration gate if not a host ────────────────────────────────────
+  if (!user?.isHost) {
+    return (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={{ flex: 1, backgroundColor: colors.background }}
+          contentContainerStyle={{ minHeight: "100%" }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Hero gradient */}
+          <LinearGradient
+            colors={["#7B2FBE", "#E91E8C"]}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+            style={[regStyles.hero, { paddingTop: topPad + 12 }]}
+          >
+            <Pressable onPress={() => router.back()} style={regStyles.backBtn}>
+              <Feather name="arrow-left" size={22} color="#fff" />
+            </Pressable>
+
+            <Animated.View style={{ transform: [{ scale: gateAnim }], alignItems: "center" }}>
+              <View style={regStyles.heroIcon}>
+                <Feather name="star" size={36} color="#FFB800" />
+              </View>
+              <Text style={regStyles.heroTitle}>Become a Host</Text>
+              <Text style={regStyles.heroSub}>
+                Earn real money by going live, taking calls{"\n"}and entertaining your fans on Ridhi
+              </Text>
+            </Animated.View>
+
+            {/* Earnings band */}
+            <View style={regStyles.earningsBand}>
+              {[
+                { label: "Starter", value: "₹5K–₹10K", emoji: "🥉" },
+                { label: "Star Host", value: "₹60K–₹1.5L", emoji: "💎" },
+                { label: "Celebrity", value: "₹3L–₹7L+", emoji: "👑" },
+              ].map((e) => (
+                <View key={e.label} style={regStyles.earningsItem}>
+                  <Text style={regStyles.earningsEmoji}>{e.emoji}</Text>
+                  <Text style={regStyles.earningsValue}>{e.value}</Text>
+                  <Text style={regStyles.earningsLabel}>{e.label}</Text>
+                </View>
+              ))}
+            </View>
+          </LinearGradient>
+
+          {/* Benefits */}
+          <View style={[regStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[regStyles.sectionTitle, { color: colors.foreground }]}>Why become a Host?</Text>
+            {[
+              { icon: "dollar-sign", text: "Earn from Video & Audio calls, Live streams, Gifts", color: "#22C55E" },
+              { icon: "trending-up", text: "Level up from Bronze to Crown — unlock higher payouts", color: "#FFB800" },
+              { icon: "users", text: "Build your own fan base and fan clubs", color: "#7B2FBE" },
+              { icon: "shield", text: "Dedicated agent support and weekly payouts", color: "#E91E8C" },
+            ].map((b, i) => (
+              <View key={i} style={regStyles.benefitRow}>
+                <View style={[regStyles.benefitIcon, { backgroundColor: b.color + "20" }]}>
+                  <Feather name={b.icon as any} size={16} color={b.color} />
+                </View>
+                <Text style={[regStyles.benefitText, { color: colors.foreground }]}>{b.text}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Requirements */}
+          <View style={[regStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[regStyles.sectionTitle, { color: colors.foreground }]}>Requirements</Text>
+            {["18+ years old", "Smartphone with good camera & internet", "E-KYC verified (Aadhaar / PAN)", "Agreeable personality & regular schedule"].map((r, i) => (
+              <View key={i} style={regStyles.reqRow}>
+                <View style={[regStyles.reqDot, { backgroundColor: colors.primary }]} />
+                <Text style={[regStyles.reqText, { color: colors.mutedForeground }]}>{r}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Registration form */}
+          <View style={[regStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[regStyles.sectionTitle, { color: colors.foreground }]}>Host Registration</Text>
+
+            <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>Full Name *</Text>
+            <TextInput
+              value={regName}
+              onChangeText={setRegName}
+              placeholder="Enter your full name"
+              placeholderTextColor={colors.mutedForeground}
+              style={[regStyles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }]}
+            />
+
+            <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>WhatsApp Number *</Text>
+            <TextInput
+              value={regPhone}
+              onChangeText={setRegPhone}
+              placeholder="+91 XXXXX XXXXX"
+              placeholderTextColor={colors.mutedForeground}
+              keyboardType="phone-pad"
+              style={[regStyles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }]}
+            />
+
+            <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>City *</Text>
+            <TextInput
+              value={regCity}
+              onChangeText={setRegCity}
+              placeholder="Mumbai, Delhi, Bangalore…"
+              placeholderTextColor={colors.mutedForeground}
+              style={[regStyles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }]}
+            />
+
+            {/* Agreement checkbox */}
+            <Pressable onPress={() => setRegAgreed(!regAgreed)} style={regStyles.agreeRow}>
+              <View style={[regStyles.checkbox, { borderColor: regAgreed ? colors.primary : colors.border, backgroundColor: regAgreed ? colors.primary : "transparent" }]}>
+                {regAgreed && <Feather name="check" size={12} color="#fff" />}
+              </View>
+              <Text style={[regStyles.agreeText, { color: colors.mutedForeground }]}>
+                I agree to the <Text style={{ color: colors.primary }}>Host Agreement</Text> and platform guidelines
+              </Text>
+            </Pressable>
+
+            <GradientButton
+              label={submitting ? "Submitting…" : "Apply to Become a Host 🌟"}
+              onPress={handleHostRegister}
+              style={{ marginTop: 8, opacity: submitting ? 0.7 : 1 }}
+            />
+
+            <Text style={[regStyles.disclaimer, { color: colors.mutedForeground }]}>
+              Applications are reviewed within 24–48 hours. You'll be notified via SMS/email.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -368,4 +529,31 @@ const styles = StyleSheet.create({
   levelBadgeName: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 4 },
   levelMeta: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
   levelMetaText: { fontSize: 12, fontFamily: "Inter_400Regular" },
+});
+
+const regStyles = StyleSheet.create({
+  hero: { paddingHorizontal: 20, paddingBottom: 28, gap: 16, alignItems: "center" },
+  backBtn: { alignSelf: "flex-start", padding: 6, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.15)", marginBottom: 8 },
+  heroIcon: { width: 80, height: 80, borderRadius: 28, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  heroTitle: { color: "#fff", fontSize: 28, fontFamily: "Inter_700Bold", textAlign: "center", letterSpacing: -0.5 },
+  heroSub: { color: "rgba(255,255,255,0.82)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
+  earningsBand: { flexDirection: "row", gap: 0, backgroundColor: "rgba(0,0,0,0.18)", borderRadius: 16, overflow: "hidden", width: "100%" },
+  earningsItem: { flex: 1, alignItems: "center", paddingVertical: 12, gap: 3 },
+  earningsEmoji: { fontSize: 20 },
+  earningsValue: { color: "#FFB800", fontSize: 13, fontFamily: "Inter_700Bold" },
+  earningsLabel: { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "Inter_500Medium" },
+  section: { marginHorizontal: 14, marginTop: 14, borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
+  sectionTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  benefitRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  benefitIcon: { width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  benefitText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
+  reqRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  reqDot: { width: 7, height: 7, borderRadius: 4, flexShrink: 0 },
+  reqText: { fontSize: 13, fontFamily: "Inter_400Regular", flex: 1 },
+  fieldLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginBottom: -4 },
+  input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 14, fontFamily: "Inter_400Regular" },
+  agreeRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginTop: 4 },
+  checkbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 },
+  agreeText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  disclaimer: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 16, marginTop: 8, marginBottom: 8 },
 });
