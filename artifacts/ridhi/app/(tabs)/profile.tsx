@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -20,6 +22,53 @@ import { GradientButton } from "@/components/GradientButton";
 
 const { width } = Dimensions.get("window");
 
+type SheetType = "posts" | "followers" | "following" | null;
+
+// Mock people for followers / following lists
+const MOCK_FOLLOWERS = [
+  { id: "f1",  name: "Ananya Singh",   city: "Delhi",     mutual: true,  followed: false },
+  { id: "f2",  name: "Rahul Mehta",    city: "Mumbai",    mutual: false, followed: false },
+  { id: "f3",  name: "Kavya Reddy",    city: "Hyderabad", mutual: true,  followed: true  },
+  { id: "f4",  name: "Arjun Kumar",    city: "Bangalore", mutual: false, followed: false },
+  { id: "f5",  name: "Meera Patel",    city: "Ahmedabad", mutual: true,  followed: true  },
+  { id: "f6",  name: "Dev Trivedi",    city: "Pune",      mutual: false, followed: false },
+  { id: "f7",  name: "Priyanka Nair",  city: "Kochi",     mutual: true,  followed: true  },
+  { id: "f8",  name: "Siddharth Jha",  city: "Patna",     mutual: false, followed: false },
+];
+
+const MOCK_FOLLOWING = [
+  { id: "g1",  name: "Kavya Reddy",    city: "Hyderabad", following: true  },
+  { id: "g2",  name: "Meera Patel",    city: "Ahmedabad", following: true  },
+  { id: "g3",  name: "Priyanka Nair",  city: "Kochi",     following: true  },
+  { id: "g4",  name: "Divya Sharma",   city: "Chennai",   following: true  },
+  { id: "g5",  name: "Rohan Verma",    city: "Jaipur",    following: true  },
+  { id: "g6",  name: "Nikita Gupta",   city: "Lucknow",   following: true  },
+];
+
+const MOCK_POSTS = [
+  { id: "p1",  likes: 284, comments: 42 },
+  { id: "p2",  likes: 512, comments: 89 },
+  { id: "p3",  likes: 167, comments: 95 },
+  { id: "p4",  likes: 98,  comments: 23 },
+  { id: "p5",  likes: 743, comments: 156 },
+  { id: "p6",  likes: 431, comments: 67 },
+  { id: "p7",  likes: 628, comments: 112 },
+  { id: "p8",  likes: 215, comments: 38 },
+  { id: "p9",  likes: 389, comments: 74 },
+];
+
+const POST_COLORS = [
+  ["#7B2FBE", "#E91E8C"],
+  ["#0F4C81", "#1976D2"],
+  ["#B5451B", "#FF6F00"],
+  ["#1B5E20", "#388E3C"],
+  ["#4A148C", "#880E4F"],
+  ["#E65100", "#F9A825"],
+  ["#006064", "#00838F"],
+  ["#880E4F", "#C2185B"],
+  ["#1A237E", "#3949AB"],
+];
+
 const GRID_IMAGES = [
   "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300",
   "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=300",
@@ -30,17 +79,122 @@ const GRID_IMAGES = [
 ];
 
 export default function ProfileScreen() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const colors  = useColors();
+  const insets  = useSafeAreaInsets();
   const { user, logout } = useAuth();
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
   const imageSize = (width - 4) / 3;
 
+  const [sheet, setSheet] = useState<SheetType>(null);
+  const [followStates, setFollowStates] = useState<Record<string, boolean>>(
+    () => Object.fromEntries([...MOCK_FOLLOWERS, ...MOCK_FOLLOWING].map((p) => [p.id, ("followed" in p ? p.followed : p.following)]))
+  );
+
+  const toggleFollow = (id: string) =>
+    setFollowStates((prev) => ({ ...prev, [id]: !prev[id] }));
+
   if (!user) return null;
 
+  // ── bottom-sheet modal ────────────────────────────────────────────────────
+  const sheetTitle =
+    sheet === "posts"     ? `Posts (${user.posts})`          :
+    sheet === "followers" ? `Followers (${user.followers})`  :
+    sheet === "following" ? `Following (${user.following})`  : "";
+
+  const renderSheet = () => {
+    if (sheet === "posts") {
+      return (
+        <View style={styles.sheetPostGrid}>
+          {MOCK_POSTS.map((p, i) => (
+            <Pressable key={p.id} style={[styles.sheetPostCell, { width: (width - 8) / 3 }]}>
+              <LinearGradient
+                colors={POST_COLORS[i % POST_COLORS.length] as [string, string]}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.sheetPostOverlay}>
+                <Feather name="heart" size={13} color="rgba(255,255,255,0.9)" />
+                <Text style={styles.sheetPostStat}>{p.likes}</Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      );
+    }
+
+    const people = sheet === "followers" ? MOCK_FOLLOWERS : MOCK_FOLLOWING;
+    return (
+      <View style={{ paddingHorizontal: 16, gap: 2 }}>
+        {people.map((person) => {
+          const isFollowing = followStates[person.id];
+          const isMutual    = "mutual" in person && person.mutual;
+          return (
+            <View key={person.id} style={[styles.personRow, { borderBottomColor: colors.border }]}>
+              <Avatar name={person.name} size={46} />
+              <View style={{ flex: 1 }}>
+                <View style={styles.personNameRow}>
+                  <Text style={[styles.personName, { color: colors.foreground }]}>{person.name}</Text>
+                  {isMutual && (
+                    <View style={[styles.mutualBadge, { backgroundColor: colors.primary + "18" }]}>
+                      <Text style={[styles.mutualText, { color: colors.primary }]}>Mutual</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.personCity, { color: colors.mutedForeground }]}>
+                  <Feather name="map-pin" size={11} /> {person.city}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => toggleFollow(person.id)}
+                style={[
+                  styles.followBtn,
+                  isFollowing
+                    ? { backgroundColor: colors.muted, borderColor: colors.border }
+                    : { backgroundColor: colors.primary, borderColor: colors.primary },
+                ]}
+              >
+                <Text style={[styles.followBtnText, { color: isFollowing ? colors.mutedForeground : "#fff" }]}>
+                  {isFollowing ? "Following" : "Follow"}
+                </Text>
+              </Pressable>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
   return (
+    <>
+    {/* ── Stats bottom sheet ────────────────────────────────────────────── */}
+    <Modal
+      visible={sheet !== null}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setSheet(null)}
+    >
+      <TouchableWithoutFeedback onPress={() => setSheet(null)}>
+        <View style={styles.sheetOverlay} />
+      </TouchableWithoutFeedback>
+      <View style={[styles.sheetContainer, { backgroundColor: colors.card, paddingBottom: insets.bottom + 16 }]}>
+        {/* drag handle */}
+        <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+        {/* header */}
+        <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.sheetTitle, { color: colors.foreground }]}>{sheetTitle}</Text>
+          <Pressable onPress={() => setSheet(null)} style={[styles.sheetClose, { backgroundColor: colors.muted }]}>
+            <Feather name="x" size={16} color={colors.foreground} />
+          </Pressable>
+        </View>
+        {/* content */}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }}>
+          {renderSheet()}
+        </ScrollView>
+      </View>
+    </Modal>
+
+    {/* ── Main profile scroll ───────────────────────────────────────────── */}
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
@@ -73,16 +227,21 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          {[
-            { label: "Posts", value: user.posts },
-            { label: "Followers", value: user.followers },
-            { label: "Following", value: user.following },
-          ].map((stat) => (
-            <Pressable key={stat.label} style={styles.stat}>
+          {([
+            { label: "Posts",     value: user.posts,     key: "posts"     },
+            { label: "Followers", value: user.followers, key: "followers" },
+            { label: "Following", value: user.following, key: "following" },
+          ] as { label: string; value: number; key: SheetType }[]).map((stat, i) => (
+            <Pressable
+              key={stat.label}
+              onPress={() => setSheet(stat.key)}
+              style={[styles.stat, i < 2 && { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }]}
+            >
               <Text style={[styles.statValue, { color: colors.foreground }]}>
                 {stat.value.toLocaleString()}
               </Text>
               <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{stat.label}</Text>
+              <Feather name="chevron-down" size={11} color={colors.primary} style={{ marginTop: 1 }} />
             </Pressable>
           ))}
         </View>
@@ -244,6 +403,7 @@ export default function ProfileScreen() {
         </Pressable>
       </View>
     </ScrollView>
+    </>
   );
 }
 
@@ -327,4 +487,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   logoutText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+
+  // ── bottom sheet ──────────────────────────────────────────────────────────
+  sheetOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
+  sheetContainer:  { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "78%", minHeight: 320 },
+  sheetHandle:     { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginTop: 10, marginBottom: 4 },
+  sheetHeader:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth },
+  sheetTitle:      { fontSize: 17, fontFamily: "Inter_700Bold" },
+  sheetClose:      { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+
+  // posts grid inside sheet
+  sheetPostGrid:   { flexDirection: "row", flexWrap: "wrap", gap: 4, padding: 4, paddingTop: 12 },
+  sheetPostCell:   { height: 110, borderRadius: 8, overflow: "hidden", alignItems: "center", justifyContent: "flex-end" },
+  sheetPostOverlay:{ flexDirection: "row", alignItems: "center", gap: 4, padding: 8, width: "100%" },
+  sheetPostStat:   { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#fff" },
+
+  // people rows
+  personRow:       { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  personNameRow:   { flexDirection: "row", alignItems: "center", gap: 6 },
+  personName:      { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  personCity:      { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  mutualBadge:     { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  mutualText:      { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+  followBtn:       { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
+  followBtnText:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
