@@ -6,9 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
   Briefcase, Users, TrendingUp, IndianRupee, Star, Eye, ChevronRight,
-  Search, Award, UserCheck, Coins, Plus,
+  Search, Award, UserCheck, Coins, Plus, CheckCircle, XCircle, Clock,
+  Phone, MapPin, Calendar, ShieldAlert,
 } from "lucide-react";
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+const PENDING_AGENTS = [
+  { id: "pa1", name: "Suresh Malhotra",  city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years in talent mgmt",  status: "pending" as const },
+  { id: "pa2", name: "Lakshmi Devi",     city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 years",        status: "pending" as const },
+  { id: "pa3", name: "Gopal Reddy",      city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform",           status: "pending" as const },
+];
 
 const AGENT_LEVELS = [
   { level: "A1", title: "Agent", hostsRequired: 5, commissionRate: 2, color: "#9E9E9E", icon: "🥉" },
@@ -40,13 +48,19 @@ const levelIcon = (l: string) => AGENT_LEVELS.find((a) => a.level === l)?.icon ?
 const levelCommission = (l: string) => AGENT_LEVELS.find((a) => a.level === l)?.commissionRate ?? 0;
 
 export default function AgentsPage() {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const [search, setSearch]       = useState("");
+  const [selected, setSelected]   = useState<string | null>(null);
+  const [pending, setPending]      = useState(PENDING_AGENTS);
+  const role                       = localStorage.getItem("ridhi_admin_role");
+  const canApproveAgents           = role === "admin" || role === "super_admin";
 
   const filtered = AGENTS.filter(
     (a) => a.name.toLowerCase().includes(search.toLowerCase()) || a.city.toLowerCase().includes(search.toLowerCase())
   );
   const agent = AGENTS.find((a) => a.id === selected);
+
+  const resolveApplication = (id: string, approved: boolean) =>
+    setPending((p) => p.filter((a) => a.id !== id));
 
   return (
     <div className="space-y-6">
@@ -60,6 +74,64 @@ export default function AgentsPage() {
         </div>
         <Button className="gap-2"><Plus className="w-4 h-4" /> Invite Agent</Button>
       </div>
+
+      {/* ── Pending Agent Approvals (Admin only) ── */}
+      {canApproveAgents && pending.length > 0 && (
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-sm flex items-center gap-2 text-orange-800">
+              <ShieldAlert className="w-4 h-4 text-orange-600" />
+              Pending Agent Applications
+              <Badge className="bg-orange-500 text-white text-xs">{pending.length} awaiting review</Badge>
+              <span className="ml-auto text-xs font-normal text-orange-600">Admin approval required</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="space-y-3">
+              {pending.map((app) => (
+                <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-orange-100 p-3 shadow-sm">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {app.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{app.name}</p>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.hosts} referred hosts</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{app.appliedAt}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 italic">{app.experience}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1 border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={() => resolveApplication(app.id, false)}
+                    >
+                      <XCircle className="w-3 h-3" /> Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => resolveApplication(app.id, true)}
+                    >
+                      <CheckCircle className="w-3 h-3" /> Approve
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {canApproveAgents && pending.length === 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <p className="text-sm text-green-700 font-medium">All agent applications reviewed — no pending approvals.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {AGENT_LEVELS.map((lvl) => {

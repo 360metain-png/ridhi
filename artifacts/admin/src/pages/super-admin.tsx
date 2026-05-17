@@ -254,7 +254,7 @@ export default function SuperAdminPage() {
             <Shield className="w-6 h-6 text-primary" />
             Super Admin Control
           </h2>
-          <p className="text-muted-foreground text-sm mt-1">Full system access — Hosts & Agents included</p>
+          <p className="text-muted-foreground text-sm mt-1">End-to-end control · Monitors Admins → Agents → Hosts → Users</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Badge className="bg-green-500 text-white gap-1.5">
@@ -263,7 +263,7 @@ export default function SuperAdminPage() {
           </Badge>
           <Badge variant="outline" className="gap-1 text-purple-700 border-purple-200 bg-purple-50">
             <ShieldCheck className="w-3 h-3" />
-            All Roles: Full Access
+            Super Admin: Full Control
           </Badge>
         </div>
       </div>
@@ -290,16 +290,16 @@ export default function SuperAdminPage() {
         ))}
       </div>
 
-      <Tabs defaultValue="access">
+      <Tabs defaultValue="admins">
         <TabsList className="h-9">
+          <TabsTrigger value="admins" className="text-xs gap-1.5">
+            <Users className="w-3.5 h-3.5" /> Admin Monitoring
+          </TabsTrigger>
           <TabsTrigger value="access" className="text-xs gap-1.5">
             <Key className="w-3.5 h-3.5" /> Host & Agent Access
           </TabsTrigger>
           <TabsTrigger value="system" className="text-xs gap-1.5">
             <Server className="w-3.5 h-3.5" /> System
-          </TabsTrigger>
-          <TabsTrigger value="admins" className="text-xs gap-1.5">
-            <Users className="w-3.5 h-3.5" /> Admin Roles
           </TabsTrigger>
           <TabsTrigger value="apis" className="text-xs gap-1.5">
             <Code className="w-3.5 h-3.5" /> APIs & Integrations
@@ -312,22 +312,24 @@ export default function SuperAdminPage() {
         {/* ─── HOST & AGENT ACCESS TAB ─── */}
         <TabsContent value="access" className="mt-4 space-y-6">
 
-          {/* Access Policy Banner */}
-          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4 flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-purple-600">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-purple-900">Full Super Admin Access Policy</p>
-              <p className="text-sm text-purple-700 mt-0.5">
-                All enabled Hosts and Agents have <strong>identical Super Admin permissions</strong> — access to every dashboard section, all user data, financial reports, moderation queue, settings, and platform controls.
-              </p>
-            </div>
-            <div className="hidden md:flex flex-col gap-1 text-xs text-purple-700">
-              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> All Dashboard Pages</span>
-              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> User Management</span>
-              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Financial Data</span>
-              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Global Settings</span>
+          {/* Hierarchy banner */}
+          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+            <p className="font-semibold text-purple-900 mb-3 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" /> Role-Based Access Hierarchy
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { role: "Super Admin", color: "bg-purple-600", scope: "Full control — all pages, all actions", manages: "Manages Admins" },
+                { role: "Admin",       color: "bg-indigo-500", scope: "All pages except Super Admin panel",    manages: "Approves Agents" },
+                { role: "Agent",       color: "bg-blue-500",   scope: "Hosts, Calls, KYC, Live Streams",       manages: "Approves Hosts" },
+                { role: "Host",        color: "bg-pink-500",   scope: "Dashboard, Calls, Live Streams only",   manages: "Managed by Agent" },
+              ].map((r) => (
+                <div key={r.role} className="bg-white rounded-lg border p-3 space-y-1.5">
+                  <div className={`w-fit px-2 py-0.5 rounded-full ${r.color} text-white text-xs font-bold`}>{r.role}</div>
+                  <p className="text-xs text-foreground font-medium">{r.manages}</p>
+                  <p className="text-xs text-muted-foreground">{r.scope}</p>
+                </div>
+              ))}
             </div>
           </div>
 

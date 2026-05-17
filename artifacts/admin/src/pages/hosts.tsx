@@ -7,8 +7,15 @@ import { Progress } from "@/components/ui/progress";
 import {
   Star, TrendingUp, IndianRupee, Users, Eye, CheckCircle,
   Search, Radio, Award, Crown, Zap, ShieldCheck, Heart,
+  XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
 } from "lucide-react";
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+
+const PENDING_HOSTS = [
+  { id: "ph1", name: "Anjali Rao",   city: "Bangalore", phone: "+91 99887 76655", agent: "Vikram Rao (A5)",    appliedAt: "1 hour ago",  language: "Kannada", followers: 3200 },
+  { id: "ph2", name: "Rohit Sharma", city: "Delhi",     phone: "+91 88776 65544", agent: "Sunita Joshi (A4)", appliedAt: "3 hours ago", language: "Hindi",   followers: 1800 },
+];
 
 const HOST_LEVELS = [
   { level: "L1", title: "Bronze", minCoins: 50000, badge: "🥉", color: "#CD7F32", next: "L2" },
@@ -41,8 +48,11 @@ const hostEarningsData = [
 const levelOf = (l: string) => HOST_LEVELS.find((h) => h.level === l);
 
 export default function HostsPage() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch]         = useState("");
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [pending, setPending]        = useState(PENDING_HOSTS);
+  const role                          = localStorage.getItem("ridhi_admin_role");
+  const canApproveHosts               = role === "agent" || role === "admin" || role === "super_admin";
 
   const filtered = HOSTS.filter((h) => {
     const matchSearch = h.name.toLowerCase().includes(search.toLowerCase()) || h.city.toLowerCase().includes(search.toLowerCase());
@@ -52,6 +62,9 @@ export default function HostsPage() {
 
   const liveHosts = HOSTS.filter((h) => h.isLive).length;
   const totalEarnings = HOSTS.reduce((s, h) => s + h.earnings, 0);
+
+  const resolveApplication = (id: string, _approved: boolean) =>
+    setPending((p) => p.filter((h) => h.id !== id));
 
   return (
     <div className="space-y-6">
@@ -68,6 +81,67 @@ export default function HostsPage() {
           {liveHosts} Live Now
         </Badge>
       </div>
+
+      {/* ── Pending Host Approvals (Agent / Admin) ── */}
+      {canApproveHosts && pending.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50/40">
+          <CardHeader className="py-3 px-4">
+            <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
+              <ShieldAlert className="w-4 h-4 text-blue-600" />
+              Pending Host Applications
+              <Badge className="bg-blue-500 text-white text-xs">{pending.length} awaiting review</Badge>
+              <span className="ml-auto text-xs font-normal text-blue-600">
+                {role === "agent" ? "Agent approval required" : "Admin / Agent review"}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-4">
+            <div className="space-y-3">
+              {pending.map((app) => (
+                <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-blue-100 p-3 shadow-sm">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {app.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{app.name}</p>
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Briefcase className="w-3 h-3" />{app.agent}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.followers.toLocaleString()} followers</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{app.appliedAt}</span>
+                    </div>
+                    <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1.5">{app.language}</Badge>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1 border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={() => resolveApplication(app.id, false)}
+                    >
+                      <XCircle className="w-3 h-3" /> Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => resolveApplication(app.id, true)}
+                    >
+                      <CheckCircle className="w-3 h-3" /> Approve
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {canApproveHosts && pending.length === 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <p className="text-sm text-green-700 font-medium">All host applications reviewed — no pending approvals.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
         {HOST_LEVELS.map((lvl) => {
