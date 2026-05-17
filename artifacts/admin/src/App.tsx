@@ -19,6 +19,9 @@ import Settings from "@/pages/settings";
 import LiveStreams from "@/pages/live-streams";
 import Revenue from "@/pages/revenue";
 import SuperAdmin from "@/pages/super-admin";
+import Gaming from "@/pages/gaming";
+import Agents from "@/pages/agents";
+import Hosts from "@/pages/hosts";
 
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -58,6 +61,9 @@ function Router() {
       <Route path="/live-streams" component={() => <ProtectedRoute component={LiveStreams} />} />
       <Route path="/revenue" component={() => <ProtectedRoute component={Revenue} />} />
       <Route path="/super-admin" component={() => <ProtectedRoute component={SuperAdmin} />} />
+      <Route path="/gaming" component={() => <ProtectedRoute component={Gaming} />} />
+      <Route path="/agents" component={() => <ProtectedRoute component={Agents} />} />
+      <Route path="/hosts" component={() => <ProtectedRoute component={Hosts} />} />
       <Route component={NotFound} />
     </Switch>
   );
