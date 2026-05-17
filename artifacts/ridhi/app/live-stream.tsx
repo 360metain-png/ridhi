@@ -7,11 +7,14 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Image,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { router } from "expo-router";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -88,7 +91,10 @@ function BigGiftOverlay({ gift, onDone }: { gift: typeof LIVE_GIFTS[0]; onDone: 
       </Animated.View>
       <Animated.View style={[styles.bigGiftPill, { borderColor: gift.color, transform: [{ scale }] }]}>
         <Text style={styles.bigGiftPillText}>{gift.name}</Text>
-        <Text style={{ fontSize: 11, color: "#FFB800" }}>🪙 {gift.cost.toLocaleString()} coins</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+            <Image source={COIN_IMAGE} style={{ width: 12, height: 12 }} resizeMode="contain" />
+            <Text style={{ fontSize: 11, color: "#FFB800" }}>{gift.cost.toLocaleString()} coins</Text>
+          </View>
       </Animated.View>
     </Animated.View>
   );
@@ -110,7 +116,7 @@ function HostCoinPill({ coins }: { coins: number }) {
 
   return (
     <Animated.View style={[styles.hostCoinPill, { transform: [{ scale }] }]}>
-      <Text style={{ fontSize: 13 }}>🪙</Text>
+      <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
       <Text style={[styles.hostCoinText, { color: "#FFB800" }]}>{coins.toLocaleString()}</Text>
     </Animated.View>
   );
@@ -347,7 +353,7 @@ export default function LiveStreamScreen() {
                   </View>
                   <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
                   <View style={styles.giftCost}>
-                    <Text style={{ fontSize: 10 }}>🪙</Text>
+                    <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
                     <Text style={[styles.giftCostText, { color: colors.mutedForeground }]}>
                       {g.cost >= 1000 ? `${(g.cost / 1000).toFixed(0)}K` : g.cost}
                     </Text>

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,6 +17,9 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -229,7 +233,7 @@ export default function GameRoomScreen() {
           </View>
         </View>
         <View style={[styles.entryBadge, { backgroundColor: colors.gold + "25" }]}>
-          <Text style={[styles.entryText, { color: colors.gold }]}>🪙 {entry}</Text>
+          <Text style={[styles.entryText, { color: colors.gold }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{entry}</Text>
         </View>
       </LinearGradient>
 
@@ -239,7 +243,7 @@ export default function GameRoomScreen() {
             <Avatar name="You" size={52} hasStory />
             <Text style={[styles.playerName, { color: colors.foreground }]}>You</Text>
             <View style={[styles.coinPill, { backgroundColor: colors.primary + "20" }]}>
-              <Text style={[styles.coinPillText, { color: colors.primary }]}>🪙 {myCoins}</Text>
+              <Text style={[styles.coinPillText, { color: colors.primary }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{myCoins}</Text>
             </View>
           </View>
 
@@ -252,7 +256,7 @@ export default function GameRoomScreen() {
             ) : (
               <View style={styles.prizeBox}>
                 <Text style={[styles.prizeLabel, { color: colors.mutedForeground }]}>Prize</Text>
-                <Text style={[styles.prizeValue, { color: colors.gold }]}>🪙 {prize}</Text>
+                <Text style={[styles.prizeValue, { color: colors.gold }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{prize}</Text>
               </View>
             )}
           </View>
@@ -261,7 +265,7 @@ export default function GameRoomScreen() {
             <Avatar name={OPPONENT.name} size={52} hasStory />
             <Text style={[styles.playerName, { color: colors.foreground }]} numberOfLines={1}>{OPPONENT.name.split(" ")[0]}</Text>
             <View style={[styles.coinPill, { backgroundColor: colors.secondary + "20" }]}>
-              <Text style={[styles.coinPillText, { color: colors.secondary }]}>🪙 {opCoins}</Text>
+              <Text style={[styles.coinPillText, { color: colors.secondary }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{opCoins}</Text>
             </View>
           </View>
         </View>
@@ -398,7 +402,7 @@ export default function GameRoomScreen() {
                 >
                   <Text style={styles.giftEmoji}>{g.emoji}</Text>
                   <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
-                  <Text style={[styles.giftCoins, { color: colors.gold }]}>🪙 {g.coins.toLocaleString()}</Text>
+                  <Text style={[styles.giftCoins, { color: colors.gold }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{g.coins.toLocaleString()}</Text>
                 </Pressable>
               ))}
             </View>

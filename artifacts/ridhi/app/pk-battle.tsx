@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -18,6 +19,9 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 const { width } = Dimensions.get("window");
 
@@ -198,7 +202,7 @@ export default function PKBattleScreen() {
             <Text style={styles.hostName}>{activeBattle.leftHost}</Text>
             <Text style={styles.hostCity}>{activeBattle.leftCity}</Text>
             <View style={styles.coinRow}>
-              <Text style={styles.coinEmoji}>🪙</Text>
+              <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
               <Text style={[styles.coinCount, { color: "#E91E8C" }]}>
                 {leftCoins.toLocaleString()}
               </Text>
@@ -216,7 +220,7 @@ export default function PKBattleScreen() {
             <Text style={styles.hostName}>{activeBattle.rightHost}</Text>
             <Text style={styles.hostCity}>{activeBattle.rightCity}</Text>
             <View style={styles.coinRow}>
-              <Text style={styles.coinEmoji}>🪙</Text>
+              <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
               <Text style={[styles.coinCount, { color: "#7B2FBE" }]}>
                 {rightCoins.toLocaleString()}
               </Text>
@@ -318,7 +322,7 @@ export default function PKBattleScreen() {
                   <View style={styles.battleCardHost}>
                     <Avatar name={item.leftHost} size={46} hasStory />
                     <Text style={[styles.battleCardHostName, { color: colors.foreground }]}>{item.leftHost.split(" ")[0]}</Text>
-                    <Text style={[styles.battleCardCoins, { color: "#E91E8C" }]}>🪙 {(item.leftCoins / 1000).toFixed(1)}K</Text>
+                    <Text style={[styles.battleCardCoins, { color: "#E91E8C" }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{(item.leftCoins / 1000).toFixed(1)}K</Text>
                   </View>
                   <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.vsMini}>
                     <Text style={styles.vsTextMini}>PK</Text>
@@ -326,7 +330,7 @@ export default function PKBattleScreen() {
                   <View style={styles.battleCardHost}>
                     <Avatar name={item.rightHost} size={46} hasStory />
                     <Text style={[styles.battleCardHostName, { color: colors.foreground }]}>{item.rightHost.split(" ")[0]}</Text>
-                    <Text style={[styles.battleCardCoins, { color: "#7B2FBE" }]}>🪙 {(item.rightCoins / 1000).toFixed(1)}K</Text>
+                    <Text style={[styles.battleCardCoins, { color: "#7B2FBE" }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{(item.rightCoins / 1000).toFixed(1)}K</Text>
                   </View>
                 </View>
 

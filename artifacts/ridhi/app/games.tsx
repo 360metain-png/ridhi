@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,6 +15,9 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 const { width } = Dimensions.get("window");
 
@@ -173,7 +177,7 @@ export default function GamesScreen() {
                 <Text style={styles.tierIcon}>{tier.icon}</Text>
                 <Text style={[styles.tierLabel, { color: "#fff" }]}>{tier.label}</Text>
                 <View style={[styles.tierEntry, { backgroundColor: tier.color + "20" }]}>
-                  <Text style={[styles.tierEntryText, { color: tier.color }]}>🪙 {tier.entry}</Text>
+                  <Text style={[styles.tierEntryText, { color: tier.color }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{tier.entry}</Text>
                 </View>
                 <Text style={[styles.tierPrize, { color: colors.gold }]}>Win {tier.prize}</Text>
                 <View style={styles.tierPlayers}>
@@ -219,8 +223,7 @@ export default function GamesScreen() {
                     </View>
                   </View>
                   <View style={styles.roomMeta}>
-                    <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}>
-                      🪙 {room.entry} entry · {room.players}/{room.maxPlayers} players
+                    <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{room.entry} entry · {room.players}/{room.maxPlayers} players
                     </Text>
                     <View style={styles.roomViewers}>
                       <Feather name="eye" size={11} color={colors.mutedForeground} />
@@ -290,7 +293,12 @@ export default function GamesScreen() {
               </View>
               <View style={[styles.missionReward, { backgroundColor: m.done ? colors.success + "20" : colors.gold + "20" }]}>
                 <Text style={[styles.missionRewardText, { color: m.done ? colors.success : colors.gold }]}>
-                  {m.done ? "✓ Done" : typeof m.reward === "number" ? `+${m.reward} 🪙` : m.reward}
+                  {m.done ? "✓ Done" : typeof m.reward === "number" ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <Text style={{ color: m.done ? colors.success : colors.gold }}>{`+${m.reward} `}</Text>
+                      <Image source={COIN_IMAGE} style={{ width: 13, height: 13 }} resizeMode="contain" />
+                    </View>
+                  ) : m.reward}
                 </Text>
               </View>
             </View>

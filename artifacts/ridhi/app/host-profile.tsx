@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +18,9 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 const { width } = Dimensions.get("window");
 
@@ -170,7 +174,7 @@ export default function HostProfileScreen() {
                     <Text style={styles.giftEmoji}>{g.emoji}</Text>
                     <Text style={[styles.giftName, { color: colors.foreground }]}>{g.name}</Text>
                     <Text style={[styles.giftCount, { color: colors.mutedForeground }]}>×{g.count}</Text>
-                    <Text style={[styles.giftCoins, { color: colors.gold }]}>🪙 {g.coins.toLocaleString()}</Text>
+                    <Text style={[styles.giftCoins, { color: colors.gold }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{g.coins.toLocaleString()}</Text>
                   </View>
                 ))}
               </View>
@@ -187,7 +191,10 @@ export default function HostProfileScreen() {
             <View style={[styles.totalEarningsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>Total Earnings This Month</Text>
               <Text style={[styles.totalAmount, { color: colors.success }]}>₹58,000</Text>
-              <Text style={[styles.totalCoins, { color: colors.gold }]}>🪙 290,000 coins</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                <Text style={[styles.totalCoins, { color: colors.gold }]}>290,000 coins</Text>
+              </View>
             </View>
 
             <View style={[styles.chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -211,7 +218,7 @@ export default function HostProfileScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.earningSource, { color: colors.foreground }]}>{e.source}</Text>
-                  <Text style={[styles.earningCoins, { color: colors.mutedForeground }]}>🪙 {e.coins.toLocaleString()}</Text>
+                  <Text style={[styles.earningCoins, { color: colors.mutedForeground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{e.coins.toLocaleString()}</Text>
                 </View>
                 <Text style={[styles.earningAmount, { color: colors.success }]}>{e.amount}</Text>
               </View>
@@ -253,8 +260,7 @@ export default function HostProfileScreen() {
                     </View>
                     <Text style={[styles.levelBadgeName, { color: lvl.color }]}>{lvl.badge} Badge</Text>
                     <View style={styles.levelMeta}>
-                      <Text style={[styles.levelMetaText, { color: colors.mutedForeground }]}>
-                        🪙 {(lvl.target / 100000).toFixed(1)}L coins/month
+                      <Text style={[styles.levelMetaText, { color: colors.mutedForeground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{(lvl.target / 100000).toFixed(1)}L coins/month
                       </Text>
                       <Text style={[styles.levelMetaText, { color: colors.success }]}>{lvl.earnings}</Text>
                     </View>

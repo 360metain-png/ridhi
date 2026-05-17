@@ -7,11 +7,14 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Image,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { router } from "expo-router";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -61,7 +64,7 @@ function LiveTxRow({ tx }: { tx: LiveTx }) {
       ]}
     >
       <View style={[styles.liveTxIcon, { backgroundColor: bgColor }]}>
-        <Text style={{ fontSize: 15 }}>{isCredit ? "🪙" : "💸"}</Text>
+        <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.liveTxLabel, { color: colors.foreground }]}>{tx.label}</Text>
@@ -164,7 +167,7 @@ export default function WalletScreen() {
           </View>
 
           <View style={styles.balanceSection}>
-            <Text style={styles.coinEmoji}>🪙</Text>
+            <Image source={COIN_IMAGE} style={styles.coinEmoji} resizeMode="contain" />
             <Text style={styles.balanceLabel}>Coin Balance</Text>
             <AnimatedCoinBalance
               value={user?.coins ?? 0}
@@ -209,7 +212,7 @@ export default function WalletScreen() {
 
           {liveTxs.length === 0 ? (
             <View style={[styles.liveEmpty, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={{ fontSize: 24 }}>🪙</Text>
+              <Image source={COIN_IMAGE} style={{ width: 32, height: 32 }} resizeMode="contain" />
               <Text style={[styles.liveEmptyText, { color: colors.mutedForeground }]}>Waiting for live activity…</Text>
             </View>
           ) : (
@@ -355,7 +358,7 @@ const styles = StyleSheet.create({
   walletHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 },
   backBtn: { padding: 4 },
   walletTitle: { color: "#fff", fontSize: 18, fontFamily: "Inter_700Bold" },
-  coinEmoji: { fontSize: 36, marginBottom: 4 },
+  coinEmoji: { width: 56, height: 56, marginBottom: 4 },
   balanceSection: { alignItems: "center", gap: 4, marginBottom: 24 },
   balanceLabel: { color: "rgba(255,255,255,0.8)", fontSize: 14, fontFamily: "Inter_400Regular" },
   balance: { color: "#fff", fontSize: 56, fontFamily: "Inter_700Bold", letterSpacing: -2 },

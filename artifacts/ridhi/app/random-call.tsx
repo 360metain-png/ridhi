@@ -8,6 +8,7 @@ import {
   Text,
   View,
   Modal,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +18,9 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 // ── Pricing per blueprint ─────────────────────────────────────────────────────
 const HOST_TIERS = [
@@ -264,8 +268,7 @@ export default function RandomCallScreen() {
                 >
                   <Text style={styles.tierEmoji}>{t.badge}</Text>
                   <Text style={[styles.tierLabel, { color: active ? t.color : colors.foreground }]}>{t.label}</Text>
-                  <Text style={[styles.tierRate, { color: active ? t.color : colors.mutedForeground }]}>
-                    🪙 {myRate}/min
+                  <Text style={[styles.tierRate, { color: active ? t.color : colors.mutedForeground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{myRate}/min
                   </Text>
                 </Pressable>
               );
@@ -302,20 +305,23 @@ export default function RandomCallScreen() {
           <View style={[styles.costBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.costRow}>
               <Text style={[styles.costLabel, { color: colors.mutedForeground }]}>{tier.badge} {tier.label} rate</Text>
-              <Text style={[styles.costVal, { color: colors.foreground }]}>🪙 {rate}/min</Text>
+              <Text style={[styles.costVal, { color: colors.foreground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{rate}/min</Text>
             </View>
             {callType === "video" && activeAddons.length > 0 && (
               <View style={styles.costRow}>
                 <Text style={[styles.costLabel, { color: colors.mutedForeground }]}>Add-ons</Text>
-                <Text style={[styles.costVal, { color: colors.foreground }]}>+🪙 {addonCostPerMin}/min</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Text style={[styles.costVal, { color: colors.foreground }]}>+</Text>
+                  <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                  <Text style={[styles.costVal, { color: colors.foreground }]}>{addonCostPerMin}/min</Text>
+                </View>
               </View>
             )}
             <View style={[styles.costRow, styles.costTotal]}>
               <Text style={[styles.costLabel, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
                 Estimated 5-min cost
               </Text>
-              <Text style={[styles.costVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 16 }]}>
-                🪙 {est5min}
+              <Text style={[styles.costVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 16 }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{est5min}
               </Text>
             </View>
           </View>
@@ -439,8 +445,7 @@ export default function RandomCallScreen() {
               </Text>
             </View>
             <View style={[styles.costInfoBox, { backgroundColor: colors.muted }]}>
-              <Text style={[styles.costInfoText, { color: colors.mutedForeground }]}>
-                🪙 {totalRate}/min · Est. 5 min = {est5min} coins
+              <Text style={[styles.costInfoText, { color: colors.mutedForeground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{totalRate}/min · Est. 5 min = {est5min} coins
               </Text>
             </View>
             <View style={styles.previewBtns}>
@@ -470,7 +475,7 @@ export default function RandomCallScreen() {
             <Text style={[styles.confirmSub, { color: colors.mutedForeground }]}>
               Free preview ended. Coins will be deducted at
             </Text>
-            <Text style={[styles.confirmRate, { color: colors.primary }]}>🪙 {totalRate} coins / minute</Text>
+            <Text style={[styles.confirmRate, { color: colors.primary }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{totalRate} coins / minute</Text>
             <View style={[styles.confirmBalance, { backgroundColor: colors.muted }]}>
               <Feather name="star" size={14} color={colors.gold} />
               <Text style={[styles.confirmBalText, { color: colors.foreground }]}>
@@ -515,7 +520,10 @@ export default function RandomCallScreen() {
               <View style={styles.callLiveRow}>
                 <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
                 <Text style={[styles.liveTimer, { color: colors.success }]}>{fmt(duration)}</Text>
-                <Text style={[styles.liveCost, { color: colors.gold }]}>  🪙 -{coinsSpent}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                  <Text style={[styles.liveCost, { color: colors.gold }]}>-{coinsSpent}</Text>
+                </View>
               </View>
             )}
           </View>

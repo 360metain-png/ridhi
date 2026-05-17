@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,6 +14,9 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+
 
 type TourneyTab = "daily" | "festival" | "my";
 
@@ -261,7 +265,7 @@ export default function TournamentsScreen() {
 
                     <View style={styles.tourneyStats}>
                       <View style={styles.tourneyStat}>
-                        <Text style={[styles.tourneyStatVal, { color: colors.gold }]}>🪙 {t.prizePool.toLocaleString()}</Text>
+                        <Text style={[styles.tourneyStatVal, { color: colors.gold }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{t.prizePool.toLocaleString()}</Text>
                         <Text style={[styles.tourneyStatLabel, { color: colors.mutedForeground }]}>Prize Pool</Text>
                       </View>
                       <View style={styles.tourneyStat}>
@@ -269,7 +273,7 @@ export default function TournamentsScreen() {
                         <Text style={[styles.tourneyStatLabel, { color: colors.mutedForeground }]}>Players</Text>
                       </View>
                       <View style={styles.tourneyStat}>
-                        <Text style={[styles.tourneyStatVal, { color: colors.foreground }]}>🪙 {t.entry}</Text>
+                        <Text style={[styles.tourneyStatVal, { color: colors.foreground }]}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{t.entry}</Text>
                         <Text style={[styles.tourneyStatLabel, { color: colors.mutedForeground }]}>Entry</Text>
                       </View>
                     </View>
@@ -325,7 +329,7 @@ export default function TournamentsScreen() {
                     <Text style={[styles.festPrizeLabel, { color: "rgba(255,255,255,0.5)" }]}>Total Prize Pool</Text>
                   </View>
                   <View style={[styles.festEntry, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
-                    <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" }}>🪙 {f.entry} entry</Text>
+                    <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" }}><Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />{f.entry} entry</Text>
                   </View>
                 </View>
                 <Pressable style={[styles.festNotifyBtn, { borderColor: f.color + "60" }]}>
@@ -379,7 +383,10 @@ export default function TournamentsScreen() {
                       </Text>
                     </View>
                     {h.prize > 0 && (
-                      <Text style={[styles.historyPrize, { color: colors.success }]}>+{h.prize} 🪙</Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Text style={[styles.historyPrize, { color: colors.success }]}>+{h.prize}</Text>
+                        <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                      </View>
                     )}
                   </View>
                 </View>

@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Image, StyleSheet, Text, View } from "react-native";
+
+const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
 export interface CoinToastData {
   id: string;
@@ -46,7 +48,7 @@ function CoinParticle({ offsetX, delay, large }: { offsetX: number; delay: numbe
         { transform: [{ translateX: offsetX }, { translateY: y }, { rotate }], opacity },
       ]}
     >
-      <Text style={{ fontSize: large ? 16 : 13 }}>🪙</Text>
+      <Image source={COIN_IMAGE} style={{ width: large ? 20 : 16, height: large ? 20 : 16 }} resizeMode="contain" />
     </Animated.View>
   );
 }
@@ -174,7 +176,7 @@ function CoinToastItem({ data, onDone }: { data: CoinToastData; onDone: () => vo
 
       {/* Main pill */}
       <View style={[styles.pill, { backgroundColor: bgColor, borderColor }]}>
-        <Text style={styles.pillCoin}>{isCredit ? "🪙" : "💸"}</Text>
+        <Image source={COIN_IMAGE} style={styles.pillCoin} resizeMode="contain" />
         <View style={styles.pillTextCol}>
           <Text style={[styles.pillAmount, { color: accentColor }]}>
             {isCredit ? "+" : "−"}{data.amount.toLocaleString()}
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 10,
   },
-  pillCoin: { fontSize: 20 },
+  pillCoin: { width: 24, height: 24 },
   pillTextCol: { alignItems: "flex-start" },
   pillAmount: { fontSize: 24, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
   pillLabel: { fontSize: 11, fontFamily: "Inter_500Medium", marginTop: 1 },
