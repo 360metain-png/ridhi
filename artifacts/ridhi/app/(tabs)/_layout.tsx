@@ -108,7 +108,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <AnimatedTabIcon name="home" focused={focused} color={color} />
           ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Feed" focused={focused} />,
+          tabBarLabel: ({ focused }) => <TabLabel label="Home" focused={focused} />,
         }}
       />
       <Tabs.Screen
