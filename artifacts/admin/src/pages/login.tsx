@@ -5,29 +5,54 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Star, Briefcase, Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Shield, Star, Briefcase, Eye, EyeOff, ChevronRight, Check, X } from "lucide-react";
 
 type RoleTab = "super_admin" | "host" | "agent";
 
 const ROLE_TABS: { id: RoleTab; label: string; icon: typeof Shield; color: string; bg: string; border: string }[] = [
-  { id: "super_admin", label: "Super Admin", icon: Shield, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-300" },
-  { id: "host", label: "Host", icon: Star, color: "text-pink-700", bg: "bg-pink-50", border: "border-pink-300" },
-  { id: "agent", label: "Agent", icon: Briefcase, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-300" },
+  { id: "super_admin", label: "Super Admin", icon: Shield,   color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-300" },
+  { id: "host",        label: "Host",        icon: Star,     color: "text-pink-700",   bg: "bg-pink-50",   border: "border-pink-300"   },
+  { id: "agent",       label: "Agent",       icon: Briefcase,color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-300"   },
 ];
 
 const DEMO_CREDS: Record<RoleTab, { email: string; password: string; hint: string; badge: string }> = {
-  super_admin: { email: "arjun@ridhi.app", password: "admin123", hint: "Full platform access", badge: "Super Admin" },
-  host: { email: "host.priya@ridhi.app", password: "host123", hint: "Host Level 5 · VIP · Full Access", badge: "Host L5" },
-  agent: { email: "agent.rahul@ridhi.app", password: "agent123", hint: "Agent Level 3 · 120 Hosts · Full Access", badge: "Agent A3" },
+  super_admin: { email: "arjun@ridhi.app",          password: "admin123",  hint: "Full platform access — all panels",            badge: "Super Admin" },
+  host:        { email: "host.priya@ridhi.app",      password: "host123",   hint: "Host management — no Super Admin panel",       badge: "Host L5"     },
+  agent:       { email: "agent.rahul@ridhi.app",     password: "agent123",  hint: "Agent dashboard — no Super Admin panel",       badge: "Agent A3"    },
+};
+
+// Permissions matrix — what each role can / cannot access
+const ROLE_PERMISSIONS: Record<RoleTab, { label: string; allowed: boolean }[]> = {
+  super_admin: [
+    { label: "Dashboard & Analytics", allowed: true },
+    { label: "Users & Content",        allowed: true },
+    { label: "Hosts, Agents, Calls",   allowed: true },
+    { label: "Finance & Revenue",      allowed: true },
+    { label: "Super Admin Panel",      allowed: true },
+  ],
+  host: [
+    { label: "Dashboard & Analytics", allowed: true },
+    { label: "Users & Content",        allowed: true },
+    { label: "Hosts, Agents, Calls",   allowed: true },
+    { label: "Finance & Revenue",      allowed: true },
+    { label: "Super Admin Panel",      allowed: false },
+  ],
+  agent: [
+    { label: "Dashboard & Analytics", allowed: true },
+    { label: "Users & Content",        allowed: true },
+    { label: "Hosts, Agents, Calls",   allowed: true },
+    { label: "Finance & Revenue",      allowed: true },
+    { label: "Super Admin Panel",      allowed: false },
+  ],
 };
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<RoleTab>("super_admin");
+  const [role, setRole]         = useState<RoleTab>("super_admin");
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState("");
-  const [, setLocation] = useLocation();
+  const [error, setError]       = useState("");
+  const [, setLocation]         = useLocation();
 
   const fillDemo = () => {
     setEmail(DEMO_CREDS[role].email);
@@ -45,6 +70,7 @@ export default function Login() {
   };
 
   const active = ROLE_TABS.find((t) => t.id === role)!;
+  const perms  = ROLE_PERMISSIONS[role];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-pink-50">
@@ -55,13 +81,13 @@ export default function Login() {
             <span className="text-white font-black text-2xl">R</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900">Ridhi</h1>
-          <p className="text-sm text-muted-foreground mt-1">Control Panel · All Roles</p>
+          <p className="text-sm text-muted-foreground mt-1">Control Panel · Role-Based Access</p>
         </div>
 
         <Card className="shadow-xl border-0 ring-1 ring-black/5">
           <CardHeader className="pb-0 pt-6 px-6">
             {/* Role Tabs */}
-            <div className="grid grid-cols-3 gap-2 mb-2">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {ROLE_TABS.map((tab) => {
                 const isActive = role === tab.id;
                 return (
@@ -70,7 +96,9 @@ export default function Login() {
                     type="button"
                     onClick={() => { setRole(tab.id); setEmail(""); setPassword(""); setError(""); }}
                     className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl border-2 transition-all text-center ${
-                      isActive ? `${tab.bg} ${tab.border} ${tab.color}` : "border-transparent bg-muted/40 text-muted-foreground hover:bg-muted"
+                      isActive
+                        ? `${tab.bg} ${tab.border} ${tab.color}`
+                        : "border-transparent bg-muted/40 text-muted-foreground hover:bg-muted"
                     }`}
                   >
                     <tab.icon className="w-4 h-4" />
@@ -80,14 +108,28 @@ export default function Login() {
               })}
             </div>
 
-            {/* Access badge */}
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl ${active.bg} ${active.border} border mb-1`}>
-              <active.icon className={`w-4 h-4 flex-shrink-0 ${active.color}`} />
-              <div className="flex-1 min-w-0">
-                <p className={`text-xs font-semibold ${active.color}`}>{DEMO_CREDS[role].badge} — Full Super Admin Access</p>
-                <p className="text-xs text-muted-foreground truncate">{DEMO_CREDS[role].hint}</p>
+            {/* Access summary for selected role */}
+            <div className={`rounded-xl border p-3 mb-1 ${active.bg} ${active.border}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <active.icon className={`w-4 h-4 ${active.color}`} />
+                <span className={`text-xs font-bold ${active.color}`}>{DEMO_CREDS[role].badge}</span>
+                <span className="text-xs text-muted-foreground ml-auto">{DEMO_CREDS[role].hint}</span>
               </div>
-              <Badge variant="outline" className={`text-xs flex-shrink-0 ${active.color} ${active.border}`}>All Permissions</Badge>
+              <div className="grid grid-cols-1 gap-1">
+                {perms.map((p) => (
+                  <div key={p.label} className="flex items-center gap-2">
+                    {p.allowed
+                      ? <Check className="w-3 h-3 text-green-600 flex-shrink-0" />
+                      : <X     className="w-3 h-3 text-destructive flex-shrink-0" />}
+                    <span className={`text-xs ${p.allowed ? "text-foreground" : "text-muted-foreground line-through"}`}>
+                      {p.label}
+                    </span>
+                    {!p.allowed && (
+                      <Badge variant="destructive" className="text-[10px] px-1 py-0 h-4 ml-auto">Restricted</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </CardHeader>
 
@@ -147,19 +189,6 @@ export default function Login() {
                 Use demo credentials for <span className="font-semibold">{DEMO_CREDS[role].badge}</span>
               </button>
             </form>
-
-            {/* All roles note */}
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-xs text-center text-muted-foreground font-medium mb-2">All roles have full Super Admin access</p>
-              <div className="flex items-center justify-center gap-3">
-                {ROLE_TABS.map((t) => (
-                  <div key={t.id} className={`flex items-center gap-1 text-xs ${t.color}`}>
-                    <t.icon className="w-3 h-3" />
-                    <span className="font-medium">{t.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </CardContent>
         </Card>
 
