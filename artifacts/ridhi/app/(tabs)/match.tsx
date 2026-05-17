@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { MATCH_PROFILES } from "@/data/mockData";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -26,7 +27,12 @@ type Profile = typeof MATCH_PROFILES[0];
 export default function MatchScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const [profiles, setProfiles] = useState<Profile[]>(MATCH_PROFILES);
+  const { user } = useAuth();
+  const userLanguage = user?.language ?? "Hindi";
+  const sameLanguageProfiles = MATCH_PROFILES.filter((p) => p.language === userLanguage);
+  const [profiles, setProfiles] = useState<Profile[]>(
+    sameLanguageProfiles.length > 0 ? sameLanguageProfiles : MATCH_PROFILES
+  );
   const [matched, setMatched] = useState<Profile | null>(null);
   const position = useRef(new Animated.ValueXY()).current;
   const rotateAnim = position.x.interpolate({
@@ -84,7 +90,17 @@ export default function MatchScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 8, borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Discover</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.headerTitle, { color: colors.foreground }]}>Discover</Text>
+          <View style={styles.langFilterRow}>
+            <View style={[styles.langFilterBadge, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "40" }]}>
+              <Text style={styles.langFilterEmoji}>🗣️</Text>
+              <Text style={[styles.langFilterText, { color: colors.primary }]}>
+                {userLanguage} speakers only
+              </Text>
+            </View>
+          </View>
+        </View>
         <Pressable style={[styles.filterBtn, { backgroundColor: colors.muted }]}>
           <Feather name="sliders" size={18} color={colors.primary} />
         </Pressable>
@@ -146,6 +162,9 @@ export default function MatchScreen() {
                   <View style={styles.cardMetaRow}>
                     <Feather name="map-pin" size={13} color="rgba(255,255,255,0.8)" />
                     <Text style={styles.cardMeta}>{current.distance} · {current.city}</Text>
+                    <View style={styles.cardLangBadge}>
+                      <Text style={styles.cardLangText}>🗣️ {current.language}</Text>
+                    </View>
                   </View>
                   <Text style={styles.cardBio} numberOfLines={2}>{current.bio}</Text>
                   <View style={styles.cardTags}>
@@ -224,6 +243,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerTitle: { fontSize: 24, fontFamily: "Inter_700Bold" },
+  langFilterRow: { flexDirection: "row", marginTop: 4 },
+  langFilterBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  langFilterEmoji: { fontSize: 13 },
+  langFilterText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   filterBtn: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   cardArea: { flex: 1, alignItems: "center", justifyContent: "center" },
   card: {
@@ -273,8 +304,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   matchPct: { color: "#fff", fontSize: 12, fontFamily: "Inter_700Bold" },
-  cardMetaRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  cardMetaRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
   cardMeta: { color: "rgba(255,255,255,0.8)", fontSize: 13, fontFamily: "Inter_400Regular" },
+  cardLangBadge: {
+    backgroundColor: "rgba(233,30,140,0.3)",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(233,30,140,0.5)",
+  },
+  cardLangText: { color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" },
   cardBio: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
   cardTags: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   cardTag: { backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },

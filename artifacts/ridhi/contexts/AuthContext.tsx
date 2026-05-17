@@ -10,6 +10,7 @@ export interface UserProfile {
   gender: "male" | "female" | "other";
   bio: string;
   city: string;
+  language: string;
   interests: string[];
   avatar?: string;
   coins: number;
@@ -41,6 +42,7 @@ const DEFAULT_USER: UserProfile = {
   gender: "female",
   bio: "Love music, travel and good conversations 🌸",
   city: "Mumbai",
+  language: "Hindi",
   interests: ["Music", "Travel", "Food", "Fitness", "Books"],
   coins: 250,
   followers: 128,

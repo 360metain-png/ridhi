@@ -18,6 +18,23 @@ import { GradientButton } from "@/components/GradientButton";
 
 const { width } = Dimensions.get("window");
 
+const LANGUAGES = [
+  { code: "Hindi", label: "हिंदी", sublabel: "Hindi", emoji: "🇮🇳" },
+  { code: "Bengali", label: "বাংলা", sublabel: "Bengali", emoji: "🌿" },
+  { code: "Telugu", label: "తెలుగు", sublabel: "Telugu", emoji: "🌺" },
+  { code: "Tamil", label: "தமிழ்", sublabel: "Tamil", emoji: "🏛️" },
+  { code: "Marathi", label: "मराठी", sublabel: "Marathi", emoji: "🌸" },
+  { code: "Gujarati", label: "ગુજરાતી", sublabel: "Gujarati", emoji: "💐" },
+  { code: "Kannada", label: "ಕನ್ನಡ", sublabel: "Kannada", emoji: "🏔️" },
+  { code: "Malayalam", label: "മലയാളം", sublabel: "Malayalam", emoji: "🌴" },
+  { code: "Punjabi", label: "ਪੰਜਾਬੀ", sublabel: "Punjabi", emoji: "🌾" },
+  { code: "Odia", label: "ଓଡ଼ିଆ", sublabel: "Odia", emoji: "🌊" },
+  { code: "Assamese", label: "অসমীয়া", sublabel: "Assamese", emoji: "🍃" },
+  { code: "Urdu", label: "اردو", sublabel: "Urdu", emoji: "☪️" },
+  { code: "Rajasthani", label: "राजस्थानी", sublabel: "Rajasthani", emoji: "🏰" },
+  { code: "English", label: "English", sublabel: "English", emoji: "🌍" },
+];
+
 const INTERESTS = [
   "Music", "Travel", "Food", "Fitness", "Books",
   "Photography", "Dancing", "Gaming", "Art", "Movies",
@@ -27,17 +44,25 @@ const INTERESTS = [
 
 const CITIES = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Surat"];
 
+const TOTAL_STEPS = 5;
+
 export default function ProfileSetupScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
   const [step, setStep] = useState(0);
+
+  // Step 0: language
+  const [language, setLanguage] = useState("");
+  // Step 1: name
   const [name, setName] = useState("");
+  // Step 2: age + gender
   const [age, setAge] = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
+  // Step 3: city
   const [city, setCity] = useState("");
+  // Step 4: interests
   const [interests, setInterests] = useState<string[]>([]);
-  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
 
   const toggleInterest = (interest: string) => {
@@ -47,6 +72,7 @@ export default function ProfileSetupScreen() {
   };
 
   const canProceed = [
+    !!language,
     name.length >= 2,
     !!gender && parseInt(age) >= 18,
     !!city,
@@ -54,28 +80,68 @@ export default function ProfileSetupScreen() {
   ][step];
 
   const handleNext = async () => {
-    if (step < 3) { setStep(step + 1); return; }
+    if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
     setLoading(true);
     await login({
       name,
       age: parseInt(age),
       gender: gender as "male" | "female" | "other",
       city,
+      language,
       interests,
-      bio,
       coins: 100,
     });
     setLoading(false);
     router.replace("/(tabs)");
   };
 
+  const selectedLang = LANGUAGES.find((l) => l.code === language);
+
   const STEPS = [
+    {
+      title: "Choose your language",
+      subtitle: "You'll connect with people who speak the same language",
+      content: (
+        <View style={styles.langGrid}>
+          {LANGUAGES.map((lang) => {
+            const selected = language === lang.code;
+            return (
+              <Pressable
+                key={lang.code}
+                onPress={() => setLanguage(lang.code)}
+                style={[
+                  styles.langCard,
+                  {
+                    backgroundColor: selected ? colors.primary + "18" : colors.card,
+                    borderColor: selected ? colors.primary : colors.border,
+                    borderWidth: selected ? 2 : 1,
+                  },
+                ]}
+              >
+                <Text style={styles.langEmoji}>{lang.emoji}</Text>
+                <Text style={[styles.langLabel, { color: selected ? colors.primary : colors.foreground }]}>
+                  {lang.label}
+                </Text>
+                <Text style={[styles.langSublabel, { color: colors.mutedForeground }]}>
+                  {lang.sublabel}
+                </Text>
+                {selected && (
+                  <View style={[styles.langCheck, { backgroundColor: colors.primary }]}>
+                    <Feather name="check" size={10} color="#fff" />
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+      ),
+    },
     {
       title: "What's your name?",
       subtitle: "How should we introduce you",
       content: (
         <TextInput
-          style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border }]}
+          style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
           placeholder="Your full name"
           placeholderTextColor={colors.mutedForeground}
           value={name}
@@ -90,7 +156,7 @@ export default function ProfileSetupScreen() {
       content: (
         <View style={{ gap: 16, width: "100%" }}>
           <TextInput
-            style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border }]}
+            style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
             placeholder="Your age"
             placeholderTextColor={colors.mutedForeground}
             value={age}
@@ -106,7 +172,7 @@ export default function ProfileSetupScreen() {
                 style={[
                   styles.genderBtn,
                   {
-                    backgroundColor: gender === g ? colors.primary : colors.muted,
+                    backgroundColor: gender === g ? colors.primary : colors.card,
                     borderColor: gender === g ? colors.primary : colors.border,
                   },
                 ]}
@@ -138,7 +204,7 @@ export default function ProfileSetupScreen() {
                 style={[
                   styles.cityBtn,
                   {
-                    backgroundColor: city === c ? colors.primary : colors.muted,
+                    backgroundColor: city === c ? colors.primary : colors.card,
                     borderColor: city === c ? colors.primary : colors.border,
                   },
                 ]}
@@ -164,7 +230,7 @@ export default function ProfileSetupScreen() {
                 style={[
                   styles.tag,
                   {
-                    backgroundColor: selected ? colors.primary : colors.muted,
+                    backgroundColor: selected ? colors.primary : colors.card,
                     borderColor: selected ? colors.primary : colors.border,
                   },
                 ]}
@@ -193,21 +259,38 @@ export default function ProfileSetupScreen() {
             colors={[colors.primary, colors.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={[styles.progressBar, { width: `${((step + 1) / STEPS.length) * 100}%` }]}
+            style={[styles.progressBar, { width: `${((step + 1) / TOTAL_STEPS) * 100}%` }]}
           />
         </View>
-        <Text style={[styles.stepCount, { color: colors.mutedForeground }]}>{step + 1}/{STEPS.length}</Text>
+        <Text style={[styles.stepCount, { color: colors.mutedForeground }]}>{step + 1}/{TOTAL_STEPS}</Text>
       </View>
+
+      {step === 0 && selectedLang ? (
+        <View style={[styles.selectedLangBanner, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "40" }]}>
+          <Text style={styles.selectedLangEmoji}>{selectedLang.emoji}</Text>
+          <Text style={[styles.selectedLangText, { color: colors.primary }]}>
+            {selectedLang.label} selected — you'll match with {selectedLang.sublabel} speakers
+          </Text>
+        </View>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: colors.foreground }]}>{current.title}</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{current.subtitle}</Text>
+        {step === 0 && language === "" && (
+          <View style={[styles.langHint, { backgroundColor: colors.secondary + "12", borderColor: colors.secondary + "30" }]}>
+            <Feather name="info" size={14} color={colors.secondary} />
+            <Text style={[styles.langHintText, { color: colors.secondary }]}>
+              All calls, matches & live streams will be filtered to your language
+            </Text>
+          </View>
+        )}
         {current.content}
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <GradientButton
-          label={step === STEPS.length - 1 ? "Complete Profile" : "Continue"}
+          label={step === TOTAL_STEPS - 1 ? "Complete Profile 🎉" : "Continue"}
           onPress={handleNext}
           loading={loading}
           disabled={!canProceed}
@@ -231,9 +314,55 @@ const styles = StyleSheet.create({
   progressBg: { flex: 1, height: 6, borderRadius: 3, overflow: "hidden" },
   progressBar: { height: "100%", borderRadius: 3 },
   stepCount: { fontSize: 13, fontFamily: "Inter_500Medium", minWidth: 32, textAlign: "right" },
-  content: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 120, gap: 24 },
-  title: { fontSize: 28, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  selectedLangBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 20,
+    marginBottom: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  selectedLangEmoji: { fontSize: 16 },
+  selectedLangText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium" },
+  content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 120, gap: 20 },
+  title: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
   subtitle: { fontSize: 15, fontFamily: "Inter_400Regular" },
+  langHint: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  langHintText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  langGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  langCard: {
+    width: (width - 60) / 3,
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    borderRadius: 16,
+    gap: 5,
+    position: "relative",
+  },
+  langEmoji: { fontSize: 26 },
+  langLabel: { fontSize: 13, fontFamily: "Inter_700Bold", textAlign: "center" },
+  langSublabel: { fontSize: 10, fontFamily: "Inter_400Regular", textAlign: "center" },
+  langCheck: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   bigInput: {
     fontSize: 18,
     fontFamily: "Inter_500Medium",

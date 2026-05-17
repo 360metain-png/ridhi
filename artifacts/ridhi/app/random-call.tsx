@@ -59,8 +59,10 @@ export default function RandomCallScreen() {
           Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
         ])
       ).start();
+      const sameLanguage = ONLINE_USERS.filter((u) => u.language === (user?.language ?? "Hindi"));
+      const pool = sameLanguage.length > 0 ? sameLanguage : ONLINE_USERS;
       const t = setTimeout(() => {
-        const u = ONLINE_USERS[Math.floor(Math.random() * ONLINE_USERS.length)];
+        const u = pool[Math.floor(Math.random() * pool.length)];
         setMatched(u);
         setMode("calling");
         setTimeout(() => setMode("connected"), 2000);
@@ -113,9 +115,14 @@ export default function RandomCallScreen() {
             style={styles.onlineCard}
           >
             <Feather name="radio" size={20} color={colors.primary} />
-            <Text style={[styles.onlineText, { color: colors.foreground }]}>
-              <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>1,284</Text> people online now
-            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.onlineText, { color: colors.foreground }]}>
+                <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>1,284</Text> people online now
+              </Text>
+              <Text style={[styles.onlineLangText, { color: colors.mutedForeground }]}>
+                🗣️ Matching <Text style={{ color: colors.primary, fontFamily: "Inter_600SemiBold" }}>{user?.language ?? "Hindi"}</Text> speakers only
+              </Text>
+            </View>
           </LinearGradient>
 
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Choose call type</Text>
@@ -181,7 +188,9 @@ export default function RandomCallScreen() {
             <Feather name={callType === "audio" ? "mic" : "video"} size={40} color={colors.primary} />
           </View>
           <Text style={[styles.searchingTitle, { color: colors.foreground }]}>Finding someone...</Text>
-          <Text style={[styles.searchingSubtitle, { color: colors.mutedForeground }]}>Matching based on your interests</Text>
+          <Text style={[styles.searchingSubtitle, { color: colors.mutedForeground }]}>
+            🗣️ Matching {user?.language ?? "Hindi"} speakers near you
+          </Text>
           <Pressable onPress={() => setMode("idle")} style={[styles.cancelBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}>
             <Feather name="x" size={18} color={colors.destructive} />
             <Text style={[styles.cancelBtnText, { color: colors.destructive }]}>Cancel</Text>
@@ -262,6 +271,7 @@ const styles = StyleSheet.create({
   idleContainer: { flex: 1, paddingHorizontal: 20, paddingTop: 20 },
   onlineCard: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 14, marginBottom: 24 },
   onlineText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  onlineLangText: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 3 },
   sectionLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 },
   typeRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   typeBtn: { flex: 1, alignItems: "center", padding: 20, borderRadius: 16, borderWidth: 1, gap: 8 },
