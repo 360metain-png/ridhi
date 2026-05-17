@@ -58,12 +58,32 @@ const ICEBREAKERS = [
 ];
 
 const ONLINE_HOSTS = [
-  { id: "h1", name: "Ananya Singh",  city: "Delhi",     language: "Hindi",     tier: "popular",   rating: 4.8, calls: 2840, verified: true,  isFav: false },
-  { id: "h2", name: "Priya Mehta",   city: "Mumbai",    language: "Marathi",   tier: "vip",        rating: 4.9, calls: 1240, verified: true,  isFav: true  },
-  { id: "h3", name: "Kavya Reddy",   city: "Hyderabad", language: "Telugu",    tier: "celebrity",  rating: 5.0, calls: 8420, verified: true,  isFav: false },
-  { id: "h4", name: "Meera Pillai",  city: "Kochi",     language: "Malayalam", tier: "new",        rating: 4.5, calls: 84,   verified: false, isFav: false },
-  { id: "h5", name: "Riya Das",      city: "Kolkata",   language: "Bengali",   tier: "popular",   rating: 4.7, calls: 1840, verified: true,  isFav: false },
+  // ── Female hosts ────────────────────────────────────────────────────────────
+  { id: "h1",  gender: "female" as const, name: "Ananya Singh",   city: "Delhi",     language: "Hindi",     tier: "popular",   rating: 4.8, calls: 2840, verified: true,  isFav: false },
+  { id: "h2",  gender: "female" as const, name: "Priya Mehta",    city: "Mumbai",    language: "Marathi",   tier: "vip",       rating: 4.9, calls: 1240, verified: true,  isFav: true  },
+  { id: "h3",  gender: "female" as const, name: "Kavya Reddy",    city: "Hyderabad", language: "Telugu",    tier: "celebrity", rating: 5.0, calls: 8420, verified: true,  isFav: false },
+  { id: "h4",  gender: "female" as const, name: "Meera Pillai",   city: "Kochi",     language: "Malayalam", tier: "new",       rating: 4.5, calls: 84,   verified: false, isFav: false },
+  { id: "h5",  gender: "female" as const, name: "Riya Das",       city: "Kolkata",   language: "Bengali",   tier: "popular",   rating: 4.7, calls: 1840, verified: true,  isFav: false },
+  { id: "h6",  gender: "female" as const, name: "Simran Kaur",    city: "Amritsar",  language: "Punjabi",   tier: "vip",       rating: 4.8, calls: 960,  verified: true,  isFav: false },
+  { id: "h7",  gender: "female" as const, name: "Divya Iyer",     city: "Chennai",   language: "Tamil",     tier: "popular",   rating: 4.6, calls: 1320, verified: true,  isFav: false },
+  { id: "h8",  gender: "female" as const, name: "Nandini Joshi",  city: "Pune",      language: "Hindi",     tier: "new",       rating: 4.3, calls: 45,   verified: false, isFav: false },
+  // ── Male hosts ──────────────────────────────────────────────────────────────
+  { id: "h9",  gender: "male" as const,   name: "Rohan Sharma",   city: "Delhi",     language: "Hindi",     tier: "popular",   rating: 4.7, calls: 2100, verified: true,  isFav: false },
+  { id: "h10", gender: "male" as const,   name: "Arjun Nair",     city: "Kochi",     language: "Malayalam", tier: "vip",       rating: 4.9, calls: 1560, verified: true,  isFav: false },
+  { id: "h11", gender: "male" as const,   name: "Karthik Reddy",  city: "Hyderabad", language: "Telugu",    tier: "celebrity", rating: 4.8, calls: 6200, verified: true,  isFav: false },
+  { id: "h12", gender: "male" as const,   name: "Vikram Mehta",   city: "Mumbai",    language: "Hindi",     tier: "popular",   rating: 4.6, calls: 1980, verified: true,  isFav: false },
+  { id: "h13", gender: "male" as const,   name: "Sourav Das",     city: "Kolkata",   language: "Bengali",   tier: "new",       rating: 4.4, calls: 120,  verified: false, isFav: false },
+  { id: "h14", gender: "male" as const,   name: "Harpreet Singh", city: "Amritsar",  language: "Punjabi",   tier: "vip",       rating: 4.7, calls: 870,  verified: true,  isFav: false },
+  { id: "h15", gender: "male" as const,   name: "Aditya Raj",     city: "Bangalore", language: "Kannada",   tier: "popular",   rating: 4.5, calls: 1430, verified: true,  isFav: false },
+  { id: "h16", gender: "male" as const,   name: "Siddharth K",    city: "Chennai",   language: "Tamil",     tier: "new",       rating: 4.2, calls: 60,   verified: false, isFav: false },
 ];
+
+const CALL_LANGUAGES = [
+  "Any Language", "Hindi", "Bengali", "Telugu", "Marathi", "Tamil",
+  "Gujarati", "Kannada", "Malayalam", "Punjabi", "Odia", "English",
+];
+
+type PreferGender = "Any" | "Female" | "Male";
 
 type CallMode = "idle" | "searching" | "preview" | "confirming" | "calling" | "connected";
 type CallType = "audio" | "video";
@@ -92,6 +112,8 @@ export default function RandomCallScreen() {
   const [favs, setFavs]                 = useState<string[]>(["h2"]);
   const [showTab, setShowTab]           = useState<"all" | "favs">("all");
   const [reportVisible, setReportVisible] = useState(false);
+  const [preferGender, setPreferGender] = useState<PreferGender>("Any");
+  const [preferLanguage, setPreferLanguage] = useState<string>(user?.language ?? "Any Language");
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -151,19 +173,31 @@ export default function RandomCallScreen() {
           Animated.timing(pulseAnim, { toValue: 1,    duration: 700, useNativeDriver: true }),
         ])
       ).start();
-      const sameLanguage = ONLINE_HOSTS.filter(
-        (h) => h.language === (user?.language ?? "Hindi") && h.tier === tierId
-      );
-      const pool = sameLanguage.length > 0 ? sameLanguage : ONLINE_HOSTS.filter((h) => h.tier === tierId);
-      const finalPool = pool.length > 0 ? pool : ONLINE_HOSTS;
+
+      // Build pool respecting gender + language + tier preferences
+      let pool = ONLINE_HOSTS.filter((h) => {
+        const genderOk =
+          preferGender === "Any" ||
+          (preferGender === "Female" && h.gender === "female") ||
+          (preferGender === "Male"   && h.gender === "male");
+        const langOk =
+          preferLanguage === "Any Language" || h.language === preferLanguage;
+        return genderOk && langOk;
+      });
+
+      // Try to further narrow by tier; fall back gracefully
+      const byTier = pool.filter((h) => h.tier === tierId);
+      if (byTier.length > 0) pool = byTier;
+      if (pool.length === 0) pool = ONLINE_HOSTS; // absolute fallback
+
       const timeout = setTimeout(() => {
-        const u = finalPool[Math.floor(Math.random() * finalPool.length)];
+        const u = pool[Math.floor(Math.random() * pool.length)];
         setMatched(u);
         setMode("preview");
       }, 2500);
       return () => clearTimeout(timeout);
     }
-  }, [mode, tierId]);
+  }, [mode, tierId, preferGender, preferLanguage]);
 
   const startSearch = () => {
     if ((user?.coins ?? 0) < totalRate) return;
@@ -197,9 +231,16 @@ export default function RandomCallScreen() {
   const toggleFav = (id: string) =>
     setFavs((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]);
 
-  const displayedHosts = showTab === "favs"
-    ? ONLINE_HOSTS.filter((h) => favs.includes(h.id))
-    : ONLINE_HOSTS;
+  const displayedHosts = ONLINE_HOSTS.filter((h) => {
+    if (showTab === "favs" && !favs.includes(h.id)) return false;
+    const genderOk =
+      preferGender === "Any" ||
+      (preferGender === "Female" && h.gender === "female") ||
+      (preferGender === "Male"   && h.gender === "male");
+    const langOk =
+      preferLanguage === "Any Language" || h.language === preferLanguage;
+    return genderOk && langOk;
+  });
 
   // ──────────────────────────────────────────────────────────────────────────────
   return (
@@ -227,7 +268,9 @@ export default function RandomCallScreen() {
                 <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>1,284</Text> online now
               </Text>
               <Text style={[styles.onlineBannerSub, { color: colors.mutedForeground }]}>
-                Matching <Text style={{ color: colors.primary, fontFamily: "Inter_600SemiBold" }}>{user?.language ?? "Hindi"}</Text> speakers
+                {preferGender === "Any" ? "All genders" : preferGender + " hosts"}
+                {" · "}
+                {preferLanguage === "Any Language" ? "Any language" : preferLanguage}
               </Text>
             </View>
             <View style={[styles.safetyBadge, { backgroundColor: colors.success + "20" }]}>
@@ -235,6 +278,72 @@ export default function RandomCallScreen() {
               <Text style={[styles.safetyText, { color: colors.success }]}>Safe</Text>
             </View>
           </LinearGradient>
+
+          {/* ── I want to talk to ─────────────────────────────────────────── */}
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>I Want To Talk To</Text>
+          <View style={styles.genderRow}>
+            {([
+              { value: "Any",    label: "Anyone",  icon: "users",     color: "#7B2FBE" },
+              { value: "Female", label: "Women",   icon: "heart",     color: "#E91E8C" },
+              { value: "Male",   label: "Men",     icon: "user",      color: "#2196F3" },
+            ] as { value: PreferGender; label: string; icon: string; color: string }[]).map((opt) => {
+              const active = preferGender === opt.value;
+              return (
+                <Pressable
+                  key={opt.value}
+                  onPress={() => setPreferGender(opt.value)}
+                  style={[
+                    styles.genderBtn,
+                    {
+                      backgroundColor: active ? opt.color + "20" : colors.card,
+                      borderColor: active ? opt.color : colors.border,
+                    },
+                  ]}
+                >
+                  <View style={[styles.genderIconWrap, { backgroundColor: active ? opt.color + "25" : colors.muted }]}>
+                    <Feather name={opt.icon as any} size={20} color={active ? opt.color : colors.mutedForeground} />
+                  </View>
+                  <Text style={[styles.genderBtnLabel, { color: active ? opt.color : colors.foreground }]}>
+                    {opt.label}
+                  </Text>
+                  {active && (
+                    <View style={[styles.genderCheck, { backgroundColor: opt.color }]}>
+                      <Feather name="check" size={10} color="#fff" />
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* ── Speaking Language ─────────────────────────────────────────── */}
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Speaking Language</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.langScroll}
+          >
+            {CALL_LANGUAGES.map((lang) => {
+              const active = preferLanguage === lang;
+              return (
+                <Pressable
+                  key={lang}
+                  onPress={() => setPreferLanguage(lang)}
+                  style={[
+                    styles.langChip,
+                    {
+                      backgroundColor: active ? colors.primary : colors.card,
+                      borderColor: active ? colors.primary : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.langChipText, { color: active ? "#fff" : colors.foreground }]}>
+                    {lang}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
 
           {/* Call type */}
           <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Call Type</Text>
@@ -771,4 +880,44 @@ const styles = StyleSheet.create({
   reportItemText: { fontSize: 15, fontFamily: "Inter_500Medium" },
   blockBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, padding: 14, borderRadius: 14, borderWidth: 1, marginTop: 12 },
   blockText: { fontSize: 15, fontFamily: "Inter_700Bold" },
+
+  // ── Gender preference ──────────────────────────────────────────────────────
+  genderRow: { flexDirection: "row", gap: 10, marginBottom: 4 },
+  genderBtn: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    gap: 6,
+    position: "relative",
+  },
+  genderIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  genderBtnLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  genderCheck: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // ── Language chips ─────────────────────────────────────────────────────────
+  langScroll: { paddingHorizontal: 0, gap: 8, paddingBottom: 4, flexDirection: "row" },
+  langChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  langChipText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 });
