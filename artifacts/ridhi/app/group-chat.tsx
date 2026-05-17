@@ -156,7 +156,7 @@ export default function GroupChatScreen() {
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </Pressable>
         <Text style={[styles.title, { color: colors.foreground }]}>Group Chats</Text>
-        <GradientButton label="New Group" onPress={() => {}} small />
+        <GradientButton label="New Group" onPress={() => { const { Alert } = require("react-native"); Alert.alert("Create Group Chat", "Start a new group chat with friends or your community.", [{ text: "Cancel", style: "cancel" }, { text: "Create Group", onPress: () => router.push("/communities") }]); }} small />
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>

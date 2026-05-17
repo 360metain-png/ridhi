@@ -190,7 +190,7 @@ export default function MatchScreen() {
             <Feather name="x" size={28} color="#FF3B30" />
           </Pressable>
           <Pressable
-            onPress={() => {}}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); swipe("right"); }}
             style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
           >
             <Feather name="star" size={22} color={colors.gold} />

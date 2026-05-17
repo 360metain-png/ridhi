@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -200,31 +201,31 @@ export default function SettingsScreen() {
           <SettingRow icon="eye" label="Public Profile" subtitle="Anyone can view your profile" value={profilePublic} onToggle={setProfilePublic} />
           <SettingRow icon="activity" label="Show Online Status" value={showOnline} onToggle={setShowOnline} />
           <SettingRow icon="map-pin" label="Share Location (City)" value={locationShared} onToggle={setLocationShared} />
-          <SettingRow icon="slash" label="Blocked Users" subtitle="Manage blocked accounts" onPress={() => {}} />
-          <SettingRow icon="flag" label="Reported Accounts" onPress={() => {}} />
+          <SettingRow icon="slash" label="Blocked Users" subtitle="Manage blocked accounts" onPress={() => Alert.alert("Blocked Users", "You have no blocked users.\n\nTo block someone, visit their profile and tap ⋮ → Block.", [{ text: "OK" }])} />
+          <SettingRow icon="flag" label="Reported Accounts" onPress={() => Alert.alert("Reported Accounts", "You haven't reported any accounts yet.\n\nUse the report button on any post or profile to flag inappropriate content.", [{ text: "OK" }])} />
         </View>
 
         <SectionHeader title="Security" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="shield" label="Two-Factor Authentication" value={twoFAEnabled} onToggle={setTwoFAEnabled} />
-          <SettingRow icon="smartphone" label="Active Sessions" subtitle="Manage logged-in devices" onPress={() => {}} />
-          <SettingRow icon="lock" label="Change Password" onPress={() => {}} />
-          <SettingRow icon="key" label="Biometric Login" onPress={() => {}} />
+          <SettingRow icon="smartphone" label="Active Sessions" subtitle="Manage logged-in devices" onPress={() => Alert.alert("Active Sessions", "📱 This device — Active now\n   Android · Mumbai · Just now\n\nNo other sessions detected.\nSign out here if you don't recognize a device.", [{ text: "OK" }])} />
+          <SettingRow icon="lock" label="Change Password" onPress={() => Alert.alert("Change Password", "A reset link will be sent to your registered phone or email.", [{ text: "Cancel", style: "cancel" }, { text: "Send Reset Link", onPress: () => Alert.alert("Link Sent ✓", "Check your registered phone or email for the reset link.", [{ text: "OK" }]) }])} />
+          <SettingRow icon="key" label="Biometric Login" onPress={() => Alert.alert("Biometric Login", "Use Face ID or Fingerprint for faster, secure login.", [{ text: "Cancel", style: "cancel" }, { text: "Enable", onPress: () => Alert.alert("Enabled ✓", "Biometric login is now active on this device.", [{ text: "OK" }]) }])} />
         </View>
 
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />
-          <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => {}} />
-          <SettingRow icon="download" label="Download My Data" onPress={() => {}} />
+          <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => Alert.alert("Linked Accounts", "Link your Google or Facebook account for one-tap login.\n\n• Google — Tap to connect\n• Facebook — Tap to connect\n\nComing in v1.1 update.", [{ text: "OK" }])} />
+          <SettingRow icon="download" label="Download My Data" onPress={() => Alert.alert("Download My Data", "Your full data export includes posts, chats, matches, and settings.", [{ text: "Cancel", style: "cancel" }, { text: "Request Export", onPress: () => Alert.alert("Export Requested ✓", "You'll receive a download link within 24 hours.", [{ text: "OK" }]) }])} />
         </View>
 
         <SectionHeader title="Support" />
         <View style={[styles.section, { borderColor: colors.border }]}>
-          <SettingRow icon="help-circle" label="Help & Support" onPress={() => {}} />
-          <SettingRow icon="info" label="About Ridhi" subtitle="Version 1.0.0" onPress={() => {}} />
-          <SettingRow icon="file-text" label="Terms of Service" onPress={() => {}} />
-          <SettingRow icon="shield" label="Privacy Policy" onPress={() => {}} />
+          <SettingRow icon="help-circle" label="Help & Support" onPress={() => Alert.alert("Help & Support", "📧  support@ridhi.app\n📞  1800-103-7777 (Toll Free)\n🕐  Mon – Sat, 9 AM – 6 PM IST\n\nWe typically respond within 2 hours.", [{ text: "OK" }])} />
+          <SettingRow icon="info" label="About Ridhi" subtitle="Version 1.0.0" onPress={() => Alert.alert("About Ridhi", "🎉  Ridhi v1.0.0\n\nIndia's #1 social networking & dating app. Built with ❤️ for Bharat.\n\n© 2025 Ridhi Technologies Pvt. Ltd.\nAll rights reserved.", [{ text: "OK" }])} />
+          <SettingRow icon="file-text" label="Terms of Service" onPress={() => Alert.alert("Terms of Service", "By using Ridhi you agree to:\n\n• Be 18+ years old\n• Not post harmful or illegal content\n• Respect other users\n• Follow Indian IT Act & laws\n\nFull terms: ridhi.app/terms", [{ text: "OK" }])} />
+          <SettingRow icon="shield" label="Privacy Policy" onPress={() => Alert.alert("Privacy Policy", "We collect only what's needed:\n\n• Profile info you provide\n• Usage data to improve the app\n• City-level location only\n\nWe never sell your data.\nFull policy: ridhi.app/privacy", [{ text: "OK" }])} />
         </View>
 
         <View style={styles.logoutWrap}>

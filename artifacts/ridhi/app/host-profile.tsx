@@ -181,7 +181,7 @@ export default function HostProfileScreen() {
             </View>
 
             <View style={styles.withdrawRow}>
-              <GradientButton label="💸 Request Withdrawal" onPress={() => {}} style={{ flex: 1 }} />
+              <GradientButton label="💸 Request Withdrawal" onPress={() => router.push("/withdraw")} style={{ flex: 1 }} />
             </View>
           </>
         )}

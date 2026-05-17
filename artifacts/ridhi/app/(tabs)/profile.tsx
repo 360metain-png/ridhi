@@ -94,8 +94,8 @@ export default function ProfileScreen() {
         </Pressable>
 
         <View style={styles.profileBtns}>
-          <GradientButton label="Edit Profile" onPress={() => {}} small style={{ flex: 1 }} />
-          <GradientButton label="Boost Profile" onPress={() => {}} small outline style={{ flex: 1 }} />
+          <GradientButton label="Edit Profile" onPress={() => router.push("/auth/profile-setup" as any)} small style={{ flex: 1 }} />
+          <GradientButton label="Boost Profile" onPress={() => router.push("/subscription")} small outline style={{ flex: 1 }} />
         </View>
       </LinearGradient>
 

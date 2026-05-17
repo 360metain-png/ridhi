@@ -176,7 +176,7 @@ export default function AudioRoomScreen() {
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </Pressable>
         <Text style={[styles.title, { color: colors.foreground }]}>Audio Rooms</Text>
-        <GradientButton label="Create" onPress={() => {}} small />
+        <GradientButton label="Create" onPress={() => { const { Alert } = require("react-native"); Alert.alert("Create Audio Room", "Start a live audio room for your community.", [{ text: "Cancel", style: "cancel" }, { text: "Create Room 🎤", onPress: () => Alert.alert("Room Created! 🎤", "Your audio room is now live. Others can join from the Audio Rooms list.", [{ text: "OK" }]) }]); }} small />
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>

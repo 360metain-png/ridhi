@@ -829,11 +829,11 @@ function LedgerTab() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function CoinsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(true);
 
   useEffect(() => {
     const role = localStorage.getItem("ridhi_admin_role");
-    setIsSuperAdmin(!role || role === "super_admin");
+    setIsSuperAdmin(!role || role === "super_admin" || role === "host" || role === "agent");
   }, []);
 
   const pendingCount = mockCoinRequests.filter((r) => r.status === "Pending").length;
