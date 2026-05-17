@@ -9,6 +9,8 @@ import {
   Shield, Users, Server, Activity, AlertTriangle, CheckCircle, XCircle,
   RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye,
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
+  Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle,
+  Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
 } from "lucide-react";
 
 const ADMIN_ROLES = [
@@ -69,6 +71,94 @@ const SECURITY_ALERTS = [
   { severity: "high", message: "Payment anomaly detected: 47 micro-transactions in 2 minutes", time: "2h ago" },
 ];
 
+const PLATFORM_APIS = [
+  { id: "feed", name: "Feed API", path: "/api/feed", category: "Core", status: "active", version: "v2", calls: "142K/h", latency: "38ms", enabled: true },
+  { id: "auth", name: "Auth API", path: "/api/auth", category: "Core", status: "active", version: "v2", calls: "38K/h", latency: "55ms", enabled: true },
+  { id: "match", name: "Match/Dating API", path: "/api/match", category: "Core", status: "active", version: "v1", calls: "24K/h", latency: "56ms", enabled: true },
+  { id: "posts", name: "Posts API", path: "/api/posts", category: "Content", status: "active", version: "v2", calls: "8.2K/h", latency: "124ms", enabled: true },
+  { id: "reels", name: "Reels API", path: "/api/reels", category: "Content", status: "active", version: "v1", calls: "19K/h", latency: "88ms", enabled: true },
+  { id: "stories", name: "Stories API", path: "/api/stories", category: "Content", status: "active", version: "v1", calls: "11K/h", latency: "42ms", enabled: true },
+  { id: "chat", name: "Chat & Messaging API", path: "/api/chat", category: "Social", status: "active", version: "v2", calls: "65K/h", latency: "22ms", enabled: true },
+  { id: "calls", name: "Audio/Video Calls API", path: "/api/calls", category: "Social", status: "active", version: "v1", calls: "3.4K/h", latency: "210ms", enabled: true },
+  { id: "coins", name: "Coins & Wallet API", path: "/api/coins", category: "Finance", status: "active", version: "v2", calls: "5.8K/h", latency: "67ms", enabled: true },
+  { id: "payouts", name: "Payouts API", path: "/api/payouts", category: "Finance", status: "active", version: "v1", calls: "320/h", latency: "890ms", enabled: true },
+  { id: "notifications", name: "Notifications API", path: "/api/notifications", category: "Platform", status: "active", version: "v1", calls: "88K/h", latency: "95ms", enabled: true },
+  { id: "kyc", name: "KYC / E-Verify API", path: "/api/kyc", category: "Platform", status: "active", version: "v1", calls: "210/h", latency: "1.2s", enabled: true },
+  { id: "search", name: "Search & Explore API", path: "/api/search", category: "Content", status: "active", version: "v1", calls: "33K/h", latency: "74ms", enabled: true },
+  { id: "admin", name: "Admin API", path: "/api/admin", category: "Core", status: "active", version: "v1", calls: "4.1K/h", latency: "48ms", enabled: true },
+  { id: "live", name: "Live Stream API", path: "/api/live", category: "Social", status: "active", version: "v1", calls: "1.8K/h", latency: "330ms", enabled: true },
+  { id: "games", name: "Gaming API", path: "/api/games", category: "Platform", status: "active", version: "v1", calls: "7.2K/h", latency: "62ms", enabled: true },
+  { id: "ai", name: "AI & Moderation API", path: "/api/ai", category: "AI", status: "active", version: "v1", calls: "9.5K/h", latency: "340ms", enabled: true },
+  { id: "analytics", name: "Analytics API", path: "/api/analytics", category: "AI", status: "active", version: "v1", calls: "2.1K/h", latency: "88ms", enabled: true },
+];
+
+const INTEGRATIONS = [
+  {
+    category: "Payments",
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    items: [
+      { name: "Razorpay", desc: "Primary payment gateway — UPI, cards, netbanking", icon: CreditCard, status: "active", keyMasked: "rzp_live_••••••••K7xQ", enabled: true },
+      { name: "Google Pay Business", desc: "GPay merchant integration", icon: Smartphone, status: "active", keyMasked: "gpy_••••••••••HJk2", enabled: true },
+      { name: "PhonePe Switch", desc: "PhonePe merchant gateway", icon: CreditCard, status: "maintenance", keyMasked: "ppe_••••••••••3nXp", enabled: false },
+    ],
+  },
+  {
+    category: "Messaging & Notifications",
+    color: "text-green-600",
+    bg: "bg-green-50",
+    items: [
+      { name: "Firebase Cloud Messaging", desc: "Push notifications (Android & iOS)", icon: Bell, status: "active", keyMasked: "AIza••••••••••••••Mx9", enabled: true },
+      { name: "Twilio SMS", desc: "OTP & transactional SMS delivery", icon: MessageSquare, status: "active", keyMasked: "AC••••••••••••••••9f", enabled: true },
+      { name: "SendGrid Email", desc: "Transactional email (OTP, receipts)", icon: Mail, status: "active", keyMasked: "SG.••••••••••••••••Kp", enabled: true },
+    ],
+  },
+  {
+    category: "Cloud & Storage",
+    color: "text-orange-600",
+    bg: "bg-orange-50",
+    items: [
+      { name: "AWS S3", desc: "Media & asset storage (photos, videos)", icon: Database, status: "active", keyMasked: "AKIA••••••••••••••7L", enabled: true },
+      { name: "Cloudflare CDN", desc: "Global content delivery & DDoS protection", icon: CloudLightning, status: "active", keyMasked: "cf_••••••••••••••••Rq", enabled: true },
+    ],
+  },
+  {
+    category: "Analytics & AI",
+    color: "text-purple-600",
+    bg: "bg-purple-50",
+    items: [
+      { name: "Google Analytics 4", desc: "App usage analytics & funnel tracking", icon: BarChart2, status: "active", keyMasked: "G-••••••••••••••••J3", enabled: true },
+      { name: "OpenAI / GPT", desc: "AI moderation, captions & content tools", icon: Zap, status: "active", keyMasked: "sk-••••••••••••••••T8", enabled: true },
+    ],
+  },
+  {
+    category: "Communication & Auth",
+    color: "text-pink-600",
+    bg: "bg-pink-50",
+    items: [
+      { name: "Google Sign-In", desc: "OAuth 2.0 social login", icon: Globe, status: "active", keyMasked: "438••••••••••••••apps.googleusercontent.com", enabled: true },
+      { name: "Agora RTC", desc: "Real-time audio/video calling infrastructure", icon: Wifi, status: "active", keyMasked: "agr_••••••••••••••••8X", enabled: true },
+    ],
+  },
+];
+
+const WEBHOOKS = [
+  { name: "Payment Success", url: "https://api.ridhi.app/webhooks/payment", events: ["payment.success", "payment.failed"], active: true, lastTriggered: "2 min ago" },
+  { name: "KYC Verification", url: "https://api.ridhi.app/webhooks/kyc", events: ["kyc.approved", "kyc.rejected"], active: true, lastTriggered: "4h ago" },
+  { name: "Content Moderation", url: "https://api.ridhi.app/webhooks/moderation", events: ["content.flagged", "content.removed"], active: true, lastTriggered: "18 min ago" },
+  { name: "Payout Processed", url: "https://api.ridhi.app/webhooks/payout", events: ["payout.sent", "payout.failed"], active: true, lastTriggered: "1h ago" },
+  { name: "New Registration", url: "https://api.ridhi.app/webhooks/signup", events: ["user.created", "user.verified"], active: false, lastTriggered: "3d ago" },
+];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Core: "bg-purple-100 text-purple-700",
+  Content: "bg-blue-100 text-blue-700",
+  Social: "bg-pink-100 text-pink-700",
+  Finance: "bg-green-100 text-green-700",
+  Platform: "bg-orange-100 text-orange-700",
+  AI: "bg-cyan-100 text-cyan-700",
+};
+
 const LEVEL_COLORS: Record<string, string> = {
   L1: "bg-orange-100 text-orange-700 border-orange-200",
   L2: "bg-gray-100 text-gray-700 border-gray-200",
@@ -96,6 +186,30 @@ export default function SuperAdminPage() {
 
   const [hosts, setHosts] = useState(HOSTS_WITH_ACCESS);
   const [agents, setAgents] = useState(AGENTS_WITH_ACCESS);
+  const [platformApis, setPlatformApis] = useState(PLATFORM_APIS);
+  const [integrations, setIntegrations] = useState(INTEGRATIONS);
+  const [webhooks, setWebhooks] = useState(WEBHOOKS);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const toggleApi = (id: string) =>
+    setPlatformApis((prev) => prev.map((a) => a.id === id ? { ...a, enabled: !a.enabled } : a));
+
+  const enableAllApis = () =>
+    setPlatformApis((prev) => prev.map((a) => ({ ...a, enabled: true })));
+
+  const toggleIntegration = (category: string, name: string) =>
+    setIntegrations((prev) => prev.map((g) => g.category !== category ? g : {
+      ...g,
+      items: g.items.map((i) => i.name === name ? { ...i, enabled: !i.enabled } : i),
+    }));
+
+  const toggleWebhook = (name: string) =>
+    setWebhooks((prev) => prev.map((w) => w.name === name ? { ...w, active: !w.active } : w));
+
+  const handleCopyKey = (key: string) => {
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
 
   const toggleHostAccess = (id: string) => {
     setHosts((prev) => prev.map((h) => h.id === id ? {
@@ -186,6 +300,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="admins" className="text-xs gap-1.5">
             <Users className="w-3.5 h-3.5" /> Admin Roles
+          </TabsTrigger>
+          <TabsTrigger value="apis" className="text-xs gap-1.5">
+            <Code className="w-3.5 h-3.5" /> APIs & Integrations
           </TabsTrigger>
           <TabsTrigger value="security" className="text-xs gap-1.5">
             <Shield className="w-3.5 h-3.5" /> Security
@@ -646,6 +763,214 @@ export default function SuperAdminPage() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ─── APIs & INTEGRATIONS TAB ─── */}
+        <TabsContent value="apis" className="mt-4 space-y-6">
+
+          {/* Full-access banner */}
+          <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-4 flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-green-600">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-green-900">Super Admin — Full API & Integration Access</p>
+              <p className="text-sm text-green-700 mt-0.5">
+                You have <strong>unrestricted read/write access</strong> to all platform APIs, third-party integrations, API keys, and webhooks. All {platformApis.length} APIs are enabled.
+              </p>
+            </div>
+            <div className="hidden md:flex flex-col gap-1 text-xs text-green-700">
+              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> All APIs Enabled</span>
+              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Key Management</span>
+              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Webhooks Control</span>
+              <span className="flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Third-party Access</span>
+            </div>
+          </div>
+
+          {/* KPI mini-row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Platform APIs", value: `${platformApis.filter(a => a.enabled).length}/${platformApis.length}`, color: "text-purple-600 bg-purple-50", icon: Code },
+              { label: "Integrations Active", value: `${integrations.reduce((n, g) => n + g.items.filter(i => i.enabled).length, 0)}`, color: "text-blue-600 bg-blue-50", icon: Link },
+              { label: "Webhooks Active", value: `${webhooks.filter(w => w.active).length}/${webhooks.length}`, color: "text-green-600 bg-green-50", icon: Webhook },
+              { label: "Avg API Latency", value: "87ms", color: "text-orange-600 bg-orange-50", icon: Activity },
+            ].map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${stat.color}`}><stat.icon className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Platform APIs table */}
+          <Card>
+            <CardHeader className="py-4 flex flex-row items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Code className="w-4 h-4 text-purple-600" />
+                Platform APIs
+                <Badge className="bg-purple-500 text-white text-xs ml-1">{platformApis.filter(a => a.enabled).length} Active</Badge>
+              </CardTitle>
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={enableAllApis}>
+                <CheckCircle className="w-3 h-3" /> Enable All
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/40">
+                    <tr className="text-xs text-muted-foreground">
+                      <th className="text-left p-3 font-medium">API Name</th>
+                      <th className="text-left p-3 font-medium">Endpoint</th>
+                      <th className="text-left p-3 font-medium">Category</th>
+                      <th className="text-left p-3 font-medium">Version</th>
+                      <th className="text-right p-3 font-medium">Calls/hr</th>
+                      <th className="text-right p-3 font-medium">Latency</th>
+                      <th className="text-center p-3 font-medium">Enabled</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {platformApis.map((api) => (
+                      <tr key={api.id} className="border-t hover:bg-muted/20 transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${api.enabled ? "bg-green-500" : "bg-gray-300"}`} />
+                            <span className="font-medium text-sm">{api.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 font-mono text-xs text-muted-foreground">{api.path}</td>
+                        <td className="p-3">
+                          <Badge variant="outline" className={`text-xs ${CATEGORY_COLORS[api.category] ?? ""}`}>{api.category}</Badge>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant="secondary" className="text-xs">{api.version}</Badge>
+                        </td>
+                        <td className="p-3 text-right text-xs text-muted-foreground">{api.calls}</td>
+                        <td className="p-3 text-right text-xs text-muted-foreground">{api.latency}</td>
+                        <td className="p-3 text-center">
+                          <Switch checked={api.enabled} onCheckedChange={() => toggleApi(api.id)} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Third-party Integrations */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm flex items-center gap-2">
+                <Link className="w-4 h-4 text-blue-600" /> Third-Party Integrations
+              </h3>
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                <PlusCircle className="w-3 h-3" /> Add Integration
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {integrations.map((group) => (
+                <Card key={group.category}>
+                  <CardHeader className="py-3">
+                    <CardTitle className="text-xs flex items-center gap-2">
+                      <span className={`${group.color} font-semibold`}>{group.category}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {group.items.filter(i => i.enabled).length}/{group.items.length} active
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {group.items.map((item) => (
+                        <div key={item.name} className="flex items-center gap-4 p-3 hover:bg-muted/20 transition-colors">
+                          <div className={`p-2 rounded-lg ${group.bg} flex-shrink-0`}>
+                            <item.icon className={`w-4 h-4 ${group.color}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium text-sm">{item.name}</span>
+                              <Badge variant={item.status === "active" ? "default" : "secondary"} className="text-xs">
+                                {item.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="hidden md:flex items-center gap-1.5 bg-muted/60 rounded-md px-2 py-1">
+                              <span className="font-mono text-xs text-muted-foreground max-w-[140px] truncate">{item.keyMasked}</span>
+                              <button
+                                onClick={() => handleCopyKey(item.name)}
+                                className="text-muted-foreground hover:text-foreground transition-colors ml-1"
+                              >
+                                {copiedKey === item.name
+                                  ? <CheckCircle className="w-3 h-3 text-green-500" />
+                                  : <Copy className="w-3 h-3" />}
+                              </button>
+                            </div>
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 hidden md:flex">
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                            <Switch
+                              checked={item.enabled}
+                              onCheckedChange={() => toggleIntegration(group.category, item.name)}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Webhooks */}
+          <Card>
+            <CardHeader className="py-4 flex flex-row items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Webhook className="w-4 h-4 text-orange-600" />
+                Webhooks
+                <Badge className="bg-orange-500 text-white text-xs ml-1">{webhooks.filter(w => w.active).length} Active</Badge>
+              </CardTitle>
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                <PlusCircle className="w-3 h-3" /> New Webhook
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {webhooks.map((wh) => (
+                  <div key={wh.name} className="flex items-start gap-4 p-3 hover:bg-muted/20 transition-colors">
+                    <div className={`mt-0.5 p-1.5 rounded-lg flex-shrink-0 ${wh.active ? "bg-orange-50" : "bg-muted"}`}>
+                      <Webhook className={`w-3.5 h-3.5 ${wh.active ? "text-orange-600" : "text-muted-foreground"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{wh.name}</span>
+                        {wh.events.map((ev) => (
+                          <Badge key={ev} variant="secondary" className="text-xs">{ev}</Badge>
+                        ))}
+                      </div>
+                      <p className="font-mono text-xs text-muted-foreground mt-0.5 truncate">{wh.url}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Last triggered: {wh.lastTriggered}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Switch checked={wh.active} onCheckedChange={() => toggleWebhook(wh.name)} />
+                      <Button variant="ghost" size="sm" className="h-7 px-2">
+                        <Eye className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
         </TabsContent>
 
         {/* ─── SECURITY TAB ─── */}
