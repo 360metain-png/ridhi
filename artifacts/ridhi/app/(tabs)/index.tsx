@@ -173,6 +173,8 @@ export default function FeedScreen() {
 
   const headerAnim = useRef(new Animated.Value(0)).current;
   const liveIndicator = useRef(new Animated.Value(0.4)).current;
+  const recsFadeAnim = useRef(new Animated.Value(0)).current;
+  const recsShown = useRef(false);
 
   useEffect(() => {
     Animated.timing(headerAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
@@ -183,6 +185,17 @@ export default function FeedScreen() {
       ])
     ).start();
   }, []);
+
+  const handleFeedScroll = (e: { nativeEvent: { contentOffset: { y: number } } }) => {
+    if (!recsShown.current && e.nativeEvent.contentOffset.y > 160) {
+      recsShown.current = true;
+      Animated.timing(recsFadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
   const handleLike = (id: string) => {
     setPosts((prev) =>
@@ -222,7 +235,7 @@ export default function FeedScreen() {
           />
 
           {nearYouPosts.length > 0 && (
-            <View style={styles.nearYouSection}>
+            <Animated.View style={[styles.nearYouSection, { opacity: recsFadeAnim, transform: [{ translateY: recsFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
               <View style={styles.sectionHeader}>
                 <View style={[styles.sectionIcon, { backgroundColor: colors.secondary + "22" }]}>
                   <Feather name="map-pin" size={11} color={colors.secondary} />
@@ -280,10 +293,10 @@ export default function FeedScreen() {
                   </Pressable>
                 ))}
               </ScrollView>
-            </View>
+            </Animated.View>
           )}
 
-          <View style={styles.aiPicksSection}>
+          <Animated.View style={[styles.aiPicksSection, { opacity: recsFadeAnim, transform: [{ translateY: recsFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
             <View style={styles.aiPicksHeader}>
               <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.aiPicksIcon}>
                 <Feather name="cpu" size={11} color="#fff" />
@@ -311,7 +324,7 @@ export default function FeedScreen() {
                 </Pressable>
               ))}
             </ScrollView>
-          </View>
+          </Animated.View>
         </>
       );
     }
@@ -645,6 +658,8 @@ export default function FeedScreen() {
         )}
         ListHeaderComponent={renderListHeader}
         ListEmptyComponent={activeTab === "Local" ? renderEmptyLocal : null}
+        onScroll={handleFeedScroll}
+        scrollEventThrottle={32}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
