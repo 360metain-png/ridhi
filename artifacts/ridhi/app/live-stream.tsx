@@ -18,6 +18,7 @@ const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -127,6 +128,8 @@ export default function LiveStreamScreen() {
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
+  // Block screenshots & screen recordings during live streams
+  usePreventScreenCapture();
 
   const [view, setView] = useState<"browse" | "watch" | "host">("browse");
   const [selectedRoom, setSelectedRoom] = useState<typeof LIVE_ROOMS[0] | null>(null);

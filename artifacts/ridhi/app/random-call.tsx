@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -66,6 +67,8 @@ const ONLINE_HOSTS = [
 
 type CallMode = "idle" | "searching" | "preview" | "confirming" | "calling" | "connected";
 type CallType = "audio" | "video";
+
+const CALL_ACTIVE_MODES: CallMode[] = ["preview", "confirming", "calling", "connected"];
 
 export default function RandomCallScreen() {
   const colors = useColors();
@@ -126,6 +129,17 @@ export default function RandomCallScreen() {
       }, 1000);
     }
     return () => clearInterval(t);
+  }, [mode]);
+
+  // Block screenshots & screen recordings when a call is active
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (CALL_ACTIVE_MODES.includes(mode)) {
+      ScreenCapture.preventScreenCaptureAsync("ridhi-call");
+    } else {
+      ScreenCapture.allowScreenCaptureAsync("ridhi-call");
+    }
+    return () => { ScreenCapture.allowScreenCaptureAsync("ridhi-call"); };
   }, [mode]);
 
   // Pulse while searching

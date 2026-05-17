@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { CHATS } from "@/data/mockData";
 import { Avatar } from "@/components/Avatar";
@@ -46,6 +47,8 @@ export default function ChatDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  // Block screenshots & screen recordings for the entire chat session
+  usePreventScreenCapture();
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);

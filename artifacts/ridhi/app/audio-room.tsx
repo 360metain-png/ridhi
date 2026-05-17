@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePreventScreenCapture } from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -57,6 +58,8 @@ export default function AudioRoomScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  // Block screenshots & screen recordings in audio rooms
+  usePreventScreenCapture();
   const [activeRoom, setActiveRoom] = useState<typeof AUDIO_ROOMS[0] | null>(null);
   const [muted, setMuted] = useState(true);
   const [raised, setRaised] = useState(false);

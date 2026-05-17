@@ -5,6 +5,8 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "./Avatar";
+import { WatermarkBadge } from "./WatermarkBadge";
+import { useWatermark } from "@/hooks/useWatermark";
 
 export interface Post {
   id: string;
@@ -84,6 +86,7 @@ function HeartBurst({ visible }: { visible: boolean }) {
 
 export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) {
   const colors = useColors();
+  const { saveWithWatermark, saving, saved } = useWatermark();
   const [showBurst, setShowBurst] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
@@ -232,9 +235,13 @@ export function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) 
 
           <View style={{ flex: 1 }} />
 
-          <Pressable>
-            <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
-              <Feather name="bookmark" size={14} color={colors.mutedForeground} />
+          <Pressable onPress={() => saveWithWatermark(post.imageUri)} disabled={saving}>
+            <View style={[styles.actionIcon, { backgroundColor: saved ? "#34C75920" : colors.muted }]}>
+              <Feather
+                name={saved ? "check-circle" : "download"}
+                size={14}
+                color={saved ? "#34C759" : colors.mutedForeground}
+              />
             </View>
           </Pressable>
         </View>

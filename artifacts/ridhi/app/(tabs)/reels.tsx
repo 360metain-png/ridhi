@@ -15,6 +15,8 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+import { WatermarkBadge } from "@/components/WatermarkBadge";
+import { useWatermark } from "@/hooks/useWatermark";
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -88,11 +90,17 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
   const insets = useSafeAreaInsets();
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likes);
+  const { saveWithWatermark, saving, saved } = useWatermark();
 
   const handleLike = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLiked((l) => !l);
     setLikeCount((c) => (liked ? c - 1 : c + 1));
+  };
+
+  const handleSave = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    saveWithWatermark();
   };
 
   const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
@@ -112,6 +120,8 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
           <Text style={styles.reelPlayHint}>Reel Preview</Text>
         </View>
       </View>
+      {/* Persistent watermark — visible on all reel content including screenshots */}
+      <WatermarkBadge position="top-right" size="sm" opacity={0.5} />
 
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.7)"]}
@@ -143,6 +153,16 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
           <Pressable style={styles.reelAction}>
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
+          </Pressable>
+          <Pressable style={styles.reelAction} onPress={handleSave} disabled={saving}>
+            <Feather
+              name={saved ? "check-circle" : "download"}
+              size={28}
+              color={saved ? "#34C759" : "#fff"}
+            />
+            <Text style={[styles.reelActionCount, saved && { color: "#34C759" }]}>
+              {saving ? "…" : saved ? "Saved" : "Save"}
+            </Text>
           </Pressable>
           <Pressable style={styles.reelAction}>
             <Feather name="more-vertical" size={28} color="#fff" />
