@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   FlatList,
   Image,
   Pressable,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   View,
   Platform,
-  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
@@ -43,7 +45,7 @@ const TRENDING_POSTS: Post[] = [
     id: "t2",
     userName: "Mumbai Foodies",
     userAvatar: "",
-    content: "Top 10 street food spots in Mumbai that every foodie must visit! 🍛🥘 Thread below 👇",
+    content: "Top 10 street food spots in Mumbai that every foodie must visit! 🍛🥘",
     likes: 8900,
     comments: 412,
     shares: 1560,
@@ -51,19 +53,6 @@ const TRENDING_POSTS: Post[] = [
     timeAgo: "4h",
     type: "text",
     hashtags: ["#MumbaiFoodGuide", "#StreetFood"],
-  },
-  {
-    id: "t3",
-    userName: "TechIndia",
-    userAvatar: "",
-    content: "India just surpassed 1 billion smartphone users! 🇮🇳📱 The digital revolution is here. What does this mean for us?",
-    likes: 6300,
-    comments: 289,
-    shares: 870,
-    isLiked: false,
-    timeAgo: "6h",
-    type: "text",
-    hashtags: ["#DigitalIndia", "#TechNews"],
   },
 ];
 
@@ -81,19 +70,6 @@ const COMMUNITY_POSTS: Post[] = [
     type: "text",
     hashtags: ["#TamilCreators", "#NewMembers"],
   },
-  {
-    id: "c2",
-    userName: "Bangalore Tech Hub",
-    userAvatar: "",
-    content: "Weekend hackathon results are in! 🏆 Congratulations to all 48 participants who built amazing projects. Full recap 🧵",
-    likes: 2800,
-    comments: 94,
-    shares: 310,
-    isLiked: true,
-    timeAgo: "3h",
-    type: "text",
-    hashtags: ["#Hackathon", "#BangaloreTech"],
-  },
 ];
 
 export default function FeedScreen() {
@@ -105,7 +81,21 @@ export default function FeedScreen() {
   const [activeTab, setActiveTab] = useState<FeedTab>("For You");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 84 : 60;
+  const bottomPad = Platform.OS === "web" ? 84 : 66;
+
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const liveIndicator = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.timing(headerAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(liveIndicator, { toValue: 1, duration: 700, useNativeDriver: true }),
+        Animated.timing(liveIndicator, { toValue: 0.4, duration: 700, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
 
   const handleLike = (id: string) => {
     setPosts((prev) =>
@@ -134,60 +124,86 @@ export default function FeedScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View
+      <LinearGradient
+        colors={[colors.primary + "18", colors.secondary + "08", "transparent"]}
+        style={[styles.headerGlow, { height: topPad + 120 }]}
+        pointerEvents="none"
+      />
+
+      <Animated.View
         style={[
           styles.header,
           {
             paddingTop: topPad + 8,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surface + "F0",
             borderBottomColor: colors.border,
+            opacity: headerAnim,
+            transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-12, 0] }) }],
           },
         ]}
       >
-        <Image source={LOGO} style={styles.logoMini} resizeMode="contain" />
-        <Text style={[styles.appName, { color: colors.foreground }]}>Ridhi</Text>
+        <View style={styles.logoGroup}>
+          <Image source={LOGO} style={styles.logoMini} resizeMode="contain" />
+          <View>
+            <Text style={[styles.appName, { color: colors.foreground }]}>Ridhi</Text>
+            <View style={styles.onlineRow}>
+              <Animated.View style={[styles.onlineDot, { backgroundColor: colors.success, opacity: liveIndicator }]} />
+              <Text style={[styles.onlineText, { color: colors.mutedForeground }]}>2.4M online</Text>
+            </View>
+          </View>
+        </View>
 
         <View style={styles.headerActions}>
-          <Pressable onPress={() => router.push("/explore")} style={styles.headerBtn}>
-            <Feather name="search" size={22} color={colors.foreground} />
+          <Pressable
+            onPress={() => router.push("/explore")}
+            style={[styles.headerBtn, { backgroundColor: colors.muted }]}
+          >
+            <Feather name="search" size={18} color={colors.foreground} />
           </Pressable>
-          <Pressable onPress={() => router.push("/communities")} style={styles.headerBtn}>
-            <Feather name="users" size={22} color={colors.foreground} />
-          </Pressable>
-          <Pressable onPress={() => router.push("/notifications")} style={styles.headerBtn}>
-            <Feather name="bell" size={22} color={colors.foreground} />
-            <View style={[styles.notifDot, { backgroundColor: colors.primary }]} />
+          <Pressable
+            onPress={() => router.push("/notifications")}
+            style={[styles.headerBtn, { backgroundColor: colors.muted }]}
+          >
+            <Feather name="bell" size={18} color={colors.foreground} />
+            <LinearGradient
+              colors={[colors.primary, colors.secondary]}
+              style={styles.notifBadge}
+            />
           </Pressable>
           <Pressable onPress={() => router.push("/wallet")} style={styles.headerBtn}>
             <CoinBadge amount={user?.coins ?? 0} size="sm" />
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
 
-      <View style={[styles.feedTabBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <View style={[styles.feedTabBar, { backgroundColor: colors.surface + "F0", borderBottomColor: colors.border }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.feedTabScroll}>
-          {FEED_TABS.map((tab) => (
-            <Pressable
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-              style={[
-                styles.feedTab,
-                activeTab === tab && { borderBottomColor: colors.primary, borderBottomWidth: 2 },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.feedTabText,
-                  { color: activeTab === tab ? colors.primary : colors.mutedForeground },
-                ]}
+          {FEED_TABS.map((tab) => {
+            const isActive = activeTab === tab;
+            return (
+              <Pressable
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                style={[styles.feedTab]}
               >
-                {tab}
-              </Text>
-              {tab === "Trending" && (
-                <View style={[styles.trendDot, { backgroundColor: colors.destructive }]} />
-              )}
-            </Pressable>
-          ))}
+                {isActive ? (
+                  <LinearGradient
+                    colors={[colors.primary + "20", colors.secondary + "10"]}
+                    style={styles.feedTabActive}
+                  >
+                    <Text style={[styles.feedTabText, { color: colors.primary }]}>{tab}</Text>
+                    {tab === "Trending" && (
+                      <View style={[styles.trendDot, { backgroundColor: colors.destructive }]} />
+                    )}
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.feedTabInactive}>
+                    <Text style={[styles.feedTabText, { color: colors.mutedForeground }]}>{tab}</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -210,21 +226,24 @@ export default function FeedScreen() {
               onStory={() => {}}
               selfName={user?.name ?? "Me"}
             />
-          ) : activeTab === "Trending" ? (
-            <View style={[styles.trendingBanner, { backgroundColor: colors.destructive + "12" }]}>
-              <Feather name="trending-up" size={16} color={colors.destructive} />
-              <Text style={[styles.trendingBannerText, { color: colors.destructive }]}>
-                Trending across India right now 🔥
+          ) : (
+            <View style={[styles.tabBanner, { backgroundColor: activeTab === "Trending" ? colors.destructive + "12" : colors.secondary + "10" }]}>
+              <LinearGradient
+                colors={activeTab === "Trending" ? [colors.destructive + "20", "transparent"] : [colors.secondary + "20", "transparent"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <Feather
+                name={activeTab === "Trending" ? "trending-up" : "users"}
+                size={15}
+                color={activeTab === "Trending" ? colors.destructive : colors.secondary}
+              />
+              <Text style={[styles.tabBannerText, { color: activeTab === "Trending" ? colors.destructive : colors.secondary }]}>
+                {activeTab === "Trending" ? "🔥 Trending across India right now" : "Latest from your communities"}
               </Text>
             </View>
-          ) : activeTab === "Community" ? (
-            <View style={[styles.trendingBanner, { backgroundColor: colors.secondary + "12" }]}>
-              <Feather name="users" size={16} color={colors.secondary} />
-              <Text style={[styles.trendingBannerText, { color: colors.secondary }]}>
-                Latest from your communities
-              </Text>
-            </View>
-          ) : null
+          )
         }
         refreshControl={
           <RefreshControl
@@ -242,56 +261,74 @@ export default function FeedScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  headerGlow: {
+    position: "absolute",
+    top: 0, left: 0, right: 0,
+    zIndex: 0,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 8,
+    zIndex: 10,
   },
+  logoGroup: { flexDirection: "row", alignItems: "center", gap: 8, flex: 1 },
   logoMini: { width: 34, height: 34 },
-  appName: { fontSize: 20, fontFamily: "Inter_700Bold", flex: 1 },
+  appName: { fontSize: 20, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
+  onlineRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  onlineDot: { width: 6, height: 6, borderRadius: 3 },
+  onlineText: { fontSize: 10, fontFamily: "Inter_400Regular" },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
-  headerBtn: { padding: 6, position: "relative" },
-  notifDot: {
+  headerBtn: { padding: 8, borderRadius: 20, position: "relative" },
+  notifBadge: {
     position: "absolute",
-    top: 4,
-    right: 4,
-    width: 8,
-    height: 8,
+    top: 6,
+    right: 6,
+    width: 7,
+    height: 7,
     borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#08080F",
   },
   feedTabBar: {
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   feedTabScroll: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
   },
-  feedTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  feedTab: {},
+  feedTabActive: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
   },
-  feedTabText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  trendDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginTop: -6,
+  feedTabInactive: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
   },
-  trendingBanner: {
+  feedTabText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  trendDot: { width: 6, height: 6, borderRadius: 3 },
+  tabBanner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    margin: 12,
+    marginHorizontal: 12,
+    marginTop: 10,
     borderRadius: 12,
+    overflow: "hidden",
   },
-  trendingBannerText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  tabBannerText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });

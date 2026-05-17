@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Dimensions,
   Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,21 +16,44 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
-const { height } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
+
+const BG = "#08080F";
+const CARD = "#0F0F1C";
+const BORDER = "rgba(255,255,255,0.08)";
+const TEXT = "#EEEEF5";
+const MUTED = "#55556A";
+const PRIMARY = "#E91E8C";
+const SECONDARY = "#7B2FBE";
+const INPUT_BG = "#141424";
 
 export default function LoginScreen() {
-  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
   const [tab, setTab] = useState<"phone" | "email">("phone");
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [focused, setFocused] = useState(false);
+
+  const contentAnim = useRef(new Animated.Value(0)).current;
+  const orbAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(contentAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(orbAnim, { toValue: 1, duration: 4000, useNativeDriver: true }),
+          Animated.timing(orbAnim, { toValue: 0, duration: 4000, useNativeDriver: true }),
+        ])
+      ),
+    ]).start();
+  }, []);
 
   const handleContinue = async () => {
     if (!value.trim()) return;
@@ -40,11 +65,11 @@ export default function LoginScreen() {
 
   const handleSocialLogin = async (provider: string) => {
     setSocialLoading(provider);
-    await new Promise((r) => setTimeout(r, 1200));
+    await new Promise((r) => setTimeout(r, 1000));
     setSocialLoading(null);
     login({
       id: "social_" + Date.now(),
-      name: provider === "google" ? "Google User" : provider === "apple" ? "Apple User" : "Facebook User",
+      name: provider === "google" ? "Rahul Sharma" : provider === "apple" ? "Priya Singh" : "Arjun Kumar",
       phone: "",
       email: provider + "@ridhi.app",
       avatar: "",
@@ -82,167 +107,224 @@ export default function LoginScreen() {
     router.replace("/(tabs)");
   };
 
+  const orbTranslate = orbAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
+  const orbOpacity = orbAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.18, 0.28, 0.18] });
+
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <LinearGradient
-        colors={[colors.primary + "15", colors.secondary + "08", "transparent"]}
-        style={styles.topGlow}
-      />
+      <LinearGradient colors={[BG, "#0C0C18", BG]} style={StyleSheet.absoluteFill} />
 
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+      <Animated.View style={[styles.orb1, { opacity: orbOpacity, transform: [{ translateY: orbTranslate }] }]} />
+      <Animated.View style={[styles.orb2, { opacity: orbOpacity, transform: [{ translateY: orbTranslate }] }]} />
+
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={24} color={colors.foreground} />
+          <Feather name="arrow-left" size={22} color={TEXT} />
         </Pressable>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.logoCircle}>
-          <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
-        </View>
-        <Text style={[styles.title, { color: colors.foreground }]}>Welcome to Ridhi</Text>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          India's fastest growing social community
-        </Text>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: contentAnim,
+              transform: [{ translateY: contentAnim.interpolate({ inputRange: [0, 1], outputRange: [30, 0] }) }],
+            },
+          ]}
+        >
+          <View style={styles.logoWrap}>
+            <LinearGradient
+              colors={[PRIMARY + "25", SECONDARY + "15"]}
+              style={styles.logoGlowRing}
+            />
+            <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
+          </View>
 
-        <View style={[styles.tabRow, { backgroundColor: colors.muted }]}>
-          <Pressable
-            style={[styles.tabBtn, tab === "phone" && { backgroundColor: colors.surface }]}
-            onPress={() => setTab("phone")}
-          >
-            <Feather name="smartphone" size={16} color={tab === "phone" ? colors.primary : colors.mutedForeground} />
-            <Text style={[styles.tabText, { color: tab === "phone" ? colors.primary : colors.mutedForeground }]}>
-              Phone
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[styles.tabBtn, tab === "email" && { backgroundColor: colors.surface }]}
-            onPress={() => setTab("email")}
-          >
-            <Feather name="mail" size={16} color={tab === "email" ? colors.primary : colors.mutedForeground} />
-            <Text style={[styles.tabText, { color: tab === "email" ? colors.primary : colors.mutedForeground }]}>
-              Email
-            </Text>
-          </Pressable>
-        </View>
+          <View style={styles.titleGroup}>
+            <Text style={styles.title}>Welcome to Ridhi</Text>
+            <Text style={styles.subtitle}>India's fastest growing social community</Text>
+          </View>
 
-        <View style={[styles.inputWrap, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-          {tab === "phone" && (
-            <View style={[styles.countryCode, { borderRightColor: colors.border }]}>
-              <Text style={[styles.countryText, { color: colors.foreground }]}>🇮🇳 +91</Text>
-            </View>
-          )}
-          <TextInput
-            style={[styles.input, { color: colors.foreground }]}
-            placeholder={tab === "phone" ? "Enter mobile number" : "Enter email address"}
-            placeholderTextColor={colors.mutedForeground}
-            value={value}
-            onChangeText={setValue}
-            keyboardType={tab === "phone" ? "phone-pad" : "email-address"}
-            autoCapitalize="none"
-            autoFocus
+          <View style={[styles.tabRow, { backgroundColor: "#141424" }]}>
+            <Pressable
+              style={[styles.tabBtn, tab === "phone" && styles.tabBtnActive]}
+              onPress={() => setTab("phone")}
+            >
+              {tab === "phone" && (
+                <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
+              )}
+              <Feather name="smartphone" size={15} color={tab === "phone" ? PRIMARY : MUTED} />
+              <Text style={[styles.tabText, { color: tab === "phone" ? PRIMARY : MUTED }]}>Phone</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.tabBtn, tab === "email" && styles.tabBtnActive]}
+              onPress={() => setTab("email")}
+            >
+              {tab === "email" && (
+                <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
+              )}
+              <Feather name="mail" size={15} color={tab === "email" ? PRIMARY : MUTED} />
+              <Text style={[styles.tabText, { color: tab === "email" ? PRIMARY : MUTED }]}>Email</Text>
+            </Pressable>
+          </View>
+
+          <View style={[styles.inputWrap, focused && styles.inputFocused]}>
+            {tab === "phone" && (
+              <View style={[styles.countryCode, { borderRightColor: BORDER }]}>
+                <Text style={styles.countryText}>🇮🇳 +91</Text>
+              </View>
+            )}
+            <TextInput
+              style={styles.input}
+              placeholder={tab === "phone" ? "Enter mobile number" : "Enter email address"}
+              placeholderTextColor={MUTED}
+              value={value}
+              onChangeText={setValue}
+              keyboardType={tab === "phone" ? "phone-pad" : "email-address"}
+              autoCapitalize="none"
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+            />
+          </View>
+
+          <GradientButton
+            label="Get OTP →"
+            onPress={handleContinue}
+            loading={loading}
+            disabled={value.length < 6}
+            style={{ width: "100%" }}
           />
-        </View>
 
-        <GradientButton
-          label="Get OTP"
-          onPress={handleContinue}
-          loading={loading}
-          disabled={value.length < 6}
-          style={{ width: "100%" }}
-        />
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
-        <View style={styles.dividerRow}>
-          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-          <Text style={[styles.dividerText, { color: colors.mutedForeground }]}>or continue with</Text>
-          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-        </View>
+          <View style={styles.socialRow}>
+            {[
+              { id: "google", label: "Google", icon: null, letter: "G", color: "#FFFFFF" },
+              { id: "apple", label: "Apple", icon: "smartphone" as const, letter: null, color: "#FFFFFF" },
+              { id: "facebook", label: "Facebook", icon: null, letter: "f", color: "#1877F2" },
+            ].map(({ id, label, icon, letter, color }) => (
+              <Pressable
+                key={id}
+                onPress={() => handleSocialLogin(id)}
+                style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.7 }]}
+              >
+                <LinearGradient
+                  colors={["#141424", "#1A1A2E"]}
+                  style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
+                />
+                {socialLoading === id ? (
+                  <Feather name="loader" size={20} color={MUTED} />
+                ) : icon ? (
+                  <Feather name={icon} size={20} color={color} />
+                ) : (
+                  <Text style={[styles.socialLetter, { color }]}>{letter}</Text>
+                )}
+                <Text style={styles.socialLabel}>{label}</Text>
+              </Pressable>
+            ))}
+          </View>
 
-        <View style={styles.socialRow}>
-          <Pressable
-            onPress={() => handleSocialLogin("google")}
-            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            {socialLoading === "google" ? (
-              <Feather name="loader" size={20} color={colors.mutedForeground} />
+          <Pressable onPress={handleGuestAccess} style={styles.guestBtn}>
+            <LinearGradient
+              colors={["rgba(255,255,255,0.04)", "rgba(255,255,255,0.06)"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+            />
+            {socialLoading === "guest" ? (
+              <Feather name="loader" size={16} color={MUTED} />
             ) : (
-              <Text style={styles.socialIcon}>G</Text>
+              <Feather name="user" size={16} color={MUTED} />
             )}
-            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Google</Text>
+            <Text style={styles.guestText}>Continue as Guest</Text>
           </Pressable>
 
-          <Pressable
-            onPress={() => handleSocialLogin("apple")}
-            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            {socialLoading === "apple" ? (
-              <Feather name="loader" size={20} color={colors.mutedForeground} />
-            ) : (
-              <Feather name="smartphone" size={20} color={colors.foreground} />
-            )}
-            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Apple</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={() => handleSocialLogin("facebook")}
-            style={[styles.socialBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            {socialLoading === "facebook" ? (
-              <Feather name="loader" size={20} color={colors.mutedForeground} />
-            ) : (
-              <Text style={[styles.socialIcon, { color: "#1877F2" }]}>f</Text>
-            )}
-            <Text style={[styles.socialLabel, { color: colors.foreground }]}>Facebook</Text>
-          </Pressable>
-        </View>
-
-        <Pressable onPress={handleGuestAccess} style={styles.guestBtn}>
-          {socialLoading === "guest" ? (
-            <Feather name="loader" size={16} color={colors.mutedForeground} />
-          ) : (
-            <Feather name="user" size={16} color={colors.mutedForeground} />
-          )}
-          <Text style={[styles.guestText, { color: colors.mutedForeground }]}>Continue as Guest</Text>
-        </Pressable>
-
-        <Text style={[styles.terms, { color: colors.mutedForeground }]}>
-          By continuing, you agree to our{" "}
-          <Text style={{ color: colors.primary }}>Terms of Service</Text> and{" "}
-          <Text style={{ color: colors.primary }}>Privacy Policy</Text>
-        </Text>
-      </View>
+          <Text style={styles.terms}>
+            By continuing, you agree to our{" "}
+            <Text style={{ color: PRIMARY }}>Terms of Service</Text> and{" "}
+            <Text style={{ color: PRIMARY }}>Privacy Policy</Text>
+          </Text>
+        </Animated.View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  topGlow: { position: "absolute", top: 0, left: 0, right: 0, height: height * 0.4 },
-  header: { paddingHorizontal: 20 },
+  container: { flex: 1, backgroundColor: BG },
+  orb1: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: PRIMARY,
+    top: -80,
+    left: -80,
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 80,
+  },
+  orb2: {
+    position: "absolute",
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: SECONDARY,
+    bottom: height * 0.15,
+    right: -60,
+    shadowColor: SECONDARY,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 60,
+  },
+  header: { paddingHorizontal: 20, paddingBottom: 4 },
   backBtn: { padding: 8, alignSelf: "flex-start" },
+  scrollContent: { flexGrow: 1 },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 12,
-    gap: 14,
+    paddingTop: 8,
+    gap: 16,
     alignItems: "center",
   },
-  logoCircle: {
-    width: 72,
-    height: 72,
+  logoWrap: {
+    width: 88,
+    height: 88,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  logoImage: { width: 72, height: 72 },
-  title: { fontSize: 24, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
+  logoGlowRing: {
+    position: "absolute",
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+  },
+  logoImage: { width: 68, height: 68 },
+  titleGroup: { alignItems: "center", gap: 6 },
+  title: { fontSize: 26, fontFamily: "Inter_700Bold", color: TEXT, letterSpacing: -0.6 },
+  subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", color: MUTED, textAlign: "center" },
   tabRow: {
     flexDirection: "row",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 4,
     width: "100%",
+    borderWidth: 1,
+    borderColor: BORDER,
+    overflow: "hidden",
   },
   tabBtn: {
     flex: 1,
@@ -250,49 +332,89 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    paddingVertical: 10,
-    borderRadius: 9,
+    paddingVertical: 11,
+    borderRadius: 10,
+    overflow: "hidden",
+    position: "relative",
   },
-  tabText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  tabBtnActive: {
+    borderWidth: 1,
+    borderColor: PRIMARY + "30",
+  },
+  tabText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: INPUT_BG,
     borderRadius: 14,
     borderWidth: 1.5,
+    borderColor: BORDER,
     overflow: "hidden",
     width: "100%",
-    height: 52,
+    height: 54,
+  },
+  inputFocused: {
+    borderColor: PRIMARY + "60",
+    shadowColor: PRIMARY,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
   countryCode: {
     paddingHorizontal: 14,
     height: "100%",
     justifyContent: "center",
     borderRightWidth: 1,
+    borderRightColor: BORDER,
   },
-  countryText: { fontSize: 15, fontFamily: "Inter_500Medium" },
-  input: { flex: 1, paddingHorizontal: 14, fontSize: 16, fontFamily: "Inter_400Regular" },
+  countryText: { fontSize: 15, fontFamily: "Inter_500Medium", color: TEXT },
+  input: {
+    flex: 1,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+    color: TEXT,
+  },
   dividerRow: { flexDirection: "row", alignItems: "center", width: "100%", gap: 10 },
-  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth },
-  dividerText: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: BORDER },
+  dividerText: { fontSize: 12, fontFamily: "Inter_400Regular", color: MUTED },
   socialRow: { flexDirection: "row", width: "100%", gap: 10 },
   socialBtn: {
     flex: 1,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 14,
+    paddingVertical: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    gap: 4,
+    borderColor: BORDER,
+    gap: 5,
+    overflow: "hidden",
+    position: "relative",
   },
-  socialIcon: { fontSize: 20, fontFamily: "Inter_700Bold" },
-  socialLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  socialLetter: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  socialLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: TEXT },
   guestBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: BORDER,
+    width: "100%",
+    justifyContent: "center",
+    overflow: "hidden",
+    position: "relative",
   },
-  guestText: { fontSize: 14, fontFamily: "Inter_400Regular", textDecorationLine: "underline" },
-  terms: { fontSize: 11, textAlign: "center", lineHeight: 16, fontFamily: "Inter_400Regular" },
+  guestText: { fontSize: 14, fontFamily: "Inter_500Medium", color: MUTED },
+  terms: {
+    fontSize: 11,
+    textAlign: "center",
+    lineHeight: 17,
+    fontFamily: "Inter_400Regular",
+    color: MUTED,
+    paddingHorizontal: 8,
+  },
 });

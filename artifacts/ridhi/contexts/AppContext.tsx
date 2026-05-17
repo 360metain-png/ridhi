@@ -2,6 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { Appearance, useColorScheme } from "react-native";
 
+function safeSetColorScheme(scheme: "light" | "dark" | null) {
+  try {
+    Appearance.setColorScheme(scheme);
+  } catch {}
+}
+
 export type Language = {
   code: string;
   name: string;
@@ -48,11 +54,11 @@ interface AppContextValue {
   setTwoFAEnabled: (v: boolean) => void;
 }
 
-const AppContext = createContext<AppContextValue | null>(null);
+export const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
-  const [theme, setThemeState] = useState<"light" | "dark" | "system">("system");
+  const [theme, setThemeState] = useState<"light" | "dark" | "system">("dark");
   const [language, setLanguageState] = useState<Language>(LANGUAGES[0]);
   const [notificationsEnabled, setNotificationsEnabledState] = useState(true);
   const [pushEnabled, setPushEnabledState] = useState(true);
@@ -64,10 +70,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [twoFAEnabled, setTwoFAEnabledState] = useState(false);
 
   useEffect(() => {
+    safeSetColorScheme("dark");
+
     AsyncStorage.getItem("ridhi_app_settings").then((data) => {
       if (data) {
         const s = JSON.parse(data);
-        if (s.theme) setThemeState(s.theme);
+        if (s.theme) {
+          setThemeState(s.theme);
+          safeSetColorScheme(s.theme === "system" ? null : s.theme);
+        }
         if (s.language) setLanguageState(s.language);
         if (s.notificationsEnabled !== undefined) setNotificationsEnabledState(s.notificationsEnabled);
         if (s.pushEnabled !== undefined) setPushEnabledState(s.pushEnabled);
@@ -91,8 +102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((t: "light" | "dark" | "system") => {
     setThemeState(t);
     save({ theme: t });
-    // Drive the native color scheme so useColorScheme() picks it up everywhere
-    Appearance.setColorScheme(t === "system" ? null : t);
+    safeSetColorScheme(t === "system" ? null : t);
   }, []);
 
   const setLanguage = useCallback((l: Language) => {
@@ -109,7 +119,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setLocationShared = useCallback((v: boolean) => { setLocationSharedState(v); save({ locationShared: v }); }, []);
   const setTwoFAEnabled = useCallback((v: boolean) => { setTwoFAEnabledState(v); save({ twoFAEnabled: v }); }, []);
 
-  const activeTheme: "light" | "dark" = theme === "system" ? (systemScheme ?? "light") : theme;
+  const activeTheme: "light" | "dark" =
+    theme === "system" ? (systemScheme ?? "dark") : theme;
 
   return (
     <AppContext.Provider

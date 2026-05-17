@@ -1,10 +1,70 @@
 import { BlurView } from "expo-blur";
-import { Tabs, router } from "expo-router";
+import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
-import { Platform, Pressable, StyleSheet, View, useColorScheme } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
+
+function AnimatedTabIcon({
+  name,
+  focused,
+  color,
+}: {
+  name: React.ComponentProps<typeof Feather>["name"];
+  focused: boolean;
+  color: string;
+}) {
+  const colors = useColors();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (focused) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, { toValue: 1.18, useNativeDriver: true, speed: 50, bounciness: 12 }),
+        Animated.timing(glowAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 30 }),
+        Animated.timing(glowAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start();
+    }
+  }, [focused]);
+
+  return (
+    <Animated.View style={[styles.iconWrap, { transform: [{ scale: scaleAnim }] }]}>
+      {focused && (
+        <Animated.View
+          style={[
+            styles.iconGlow,
+            {
+              opacity: glowAnim,
+              shadowColor: colors.primary,
+            },
+          ]}
+        />
+      )}
+      <Feather name={name} size={22} color={color} />
+      {focused && (
+        <Animated.View style={[styles.activeDot, { backgroundColor: colors.primary, opacity: glowAnim }]} />
+      )}
+    </Animated.View>
+  );
+}
+
+function TabLabel({ label, focused }: { label: string; focused: boolean }) {
+  const colors = useColors();
+  return (
+    <Text style={[
+      styles.tabLabel,
+      { color: focused ? colors.primary : colors.mutedForeground },
+    ]}>
+      {label}
+    </Text>
+  );
+}
 
 export default function TabLayout() {
   const colors = useColors();
@@ -25,45 +85,47 @@ export default function TabLayout() {
           borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: colors.border,
           elevation: 0,
-          height: isWeb ? 84 : 62,
-          paddingBottom: isWeb ? 34 : 10,
+          height: isWeb ? 84 : 66,
+          paddingBottom: isWeb ? 34 : 12,
+          paddingTop: 6,
         },
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
-              intensity={100}
-              tint={isDark ? "dark" : "light"}
+              intensity={80}
+              tint="dark"
               style={StyleSheet.absoluteFill}
             />
-          ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface }]} />
-          ) : null,
-        tabBarLabelStyle: { fontSize: 10, fontFamily: "Inter_500Medium" },
+          ) : (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]} />
+          ),
+        tabBarLabelStyle: { display: "none" },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Feed",
           tabBarIcon: ({ color, focused }) => (
-            <Feather name={focused ? "home" : "home"} size={22} color={color} />
+            <AnimatedTabIcon name="home" focused={focused} color={color} />
           ),
+          tabBarLabel: ({ focused }) => <TabLabel label="Feed" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="reels"
         options={{
-          title: "Reels",
-          tabBarIcon: ({ color }) => <Feather name="play" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedTabIcon name="play" focused={focused} color={color} />
+          ),
+          tabBarLabel: ({ focused }) => <TabLabel label="Reels" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="match"
         options={{
-          title: "",
           tabBarIcon: () => (
             <LinearGradient
-              colors={[colors.primary, colors.secondary]}
+              colors={["#E91E8C", "#7B2FBE"]}
               style={styles.createBtn}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -77,15 +139,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: "Chat",
-          tabBarIcon: ({ color }) => <Feather name="message-circle" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedTabIcon name="message-circle" focused={focused} color={color} />
+          ),
+          tabBarLabel: ({ focused }) => <TabLabel label="Chat" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => <Feather name="user" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedTabIcon name="user" focused={focused} color={color} />
+          ),
+          tabBarLabel: ({ focused }) => <TabLabel label="Profile" focused={focused} />,
         }}
       />
     </Tabs>
@@ -93,17 +159,47 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  iconWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 42,
+    height: 36,
+    position: "relative",
+  },
+  iconGlow: {
+    position: "absolute",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "transparent",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 0,
+  },
+  activeDot: {
+    position: "absolute",
+    bottom: -2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_500Medium",
+    marginTop: -2,
+  },
   createBtn: {
     width: 52,
     height: 52,
     borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 8,
     shadowColor: "#E91E8C",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.55,
+    shadowRadius: 14,
+    elevation: 10,
   },
 });
