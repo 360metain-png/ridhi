@@ -27,13 +27,13 @@ const LIVE_ROOMS = [
 ];
 
 const INIT_TOURNAMENTS = [
-  { id: "t1", name: "Ludo Battle Arena",    game: "Ludo",   status: "live",        players: "128/256", prizePool: 10000,  entry: 100,  startTime: "2h 15m ago" },
-  { id: "t2", name: "Carrom Championship",  game: "Carrom", status: "live",        players: "64/128",  prizePool: 25000,  entry: 200,  startTime: "30m ago"    },
-  { id: "t3", name: "Diwali Coin Cup 🪔",   game: "Ludo",   status: "upcoming",    players: "0/512",   prizePool: 500000, entry: 1000, startTime: "in 3d"      },
-  { id: "t4", name: "Couple Tournament 💑", game: "Ludo",   status: "registering", players: "40/64",   prizePool: 15000,  entry: 150,  startTime: "in 5h 30m"  },
-  { id: "t5", name: "Regional Battle 🗺️",  game: "Ludo",   status: "ended",       players: "200/512", prizePool: 5000,   entry: 50,   startTime: "2h ago"     },
-  { id: "t6", name: "Creator Match ⭐",     game: "Carrom", status: "upcoming",    players: "8/16",    prizePool: 50000,  entry: 500,  startTime: "Tomorrow"   },
-  { id: "t7", name: "New Year Mega Battle 🎆", game: "Ludo", status: "upcoming",  players: "0/1024",  prizePool: 1000000,entry: 2000, startTime: "Dec 31"     },
+  { id: "t1", name: "Ludo Battle Arena",       game: "Ludo",   status: "live", players: "248/256",  prizePool: 10000,   entry: 100,  startTime: "2h 15m ago" },
+  { id: "t2", name: "Carrom Championship",     game: "Carrom", status: "live", players: "126/128",  prizePool: 25000,   entry: 200,  startTime: "30m ago"    },
+  { id: "t3", name: "Diwali Coin Cup 🪔",      game: "Ludo",   status: "live", players: "498/512",  prizePool: 500000,  entry: 1000, startTime: "45m ago"    },
+  { id: "t4", name: "Couple Tournament 💑",    game: "Ludo",   status: "live", players: "62/64",    prizePool: 15000,   entry: 150,  startTime: "20m ago"    },
+  { id: "t5", name: "Regional Battle 🗺️",     game: "Ludo",   status: "live", players: "504/512",  prizePool: 5000,    entry: 50,   startTime: "1h ago"     },
+  { id: "t6", name: "Creator Match ⭐",        game: "Carrom", status: "live", players: "16/16",    prizePool: 50000,   entry: 500,  startTime: "15m ago"    },
+  { id: "t7", name: "New Year Mega Battle 🎆", game: "Ludo",   status: "live", players: "1018/1024",prizePool: 1000000, entry: 2000, startTime: "just now"   },
 ];
 
 const FRAUD_FLAGS = [

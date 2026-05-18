@@ -152,7 +152,7 @@ export default function GameRoomScreen() {
   const [myCoins, setMyCoins] = useState(0);
   const [opCoins, setOpCoins] = useState(0);
   const [timer, setTimer] = useState(0);
-  const [gameState, setGameState] = useState<"waiting" | "playing" | "ended">("waiting");
+  const [gameState, setGameState] = useState<"waiting" | "playing" | "ended">("playing");
   const [sentGift, setSentGift] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
   const giftAnim = useRef(new Animated.Value(0)).current;
@@ -166,8 +166,7 @@ export default function GameRoomScreen() {
   const isHost = params.host === "true";
 
   useEffect(() => {
-    const t = setTimeout(() => setGameState("playing"), 2000);
-    return () => clearTimeout(t);
+    // game starts immediately — always live
   }, []);
 
   useEffect(() => {

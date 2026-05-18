@@ -25,19 +25,24 @@ type GameType = "all" | "ludo" | "carrom";
 type BattleMode = "1v1" | "couple" | "team";
 
 const ROOM_TIERS = [
-  { id: "beginner", label: "Beginner", entry: 50, prize: 80, players: 284, color: "#4CAF50", colorDark: "#2E7D32", icon: "🌱" },
-  { id: "silver", label: "Silver", entry: 200, prize: 320, players: 142, color: "#9E9E9E", colorDark: "#757575", icon: "🥈" },
-  { id: "gold", label: "Gold", entry: 500, prize: 800, players: 89, color: "#FFB800", colorDark: "#FF8C00", icon: "🥇" },
-  { id: "platinum", label: "Platinum", entry: 2000, prize: 3200, players: 31, color: "#00BCD4", colorDark: "#0097A7", icon: "💎" },
-  { id: "vip", label: "VIP Room", entry: 10000, prize: 16000, players: 8, color: "#E91E8C", colorDark: "#7B2FBE", icon: "👑" },
+  { id: "beginner", label: "Beginner", entry: 50,    prize: 80,    players: 1842, color: "#4CAF50", colorDark: "#2E7D32", icon: "🌱" },
+  { id: "silver",   label: "Silver",   entry: 200,   prize: 320,   players: 976,  color: "#9E9E9E", colorDark: "#757575", icon: "🥈" },
+  { id: "gold",     label: "Gold",     entry: 500,   prize: 800,   players: 543,  color: "#FFB800", colorDark: "#FF8C00", icon: "🥇" },
+  { id: "platinum", label: "Platinum", entry: 2000,  prize: 3200,  players: 218,  color: "#00BCD4", colorDark: "#0097A7", icon: "💎" },
+  { id: "vip",      label: "VIP Room", entry: 10000, prize: 16000, players: 47,   color: "#E91E8C", colorDark: "#7B2FBE", icon: "👑" },
 ];
 
 const ACTIVE_ROOMS = [
-  { id: "r1", game: "ludo", host: "Priya S", entry: 50, players: 2, maxPlayers: 4, tier: "Beginner", viewers: 12 },
-  { id: "r2", game: "carrom", host: "Rahul M", entry: 200, players: 1, maxPlayers: 2, tier: "Silver", viewers: 5 },
-  { id: "r3", game: "ludo", host: "Kavya R", entry: 500, players: 3, maxPlayers: 4, tier: "Gold", viewers: 34 },
-  { id: "r4", game: "carrom", host: "Arjun K", entry: 2000, players: 1, maxPlayers: 2, tier: "Platinum", viewers: 78 },
-  { id: "r5", game: "ludo", host: "Dev T", entry: 10000, players: 1, maxPlayers: 4, tier: "VIP", viewers: 210 },
+  { id: "r1",  game: "ludo",   host: "Priya S",    entry: 50,    players: 3, maxPlayers: 4, tier: "Beginner", viewers: 142 },
+  { id: "r2",  game: "carrom", host: "Rahul M",    entry: 200,   players: 1, maxPlayers: 2, tier: "Silver",   viewers: 58  },
+  { id: "r3",  game: "ludo",   host: "Kavya R",    entry: 500,   players: 3, maxPlayers: 4, tier: "Gold",     viewers: 312 },
+  { id: "r4",  game: "carrom", host: "Arjun K",    entry: 2000,  players: 2, maxPlayers: 2, tier: "Platinum", viewers: 780 },
+  { id: "r5",  game: "ludo",   host: "Dev T",      entry: 10000, players: 2, maxPlayers: 4, tier: "VIP",      viewers: 2104 },
+  { id: "r6",  game: "ludo",   host: "Sneha P",    entry: 50,    players: 2, maxPlayers: 4, tier: "Beginner", viewers: 87  },
+  { id: "r7",  game: "carrom", host: "Vivek A",    entry: 500,   players: 1, maxPlayers: 2, tier: "Gold",     viewers: 203 },
+  { id: "r8",  game: "ludo",   host: "Meera J",    entry: 200,   players: 3, maxPlayers: 4, tier: "Silver",   viewers: 134 },
+  { id: "r9",  game: "carrom", host: "Rohan D",    entry: 10000, players: 1, maxPlayers: 2, tier: "VIP",      viewers: 1876 },
+  { id: "r10", game: "ludo",   host: "Ananya S",   entry: 2000,  players: 2, maxPlayers: 4, tier: "Platinum", viewers: 498 },
 ];
 
 const DAILY_MISSIONS = [
@@ -81,7 +86,7 @@ export default function GamesScreen() {
             <Text style={[styles.heroTitle, { color: colors.foreground }]}>🎮 Gaming Arena</Text>
             <View style={[styles.liveTag, { backgroundColor: colors.success + "20" }]}>
               <View style={[styles.liveDot, { backgroundColor: colors.success }]} />
-              <Text style={[styles.liveText, { color: colors.success }]}>1,284 online</Text>
+              <Text style={[styles.liveText, { color: colors.success }]}>8,420 online · LIVE</Text>
             </View>
           </View>
           <Pressable
@@ -94,9 +99,9 @@ export default function GamesScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { label: "Games Today", value: "8,420" },
-            { label: "Coins Won", value: "2.4L" },
-            { label: "Top Prize", value: "₹4,499" },
+            { label: "Games Today", value: "24,816" },
+            { label: "Coins Won", value: "12.6L" },
+            { label: "Top Prize", value: "₹16,000" },
           ].map((s) => (
             <View key={s.label} style={[styles.statBox, { backgroundColor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.12)" }]}>
               <Text style={[styles.statVal, { color: "#EEEEF5" }]}>{s.value}</Text>
@@ -172,8 +177,13 @@ export default function GamesScreen() {
             >
               <LinearGradient
                 colors={[tier.color + "30", tier.colorDark + "10"]}
-                style={[styles.tierCardInner, { borderColor: tier.color + "40" }]}
+                style={[styles.tierCardInner, { borderColor: tier.color + "60" }]}
               >
+                {/* LIVE badge */}
+                <View style={[styles.tierLiveBadge, { backgroundColor: colors.success }]}>
+                  <View style={styles.tierLiveDot} />
+                  <Text style={styles.tierLiveText}>LIVE</Text>
+                </View>
                 <Text style={styles.tierIcon}>{tier.icon}</Text>
                 <Text style={[styles.tierLabel, { color: "#fff" }]}>{tier.label}</Text>
                 <View style={[styles.tierEntry, { backgroundColor: tier.color + "20" }]}>
@@ -182,7 +192,7 @@ export default function GamesScreen() {
                 <Text style={[styles.tierPrize, { color: colors.gold }]}>Win {tier.prize}</Text>
                 <View style={styles.tierPlayers}>
                   <View style={[styles.playerDot, { backgroundColor: colors.success }]} />
-                  <Text style={[styles.tierPlayersText, { color: colors.mutedForeground }]}>{tier.players} playing</Text>
+                  <Text style={[styles.tierPlayersText, { color: "rgba(255,255,255,0.7)" }]}>{tier.players.toLocaleString()} playing</Text>
                 </View>
               </LinearGradient>
             </Pressable>
@@ -345,6 +355,9 @@ const styles = StyleSheet.create({
   tierEntry: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   tierEntryText: { fontSize: 13, fontFamily: "Inter_700Bold" },
   tierPrize: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  tierLiveBadge:  { position: "absolute", top: 8, right: 8, flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  tierLiveDot:    { width: 5, height: 5, borderRadius: 3, backgroundColor: "#fff", opacity: 0.9 },
+  tierLiveText:   { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff", letterSpacing: 0.5 },
   tierPlayers: { flexDirection: "row", alignItems: "center", gap: 5 },
   playerDot: { width: 7, height: 7, borderRadius: 4 },
   tierPlayersText: { fontSize: 11, fontFamily: "Inter_400Regular" },
