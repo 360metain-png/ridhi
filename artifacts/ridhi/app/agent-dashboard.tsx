@@ -68,6 +68,7 @@ export default function AgentDashboardScreen() {
   const [regName, setRegName]       = useState(user?.name ?? "");
   const [regPhone, setRegPhone]     = useState(user?.phone ?? "");
   const [regCity, setRegCity]       = useState(user?.city ?? "");
+  const [regGender, setRegGender]   = useState<"male" | "female" | "other" | "">("");
   const [regExp, setRegExp]         = useState("");
   const [regAgreed, setRegAgreed]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -89,10 +90,11 @@ export default function AgentDashboardScreen() {
   }, [user?.isAgent]);
 
   const handleAgentRegister = async () => {
-    if (!regName.trim())  { Alert.alert("Required", "Please enter your full name."); return; }
-    if (!regPhone.trim()) { Alert.alert("Required", "Please enter your WhatsApp number."); return; }
-    if (!regCity.trim())  { Alert.alert("Required", "Please enter your city."); return; }
-    if (!regAgreed)       { Alert.alert("Required", "Please accept the Agent Agreement to continue."); return; }
+    if (!regName.trim())   { Alert.alert("Required", "Please enter your full name."); return; }
+    if (!regPhone.trim())  { Alert.alert("Required", "Please enter your WhatsApp number."); return; }
+    if (!regCity.trim())   { Alert.alert("Required", "Please enter your city."); return; }
+    if (!regGender)        { Alert.alert("Required", "Please select your gender."); return; }
+    if (!regAgreed)        { Alert.alert("Required", "Please accept the Agent Agreement to continue."); return; }
     setSubmitting(true);
     await new Promise((r) => setTimeout(r, 1000));
     setSubmitting(false);
@@ -225,6 +227,41 @@ export default function AgentDashboardScreen() {
               placeholderTextColor={colors.mutedForeground}
               style={[regStyles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }]}
             />
+
+            <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>Gender *</Text>
+            <View style={regStyles.genderRow}>
+              {([
+                { key: "male",   label: "Male",   icon: "👨" },
+                { key: "female", label: "Female",  icon: "👩" },
+                { key: "other",  label: "Other",   icon: "🧑" },
+              ] as const).map((g) => {
+                const sel = regGender === g.key;
+                return (
+                  <Pressable
+                    key={g.key}
+                    onPress={() => setRegGender(g.key)}
+                    style={[
+                      regStyles.genderChip,
+                      {
+                        backgroundColor: sel ? "#00BCD420" : colors.background,
+                        borderColor:     sel ? "#00BCD4" : colors.border,
+                        borderWidth:     sel ? 1.5 : 1,
+                      },
+                    ]}
+                  >
+                    <Text style={regStyles.genderEmoji}>{g.icon}</Text>
+                    <Text style={[regStyles.genderLabel, { color: sel ? "#00BCD4" : colors.foreground }]}>
+                      {g.label}
+                    </Text>
+                    {sel && (
+                      <View style={[regStyles.genderCheck, { backgroundColor: "#00BCD4" }]}>
+                        <Feather name="check" size={9} color="#fff" />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
 
             <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>Experience (optional)</Text>
             <TextInput
@@ -607,6 +644,11 @@ const regStyles = StyleSheet.create({
   reqText: { fontSize: 13, fontFamily: "Inter_400Regular", flex: 1 },
   fieldLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginBottom: -4 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 14, fontFamily: "Inter_400Regular" },
+  genderRow:   { flexDirection: "row", gap: 8 },
+  genderChip:  { flex: 1, flexDirection: "column", alignItems: "center", gap: 4, borderRadius: 12, borderWidth: 1, paddingVertical: 11, paddingHorizontal: 4, position: "relative" },
+  genderEmoji: { fontSize: 22 },
+  genderLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  genderCheck: { position: "absolute", top: 6, right: 6, width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   agreeRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginTop: 4 },
   checkbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 },
   agreeText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
