@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
 import { apiFetch, ApiError } from "@/utils/api";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const OTP_LENGTH = 6;
 
@@ -102,6 +103,7 @@ export default function OtpScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="otp" />
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={24} color={colors.foreground} />

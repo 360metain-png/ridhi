@@ -18,6 +18,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
 import { Avatar, AvatarPicker, getAvatarUrl, getAvatarOptions } from "@/components/Avatar";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -582,6 +583,7 @@ export default function ProfileSetupScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="profileSetup" />
       {/* progress bar */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Pressable onPress={() => step > 0 ? setStep(step - 1) : router.back()} style={styles.backBtn}>

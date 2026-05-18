@@ -29,6 +29,7 @@ import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS, type Ban
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: string; tag: string }> = [
   { id: "ai1", userName: "Priya Sharma", reason: "Based on your interest in Dance", preview: "New Bollywood challenge taking India by storm 💃🔥", tag: "#RidhiDance" },
@@ -707,6 +708,7 @@ export default function FeedScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="feed" />
       <LinearGradient
         colors={[colors.primary + "18", colors.secondary + "08", "transparent"]}
         style={[styles.headerGlow, { height: topPad + 120, pointerEvents: "none" }]}

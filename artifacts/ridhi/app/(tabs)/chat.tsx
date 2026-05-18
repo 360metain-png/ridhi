@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 type Tab = "direct" | "groups";
 
@@ -33,6 +34,7 @@ export default function ChatScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="chatList" />
       <View
         style={[
           styles.header,

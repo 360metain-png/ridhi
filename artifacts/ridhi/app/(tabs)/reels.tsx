@@ -17,6 +17,7 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { WatermarkBadge } from "@/components/WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const REELS = [
   {
@@ -249,6 +250,7 @@ export default function ReelsScreen() {
 
   return (
     <View style={styles.container}>
+      <FloatingEmojiBg preset="reels" />
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>
         <Pressable

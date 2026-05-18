@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -58,6 +59,7 @@ export default function CreatorDashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="creator" />
       <LinearGradient
         colors={[colors.primary, colors.secondary]}
         style={[styles.topGrad, { paddingTop: topPad + 10 }]}

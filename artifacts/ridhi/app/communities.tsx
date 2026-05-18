@@ -18,6 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CATEGORIES, COMMUNITIES, Community } from "@/data/communities";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const EMOJIS = ["🎵", "🎮", "💪", "🍛", "🌍", "📸", "💃", "🏏", "🎨", "📚", "🚀", "🌸"];
 const COMMUNITY_CATEGORIES = ["Social", "Gaming", "Fitness", "Food", "Travel", "Fashion", "Music", "Tech"];
@@ -136,6 +137,7 @@ export default function CommunitiesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="communities" />
       <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
           <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>

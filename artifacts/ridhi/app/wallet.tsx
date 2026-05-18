@@ -23,6 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
 import { CoinFountainOverlay, AnimatedCoinBalance, useCoinToasts } from "@/components/CoinFountain";
 import { PaymentSheet } from "@/components/PaymentSheet";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -173,6 +174,7 @@ export default function WalletScreen() {
 
   return (
     <View style={[styles.outerWrap, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="wallet" />
       <ScrollView ref={scrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         {/* ── Wallet Card ── */}
         <LinearGradient colors={[colors.primary, colors.secondary]} style={[styles.walletCard, { paddingTop: topPad + 16 }]}>
