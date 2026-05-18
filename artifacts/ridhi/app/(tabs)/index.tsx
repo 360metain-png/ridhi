@@ -28,6 +28,7 @@ import { Avatar } from "@/components/Avatar";
 import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
+import { PromoBanner } from "@/components/PromoBanner";
 
 const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: string; tag: string }> = [
   { id: "ai1", userName: "Priya Sharma", reason: "Based on your interest in Dance", preview: "New Bollywood challenge taking India by storm 💃🔥", tag: "#RidhiDance" },
@@ -357,6 +358,8 @@ export default function FeedScreen() {
             onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
           />
+
+          <PromoBanner />
 
           {nearYouPosts.length > 0 && (
             <Animated.View style={[styles.nearYouSection, { opacity: recsFadeAnim, transform: [{ translateY: recsFadeAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
