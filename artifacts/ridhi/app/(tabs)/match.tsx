@@ -253,7 +253,7 @@ export default function MatchScreen() {
     filters.distance !== "25 km",
     filters.ageMin !== 18 || filters.ageMax !== 35,
     filters.verifiedOnly,
-    filters.withPhotoOnly !== true,
+    filters.withPhotoOnly === true,
     filters.interests.length > 0,
     filters.onlineOnly,
     filters.showNewProfiles,
