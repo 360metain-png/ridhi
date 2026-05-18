@@ -46,3 +46,9 @@ externalPort = 3000
 [[ports]]
 localPort = 26095
 externalPort = 3003
+
+[userenv]
+
+[userenv.shared]
+EXPO_PUBLIC_API_URL = "https://8f940257-4c4e-4549-a4a9-638a0d369b1e-00-39dus2nt16lza.pike.replit.dev/api"
+TWILIO_PHONE_NUMBER = "+918884444806"
