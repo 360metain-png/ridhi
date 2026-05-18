@@ -26,12 +26,14 @@ const LIVE_ROOMS = [
   { id: "gr5", game: "Ludo", host: "Arjun K", tier: "Beginner", players: "4/4", entry: 50, viewers: 5, duration: "45m", flagged: false },
 ];
 
-const TOURNAMENTS = [
-  { id: "t1", name: "Ludo Battle Arena", game: "Ludo", status: "live", players: "128/256", prizePool: 10000, entry: 100, startTime: "2h 15m ago" },
-  { id: "t2", name: "Carrom Championship", game: "Carrom", status: "live", players: "64/128", prizePool: 25000, entry: 200, startTime: "30m ago" },
-  { id: "t3", name: "Diwali Coin Cup", game: "Ludo", status: "upcoming", players: "0/512", prizePool: 500000, entry: 1000, startTime: "in 3d" },
-  { id: "t4", name: "Couple Tournament", game: "Ludo", status: "registering", players: "40/64", prizePool: 15000, entry: 150, startTime: "in 5h 30m" },
-  { id: "t5", name: "Regional Battle", game: "Ludo", status: "ended", players: "200/512", prizePool: 5000, entry: 50, startTime: "2h ago" },
+const INIT_TOURNAMENTS = [
+  { id: "t1", name: "Ludo Battle Arena",    game: "Ludo",   status: "live",        players: "128/256", prizePool: 10000,  entry: 100,  startTime: "2h 15m ago" },
+  { id: "t2", name: "Carrom Championship",  game: "Carrom", status: "live",        players: "64/128",  prizePool: 25000,  entry: 200,  startTime: "30m ago"    },
+  { id: "t3", name: "Diwali Coin Cup 🪔",   game: "Ludo",   status: "upcoming",    players: "0/512",   prizePool: 500000, entry: 1000, startTime: "in 3d"      },
+  { id: "t4", name: "Couple Tournament 💑", game: "Ludo",   status: "registering", players: "40/64",   prizePool: 15000,  entry: 150,  startTime: "in 5h 30m"  },
+  { id: "t5", name: "Regional Battle 🗺️",  game: "Ludo",   status: "ended",       players: "200/512", prizePool: 5000,   entry: 50,   startTime: "2h ago"     },
+  { id: "t6", name: "Creator Match ⭐",     game: "Carrom", status: "upcoming",    players: "8/16",    prizePool: 50000,  entry: 500,  startTime: "Tomorrow"   },
+  { id: "t7", name: "New Year Mega Battle 🎆", game: "Ludo", status: "upcoming",  players: "0/1024",  prizePool: 1000000,entry: 2000, startTime: "Dec 31"     },
 ];
 
 const FRAUD_FLAGS = [
@@ -66,9 +68,38 @@ const LEADERBOARD = [
   { rank: 5, name: "Meera Pillai", city: "Kochi", game: "Carrom", wins: 119, coinEarned: 59500, badge: "⭐ Star" },
 ];
 
+type TournamentEntry = typeof INIT_TOURNAMENTS[0];
+
 export default function GamingManagement() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"rooms" | "tournaments" | "leaderboard" | "fraud">("rooms");
+  const [tournaments, setTournaments] = useState<TournamentEntry[]>(INIT_TOURNAMENTS);
+  const [goingLiveAll, setGoingLiveAll] = useState(false);
+
+  const allLive = tournaments.every((t) => t.status === "live");
+  const liveCount = tournaments.filter((t) => t.status === "live").length;
+
+  const goLiveAll = async () => {
+    setGoingLiveAll(true);
+    // Stagger the go-live for each non-live tournament
+    for (let i = 0; i < INIT_TOURNAMENTS.length; i++) {
+      await new Promise((r) => setTimeout(r, 180));
+      setTournaments((prev) =>
+        prev.map((t, idx) => idx <= i ? { ...t, status: "live", startTime: "just now" } : t)
+      );
+    }
+    setGoingLiveAll(false);
+  };
+
+  const toggleTournamentLive = (id: string) => {
+    setTournaments((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, status: t.status === "live" ? "ended" : "live", startTime: t.status === "live" ? "just ended" : "just now" }
+          : t
+      )
+    );
+  };
 
   const statusColor = (s: string) =>
     s === "live" ? "bg-green-100 text-green-700" :
@@ -78,7 +109,7 @@ export default function GamingManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Gamepad2 className="w-6 h-6 text-primary" />
@@ -86,10 +117,25 @@ export default function GamingManagement() {
           </h2>
           <p className="text-muted-foreground text-sm mt-1">Ludo & Carrom rooms, tournaments, coin battles, anti-fraud</p>
         </div>
-        <Badge className="gap-1 bg-green-600 hover:bg-green-600">
-          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse inline-block" />
-          554 Live Games
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge className="gap-1 bg-green-600 hover:bg-green-600 text-sm px-3 py-1">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse inline-block" />
+            554 Live Games
+          </Badge>
+          <Button
+            onClick={goLiveAll}
+            disabled={allLive || goingLiveAll}
+            className={`gap-2 font-bold ${allLive ? "bg-green-600 hover:bg-green-600" : "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"}`}
+          >
+            {goingLiveAll ? (
+              <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Going Live…</>
+            ) : allLive ? (
+              <><Play className="w-4 h-4" /> All {liveCount} Tournaments Live ✓</>
+            ) : (
+              <><Zap className="w-4 h-4" /> Go Live All ({INIT_TOURNAMENTS.length - liveCount} pending)</>
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -234,7 +280,31 @@ export default function GamingManagement() {
       {tab === "tournaments" && (
         <Card>
           <CardContent className="p-0">
-            <table className="w-full text-sm">
+            <div className="flex items-center justify-between p-4 pb-0 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-foreground">All Tournaments</span>
+                <Badge className="bg-green-600 hover:bg-green-600 gap-1 text-xs">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse inline-block" />
+                  {liveCount}/{tournaments.length} Live
+                </Badge>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={goLiveAll}
+                  disabled={allLive || goingLiveAll}
+                  className={`h-8 gap-1.5 text-xs font-bold ${allLive ? "bg-green-600 hover:bg-green-600" : "bg-gradient-to-r from-pink-600 to-purple-600"}`}
+                >
+                  {goingLiveAll
+                    ? <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> Going Live…</>
+                    : allLive
+                    ? <><Play className="w-3 h-3" /> All Live ✓</>
+                    : <><Zap className="w-3 h-3" /> Go Live All</>}
+                </Button>
+                <Button size="sm" className="h-8 gap-1.5 text-xs"><Trophy className="w-3 h-3" /> Create Tournament</Button>
+              </div>
+            </div>
+            <table className="w-full text-sm mt-2">
               <thead>
                 <tr className="border-b text-muted-foreground text-xs">
                   <th className="text-left p-4 pb-3">Tournament</th>
@@ -248,13 +318,14 @@ export default function GamingManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {TOURNAMENTS.map((t) => (
-                  <tr key={t.id}>
+                {tournaments.map((t) => (
+                  <tr key={t.id} className={t.status === "live" ? "bg-green-50/40 dark:bg-green-950/10" : ""}>
                     <td className="p-4 py-3 font-medium">{t.name}</td>
                     <td className="py-3">{t.game === "Ludo" ? "🎲" : "🎯"} {t.game}</td>
                     <td className="py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(t.status)}`}>
-                        {t.status === "live" ? "🔴 " : ""}{t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                        {t.status === "live" && <span className="inline-block w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse mr-1 align-middle" />}
+                        {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
                       </span>
                     </td>
                     <td className="py-3 text-center">{t.players}</td>
@@ -264,16 +335,29 @@ export default function GamingManagement() {
                     <td className="py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><Eye className="w-3.5 h-3.5" /></Button>
-                        {t.status === "live" && <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive px-2">Cancel</Button>}
+                        {t.status === "live" ? (
+                          <Button
+                            variant="ghost" size="sm"
+                            className="h-7 text-xs text-destructive px-2 hover:bg-destructive/10"
+                            onClick={() => toggleTournamentLive(t.id)}
+                          >
+                            End
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs px-2 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => toggleTournamentLive(t.id)}
+                          >
+                            <Play className="w-3 h-3 mr-1" /> Go Live
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="p-4 border-t">
-              <Button className="gap-2"><Trophy className="w-4 h-4" /> Create Tournament</Button>
-            </div>
           </CardContent>
         </Card>
       )}
