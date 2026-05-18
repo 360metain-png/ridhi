@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
+import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
 
 type JobType = "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
 type SalaryUnit = "Month" | "Day" | "Hour" | "Project";
@@ -25,11 +26,6 @@ const CATEGORIES = [
   "IT & Tech", "Healthcare", "Education", "Finance", "Retail",
   "Construction", "Hospitality", "Transport", "Marketing", "Design",
   "Sales", "Manufacturing", "Security", "Domestic", "Other",
-];
-const CITIES = [
-  "Mumbai", "Delhi", "Bangalore", "Pune", "Hyderabad", "Chennai",
-  "Ahmedabad", "Jaipur", "Noida", "Kolkata", "Surat", "Lucknow",
-  "Chandigarh", "Indore", "Bhopal", "Nagpur", "Visakhapatnam", "Other",
 ];
 const JOB_TYPES: JobType[] = ["Full-time", "Part-time", "Freelance", "Internship", "Gig"];
 const SALARY_UNITS: SalaryUnit[] = ["Month", "Day", "Hour", "Project"];
@@ -132,8 +128,9 @@ export default function JobsPostScreen() {
   const [company,    setCompany]    = useState("");
   const [category,   setCategory]   = useState("");
   const [jobType,    setJobType]    = useState<JobType | "">("");
-  const [city,       setCity]       = useState("");
-  const [area,       setArea]       = useState("");
+  const [jobState,    setJobState]    = useState("");
+  const [jobDistrict, setJobDistrict] = useState("");
+  const [area,        setArea]        = useState("");
   const [salaryMin,  setSalaryMin]  = useState("");
   const [salaryMax,  setSalaryMax]  = useState("");
   const [salaryUnit, setSalaryUnit] = useState<SalaryUnit>("Month");
@@ -147,7 +144,7 @@ export default function JobsPostScreen() {
   const verifiedPhone = user?.phone ?? "";
   const verifiedEmail = user?.email ?? "";
 
-  const canSubmit = title.trim() && company.trim() && category && jobType && city && salaryMin && desc.trim() && (verifiedPhone || verifiedEmail);
+  const canSubmit = title.trim() && company.trim() && category && jobType && jobState && jobDistrict && salaryMin && desc.trim() && (verifiedPhone || verifiedEmail);
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -202,7 +199,7 @@ export default function JobsPostScreen() {
             {[
               { icon: "briefcase", color: "#E91E8C", text: "Post unlimited job listings for free" },
               { icon: "check-circle", color: "#34C759", text: "Verified phone & email shown to applicants" },
-              { icon: "map-pin", color: "#7B2FBE", text: "Reach candidates in your city" },
+              { icon: "map-pin", color: "#7B2FBE", text: "Reach candidates across any state or district" },
               { icon: "users", color: "#2196F3", text: "Tap into Ridhi's growing talent network" },
               { icon: "shield", color: "#FF9500", text: "Trusted — listings from verified Ridhi users" },
               { icon: "trending-up", color: "#FFB800", text: "Priority placement in search results" },
@@ -268,11 +265,11 @@ export default function JobsPostScreen() {
           <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>
             Your job listing for{"\n"}
             <Text style={{ color: "#E91E8C", fontFamily: "Inter_700Bold" }}>"{title}"</Text>
-            {"\n"}is now live and visible to candidates near {city}.
+            {"\n"}is now live and visible to candidates in {jobDistrict || jobState}.
           </Text>
           <View style={fpStyles.successStats}>
             {[
-              { icon: "map-pin",  label: city + (area ? ` · ${area}` : "") },
+              { icon: "map-pin",  label: [jobDistrict, jobState, area].filter(Boolean).join(" · ") },
               { icon: "briefcase", label: jobType },
               { icon: "users",    label: `${openings} opening${Number(openings) > 1 ? "s" : ""}` },
             ].map((s) => (
@@ -287,7 +284,7 @@ export default function JobsPostScreen() {
               <Text style={fpStyles.successBtnText}>View Jobs Board</Text>
             </LinearGradient>
           </Pressable>
-          <Pressable onPress={() => { setSubmitted(false); setTitle(""); setCompany(""); setCategory(""); setJobType(""); setCity(""); setArea(""); setSalaryMin(""); setSalaryMax(""); setDesc(""); setSkills([]); }}>
+          <Pressable onPress={() => { setSubmitted(false); setTitle(""); setCompany(""); setCategory(""); setJobType(""); setJobState(""); setJobDistrict(""); setArea(""); setSalaryMin(""); setSalaryMax(""); setDesc(""); setSkills([]); }}>
             <Text style={[fpStyles.postAnotherLink, { color: "#E91E8C" }]}>+ Post Another Job</Text>
           </Pressable>
         </View>
@@ -364,11 +361,35 @@ export default function JobsPostScreen() {
         {/* ── Section: Location ── */}
         <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>Location</Text>
         <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <OptionPicker label="City" options={CITIES} value={city} onChange={setCity} required colors={colors} />
-          <Field label="Area / Neighbourhood" colors={colors}>
+          <OptionPicker
+            label="State / Union Territory"
+            options={STATE_NAMES}
+            value={jobState}
+            onChange={(v) => { setJobState(v); setJobDistrict(""); }}
+            required
+            colors={colors}
+          />
+          {jobState ? (
+            <OptionPicker
+              label="District"
+              options={getDistricts(jobState)}
+              value={jobDistrict}
+              onChange={setJobDistrict}
+              required
+              colors={colors}
+            />
+          ) : (
+            <View style={[fpStyles.districtHint, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+              <Feather name="info" size={13} color={colors.mutedForeground} />
+              <Text style={[fpStyles.districtHintText, { color: colors.mutedForeground }]}>
+                Select a state first to choose the district
+              </Text>
+            </View>
+          )}
+          <Field label="Area / Locality (optional)" colors={colors}>
             <TextInput
               style={inputStyle}
-              placeholder="e.g. Andheri West, Koramangala…"
+              placeholder="e.g. Koramangala, Andheri West…"
               placeholderTextColor={colors.mutedForeground}
               value={area}
               onChangeText={setArea}
@@ -590,6 +611,9 @@ const fpStyles = StyleSheet.create({
   verifiedBadgeText:   { fontSize: 11, fontFamily: "Inter_700Bold", color: "#34C759" },
   missingContact:      { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1 },
   missingContactText:  { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+
+  districtHint:      { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1 },
+  districtHintText:  { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular" },
 
   modalOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
   optionSheet:     { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: 480 },

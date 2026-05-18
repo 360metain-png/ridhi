@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type JobType = "All" | "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
@@ -29,6 +30,7 @@ interface Job {
   company: string;
   category: JobCategory;
   type: Exclude<JobType, "All">;
+  state: string;
   city: string;
   area: string;
   distanceKm: number;
@@ -51,7 +53,7 @@ interface Job {
 const JOBS: Job[] = [
   {
     id: "1", title: "React Native Developer", company: "TechSpark Solutions",
-    category: "IT & Tech", type: "Full-time", city: "Mumbai", area: "Andheri West",
+    category: "IT & Tech", type: "Full-time", state: "Maharashtra", city: "Mumbai City", area: "Andheri West",
     distanceKm: 2.1, salaryMin: 60000, salaryMax: 110000, salaryUnit: "month",
     skills: ["React Native", "TypeScript", "REST APIs"],
     experience: "2-4 years", postedHoursAgo: 3, openings: 2, urgent: true, verified: true,
@@ -60,7 +62,7 @@ const JOBS: Job[] = [
   },
   {
     id: "2", title: "Staff Nurse (ICU)", company: "Sunrise Hospital",
-    category: "Healthcare", type: "Full-time", city: "Mumbai", area: "Bandra",
+    category: "Healthcare", type: "Full-time", state: "Maharashtra", city: "Mumbai City", area: "Bandra",
     distanceKm: 4.8, salaryMin: 35000, salaryMax: 55000, salaryUnit: "month",
     skills: ["ICU Care", "Patient Monitoring", "BLS/ACLS"],
     experience: "1-3 years", postedHoursAgo: 6, openings: 5, urgent: true, verified: true,
@@ -69,7 +71,7 @@ const JOBS: Job[] = [
   },
   {
     id: "3", title: "Delivery Partner", company: "Zomato / Swiggy Network",
-    category: "Transport", type: "Gig", city: "Mumbai", area: "Andheri",
+    category: "Transport", type: "Gig", state: "Maharashtra", city: "Mumbai City", area: "Andheri",
     distanceKm: 1.5, salaryMin: 800, salaryMax: 1500, salaryUnit: "day",
     skills: ["Two-wheeler licence", "Smartphone"],
     experience: "Fresher OK", postedHoursAgo: 1, openings: 50, urgent: false, verified: true,
@@ -78,7 +80,7 @@ const JOBS: Job[] = [
   },
   {
     id: "4", title: "UI/UX Designer", company: "Pixel Studio India",
-    category: "Design", type: "Full-time", city: "Pune", area: "Koregaon Park",
+    category: "Design", type: "Full-time", state: "Maharashtra", city: "Pune", area: "Koregaon Park",
     distanceKm: 12.3, salaryMin: 45000, salaryMax: 80000, salaryUnit: "month",
     skills: ["Figma", "Sketch", "Prototyping"],
     experience: "2-5 years", postedHoursAgo: 10, openings: 1, urgent: false, verified: true,
@@ -87,7 +89,7 @@ const JOBS: Job[] = [
   },
   {
     id: "5", title: "School Teacher (Maths)", company: "Delhi Public School",
-    category: "Education", type: "Full-time", city: "Delhi", area: "Dwarka",
+    category: "Education", type: "Full-time", state: "Delhi (NCT)", city: "South West Delhi", area: "Dwarka",
     distanceKm: 8.7, salaryMin: 30000, salaryMax: 45000, salaryUnit: "month",
     skills: ["Maths", "Classroom Management", "CBSE"],
     experience: "B.Ed required", postedHoursAgo: 20, openings: 3, urgent: false, verified: true,
@@ -96,7 +98,7 @@ const JOBS: Job[] = [
   },
   {
     id: "6", title: "Accountant (GST & TDS)", company: "Mehta & Associates",
-    category: "Finance", type: "Full-time", city: "Ahmedabad", area: "C G Road",
+    category: "Finance", type: "Full-time", state: "Gujarat", city: "Ahmedabad", area: "C G Road",
     distanceKm: 3.2, salaryMin: 25000, salaryMax: 40000, salaryUnit: "month",
     skills: ["Tally", "GST Filing", "TDS Returns"],
     experience: "2+ years", postedHoursAgo: 14, openings: 2, urgent: false, verified: false,
@@ -105,7 +107,7 @@ const JOBS: Job[] = [
   },
   {
     id: "7", title: "Retail Sales Executive", company: "Reliance Trends",
-    category: "Retail", type: "Full-time", city: "Chennai", area: "Anna Nagar",
+    category: "Retail", type: "Full-time", state: "Tamil Nadu", city: "Chennai", area: "Anna Nagar",
     distanceKm: 5.4, salaryMin: 18000, salaryMax: 28000, salaryUnit: "month",
     skills: ["Customer Service", "Sales", "Hindi/English/Tamil"],
     experience: "Fresher OK", postedHoursAgo: 5, openings: 10, urgent: true, verified: true,
@@ -114,7 +116,7 @@ const JOBS: Job[] = [
   },
   {
     id: "8", title: "Freelance Photographer", company: "Self / Events",
-    category: "Design", type: "Freelance", city: "Bangalore", area: "Indiranagar",
+    category: "Design", type: "Freelance", state: "Karnataka", city: "Bengaluru Urban", area: "Indiranagar",
     distanceKm: 7.0, salaryMin: 5000, salaryMax: 25000, salaryUnit: "project",
     skills: ["DSLR", "Lightroom", "Portrait", "Events"],
     experience: "Portfolio required", postedHoursAgo: 30, openings: 4, urgent: false, verified: false,
@@ -123,7 +125,7 @@ const JOBS: Job[] = [
   },
   {
     id: "9", title: "Security Guard (Night Shift)", company: "G4S India",
-    category: "Security", type: "Full-time", city: "Hyderabad", area: "HITEC City",
+    category: "Security", type: "Full-time", state: "Telangana", city: "Hyderabad", area: "HITEC City",
     distanceKm: 9.1, salaryMin: 16000, salaryMax: 22000, salaryUnit: "month",
     skills: ["Security Training", "Physical Fitness"],
     experience: "Ex-Army preferred", postedHoursAgo: 48, openings: 20, urgent: false, verified: true,
@@ -132,7 +134,7 @@ const JOBS: Job[] = [
   },
   {
     id: "10", title: "Digital Marketing Intern", company: "GrowthHackers Co.",
-    category: "Marketing", type: "Internship", city: "Bangalore", area: "Whitefield",
+    category: "Marketing", type: "Internship", state: "Karnataka", city: "Bengaluru Urban", area: "Whitefield",
     distanceKm: 15.2, salaryMin: 10000, salaryMax: 18000, salaryUnit: "month",
     skills: ["Instagram", "Meta Ads", "Content Writing"],
     experience: "Fresher / Student", postedHoursAgo: 8, openings: 3, urgent: false, verified: true,
@@ -141,7 +143,7 @@ const JOBS: Job[] = [
   },
   {
     id: "11", title: "Cook (North Indian Cuisine)", company: "Spice Garden Restaurant",
-    category: "Hospitality", type: "Full-time", city: "Jaipur", area: "Malviya Nagar",
+    category: "Hospitality", type: "Full-time", state: "Rajasthan", city: "Jaipur", area: "Malviya Nagar",
     distanceKm: 3.9, salaryMin: 20000, salaryMax: 32000, salaryUnit: "month",
     skills: ["North Indian", "Tandoor", "Bulk Cooking"],
     experience: "3+ years", postedHoursAgo: 12, openings: 2, urgent: true, verified: false,
@@ -150,7 +152,7 @@ const JOBS: Job[] = [
   },
   {
     id: "12", title: "Domestic Helper (Live-in)", company: "Private Household",
-    category: "Domestic", type: "Full-time", city: "Noida", area: "Sector 62",
+    category: "Domestic", type: "Full-time", state: "Uttar Pradesh", city: "Gautam Buddha Nagar", area: "Sector 62",
     distanceKm: 6.6, salaryMin: 15000, salaryMax: 22000, salaryUnit: "month",
     skills: ["Cooking", "Cleaning", "Childcare"],
     experience: "Any", postedHoursAgo: 24, openings: 1, urgent: false, verified: false,
@@ -159,7 +161,7 @@ const JOBS: Job[] = [
   },
   {
     id: "13", title: "Civil Site Supervisor", company: "Mahindra Constructions",
-    category: "Construction", type: "Full-time", city: "Pune", area: "Wakad",
+    category: "Construction", type: "Full-time", state: "Maharashtra", city: "Pune", area: "Wakad",
     distanceKm: 18.4, salaryMin: 35000, salaryMax: 55000, salaryUnit: "month",
     skills: ["AutoCAD", "Site Management", "Civil Engg"],
     experience: "5+ years", postedHoursAgo: 36, openings: 4, urgent: false, verified: true,
@@ -168,7 +170,7 @@ const JOBS: Job[] = [
   },
   {
     id: "14", title: "Backend Developer (Node.js)", company: "FinPay Technologies",
-    category: "IT & Tech", type: "Full-time", city: "Mumbai", area: "Lower Parel",
+    category: "IT & Tech", type: "Full-time", state: "Maharashtra", city: "Mumbai City", area: "Lower Parel",
     distanceKm: 5.3, salaryMin: 80000, salaryMax: 150000, salaryUnit: "month",
     skills: ["Node.js", "PostgreSQL", "Redis", "AWS"],
     experience: "3-6 years", postedHoursAgo: 4, openings: 1, urgent: true, verified: true,
@@ -177,7 +179,7 @@ const JOBS: Job[] = [
   },
   {
     id: "15", title: "Cab Driver (App-based)", company: "Ola / Uber Network",
-    category: "Transport", type: "Gig", city: "Delhi", area: "Laxmi Nagar",
+    category: "Transport", type: "Gig", state: "Delhi (NCT)", city: "East Delhi", area: "Laxmi Nagar",
     distanceKm: 4.0, salaryMin: 600, salaryMax: 1200, salaryUnit: "day",
     skills: ["Commercial Licence", "Smartphone", "Route Knowledge"],
     experience: "1+ year driving", postedHoursAgo: 2, openings: 100, urgent: false, verified: true,
@@ -192,7 +194,6 @@ const CATEGORIES: JobCategory[] = [
   "Retail", "Construction", "Hospitality", "Transport",
   "Marketing", "Design", "Sales", "Manufacturing", "Security", "Domestic",
 ];
-const CITIES = ["Mumbai", "Delhi", "Bangalore", "Pune", "Hyderabad", "Chennai", "Ahmedabad", "Jaipur", "Noida", "Kolkata"];
 
 const CATEGORY_ICONS: Record<string, string> = {
   "All": "grid", "IT & Tech": "monitor", "Healthcare": "activity", "Education": "book",
@@ -227,21 +228,24 @@ export default function JobsScreen() {
   const [search,      setSearch]      = useState("");
   const [typeFilter,  setTypeFilter]  = useState<JobType>("All");
   const [catFilter,   setCatFilter]   = useState<JobCategory>("All");
-  const [city,        setCity]        = useState("Mumbai");
-  const [cityModal,   setCityModal]   = useState(false);
+  const [locState,    setLocState]    = useState("");
+  const [locDistrict, setLocDistrict] = useState("");
+  const [locModal,    setLocModal]    = useState(false);
+  const [modalStep,   setModalStep]   = useState<"state" | "district">("state");
+  const [locSearch,   setLocSearch]   = useState("");
   const [savedIds,    setSavedIds]    = useState<Set<string>>(new Set());
 
   const filtered = useMemo(() => {
     return JOBS.filter((j) => {
       const matchType = typeFilter === "All" || j.type === typeFilter;
       const matchCat  = catFilter  === "All" || j.category === catFilter;
-      const matchCity = j.city === city;
+      const matchLoc  = (!locState || j.state === locState) && (!locDistrict || j.city === locDistrict);
       const q = search.trim().toLowerCase();
       const matchQ = !q || j.title.toLowerCase().includes(q) ||
         j.company.toLowerCase().includes(q) || j.skills.some((s) => s.toLowerCase().includes(q));
-      return matchType && matchCat && matchCity && matchQ;
+      return matchType && matchCat && matchLoc && matchQ;
     }).sort((a, b) => a.distanceKm - b.distanceKm);
-  }, [search, typeFilter, catFilter, city]);
+  }, [search, typeFilter, catFilter, locState, locDistrict]);
 
   const toggleSave = (id: string) =>
     setSavedIds((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -394,9 +398,11 @@ export default function JobsScreen() {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Jobs Near You</Text>
-            <Pressable style={styles.locationRow} onPress={() => setCityModal(true)}>
+            <Pressable style={styles.locationRow} onPress={() => { setModalStep("state"); setLocSearch(""); setLocModal(true); }}>
               <Feather name="map-pin" size={12} color="rgba(255,255,255,0.8)" />
-              <Text style={styles.locationText}>{city}</Text>
+              <Text style={styles.locationText}>
+                {locDistrict ? `${locDistrict}, ${locState}` : locState || "All India"}
+              </Text>
               <Feather name="chevron-down" size={12} color="rgba(255,255,255,0.8)" />
             </Pressable>
           </View>
@@ -477,7 +483,7 @@ export default function JobsScreen() {
       <View style={[styles.resultsRow, { borderBottomColor: colors.border }]}>
         <Text style={[styles.resultsCount, { color: colors.mutedForeground }]}>
           <Text style={{ color: colors.foreground, fontFamily: "Inter_600SemiBold" }}>{filtered.length}</Text>
-          {" "}jobs found in {city}
+          {" "}jobs found in {locDistrict || locState || "All India"}
         </Text>
         <Text style={[styles.sortLabel, { color: "#E91E8C" }]}>Nearest first</Text>
       </View>
@@ -488,7 +494,7 @@ export default function JobsScreen() {
           <Feather name="briefcase" size={48} color={colors.border} />
           <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No jobs found</Text>
           <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-            Try different filters or search in another city
+            Try different filters or change your location
           </Text>
           <Pressable
             onPress={() => { setSearch(""); setTypeFilter("All"); setCatFilter("All"); }}
@@ -522,23 +528,92 @@ export default function JobsScreen() {
         </LinearGradient>
       </Pressable>
 
-      {/* City picker modal */}
-      <Modal visible={cityModal} transparent animationType="slide" onRequestClose={() => setCityModal(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setCityModal(false)} />
-        <View style={[styles.citySheet, { backgroundColor: colors.card }]}>
+      {/* Location picker modal — two-step: State → District */}
+      <Modal visible={locModal} transparent animationType="slide" onRequestClose={() => setLocModal(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setLocModal(false)} />
+        <View style={[styles.locSheet, { backgroundColor: colors.card }]}>
           <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-          <Text style={[styles.sheetTitle, { color: colors.foreground }]}>Select City</Text>
-          {CITIES.map((c) => (
-            <Pressable
-              key={c}
-              onPress={() => { setCity(c); setCityModal(false); }}
-              style={[styles.cityRow, { borderBottomColor: colors.border }]}
-            >
-              <Feather name="map-pin" size={16} color={c === city ? "#E91E8C" : colors.mutedForeground} />
-              <Text style={[styles.cityName, { color: c === city ? "#E91E8C" : colors.foreground }]}>{c}</Text>
-              {c === city && <Feather name="check" size={16} color="#E91E8C" />}
-            </Pressable>
-          ))}
+
+          {/* Header */}
+          <View style={styles.locSheetHeader}>
+            {modalStep === "district" && (
+              <Pressable onPress={() => { setModalStep("state"); setLocSearch(""); }} style={styles.sheetBackBtn}>
+                <Feather name="arrow-left" size={18} color={colors.foreground} />
+              </Pressable>
+            )}
+            <Text style={[styles.sheetTitle, { color: colors.foreground, marginBottom: 0 }]}>
+              {modalStep === "state" ? "Select State / UT" : locState}
+            </Text>
+          </View>
+
+          {/* Search */}
+          <View style={[styles.locSearch, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Feather name="search" size={14} color={colors.mutedForeground} />
+            <TextInput
+              style={[styles.locSearchInput, { color: colors.foreground }]}
+              placeholder={modalStep === "state" ? "Search state or UT…" : "Search district…"}
+              placeholderTextColor={colors.mutedForeground}
+              value={locSearch}
+              onChangeText={setLocSearch}
+            />
+            {locSearch.length > 0 && (
+              <Pressable onPress={() => setLocSearch("")}>
+                <Feather name="x" size={14} color={colors.mutedForeground} />
+              </Pressable>
+            )}
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            {modalStep === "state" ? (
+              <>
+                <Pressable
+                  onPress={() => { setLocState(""); setLocDistrict(""); setLocModal(false); setLocSearch(""); }}
+                  style={[styles.locRow, { borderBottomColor: colors.border }]}
+                >
+                  <Feather name="globe" size={16} color={!locState ? "#E91E8C" : colors.mutedForeground} />
+                  <Text style={[styles.locName, { color: !locState ? "#E91E8C" : colors.foreground }]}>All India</Text>
+                  {!locState && <Feather name="check" size={16} color="#E91E8C" />}
+                </Pressable>
+                {STATE_NAMES
+                  .filter((s) => !locSearch || s.toLowerCase().includes(locSearch.toLowerCase()))
+                  .map((s) => (
+                    <Pressable
+                      key={s}
+                      onPress={() => { setLocState(s); setLocDistrict(""); setModalStep("district"); setLocSearch(""); }}
+                      style={[styles.locRow, { borderBottomColor: colors.border }]}
+                    >
+                      <Feather name="map-pin" size={16} color={s === locState ? "#E91E8C" : colors.mutedForeground} />
+                      <Text style={[styles.locName, { color: s === locState ? "#E91E8C" : colors.foreground }]}>{s}</Text>
+                      <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
+                    </Pressable>
+                  ))}
+              </>
+            ) : (
+              <>
+                <Pressable
+                  onPress={() => { setLocDistrict(""); setLocModal(false); setLocSearch(""); }}
+                  style={[styles.locRow, { borderBottomColor: colors.border }]}
+                >
+                  <Feather name="layers" size={16} color={!locDistrict ? "#E91E8C" : colors.mutedForeground} />
+                  <Text style={[styles.locName, { color: !locDistrict ? "#E91E8C" : colors.foreground }]}>All of {locState}</Text>
+                  {!locDistrict && <Feather name="check" size={16} color="#E91E8C" />}
+                </Pressable>
+                {getDistricts(locState)
+                  .filter((d) => !locSearch || d.toLowerCase().includes(locSearch.toLowerCase()))
+                  .map((d) => (
+                    <Pressable
+                      key={d}
+                      onPress={() => { setLocDistrict(d); setLocModal(false); setLocSearch(""); }}
+                      style={[styles.locRow, { borderBottomColor: colors.border }]}
+                    >
+                      <Feather name="map-pin" size={16} color={d === locDistrict ? "#E91E8C" : colors.mutedForeground} />
+                      <Text style={[styles.locName, { color: d === locDistrict ? "#E91E8C" : colors.foreground }]}>{d}</Text>
+                      {d === locDistrict && <Feather name="check" size={16} color="#E91E8C" />}
+                    </Pressable>
+                  ))}
+              </>
+            )}
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -617,9 +692,13 @@ const styles = StyleSheet.create({
   fabText:          { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
 
   modalOverlay:     { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
-  citySheet:        { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: 500 },
-  sheetHandle:      { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 16 },
-  sheetTitle:       { fontSize: 18, fontFamily: "Inter_700Bold", marginBottom: 16 },
-  cityRow:          { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 14, borderBottomWidth: 1 },
-  cityName:         { flex: 1, fontSize: 16, fontFamily: "Inter_500Medium" },
+  locSheet:         { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "78%", flex: 1 },
+  sheetHandle:      { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 14 },
+  locSheetHeader:   { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
+  sheetBackBtn:     { padding: 4 },
+  sheetTitle:       { fontSize: 18, fontFamily: "Inter_700Bold", flex: 1 },
+  locSearch:        { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 9, marginBottom: 8 },
+  locSearchInput:   { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" },
+  locRow:           { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 13, borderBottomWidth: 1 },
+  locName:          { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
 });
