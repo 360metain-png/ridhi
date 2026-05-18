@@ -34,8 +34,8 @@
       }
     },
     "android": {
-      "package": "app.replit.ridhi",
-      "versionCode": 2,
+      "package": "com.pt.ridhi",
+      "versionCode": 10,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
