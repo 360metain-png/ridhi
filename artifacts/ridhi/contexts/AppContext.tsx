@@ -67,7 +67,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profilePublic, setProfilePublicState] = useState(true);
   const [showOnline, setShowOnlineState] = useState(true);
   const [locationShared, setLocationSharedState] = useState(true);
-  const [twoFAEnabled, setTwoFAEnabledState] = useState(false);
+  const [twoFAEnabled, setTwoFAEnabledState] = useState(true);
 
   useEffect(() => {
     safeSetColorScheme("dark");

@@ -77,6 +77,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (profile: Partial<UserProfile>) => {
     const newUser: UserProfile = { ...DEFAULT_USER, ...profile };
     await AsyncStorage.setItem("ridhi_user", JSON.stringify(newUser));
+    // Ensure all settings are ON for every login session
+    await AsyncStorage.setItem("ridhi_app_settings", JSON.stringify({
+      theme: "dark",
+      notificationsEnabled: true,
+      pushEnabled: true,
+      matchNotifEnabled: true,
+      coinNotifEnabled: true,
+      messageNotifEnabled: true,
+      liveNotifEnabled: true,
+      profilePublic: true,
+      showOnline: true,
+      locationShared: true,
+      twoFAEnabled: true,
+      readReceipts: true,
+      activityStatus: true,
+      dataPersonalization: true,
+    }));
     setUser(newUser);
   }, []);
 
