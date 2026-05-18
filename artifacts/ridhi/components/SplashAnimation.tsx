@@ -102,20 +102,20 @@ export function SplashAnimation({ onAnimationComplete, isReady }: Props) {
   // Entrance sequence
   useEffect(() => {
     Animated.sequence([
-      Animated.timing(bgOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+      Animated.timing(bgOpacity, { toValue: 1, duration: 150, useNativeDriver: true }),
       Animated.parallel([
-        Animated.timing(glowOpacity, { toValue: 1, duration: 450, useNativeDriver: true }),
-        Animated.timing(glowScale,   { toValue: 1, duration: 600, easing: Easing.out(Easing.exp), useNativeDriver: true }),
+        Animated.timing(glowOpacity, { toValue: 1, duration: 260, useNativeDriver: true }),
+        Animated.timing(glowScale,   { toValue: 1, duration: 350, easing: Easing.out(Easing.exp), useNativeDriver: true }),
       ]),
       Animated.parallel([
-        Animated.spring(logoScale,   { toValue: 1, friction: 5, tension: 65, useNativeDriver: true }),
-        Animated.timing(logoOpacity, { toValue: 1, duration: 380, useNativeDriver: true }),
+        Animated.spring(logoScale,   { toValue: 1, friction: 6, tension: 90, useNativeDriver: true }),
+        Animated.timing(logoOpacity, { toValue: 1, duration: 220, useNativeDriver: true }),
       ]),
       Animated.parallel([
-        Animated.timing(titleOpacity, { toValue: 1, duration: 380, useNativeDriver: true }),
-        Animated.timing(titleY,       { toValue: 0, duration: 420, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+        Animated.timing(titleOpacity, { toValue: 1, duration: 220, useNativeDriver: true }),
+        Animated.timing(titleY,       { toValue: 0, duration: 250, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       ]),
-      Animated.timing(taglineOpacity, { toValue: 1, duration: 360, useNativeDriver: true }),
+      Animated.timing(taglineOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
     ]).start(() => startLoops());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
