@@ -25,6 +25,7 @@ import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
 import Calls         from "@/pages/calls";
 import Recordings    from "@/pages/recordings";
+import Promotions    from "@/pages/promotions";
 import AIHub         from "@/pages/ai-hub";
 import KYC           from "@/pages/kyc";
 import Handbook      from "@/pages/handbook";
@@ -49,6 +50,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/kyc":          ["super_admin", "admin", "agent"],
   "/calls":        ["super_admin", "admin", "agent", "host"],
   "/recordings":   ["super_admin", "admin"],
+  "/promotions":   ["super_admin", "admin"],
   "/gaming":       ["super_admin", "admin"],
   "/live-streams": ["super_admin", "admin", "agent", "host"],
   "/ai-hub":       ["super_admin", "admin"],
@@ -128,6 +130,7 @@ function Router() {
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
       <Route path="/calls"        component={() => <RoleRoute component={Calls}        path="/calls" />} />
       <Route path="/recordings"   component={() => <RoleRoute component={Recordings}   path="/recordings" />} />
+      <Route path="/promotions"   component={() => <RoleRoute component={Promotions}   path="/promotions" />} />
       <Route path="/ai-hub"       component={() => <RoleRoute component={AIHub}        path="/ai-hub" />} />
       <Route path="/kyc"          component={() => <RoleRoute component={KYC}          path="/kyc" />} />
       <Route path="/handbook"     component={() => <RoleRoute component={Handbook}     path="/handbook" />} />
