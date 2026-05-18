@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type FieldType = "short" | "long" | "choice" | "yesno" | "dropdown";
@@ -143,6 +144,7 @@ export default function LeadFormBuilderScreen() {
   if (step === "done") {
     return (
       <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="creator" />
         <View style={[styles.topBar, { paddingTop: topPad + 10 }]}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={colors.foreground} />

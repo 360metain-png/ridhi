@@ -17,6 +17,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const GROUP_CHATS = [
   {
@@ -75,6 +76,7 @@ export default function GroupChatScreen() {
   if (view === "chat" && activeGroup) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="chatDetail" />
         <LinearGradient
           colors={[colors.secondary + "25", colors.primary + "10", "transparent"]}
           style={[styles.chatHeader, { paddingTop: topPad + 8 }]}

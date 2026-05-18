@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 type Colors = ReturnType<typeof useColors>;
 
@@ -361,6 +362,7 @@ export default function TermsScreen() {
 
   return (
     <View style={[s.root, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="settings" />
       {/* Sticky header */}
       <Animated.View style={[s.stickyHeader, { paddingTop: topPad, backgroundColor: colors.surface + "F2", borderBottomColor: colors.border, opacity: headerOpacity }]}>
         <Pressable onPress={() => router.back()} style={s.backBtn}>

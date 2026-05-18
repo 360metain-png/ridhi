@@ -20,6 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width: SW } = Dimensions.get("window");
 
@@ -597,6 +598,7 @@ export default function AudioRoomScreen() {
   // ── rooms list ─────────────────────────────────────────────────────────────
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="reels" />
       {/* header */}
       <LinearGradient
         colors={[colors.secondary + "30", colors.primary + "18", "transparent"]}

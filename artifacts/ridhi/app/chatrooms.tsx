@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, ROOM_CATEGORIES, type Chatroom } from "@/data/chatrooms";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
@@ -157,6 +158,7 @@ export default function ChatroomsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="chatList" />
       <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
           <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>

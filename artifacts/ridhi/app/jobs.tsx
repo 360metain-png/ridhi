@@ -17,6 +17,7 @@ import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const CONTACT_COST = 10; // coins to reveal poster contact details
 
@@ -432,6 +433,7 @@ export default function JobsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="communities" />
       {/* Header */}
       <LinearGradient
         colors={["#E91E8C", "#7B2FBE"]}

@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -159,6 +160,7 @@ export default function WithdrawScreen() {
   if (!kycChecked) {
     return (
       <View style={[st.screen, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="wallet" />
         <ActivityIndicator color={colors.primary} style={{ flex: 1 }} />
       </View>
     );

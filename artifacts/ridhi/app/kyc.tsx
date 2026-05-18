@@ -16,6 +16,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -291,6 +292,7 @@ export default function KYCScreen() {
   if (submitted) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="otp" />
         <LinearGradient colors={["#22C55E20", "#22C55E08", "transparent"]} style={[styles.successGlow, { paddingTop: topPad, pointerEvents: "none" }]} />
         <ScrollView contentContainerStyle={[styles.successWrap, { paddingTop: topPad + 20 }]}>
           <View style={[styles.successIcon, { backgroundColor: "#22C55E20" }]}>

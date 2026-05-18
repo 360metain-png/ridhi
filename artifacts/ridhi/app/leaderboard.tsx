@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 type Period = "daily" | "weekly" | "monthly";
 type Category = "creators" | "gifters" | "earners" | "streamers";
@@ -96,6 +97,7 @@ export default function LeaderboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="wallet" />
       <LinearGradient
         colors={[colors.gold + "30", colors.primary + "15", "transparent"]}
         style={[styles.header, { paddingTop: topPad + 10 }]}

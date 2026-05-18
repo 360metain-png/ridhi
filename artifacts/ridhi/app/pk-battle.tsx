@@ -20,6 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -285,6 +286,7 @@ export default function PKBattleScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <FloatingEmojiBg preset="match" />
       <LinearGradient
         colors={[colors.destructive + "15", colors.primary + "08", "transparent"]}
         style={[styles.headerGlow, { height: topPad + 100 }]}

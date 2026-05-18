@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width, height } = Dimensions.get("window");
 
@@ -95,6 +96,7 @@ export default function StoryViewerScreen() {
 
   return (
     <View style={styles.container}>
+      <FloatingEmojiBg preset="feed" />
       <LinearGradient colors={story.bgColors} style={styles.story}>
         <View style={[styles.topBar, { paddingTop: topPad + 4 }]}>
           <View style={styles.progressBars}>
