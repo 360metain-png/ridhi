@@ -8,7 +8,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
+import { SplashAnimation } from "@/components/SplashAnimation";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -75,13 +76,19 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  const [splashDone, setSplashDone] = useState(false);
+  const appReady = !!(fontsLoaded || fontError);
+
+  // Hide the native splash once fonts are loaded; our custom animation handles the rest
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if (appReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [appReady]);
 
-  if (!fontsLoaded && !fontError) return null;
+  const handleAnimationComplete = useCallback(() => {
+    setSplashDone(true);
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -91,7 +98,16 @@ export default function RootLayout() {
             <QueryClientProvider client={queryClient}>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <KeyboardProvider>
-                  <RootLayoutNav />
+                  {/* Always mount nav so it's ready behind the splash */}
+                  {appReady && <RootLayoutNav />}
+
+                  {/* Custom animated splash overlays until complete */}
+                  {!splashDone && (
+                    <SplashAnimation
+                      isReady={appReady}
+                      onAnimationComplete={handleAnimationComplete}
+                    />
+                  )}
                 </KeyboardProvider>
               </GestureHandlerRootView>
             </QueryClientProvider>
