@@ -350,7 +350,7 @@ export default function FeedScreen() {
                 <View style={[styles.cityPill, { backgroundColor: colors.secondary + "18", borderColor: colors.secondary + "40" }]}>
                   <Text style={[styles.cityPillText, { color: colors.secondary }]}>{userLang}</Text>
                 </View>
-                <Pressable style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
+                <Pressable onPress={() => router.push("/explore")} style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
                   <Text style={[styles.seeAllText, { color: colors.primary }]}>See all</Text>
                 </Pressable>
               </View>
@@ -362,6 +362,7 @@ export default function FeedScreen() {
                 {nearYouPosts.map((post) => (
                   <Pressable
                     key={post.id}
+                    onPress={() => router.push("/explore")}
                     style={[styles.nearYouCard, { backgroundColor: colors.card, borderColor: colors.border }]}
                   >
                     <LinearGradient
@@ -412,7 +413,7 @@ export default function FeedScreen() {
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiPicksScroll}>
               {AI_PICKS.map((pick) => (
-                <Pressable key={pick.id} style={[styles.aiPickCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Pressable key={pick.id} onPress={() => router.push("/ai-assistant")} style={[styles.aiPickCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <LinearGradient colors={[colors.secondary + "18", colors.primary + "08"]} style={StyleSheet.absoluteFill} />
                   <View style={styles.aiPickCardTop}>
                     <Avatar name={pick.userName} size={28} />

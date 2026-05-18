@@ -202,7 +202,7 @@ export default function GamesScreen() {
         <View style={styles.section}>
           <View style={styles.sectionRow}>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Live Rooms</Text>
-            <Pressable>
+            <Pressable onPress={() => router.push("/tournaments" as any)}>
               <Text style={[styles.seeAll, { color: colors.primary }]}>See all</Text>
             </Pressable>
           </View>
