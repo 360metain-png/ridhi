@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Ridhi – India Social & Dating",
+    "name": "Ridhi – Live, Chat & Job App",
     "slug": "ridhi",
     "version": "1.0.0",
-    "description": "India's #1 social networking and dating app — meet Indians, share reels, and find love in 13 languages.",
+    "description": "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and explore job opportunities—all in one powerful app.",
     "githubUrl": "https://github.com/ridhi/ridhi-app",
     "orientation": "portrait",
     "icon": "./assets/images/ridhi_logo.png",
