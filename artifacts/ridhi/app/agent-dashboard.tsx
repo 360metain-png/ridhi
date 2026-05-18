@@ -68,7 +68,7 @@ export default function AgentDashboardScreen() {
   const [regName, setRegName]       = useState(user?.name ?? "");
   const [regPhone, setRegPhone]     = useState(user?.phone ?? "");
   const [regCity, setRegCity]       = useState(user?.city ?? "");
-  const [regGender, setRegGender]   = useState<"male" | "female" | "other" | "">("");
+  const [regGender, setRegGender]   = useState<"male" | "female" | "">("");
   const [regExp, setRegExp]         = useState("");
   const [regAgreed, setRegAgreed]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -233,7 +233,6 @@ export default function AgentDashboardScreen() {
               {([
                 { key: "male",   label: "Male",   icon: "👨" },
                 { key: "female", label: "Female",  icon: "👩" },
-                { key: "other",  label: "Other",   icon: "🧑" },
               ] as const).map((g) => {
                 const sel = regGender === g.key;
                 return (

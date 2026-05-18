@@ -70,7 +70,7 @@ export default function HostProfileScreen() {
   const [regName, setRegName]       = useState(user?.name ?? "");
   const [regPhone, setRegPhone]     = useState(user?.phone ?? "");
   const [regCity, setRegCity]       = useState(user?.city ?? "");
-  const [regGender, setRegGender]   = useState<"male" | "female" | "other" | "">("");
+  const [regGender, setRegGender]   = useState<"male" | "female" | "">("");
   const [regAgreed, setRegAgreed]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted]   = useState(false);
@@ -244,9 +244,8 @@ export default function HostProfileScreen() {
             <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>Gender *</Text>
             <View style={regStyles.genderRow}>
               {([
-                { key: "male",   label: "♂  Male",   icon: "👨" },
-                { key: "female", label: "♀  Female",  icon: "👩" },
-                { key: "other",  label: "⚧  Other",   icon: "🧑" },
+                { key: "male",   label: "Male",   icon: "👨" },
+                { key: "female", label: "Female",  icon: "👩" },
               ] as const).map((g) => {
                 const sel = regGender === g.key;
                 return (
