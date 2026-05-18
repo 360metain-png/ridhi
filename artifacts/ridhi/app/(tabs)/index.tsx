@@ -149,6 +149,14 @@ export default function FeedScreen() {
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
   const [storyViewId, setStoryViewId] = useState<string | null>(null);
+
+  // ── Post menu / edit / delete / report state ─────────────────────────────
+  const [postMenu, setPostMenu] = useState<{ id: string; isOwn: boolean; content?: string; privacy?: string } | null>(null);
+  const [editTarget, setEditTarget] = useState<{ id: string; text: string } | null>(null);
+  const [editText, setEditText] = useState("");
+  const [privacyTarget, setPrivacyTarget] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<{ id: string; target: "post" | "user" | "host" } | null>(null);
+  const [reportDone, setReportDone] = useState(false);
   const storyProgress = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -218,6 +226,50 @@ export default function FeedScreen() {
   const handleOpenComments = (postId: string) => {
     setCommentPostId(postId);
     setCommentText("");
+  };
+
+  // ── Post menu handlers ────────────────────────────────────────────────────
+  const handleMenuPress = (id: string, isOwn: boolean) => {
+    const found = posts.find((p) => p.id === id);
+    setPostMenu({ id, isOwn, content: found?.content, privacy: found?.privacy });
+  };
+
+  const handleOpenEdit = () => {
+    if (!postMenu) return;
+    setEditText(postMenu.content ?? "");
+    setEditTarget({ id: postMenu.id, text: postMenu.content ?? "" });
+    setPostMenu(null);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editTarget) return;
+    setPosts((prev) => prev.map((p) => p.id === editTarget.id ? { ...p, content: editText } : p));
+    setEditTarget(null);
+  };
+
+  const handleDelete = () => {
+    if (!postMenu) return;
+    const id = postMenu.id;
+    setPostMenu(null);
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleChangePrivacy = (newPrivacy: "public" | "followers" | "private") => {
+    if (!privacyTarget) return;
+    setPosts((prev) => prev.map((p) => p.id === privacyTarget ? { ...p, privacy: newPrivacy } : p));
+    setPrivacyTarget(null);
+  };
+
+  const handleOpenReport = (target: "post" | "user" | "host") => {
+    if (!postMenu) return;
+    setReportTarget({ id: postMenu.id, target });
+    setPostMenu(null);
+  };
+
+  const handleSubmitReport = (reason: string) => {
+    setReportTarget(null);
+    setReportDone(true);
+    setTimeout(() => setReportDone(false), 2500);
   };
 
   const handleSendComment = () => {
@@ -702,10 +754,11 @@ export default function FeedScreen() {
         keyExtractor={(p) => p.id}
         renderItem={({ item }) => (
           <FeedPost
-            post={item}
+            post={{ ...item, isOwn: item.isOwn || item.userName === user?.name }}
             onLike={handleLike}
             onComment={handleOpenComments}
             onProfile={() => {}}
+            onMenuPress={handleMenuPress}
           />
         )}
         ListHeaderComponent={renderListHeader}
@@ -847,6 +900,205 @@ export default function FeedScreen() {
           );
         })()}
       </Modal>
+
+      {/* ── Post Menu Bottom Sheet ─────────────────────────────────────────── */}
+      <Modal visible={postMenu !== null} transparent animationType="slide" onRequestClose={() => setPostMenu(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setPostMenu(null)} />
+        <View style={[styles.menuSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.menuSheetTitle, { color: colors.foreground }]}>
+            {postMenu?.isOwn ? "Your Post" : "Post Options"}
+          </Text>
+
+          {postMenu?.isOwn ? (
+            <>
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={handleOpenEdit}>
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.secondary + "18" }]}>
+                  <Feather name="edit-2" size={16} color={colors.secondary} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Edit Post</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Change the text of your post</Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
+
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => { const id = postMenu.id; setPostMenu(null); setPrivacyTarget(id); }}>
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.primary + "18" }]}>
+                  <Feather name={postMenu?.privacy === "private" ? "lock" : postMenu?.privacy === "followers" ? "users" : "globe"} size={16} color={colors.primary} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Audience</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>
+                    Currently: {postMenu?.privacy === "private" ? "Only me" : postMenu?.privacy === "followers" ? "Followers" : "Public"}
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
+
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]} onPress={handleDelete}>
+                <View style={[styles.menuItemIcon, { backgroundColor: "#FF3B3020" }]}>
+                  <Feather name="trash-2" size={16} color="#FF3B30" />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: "#FF3B30" }]}>Delete Post</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Permanently remove this post</Text>
+                </View>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              {(["post", "user", "host"] as const).map((target) => {
+                const cfg = {
+                  post: { icon: "flag" as const,     label: "Report Post",     desc: "Content is inappropriate or harmful",  color: "#FF9500" },
+                  user: { icon: "user-x" as const,   label: "Report User",     desc: "Fake account, harassment or spam",      color: "#FF3B30" },
+                  host: { icon: "radio" as const,     label: "Report Host",     desc: "Abusive behavior during live streams",  color: "#E91E8C" },
+                };
+                const { icon, label, desc, color } = cfg[target];
+                return (
+                  <Pressable key={target} style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                    onPress={() => handleOpenReport(target)}>
+                    <View style={[styles.menuItemIcon, { backgroundColor: color + "18" }]}>
+                      <Feather name={icon} size={16} color={color} />
+                    </View>
+                    <View style={styles.menuItemText}>
+                      <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>{label}</Text>
+                      <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>{desc}</Text>
+                    </View>
+                    <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+                  </Pressable>
+                );
+              })}
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => setPostMenu(null)}>
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.muted }]}>
+                  <Feather name="slash" size={16} color={colors.mutedForeground} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Block User</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Stop seeing posts from this person</Text>
+                </View>
+              </Pressable>
+            </>
+          )}
+
+          <Pressable style={[styles.menuCancel, { backgroundColor: colors.muted }]} onPress={() => setPostMenu(null)}>
+            <Text style={[styles.menuCancelText, { color: colors.foreground }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
+      {/* ── Edit Post Modal ────────────────────────────────────────────────── */}
+      <Modal visible={editTarget !== null} transparent animationType="slide" onRequestClose={() => setEditTarget(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setEditTarget(null)} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.commentSheet}>
+          <View style={[styles.commentSheetInner, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+            <View style={[styles.commentHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.commentTitle, { color: colors.foreground }]}>Edit Post</Text>
+              <Pressable onPress={() => setEditTarget(null)}>
+                <Feather name="x" size={20} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+            <View style={{ padding: 16, gap: 12 }}>
+              <TextInput
+                style={[styles.editInput, { backgroundColor: colors.input, color: colors.foreground, borderColor: colors.border }]}
+                value={editText}
+                onChangeText={setEditText}
+                multiline
+                autoFocus
+                maxLength={500}
+                placeholder="What's on your mind?"
+                placeholderTextColor={colors.mutedForeground}
+              />
+              <Text style={[styles.charCount, { color: colors.mutedForeground }]}>{editText.length}/500</Text>
+              <Pressable
+                onPress={handleSaveEdit}
+                disabled={!editText.trim()}
+                style={[styles.saveEditBtn, { backgroundColor: editText.trim() ? colors.primary : colors.muted }]}
+              >
+                <Feather name="check" size={16} color="#fff" />
+                <Text style={styles.saveEditBtnText}>Save Changes</Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* ── Privacy Picker Modal ───────────────────────────────────────────── */}
+      <Modal visible={privacyTarget !== null} transparent animationType="slide" onRequestClose={() => setPrivacyTarget(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setPrivacyTarget(null)} />
+        <View style={[styles.menuSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.menuSheetTitle, { color: colors.foreground }]}>Who can see this post?</Text>
+          {([
+            { value: "public",    icon: "globe",  label: "Public",      desc: "Anyone on Ridhi can see this" },
+            { value: "followers", icon: "users",  label: "Followers",   desc: "Only your followers can see this" },
+            { value: "private",   icon: "lock",   label: "Only me",     desc: "Only you can see this" },
+          ] as const).map((opt) => {
+            const current = posts.find(p => p.id === privacyTarget)?.privacy ?? "public";
+            const isActive = current === opt.value;
+            return (
+              <Pressable key={opt.value} style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => handleChangePrivacy(opt.value)}>
+                <View style={[styles.menuItemIcon, { backgroundColor: isActive ? colors.primary + "18" : colors.muted }]}>
+                  <Feather name={opt.icon} size={16} color={isActive ? colors.primary : colors.mutedForeground} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: isActive ? colors.primary : colors.foreground }]}>{opt.label}</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>{opt.desc}</Text>
+                </View>
+                {isActive && <Feather name="check-circle" size={16} color={colors.primary} />}
+              </Pressable>
+            );
+          })}
+          <Pressable style={[styles.menuCancel, { backgroundColor: colors.muted }]} onPress={() => setPrivacyTarget(null)}>
+            <Text style={[styles.menuCancelText, { color: colors.foreground }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
+      {/* ── Report Modal ───────────────────────────────────────────────────── */}
+      <Modal visible={reportTarget !== null} transparent animationType="slide" onRequestClose={() => setReportTarget(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setReportTarget(null)} />
+        <View style={[styles.menuSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.menuSheetTitle, { color: colors.foreground }]}>
+            Report {reportTarget?.target === "post" ? "Post" : reportTarget?.target === "user" ? "User" : "Host"}
+          </Text>
+          <Text style={[styles.menuSheetSub, { color: colors.mutedForeground }]}>
+            Select a reason — your report is confidential
+          </Text>
+          {[
+            "Spam or misleading",
+            "Inappropriate content",
+            "Harassment or bullying",
+            "Fake account",
+            "Violence or dangerous acts",
+            "Hate speech",
+            "Other",
+          ].map((reason) => (
+            <Pressable key={reason} style={[styles.reportReasonBtn, { borderColor: colors.border }]}
+              onPress={() => handleSubmitReport(reason)}>
+              <Text style={[styles.reportReasonText, { color: colors.foreground }]}>{reason}</Text>
+              <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
+            </Pressable>
+          ))}
+          <Pressable style={[styles.menuCancel, { backgroundColor: colors.muted }]} onPress={() => setReportTarget(null)}>
+            <Text style={[styles.menuCancelText, { color: colors.foreground }]}>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
+
+      {/* ── Report Success Toast ───────────────────────────────────────────── */}
+      {reportDone && (
+        <View style={[styles.toast, { backgroundColor: "#1C1C2E" }]} pointerEvents="none">
+          <Feather name="check-circle" size={16} color="#34C759" />
+          <Text style={styles.toastText}>Report submitted. Thank you! 🙏</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -1252,4 +1504,108 @@ const styles = StyleSheet.create({
   storyContentSub: { fontSize: 13, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)", textAlign: "center" },
   storyTapLeft: { position: "absolute", left: 0, top: 0, bottom: 0, width: "40%" },
   storyTapRight: { position: "absolute", right: 0, top: 0, bottom: 0, width: "60%" },
+
+  // ── Post Menu Sheet ──────────────────────────────────────────────────────
+  menuSheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderWidth: 1,
+    paddingBottom: 32,
+    overflow: "hidden",
+  },
+  menuSheetTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  menuSheetSub: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 14,
+  },
+  menuItemIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuItemText: { flex: 1 },
+  menuItemLabel: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  menuItemDesc:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  menuCancel: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  menuCancelText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+
+  // ── Edit Post ────────────────────────────────────────────────────────────
+  editInput: {
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 22,
+    minHeight: 120,
+    textAlignVertical: "top",
+  },
+  charCount: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "right" },
+  saveEditBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 14,
+  },
+  saveEditBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+
+  // ── Report reasons ───────────────────────────────────────────────────────
+  reportReasonBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  reportReasonText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  toast: {
+    position: "absolute",
+    bottom: 100,
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  toastText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

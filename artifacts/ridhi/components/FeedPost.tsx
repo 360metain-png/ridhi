@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -16,6 +16,8 @@ export interface Post {
   language?: string;
   userAvatar?: string;
   isVerified?: boolean;
+  isOwn?: boolean;
+  privacy?: "public" | "followers" | "private";
   content?: string;
   imageUri?: string;
   likes: number;
@@ -32,8 +34,27 @@ interface FeedPostProps {
   onLike: (id: string) => void;
   onComment: (id: string) => void;
   onProfile: (userId: string) => void;
+  onMenuPress?: (id: string, isOwn: boolean) => void;
 }
 
+// ─── Privacy badge ─────────────────────────────────────────────────────────────
+function PrivacyBadge({ privacy, colors }: { privacy?: string; colors: any }) {
+  if (!privacy || privacy === "public") return null;
+  const icon = privacy === "private" ? "lock" : "users";
+  const label = privacy === "private" ? "Only me" : "Followers";
+  return (
+    <View style={[privBadgeStyles.wrap, { backgroundColor: colors.muted }]}>
+      <Feather name={icon} size={9} color={colors.mutedForeground} />
+      <Text style={[privBadgeStyles.text, { color: colors.mutedForeground }]}>{label}</Text>
+    </View>
+  );
+}
+const privBadgeStyles = StyleSheet.create({
+  wrap: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, marginLeft: 4 },
+  text: { fontSize: 9, fontFamily: "Inter_600SemiBold" },
+});
+
+// ─── HeartBurst ────────────────────────────────────────────────────────────────
 function HeartBurst({ visible }: { visible: boolean }) {
   const particles = Array.from({ length: 6 });
   const anims = useRef(particles.map(() => new Animated.Value(0))).current;
@@ -84,7 +105,14 @@ function HeartBurst({ visible }: { visible: boolean }) {
   );
 }
 
-export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, onProfile }: FeedPostProps) {
+// ─── FeedPost ──────────────────────────────────────────────────────────────────
+export const FeedPost = React.memo(function FeedPost({
+  post,
+  onLike,
+  onComment,
+  onProfile,
+  onMenuPress,
+}: FeedPostProps) {
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showBurst, setShowBurst] = useState(false);
@@ -112,29 +140,15 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
   };
 
   return (
-    <Animated.View
-      style={[
-        styles.cardWrap,
-        { opacity: cardOpacity, transform: [{ translateY: cardSlide }] },
-      ]}
-    >
-      <View
-        style={[
-          styles.card,
-          {
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-          },
-        ]}
-      >
+    <Animated.View style={[styles.cardWrap, { opacity: cardOpacity, transform: [{ translateY: cardSlide }] }]}>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <LinearGradient
-          colors={post.isLiked
-            ? ["rgba(233,30,140,0.05)", "transparent"]
-            : ["transparent", "transparent"]}
+          colors={post.isLiked ? ["rgba(233,30,140,0.05)", "transparent"] : ["transparent", "transparent"]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
 
+        {/* ── Header ── */}
         <Pressable
           style={styles.header}
           onPress={() => onProfile(post.userId ?? "")}
@@ -146,20 +160,28 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
             <View style={styles.nameRow}>
               <Text style={[styles.name, { color: colors.foreground }]}>{post.userName}</Text>
               {post.isVerified && (
-                <LinearGradient
-                  colors={[colors.primary, colors.secondary]}
-                  style={styles.verifiedBadge}
-                >
+                <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.verifiedBadge}>
                   <Feather name="check" size={9} color="#fff" />
                 </LinearGradient>
               )}
+              {post.isOwn && (
+                <View style={[styles.ownBadge, { backgroundColor: colors.primary + "18" }]}>
+                  <Text style={[styles.ownBadgeText, { color: colors.primary }]}>You</Text>
+                </View>
+              )}
             </View>
-            <Text style={[styles.meta, { color: colors.mutedForeground }]}>
-              {post.userCity ? `${post.userCity} · ` : ""}{post.timeAgo}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={[styles.meta, { color: colors.mutedForeground }]}>
+                {post.userCity ? `${post.userCity} · ` : ""}{post.timeAgo}
+              </Text>
+              <PrivacyBadge privacy={post.privacy} colors={colors} />
+            </View>
           </View>
+
+          {/* ⋯ menu button */}
           <Pressable
             style={[styles.more, { backgroundColor: colors.muted }]}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onMenuPress?.(post.id, post.isOwn ?? false); }}
             accessibilityRole="button"
             accessibilityLabel="More options"
           >
@@ -167,10 +189,9 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
           </Pressable>
         </Pressable>
 
+        {/* ── Content ── */}
         {post.content ? (
-          <Text style={[styles.content, { color: colors.foreground }]}>
-            {post.content}
-          </Text>
+          <Text style={[styles.content, { color: colors.foreground }]}>{post.content}</Text>
         ) : null}
 
         {post.hashtags && post.hashtags.length > 0 && (
@@ -183,20 +204,14 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
 
         {post.imageUri ? (
           <View style={styles.imageWrap}>
-            <Image
-              source={{ uri: post.imageUri }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.4)"]}
-              style={styles.imageOverlay}
-            />
+            <Image source={{ uri: post.imageUri }} style={styles.image} resizeMode="cover" />
+            <LinearGradient colors={["transparent", "rgba(0,0,0,0.4)"]} style={styles.imageOverlay} />
           </View>
         ) : null}
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
+        {/* ── Actions ── */}
         <View style={styles.actions}>
           <Pressable
             style={styles.action}
@@ -208,10 +223,7 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
             <View style={{ position: "relative" }}>
               <Animated.View style={{ transform: [{ scale: likeScale }] }}>
                 {post.isLiked ? (
-                  <LinearGradient
-                    colors={["#E91E8C", "#7B2FBE"]}
-                    style={styles.likeActive}
-                  >
+                  <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.likeActive}>
                     <Feather name="heart" size={14} color="#fff" />
                   </LinearGradient>
                 ) : (
@@ -222,39 +234,23 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
               </Animated.View>
               <HeartBurst visible={showBurst} />
             </View>
-            <Text style={[
-              styles.actionCount,
-              { color: post.isLiked ? colors.primary : colors.mutedForeground },
-            ]}>
+            <Text style={[styles.actionCount, { color: post.isLiked ? colors.primary : colors.mutedForeground }]}>
               {post.likes >= 1000 ? `${(post.likes / 1000).toFixed(1)}K` : post.likes}
             </Text>
           </Pressable>
 
-          <Pressable
-            style={styles.action}
-            onPress={() => onComment(post.id)}
-            accessibilityRole="button"
-            accessibilityLabel={`Comment, ${post.comments} comments`}
-          >
+          <Pressable style={styles.action} onPress={() => onComment(post.id)} accessibilityRole="button">
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="message-circle" size={14} color={colors.mutedForeground} />
             </View>
-            <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>
-              {post.comments}
-            </Text>
+            <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>{post.comments}</Text>
           </Pressable>
 
-          <Pressable
-            style={styles.action}
-            accessibilityRole="button"
-            accessibilityLabel={`Share, ${post.shares} shares`}
-          >
+          <Pressable style={styles.action} accessibilityRole="button">
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="send" size={14} color={colors.mutedForeground} />
             </View>
-            <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>
-              {post.shares}
-            </Text>
+            <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>{post.shares}</Text>
           </Pressable>
 
           <View style={{ flex: 1 }} />
@@ -264,14 +260,9 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
             disabled={saving}
             accessibilityRole="button"
             accessibilityLabel={saved ? "Saved" : "Save to gallery"}
-            accessibilityState={{ disabled: saving }}
           >
             <View style={[styles.actionIcon, { backgroundColor: saved ? "#34C75920" : colors.muted }]}>
-              <Feather
-                name={saved ? "check-circle" : "download"}
-                size={14}
-                color={saved ? "#34C759" : colors.mutedForeground}
-              />
+              <Feather name={saved ? "check-circle" : "download"} size={14} color={saved ? "#34C759" : colors.mutedForeground} />
             </View>
           </Pressable>
         </View>
@@ -281,100 +272,28 @@ export const FeedPost = React.memo(function FeedPost({ post, onLike, onComment, 
 });
 
 const styles = StyleSheet.create({
-  cardWrap: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  card: {
-    borderRadius: 18,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 10,
-    gap: 10,
-  },
-  headerText: { flex: 1 },
-  nameRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  name: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  verifiedBadge: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  meta: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
-  more: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    fontSize: 15,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 22,
-    paddingHorizontal: 14,
-    paddingBottom: 10,
-    letterSpacing: 0.1,
-  },
-  hashtagRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingBottom: 10,
-  },
-  hashtag: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-  },
-  imageWrap: { position: "relative" },
-  image: { width: "100%", aspectRatio: 4 / 3 },
-  imageOverlay: {
-    position: "absolute",
-    bottom: 0, left: 0, right: 0,
-    height: 60,
-  },
-  divider: { height: StyleSheet.hairlineWidth, marginHorizontal: 14 },
-  actions: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    gap: 10,
-  },
-  action: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  actionIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  likeActive: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  likeInactive: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actionCount: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  cardWrap:      { paddingHorizontal: 12, paddingVertical: 5 },
+  card:          { borderRadius: 18, borderWidth: 1, overflow: "hidden" },
+  header:        { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingTop: 14, paddingBottom: 10, gap: 10 },
+  headerText:    { flex: 1 },
+  nameRow:       { flexDirection: "row", alignItems: "center", gap: 5 },
+  name:          { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  verifiedBadge: { width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  ownBadge:      { paddingHorizontal: 6, paddingVertical: 1, borderRadius: 6 },
+  ownBadgeText:  { fontSize: 9, fontFamily: "Inter_700Bold" },
+  meta:          { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
+  more:          { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  content:       { fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 22, paddingHorizontal: 14, paddingBottom: 10, letterSpacing: 0.1 },
+  hashtagRow:    { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingHorizontal: 14, paddingBottom: 10 },
+  hashtag:       { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  imageWrap:     { position: "relative" },
+  image:         { width: "100%", aspectRatio: 4 / 3 },
+  imageOverlay:  { position: "absolute", bottom: 0, left: 0, right: 0, height: 60 },
+  divider:       { height: StyleSheet.hairlineWidth, marginHorizontal: 14 },
+  actions:       { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  action:        { flexDirection: "row", alignItems: "center", gap: 6 },
+  actionIcon:    { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  likeActive:    { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  likeInactive:  { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  actionCount:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
