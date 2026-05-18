@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ShieldAlert, UsersRound, Coins, IndianRupee,
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
-  Lock, UserCog, ChevronDown, ChevronRight,
+  Lock, UserCog, ChevronDown, ChevronRight, FolderOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -47,7 +47,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Hosts",              href: "/hosts",        icon: Star,     allowedRoles: SA_AA },
       { name: "Agents",             href: "/agents",       icon: Briefcase,allowedRoles: SA_A  },
       { name: "E-KYC Verification", href: "/kyc",          icon: ScanFace, badge: "4", allowedRoles: SA_AA },
-      { name: "Calls",              href: "/calls",        icon: Phone,    allowedRoles: ALL   },
+      { name: "Calls",              href: "/calls",        icon: Phone,       allowedRoles: ALL   },
+      { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
       { name: "Gaming",             href: "/gaming",       icon: Gamepad2, allowedRoles: SA_A  },
       { name: "Live Streams",       href: "/live-streams", icon: Radio,    allowedRoles: ALL   },
     ],
@@ -146,6 +147,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/agents":       "Agent Management",
     "/hosts":        "Host Management",
     "/calls":        "Audio & Video Calls",
+    "/recordings":   "Call Recordings & Room Activity",
     "/ai-hub":       "AI Hub",
     "/kyc":          "E-KYC Verification",
     "/handbook":     "Platform Handbook",
