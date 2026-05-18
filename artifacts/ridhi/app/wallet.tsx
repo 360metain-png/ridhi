@@ -307,6 +307,9 @@ export default function WalletScreen() {
                     ₹{pack.price.toLocaleString()}
                   </Text>
                 </View>
+                <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: pack.popular ? "rgba(255,255,255,0.55)" : colors.mutedForeground, marginTop: 1 }}>
+                  +18% GST extra
+                </Text>
                 {(pack as any).perCoin && (
                   <Text style={[styles.perCoinText, { color: pack.popular ? "rgba(255,255,255,0.65)" : colors.mutedForeground }]}>
                     {(pack as any).perCoin}/coin

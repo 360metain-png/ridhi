@@ -599,6 +599,9 @@ export default function SubscriptionScreen() {
                         <Text style={[styles.planPrice, { color: plan.color }]}>{plan.price}</Text>
                         <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>{plan.period}</Text>
                       </View>
+                      {plan.price !== "₹0" && (
+                        <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>+18% GST applicable</Text>
+                      )}
                     </View>
                     {sel && (
                       <View style={[styles.selCheck, { backgroundColor: plan.color }]}>

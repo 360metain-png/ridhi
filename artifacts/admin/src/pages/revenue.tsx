@@ -5,7 +5,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { IndianRupee, TrendingUp, TrendingDown, CreditCard, Users, Megaphone } from "lucide-react";
+import { IndianRupee, TrendingUp, TrendingDown, CreditCard, Users, Megaphone, Percent } from "lucide-react";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -75,15 +75,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+const GST_RATE = 0.18;
+
 export default function RevenuePage() {
   const totalMRR = SUBSCRIPTION_PLANS.reduce((s, p) => s + p.mrr, 0);
   const totalRevenue = revenueSplit.reduce((s, r) => s + r.amount, 0);
+  const gstCollected = Math.round(totalRevenue * GST_RATE);
 
   const summaryStats = [
     { label: "Total Revenue (MTD)", value: `₹${(totalRevenue / 100000).toFixed(1)}L`, icon: IndianRupee, change: "+22.4%", up: true, color: "text-violet-400" },
     { label: "MRR (Subscriptions)", value: `₹${(totalMRR / 1000).toFixed(0)}K`, icon: CreditCard, change: "+11.2%", up: true, color: "text-emerald-400" },
     { label: "Ad Revenue (MTD)", value: `₹${(580200 / 1000).toFixed(0)}K`, icon: Megaphone, change: "+8.7%", up: true, color: "text-blue-400" },
     { label: "Paying Users", value: "3,288", icon: Users, change: "+14.6%", up: true, color: "text-pink-400" },
+    { label: "GST Collected (18%)", value: `₹${(gstCollected / 100000).toFixed(1)}L`, icon: Percent, change: "+22.4%", up: true, color: "text-amber-400" },
   ];
 
   return (
@@ -93,7 +97,7 @@ export default function RevenuePage() {
         <p className="text-muted-foreground text-sm mt-1">Platform revenue breakdown, ad performance, and subscription reports</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {summaryStats.map((s) => (
           <Card key={s.label} className="bg-card border-border">
             <CardContent className="p-5">

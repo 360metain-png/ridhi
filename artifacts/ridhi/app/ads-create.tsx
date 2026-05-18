@@ -542,9 +542,17 @@ export default function AdsCreateScreen() {
                   <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>Duration</Text>
                   <Text style={[styles.totalVal, { color: colors.foreground }]}>{duration} days</Text>
                 </View>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>Ad spend subtotal</Text>
+                  <Text style={[styles.totalVal, { color: colors.foreground }]}>₹{totalBudget.toLocaleString()}</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text style={[styles.totalLabel, { color: "#FF8C42" }]}>GST (18%)</Text>
+                  <Text style={[styles.totalVal, { color: "#FF8C42" }]}>+₹{Math.round(totalBudget * 0.18).toLocaleString()}</Text>
+                </View>
                 <View style={[styles.totalRow, styles.totalFinal, { borderTopColor: colors.border }]}>
-                  <Text style={[styles.totalLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>Total Campaign Spend</Text>
-                  <Text style={[styles.totalVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 18 }]}>₹{totalBudget.toLocaleString()}</Text>
+                  <Text style={[styles.totalLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>Total Payable (incl. GST)</Text>
+                  <Text style={[styles.totalVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 18 }]}>₹{Math.round(totalBudget * 1.18).toLocaleString()}</Text>
                 </View>
               </View>
             )}

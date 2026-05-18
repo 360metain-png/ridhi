@@ -38,6 +38,9 @@ export default function MarketplaceProductScreen() {
   const [payStep,       setPayStep]       = useState<"select" | "confirm" | "success">("select");
   const [saved,         setSaved]         = useState(false);
 
+  const GST_RATE    = 0.18;
+  const gstAmount   = Math.round(product.price * GST_RATE);
+  const totalPayable= product.price + gstAmount;
   const commission  = Math.ceil(product.price * 0.05);
   const sellerGets  = product.price - commission;
 
@@ -149,7 +152,7 @@ export default function MarketplaceProductScreen() {
           <View style={[styles.commNote, { backgroundColor: colors.muted }]}>
             <Feather name="info" size={13} color={colors.mutedForeground} />
             <Text style={[styles.commNoteText, { color: colors.mutedForeground }]}>
-              Ridhi charges a 5% platform fee on successful sales. The seller will receive ₹{sellerGets.toLocaleString()} from this transaction.
+              Ridhi charges a 5% platform fee on successful sales. The buyer pays ₹{totalPayable.toLocaleString()} (incl. 18% GST). The seller receives ₹{sellerGets.toLocaleString()}.
             </Text>
           </View>
         </View>
@@ -201,12 +204,16 @@ export default function MarketplaceProductScreen() {
                     <Text style={[styles.orderRowVal, { color: colors.foreground }]}>₹{product.price.toLocaleString()}</Text>
                   </View>
                   <View style={styles.orderRow}>
+                    <Text style={[styles.orderRowLabel, { color: "#FF8C42" }]}>GST (18%)</Text>
+                    <Text style={[styles.orderRowVal, { color: "#FF8C42" }]}>+₹{gstAmount.toLocaleString()}</Text>
+                  </View>
+                  <View style={styles.orderRow}>
                     <Text style={[styles.orderRowLabel, { color: colors.mutedForeground }]}>Platform service fee</Text>
                     <Text style={[styles.orderRowVal, { color: colors.foreground }]}>₹0</Text>
                   </View>
                   <View style={[styles.orderRow, styles.orderTotal, { borderTopColor: colors.border }]}>
                     <Text style={[styles.orderRowLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>Total payable</Text>
-                    <Text style={[styles.orderRowVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 18 }]}>₹{product.price.toLocaleString()}</Text>
+                    <Text style={[styles.orderRowVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 18 }]}>₹{totalPayable.toLocaleString()}</Text>
                   </View>
                 </View>
 
@@ -241,7 +248,7 @@ export default function MarketplaceProductScreen() {
                 <Pressable onPress={handlePay} style={styles.payBtn}>
                   <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payBtnGrad}>
                     <Feather name="lock" size={15} color="#fff" />
-                    <Text style={styles.payBtnText}>Pay Securely  ₹{product.price.toLocaleString()}</Text>
+                    <Text style={styles.payBtnText}>Pay Securely  ₹{totalPayable.toLocaleString()}</Text>
                   </LinearGradient>
                 </Pressable>
                 <Text style={[styles.payFooter, { color: colors.mutedForeground }]}>
@@ -259,7 +266,8 @@ export default function MarketplaceProductScreen() {
                   <Text style={[styles.confirmSub, { color: colors.mutedForeground }]}>
                     You are about to pay
                   </Text>
-                  <Text style={[styles.confirmAmount, { color: colors.primary }]}>₹{product.price.toLocaleString()}</Text>
+                  <Text style={[styles.confirmAmount, { color: colors.primary }]}>₹{totalPayable.toLocaleString()}</Text>
+                  <Text style={{ fontSize: 11, color: "#FF8C42", fontFamily: "Inter_400Regular", marginTop: 2 }}>incl. ₹{gstAmount.toLocaleString()} GST (18%)</Text>
                   <Text style={[styles.confirmSub, { color: colors.mutedForeground }]}>
                     via {PAY_METHODS.find(m => m.key === payMethod)?.label}
                     {"\n"}to {product.seller} for "{product.title}"
@@ -276,7 +284,7 @@ export default function MarketplaceProductScreen() {
                 <Pressable onPress={handlePay} style={styles.payBtn}>
                   <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payBtnGrad}>
                     <Feather name="check" size={15} color="#fff" />
-                    <Text style={styles.payBtnText}>Confirm & Pay ₹{product.price.toLocaleString()}</Text>
+                    <Text style={styles.payBtnText}>Confirm & Pay ₹{totalPayable.toLocaleString()}</Text>
                   </LinearGradient>
                 </Pressable>
                 <Pressable onPress={() => setPayStep("select")} style={[styles.cancelBtn, { borderColor: colors.border }]}>
@@ -293,14 +301,14 @@ export default function MarketplaceProductScreen() {
                 </LinearGradient>
                 <Text style={[styles.successTitle, { color: colors.foreground }]}>Payment Successful!</Text>
                 <Text style={[styles.successSub, { color: colors.mutedForeground }]}>
-                  ₹{product.price.toLocaleString()} paid to {product.seller}
+                  ₹{totalPayable.toLocaleString()} paid to {product.seller} (incl. ₹{gstAmount.toLocaleString()} GST)
                 </Text>
 
                 <View style={[styles.receiptCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <Text style={[styles.receiptLabel, { color: colors.mutedForeground }]}>TRANSACTION DETAILS</Text>
                   {[
                     { label: "Item",           val: product.title },
-                    { label: "Amount Paid",    val: `₹${product.price.toLocaleString()}` },
+                    { label: "Amount Paid",    val: `₹${totalPayable.toLocaleString()} (incl. GST)` },
                     { label: "Payment Method", val: PAY_METHODS.find(m => m.key === payMethod)?.label ?? "" },
                     { label: "Transaction ID", val: "TXN" + Math.random().toString(36).slice(2, 10).toUpperCase() },
                     { label: "Seller",         val: product.seller },
@@ -316,7 +324,7 @@ export default function MarketplaceProductScreen() {
                 <View style={[styles.sellerCreditNote, { backgroundColor: "#34C75912", borderColor: "#34C75940" }]}>
                   <Feather name="trending-up" size={14} color="#34C759" />
                   <Text style={[styles.sellerCreditText, { color: "#34C759" }]}>
-                    ₹{sellerGets.toLocaleString()} will be credited to {product.seller}'s Ridhi Wallet within 24 hours (after 5% platform fee).
+                    ₹{sellerGets.toLocaleString()} will be credited to {product.seller}'s Ridhi Wallet within 24 hours (after 5% platform fee). GST of ₹{gstAmount.toLocaleString()} will be remitted to the government.
                   </Text>
                 </View>
 

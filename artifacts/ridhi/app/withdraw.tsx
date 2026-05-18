@@ -24,6 +24,7 @@ const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
 const INR_PER_COIN = 0.5;
 const PLATFORM_FEE_PCT = 30;
+const GST_RATE = 0.18;          // 18% GST on platform fee (SAC 998314)
 const MIN_COINS = 1000;
 const MAX_COINS_PER_DAY = 50000;
 
@@ -31,10 +32,12 @@ type Step = "kyc_gate" | "amount" | "method" | "details" | "review" | "success";
 type Method = "UPI" | "Bank";
 
 function calc(coins: number) {
-  const gross = coins * INR_PER_COIN;
-  const fee = gross * (PLATFORM_FEE_PCT / 100);
-  const net = gross - fee;
-  return { gross, fee, net };
+  const gross        = coins * INR_PER_COIN;
+  const platformFee  = gross * (PLATFORM_FEE_PCT / 100);
+  const gst          = platformFee * GST_RATE;          // GST on platform service fee
+  const totalDeduct  = platformFee + gst;
+  const net          = gross - totalDeduct;
+  return { gross, platformFee, gst, totalDeduct, net };
 }
 
 function StepDot({ active, done, n }: { active: boolean; done: boolean; n: number }) {
@@ -125,7 +128,7 @@ export default function WithdrawScreen() {
 
   const balance = user?.coins ?? 0;
   const coinAmt = parseInt(coins) || 0;
-  const { gross, fee, net } = calc(coinAmt);
+  const { gross, platformFee, gst, totalDeduct, net } = calc(coinAmt);
 
   useEffect(() => {
     AsyncStorage.getItem("ridhi_kyc_submitted").then((val) => {
@@ -188,7 +191,7 @@ export default function WithdrawScreen() {
         {step === "amount" && (
           <ScrollView contentContainerStyle={st.body}>
             <Text style={[st.stepHeading, { color: colors.foreground }]}>How many coins to withdraw?</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Minimum {MIN_COINS.toLocaleString()} coins · 30% platform fee applies</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Minimum {MIN_COINS.toLocaleString()} coins · 30% platform fee + 18% GST applies</Text>
 
             <View style={[st.amountCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={st.amountInputRow}>
@@ -212,7 +215,11 @@ export default function WithdrawScreen() {
                 </View>
                 <View style={st.calcRow}>
                   <Text style={[st.calcLabel, { color: colors.mutedForeground }]}>Platform fee (30%)</Text>
-                  <Text style={[st.calcValue, { color: "#F43F5E" }]}>−₹{fee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
+                  <Text style={[st.calcValue, { color: "#F43F5E" }]}>−₹{platformFee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
+                </View>
+                <View style={st.calcRow}>
+                  <Text style={[st.calcLabel, { color: colors.mutedForeground }]}>GST on fee (18%)</Text>
+                  <Text style={[st.calcValue, { color: "#FF8C42" }]}>−₹{gst.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
                 </View>
                 <View style={[st.calcRow, st.calcRowNet]}>
                   <Text style={[st.calcLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>You receive</Text>
@@ -254,7 +261,7 @@ export default function WithdrawScreen() {
         {step === "method" && (
           <ScrollView contentContainerStyle={st.body}>
             <Text style={[st.stepHeading, { color: colors.foreground }]}>Choose payment method</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Select how you want to receive ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Select how you want to receive ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} (after 30% fee + 18% GST)</Text>
 
             {(["UPI", "Bank"] as Method[]).map((m) => (
               <Pressable key={m} onPress={() => setMethod(m)} style={[st.methodCard, { backgroundColor: colors.card, borderColor: method === m ? colors.primary : colors.border, borderWidth: method === m ? 2 : 1 }]}>
@@ -292,7 +299,7 @@ export default function WithdrawScreen() {
         {step === "details" && (
           <ScrollView contentContainerStyle={st.body} keyboardShouldPersistTaps="handled">
             <Text style={[st.stepHeading, { color: colors.foreground }]}>{method === "UPI" ? "Enter your UPI ID" : "Enter bank details"}</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>This is where ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} will be sent</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>This is where ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} (net of fee + GST) will be sent</Text>
 
             {method === "UPI" ? (
               <View style={[st.fieldCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -369,9 +376,10 @@ export default function WithdrawScreen() {
               </View>
               <View style={[st.divider, { backgroundColor: colors.border }]} />
               {[
-                { label: "Gross Value", val: `₹${gross.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`, color: colors.foreground },
-                { label: "Platform Fee (30%)", val: `−₹${fee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`, color: "#F43F5E" },
-                { label: "Net Payout", val: `₹${net.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`, color: "#22C55E" },
+                { label: "Gross Value",          val: `₹${gross.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,       color: colors.foreground },
+                { label: "Platform Fee (30%)",   val: `−₹${platformFee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,  color: "#F43F5E" },
+                { label: "GST on Fee (18%)",     val: `−₹${gst.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,         color: "#FF8C42" },
+                { label: "Net Payout",           val: `₹${net.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,          color: "#22C55E" },
               ].map((r) => (
                 <View key={r.label} style={st.reviewRow}>
                   <Text style={[st.reviewLabel, { color: colors.mutedForeground }]}>{r.label}</Text>

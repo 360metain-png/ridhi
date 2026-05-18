@@ -452,6 +452,9 @@ export default function BusinessAdsPage() {
           <p className="text-xs text-violet-600 mt-0.5">
             CPM campaigns: ₹50/1K impressions · CPC campaigns: ₹2/click · Ridhi earns ~30–40% of all ad spend as platform revenue. Businesses set their own daily budgets (min ₹100/day) and duration.
           </p>
+          <p className="text-xs text-amber-600 mt-1 font-medium">
+            🏛️ 18% GST is charged on all ad spend and remitted to the government. Advertisers should account for GST when planning budgets.
+          </p>
         </div>
       </div>
 
