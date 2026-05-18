@@ -16,16 +16,25 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ridhi.app",
+      "bundleIdentifier": "app.replit.ridhi",
+      "buildNumber": "2",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Ridhi uses your location to show people and content near you.",
-        "NSCameraUsageDescription": "Ridhi needs camera access to let you post photos and videos.",
-        "NSPhotoLibraryUsageDescription": "Ridhi needs photo library access to let you share images.",
-        "NSMicrophoneUsageDescription": "Ridhi needs microphone access for video posts and voice messages."
+        "NSLocationWhenInUseUsageDescription": "Ridhi uses your location to show people and events near you.",
+        "NSLocationAlwaysUsageDescription": "Ridhi uses your location to show people and events near you.",
+        "NSCameraUsageDescription": "Ridhi needs camera access to let you post photos, videos, and go live.",
+        "NSPhotoLibraryUsageDescription": "Ridhi needs photo library access to let you share images and videos.",
+        "NSPhotoLibraryAddUsageDescription": "Ridhi saves photos and videos to your library.",
+        "NSMicrophoneUsageDescription": "Ridhi needs microphone access for video posts, voice messages, audio rooms, and live streams.",
+        "NSContactsUsageDescription": "Ridhi uses your contacts to help you find friends who are already on Ridhi.",
+        "NSFaceIDUsageDescription": "Ridhi uses Face ID to keep your account secure.",
+        "NSUserTrackingUsageDescription": "Ridhi uses data to personalise your feed, show relevant content, and improve your experience.",
+        "NSCalendarsUsageDescription": "Ridhi accesses your calendar to let you schedule and add events.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.ridhi.app",
+      "package": "app.replit.ridhi",
+      "versionCode": 2,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -35,7 +44,10 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "RECORD_AUDIO",
-        "VIBRATE"
+        "VIBRATE",
+        "READ_CONTACTS",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
       ]
     },
     "web": {
