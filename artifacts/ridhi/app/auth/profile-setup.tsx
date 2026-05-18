@@ -156,8 +156,9 @@ export default function ProfileSetupScreen() {
 
   // step 0 — language
   const [language, setLanguage] = useState("");
-  // step 1 — name
-  const [name, setName] = useState("");
+  // step 1 — name + nickname
+  const [name, setName]         = useState("");
+  const [nickname, setNickname] = useState("");
   // step 2 — age + gender
   const [age, setAge]       = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
@@ -189,6 +190,7 @@ export default function ProfileSetupScreen() {
     setLoading(true);
     await login({
       name,
+      nickname: nickname.trim() || name,
       age: parseInt(age),
       gender: gender as "male" | "female" | "other",
       city: state,
@@ -284,19 +286,48 @@ export default function ProfileSetupScreen() {
       ),
     },
 
-    // ── 1: name ───────────────────────────────────────────────────────────────
+    // ── 1: name + nickname ────────────────────────────────────────────────────
     {
-      title: "What's your name?",
-      subtitle: "How should we introduce you",
+      title: "Your name & display name",
+      subtitle: "Real name stays private — nickname is what everyone sees",
       content: (
-        <TextInput
-          style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
-          placeholder="Your full name"
-          placeholderTextColor={colors.mutedForeground}
-          value={name}
-          onChangeText={setName}
-          autoFocus
-        />
+        <View style={{ gap: 16, width: "100%" }}>
+          {/* Real name */}
+          <View style={{ gap: 6 }}>
+            <View style={styles.inputLabelRow}>
+              <Feather name="lock" size={13} color={colors.mutedForeground} />
+              <Text style={[styles.inputLabel, { color: colors.mutedForeground }]}>Full Name (private)</Text>
+            </View>
+            <TextInput
+              style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
+              placeholder="e.g. Priya Sharma"
+              placeholderTextColor={colors.mutedForeground}
+              value={name}
+              onChangeText={setName}
+              autoFocus
+            />
+          </View>
+          {/* Nickname */}
+          <View style={{ gap: 6 }}>
+            <View style={styles.inputLabelRow}>
+              <Feather name="at-sign" size={13} color={colors.primary} />
+              <Text style={[styles.inputLabel, { color: colors.primary }]}>Display Name / Nickname (public)</Text>
+            </View>
+            <TextInput
+              style={[styles.bigInput, { color: colors.foreground, borderColor: nickname.trim() ? colors.primary : colors.border, backgroundColor: colors.card }]}
+              placeholder={name.trim() || "e.g. Priya ✨ or @queen_priya"}
+              placeholderTextColor={colors.mutedForeground}
+              value={nickname}
+              onChangeText={setNickname}
+              maxLength={30}
+            />
+            <Text style={[styles.nicknameHint, { color: colors.mutedForeground }]}>
+              {nickname.trim()
+                ? `Others will see you as "${nickname.trim()}"`
+                : `Leave blank to use your first name publicly`}
+            </Text>
+          </View>
+        </View>
       ),
     },
 
@@ -579,6 +610,9 @@ const styles = StyleSheet.create({
   langSublabel: { fontSize: 10, fontFamily: "Inter_400Regular", textAlign: "center" },
   langCheck:    { position: "absolute", top: 6, right: 6, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
 
+  inputLabelRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  inputLabel:    { fontSize: 12, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
+  nicknameHint:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   bigInput:   { fontSize: 18, fontFamily: "Inter_500Medium", paddingVertical: 16, paddingHorizontal: 20, borderRadius: 16, borderWidth: 1.5, width: "100%" },
   genderRow:  { flexDirection: "row", gap: 10 },
   genderBtn:  { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5 },

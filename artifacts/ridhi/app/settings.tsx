@@ -120,9 +120,9 @@ export default function SettingsScreen() {
             onPress={() => Alert.alert("Edit Profile", "Update your name, photo, bio, and interests.", [{ text: "Cancel", style: "cancel" }, { text: "Edit Profile", onPress: () => router.push("/(tabs)/profile" as any) }])}
             style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}
           >
-            <Avatar name={user.name} size={52} />
+            <Avatar name={user.name} uri={user.avatar} size={52} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.profileName, { color: colors.foreground }]}>{user.name}</Text>
+              <Text style={[styles.profileName, { color: colors.foreground }]}>{user.nickname || user.name}</Text>
               <Text style={[styles.profileSub, { color: colors.mutedForeground }]}>
                 {user.phone || user.email || user.city}
               </Text>

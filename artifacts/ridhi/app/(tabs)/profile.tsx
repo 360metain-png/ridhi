@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
+  Image,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -14,6 +17,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -81,7 +85,7 @@ const GRID_IMAGES = [
 export default function ProfileScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
 
   const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
@@ -92,10 +96,58 @@ export default function ProfileScreen() {
     () => Object.fromEntries([...MOCK_FOLLOWERS, ...MOCK_FOLLOWING].map((p) => [p.id, ("followed" in p ? p.followed : p.following)]))
   );
 
+  // Edit profile modal
+  const [editOpen,      setEditOpen]      = useState(false);
+  const [editNickname,  setEditNickname]  = useState("");
+  const [editBio,       setEditBio]       = useState("");
+  const [editAvatar,    setEditAvatar]    = useState<string | undefined>(undefined);
+  const [avatarSheet,   setAvatarSheet]   = useState(false);
+
   const toggleFollow = (id: string) =>
     setFollowStates((prev) => ({ ...prev, [id]: !prev[id] }));
 
   if (!user) return null;
+
+  const displayName = user.nickname || user.name;
+
+  const openEditModal = () => {
+    setEditNickname(user.nickname || "");
+    setEditBio(user.bio || "");
+    setEditAvatar(user.avatar);
+    setEditOpen(true);
+  };
+
+  const saveProfile = async () => {
+    await updateProfile({
+      nickname: editNickname.trim() || user.name,
+      bio: editBio,
+      avatar: editAvatar,
+    });
+    setEditOpen(false);
+  };
+
+  const pickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow photo access to change your profile picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setEditAvatar(result.assets[0].uri);
+      setAvatarSheet(false);
+    }
+  };
+
+  const useAutoAvatar = () => {
+    setEditAvatar(undefined);
+    setAvatarSheet(false);
+  };
 
   // ── bottom-sheet modal ────────────────────────────────────────────────────
   const sheetTitle =
@@ -167,6 +219,136 @@ export default function ProfileScreen() {
 
   return (
     <>
+    {/* ── Edit Profile Modal ────────────────────────────────────────────── */}
+    <Modal visible={editOpen} transparent animationType="slide" onRequestClose={() => setEditOpen(false)}>
+      <TouchableWithoutFeedback onPress={() => setEditOpen(false)}>
+        <View style={styles.sheetOverlay} />
+      </TouchableWithoutFeedback>
+      <View style={[styles.editSheet, { backgroundColor: colors.card, paddingBottom: insets.bottom + 20 }]}>
+        <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+        <View style={[styles.sheetHeader, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.sheetTitle, { color: colors.foreground }]}>Edit Profile</Text>
+          <Pressable onPress={() => setEditOpen(false)} style={[styles.sheetClose, { backgroundColor: colors.muted }]}>
+            <Feather name="x" size={16} color={colors.foreground} />
+          </Pressable>
+        </View>
+
+        <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }} showsVerticalScrollIndicator={false}>
+          {/* Avatar picker */}
+          <View style={styles.editAvatarRow}>
+            <Pressable onPress={() => setAvatarSheet(true)} style={styles.editAvatarBtn}>
+              {editAvatar ? (
+                <Image source={{ uri: editAvatar }} style={styles.editAvatarImg} />
+              ) : (
+                <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.editAvatarImg}>
+                  <Text style={styles.editAvatarInitial}>
+                    {(editNickname || user.name).charAt(0).toUpperCase()}
+                  </Text>
+                </LinearGradient>
+              )}
+              <View style={[styles.editAvatarCamera, { backgroundColor: colors.primary }]}>
+                <Feather name="camera" size={14} color="#fff" />
+              </View>
+            </Pressable>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={[styles.editAvatarLabel, { color: colors.foreground }]}>Profile Photo</Text>
+              <Text style={[styles.editAvatarSub, { color: colors.mutedForeground }]}>
+                {editAvatar ? "Custom photo set" : "Auto-avatar (gradient initials)"}
+              </Text>
+              <Pressable onPress={() => setAvatarSheet(true)}>
+                <Text style={[styles.editAvatarChange, { color: colors.primary }]}>Change photo →</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Nickname */}
+          <View style={{ gap: 6 }}>
+            <View style={styles.editFieldLabel}>
+              <Feather name="at-sign" size={13} color={colors.primary} />
+              <Text style={[styles.editFieldLabelText, { color: colors.primary }]}>Display Name / Nickname (public)</Text>
+            </View>
+            <TextInput
+              style={[styles.editInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
+              placeholder={user.name}
+              placeholderTextColor={colors.mutedForeground}
+              value={editNickname}
+              onChangeText={setEditNickname}
+              maxLength={30}
+            />
+            <Text style={[styles.editFieldHint, { color: colors.mutedForeground }]}>
+              This is what people see on posts, chat, and matches
+            </Text>
+          </View>
+
+          {/* Real name note */}
+          <View style={[styles.editPrivacyNote, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            <Feather name="lock" size={14} color={colors.mutedForeground} />
+            <Text style={[styles.editPrivacyText, { color: colors.mutedForeground }]}>
+              Your real name ({user.name}) is private and never shown publicly.
+            </Text>
+          </View>
+
+          {/* Bio */}
+          <View style={{ gap: 6 }}>
+            <Text style={[styles.editFieldLabelText, { color: colors.foreground }]}>Bio</Text>
+            <TextInput
+              style={[styles.editInput, styles.editBioInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.background }]}
+              placeholder="Tell people a little about yourself…"
+              placeholderTextColor={colors.mutedForeground}
+              value={editBio}
+              onChangeText={setEditBio}
+              multiline
+              maxLength={150}
+            />
+            <Text style={[styles.editFieldHint, { color: colors.mutedForeground, textAlign: "right" }]}>
+              {editBio.length}/150
+            </Text>
+          </View>
+
+          <GradientButton label="Save Changes" onPress={saveProfile} style={{ marginTop: 4 }} />
+        </ScrollView>
+      </View>
+    </Modal>
+
+    {/* ── Avatar picker sheet ───────────────────────────────────────────── */}
+    <Modal visible={avatarSheet} transparent animationType="slide" onRequestClose={() => setAvatarSheet(false)}>
+      <TouchableWithoutFeedback onPress={() => setAvatarSheet(false)}>
+        <View style={styles.sheetOverlay} />
+      </TouchableWithoutFeedback>
+      <View style={[styles.avatarPickerSheet, { backgroundColor: colors.card, paddingBottom: insets.bottom + 20 }]}>
+        <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+        <Text style={[styles.avatarPickerTitle, { color: colors.foreground }]}>Change Profile Photo</Text>
+
+        <Pressable onPress={pickPhoto} style={[styles.avatarPickerOption, { borderBottomColor: colors.border }]}>
+          <View style={[styles.avatarPickerIcon, { backgroundColor: colors.primary + "18" }]}>
+            <Feather name="image" size={22} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.avatarPickerOptionTitle, { color: colors.foreground }]}>Upload from Gallery</Text>
+            <Text style={[styles.avatarPickerOptionSub, { color: colors.mutedForeground }]}>Choose a photo from your device</Text>
+          </View>
+          <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+        </Pressable>
+
+        <Pressable onPress={useAutoAvatar} style={styles.avatarPickerOption}>
+          <View style={[styles.avatarPickerIcon, { backgroundColor: colors.secondary + "18" }]}>
+            <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.avatarPickerGrad}>
+              <Text style={styles.avatarPickerInitial}>
+                {(editNickname || user.name).charAt(0).toUpperCase()}
+              </Text>
+            </LinearGradient>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.avatarPickerOptionTitle, { color: colors.foreground }]}>Use Auto Avatar</Text>
+            <Text style={[styles.avatarPickerOptionSub, { color: colors.mutedForeground }]}>
+              Gradient initials — unique to you
+            </Text>
+          </View>
+          {!editAvatar && <Feather name="check-circle" size={18} color={colors.primary} />}
+        </Pressable>
+      </View>
+    </Modal>
+
     {/* ── Stats bottom sheet ────────────────────────────────────────────── */}
     <Modal
       visible={sheet !== null}
@@ -215,8 +397,26 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.profileCore}>
-          <Avatar name={user.name} size={88} hasStory />
-          <Text style={[styles.name, { color: colors.foreground }]}>{user.name}</Text>
+          {/* Tappable avatar */}
+          <Pressable onPress={openEditModal} style={styles.avatarWrap}>
+            <Avatar name={user.name} uri={user.avatar} size={88} hasStory />
+            <View style={[styles.avatarEditBadge, { backgroundColor: colors.primary }]}>
+              <Feather name="camera" size={13} color="#fff" />
+            </View>
+          </Pressable>
+
+          {/* Nickname (public display name) */}
+          <Text style={[styles.name, { color: colors.foreground }]}>{displayName}</Text>
+          {/* Show real name as a private note if a nickname was set */}
+          {user.nickname && user.nickname !== user.name && (
+            <View style={[styles.realNameRow, { backgroundColor: colors.muted }]}>
+              <Feather name="lock" size={11} color={colors.mutedForeground} />
+              <Text style={[styles.realNameText, { color: colors.mutedForeground }]}>
+                Real name: {user.name} (private)
+              </Text>
+            </View>
+          )}
+
           <View style={styles.locationRow}>
             <Feather name="map-pin" size={14} color={colors.mutedForeground} />
             <Text style={[styles.location, { color: colors.mutedForeground }]}>{user.city}</Text>
@@ -253,7 +453,7 @@ export default function ProfileScreen() {
         </Pressable>
 
         <View style={styles.profileBtns}>
-          <GradientButton label="Edit Profile" onPress={() => router.push("/auth/profile-setup" as any)} small style={{ flex: 1 }} />
+          <GradientButton label="Edit Profile" onPress={openEditModal} small style={{ flex: 1 }} />
           <GradientButton label="Boost Profile" onPress={() => router.push("/subscription")} small outline style={{ flex: 1 }} />
         </View>
       </LinearGradient>
@@ -487,6 +687,40 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   logoutText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+
+  // ── avatar + nickname ─────────────────────────────────────────────────────
+  avatarWrap:      { position: "relative" },
+  avatarEditBadge: { position: "absolute", bottom: 2, right: 2, width: 26, height: 26, borderRadius: 13, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#000" },
+  realNameRow:     { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, marginTop: -2 },
+  realNameText:    { fontSize: 11, fontFamily: "Inter_400Regular" },
+
+  // ── edit profile sheet ────────────────────────────────────────────────────
+  editSheet:          { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "90%" },
+  editAvatarRow:      { flexDirection: "row", alignItems: "center", gap: 16 },
+  editAvatarBtn:      { position: "relative" },
+  editAvatarImg:      { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center" },
+  editAvatarInitial:  { color: "#fff", fontSize: 30, fontFamily: "Inter_700Bold" },
+  editAvatarCamera:   { position: "absolute", bottom: 0, right: 0, width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "#000" },
+  editAvatarLabel:    { fontSize: 15, fontFamily: "Inter_700Bold" },
+  editAvatarSub:      { fontSize: 12, fontFamily: "Inter_400Regular" },
+  editAvatarChange:   { fontSize: 13, fontFamily: "Inter_600SemiBold", marginTop: 2 },
+  editFieldLabel:     { flexDirection: "row", alignItems: "center", gap: 5 },
+  editFieldLabelText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  editFieldHint:      { fontSize: 11, fontFamily: "Inter_400Regular" },
+  editInput:          { fontSize: 16, fontFamily: "Inter_400Regular", paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1 },
+  editBioInput:       { minHeight: 80, textAlignVertical: "top" },
+  editPrivacyNote:    { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 12, borderWidth: 1 },
+  editPrivacyText:    { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+
+  // ── avatar picker sheet ────────────────────────────────────────────────────
+  avatarPickerSheet:       { borderTopLeftRadius: 24, borderTopRightRadius: 24 },
+  avatarPickerTitle:       { fontSize: 17, fontFamily: "Inter_700Bold", textAlign: "center", paddingVertical: 16 },
+  avatarPickerOption:      { flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  avatarPickerIcon:        { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  avatarPickerGrad:        { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
+  avatarPickerInitial:     { color: "#fff", fontSize: 20, fontFamily: "Inter_700Bold" },
+  avatarPickerOptionTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  avatarPickerOptionSub:   { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 
   // ── bottom sheet ──────────────────────────────────────────────────────────
   sheetOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
