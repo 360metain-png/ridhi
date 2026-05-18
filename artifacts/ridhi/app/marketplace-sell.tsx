@@ -109,6 +109,49 @@ export default function MarketplaceSellScreen() {
             </View>
           </View>
 
+          {/* ── Boost CTA ── */}
+          <View style={[styles.boostCard, { backgroundColor: colors.card, borderColor: "#7B2FBE40" }]}>
+            <LinearGradient colors={["#7B2FBE20", "#E91E8C20"]} style={styles.boostCardBg}>
+              <View style={styles.boostCardTop}>
+                <View style={[styles.boostIconWrap, { backgroundColor: "#7B2FBE25" }]}>
+                  <Feather name="zap" size={22} color="#7B2FBE" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.boostCardTitle, { color: colors.foreground }]}>Sell Faster with Ridhi Ads</Text>
+                  <Text style={[styles.boostCardSub, { color: colors.mutedForeground }]}>
+                    Promote "{title.length > 28 ? title.slice(0, 28) + "…" : title}" to thousands of buyers. Drive more enquiries and sell quicker.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.boostStats}>
+                {[
+                  { icon: "users",       label: "Wider Reach",     color: "#7B2FBE" },
+                  { icon: "trending-up", label: "More Enquiries",   color: "#E91E8C" },
+                  { icon: "clock",       label: "Sell Faster",      color: "#FFB800" },
+                ].map(({ icon, label, color }) => (
+                  <View key={label} style={styles.boostStat}>
+                    <Feather name={icon as any} size={16} color={color} />
+                    <Text style={[styles.boostStatTxt, { color: colors.mutedForeground }]}>{label}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <Pressable onPress={() => router.push("/ads-create" as any)}>
+                <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.boostBtn}>
+                  <Feather name="zap" size={16} color="#fff" />
+                  <Text style={styles.boostBtnTxt}>Run an Ad for This Product</Text>
+                  <Feather name="arrow-right" size={14} color="#fff" />
+                </LinearGradient>
+              </Pressable>
+
+              <Pressable onPress={() => router.push("/subscription" as any)} style={styles.boostAltBtn}>
+                <Feather name="trending-up" size={14} color="#7B2FBE" />
+                <Text style={[styles.boostAltTxt, { color: "#7B2FBE" }]}>Or Boost your Profile / Listing</Text>
+              </Pressable>
+            </LinearGradient>
+          </View>
+
           <Pressable onPress={() => router.push("/marketplace" as any)} style={styles.browseBtn}>
             <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.browseBtnGrad}>
               <Text style={styles.browseBtnText}>Browse Marketplace</Text>
@@ -602,6 +645,19 @@ const styles = StyleSheet.create({
   commCard:   { flexDirection: "row", alignItems: "flex-start", gap: 10, width: "100%", borderRadius: 14, borderWidth: 1, padding: 14 },
   commTitle:  { fontSize: 13, fontFamily: "Inter_700Bold" },
   commSub:    { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 3, lineHeight: 17 },
+  boostCard:      { width: "100%", borderRadius: 18, borderWidth: 1.5, overflow: "hidden" },
+  boostCardBg:    { padding: 16, gap: 14 },
+  boostCardTop:   { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  boostIconWrap:  { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  boostCardTitle: { fontSize: 15, fontFamily: "Inter_700Bold", marginBottom: 3 },
+  boostCardSub:   { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+  boostStats:     { flexDirection: "row", justifyContent: "space-around" },
+  boostStat:      { alignItems: "center", gap: 4 },
+  boostStatTxt:   { fontSize: 11, fontFamily: "Inter_500Medium" },
+  boostBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, paddingVertical: 13 },
+  boostBtnTxt:    { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
+  boostAltBtn:    { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  boostAltTxt:    { fontSize: 13, fontFamily: "Inter_500Medium" },
   browseBtn:  { width: "100%" },
   browseBtnGrad:{ flexDirection: "row", alignItems: "center", justifyContent: "center", borderRadius: 14, paddingVertical: 14 },
   browseBtnText:{ color: "#fff", fontSize: 15, fontFamily: "Inter_700Bold" },
