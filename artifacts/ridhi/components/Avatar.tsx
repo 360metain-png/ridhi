@@ -5,31 +5,46 @@ import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 
 // ─── DiceBear avatar helpers ──────────────────────────────────────────────────
+// Male  → avataaars  (Memoji-like cartoon faces — masculine)
+// Female → avataaars  (Memoji-like cartoon faces — feminine seeds)
+// Other  → micah     (illustrated neutral face portraits)
+
+const BG = "b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf,c1e1c5";
 
 export function getAvatarUrl(name: string, gender?: string): string {
   const seed = encodeURIComponent((name ?? "user").trim() || "user");
   if (gender === "female") {
-    return `https://api.dicebear.com/7.x/lorelei/png?seed=${seed}&size=200&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+    return `https://api.dicebear.com/7.x/avataaars/png?seed=${seed}&size=200&backgroundColor=${BG}`;
   }
   if (gender === "male") {
-    return `https://api.dicebear.com/7.x/adventurer/png?seed=${seed}&size=200&backgroundColor=b6e3f4,c0aede,d1d4f9,c1e1c5,ffd5dc`;
+    return `https://api.dicebear.com/7.x/avataaars/png?seed=${seed}&size=200&backgroundColor=${BG}`;
   }
-  return `https://api.dicebear.com/7.x/thumbs/png?seed=${seed}&size=200&backgroundColor=b6e3f4,c0aede,d1d4f9,c1e1c5,ffd5dc`;
+  return `https://api.dicebear.com/7.x/micah/png?seed=${seed}&size=200&backgroundColor=${BG}`;
 }
 
+// Seeds chosen so the avataaars generator produces clearly masculine / feminine looks
 const FEMALE_SEEDS = ["priya", "kavya", "ananya", "riya", "meera", "sneha", "pooja", "divya"];
-const MALE_SEEDS   = ["arjun", "rahul", "karan", "dev", "raj", "aditya", "vivek", "rohan"];
+const MALE_SEEDS   = ["warrior", "hero", "titan", "blade", "king", "ace", "storm", "bolt"];
 const OTHER_SEEDS  = ["alex", "nova", "sky", "cloud", "river", "phoenix", "ember", "comet"];
+
+function styleFor(gender?: string) {
+  if (gender === "female") return "avataaars";
+  if (gender === "male")   return "avataaars";
+  return "micah";
+}
 
 export function getAvatarOptions(gender?: string): string[] {
   const seeds =
     gender === "female" ? FEMALE_SEEDS :
     gender === "male"   ? MALE_SEEDS   :
     OTHER_SEEDS;
-  return seeds.map((s) => getAvatarUrl(s, gender));
+  const style = styleFor(gender);
+  return seeds.map(
+    (s) => `https://api.dicebear.com/7.x/${style}/png?seed=${encodeURIComponent(s)}&size=200&backgroundColor=${BG}`
+  );
 }
 
-// ─── Avatar picker (inline grid) ─────────────────────────────────────────────
+// ─── Avatar picker (inline horizontal scroll grid) ────────────────────────────
 
 interface AvatarPickerProps {
   gender?: string;
@@ -40,10 +55,14 @@ interface AvatarPickerProps {
 export function AvatarPicker({ gender, selected, onSelect }: AvatarPickerProps) {
   const colors = useColors();
   const options = getAvatarOptions(gender);
+  const label =
+    gender === "female" ? "✨ Feminine avatars" :
+    gender === "male"   ? "⚡ Masculine avatars" :
+    "🌈 Neutral avatars";
   return (
     <View>
       <Text style={[pickerStyles.hint, { color: colors.mutedForeground }]}>
-        {gender === "female" ? "✨ Feminine avatars" : gender === "male" ? "⚡ Masculine avatars" : "🌈 Neutral avatars"} — tap one to pick
+        {label} — tap one to pick
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={pickerStyles.row}>
         {options.map((uri) => {
@@ -54,8 +73,8 @@ export function AvatarPicker({ gender, selected, onSelect }: AvatarPickerProps) 
                 style={[
                   pickerStyles.optionRing,
                   {
-                    borderColor: isSelected ? colors.primary : "transparent",
-                    backgroundColor: isSelected ? colors.primary + "15" : "transparent",
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    backgroundColor: isSelected ? colors.primary + "15" : colors.card,
                   },
                 ]}
               >
@@ -67,7 +86,7 @@ export function AvatarPicker({ gender, selected, onSelect }: AvatarPickerProps) 
                 )}
               </View>
               {isSelected && (
-                <Text style={[pickerStyles.selectedLabel, { color: colors.primary }]}>Selected</Text>
+                <Text style={[pickerStyles.selectedLabel, { color: colors.primary }]}>Selected ✓</Text>
               )}
             </TouchableOpacity>
           );
@@ -78,12 +97,12 @@ export function AvatarPicker({ gender, selected, onSelect }: AvatarPickerProps) 
 }
 
 const pickerStyles = StyleSheet.create({
-  hint: { fontSize: 12, fontFamily: "Inter_400Regular", marginBottom: 10, textAlign: "center" },
-  row: { gap: 10, paddingHorizontal: 4, paddingVertical: 4 },
-  optionWrap: { alignItems: "center", gap: 4 },
-  optionRing: { width: 68, height: 68, borderRadius: 34, borderWidth: 2.5, alignItems: "center", justifyContent: "center" },
-  optionImg: { width: 58, height: 58, borderRadius: 29 },
-  checkBadge: { position: "absolute", bottom: 0, right: 0, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: "#fff" },
+  hint:          { fontSize: 12, fontFamily: "Inter_400Regular", marginBottom: 10, textAlign: "center" },
+  row:           { gap: 10, paddingHorizontal: 4, paddingVertical: 6 },
+  optionWrap:    { alignItems: "center", gap: 5 },
+  optionRing:    { width: 72, height: 72, borderRadius: 36, borderWidth: 2.5, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  optionImg:     { width: 66, height: 66, borderRadius: 33 },
+  checkBadge:    { position: "absolute", bottom: 2, right: 2, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center", borderWidth: 1.5, borderColor: "#fff" },
   selectedLabel: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
 });
 
@@ -121,7 +140,7 @@ export function Avatar({ name, uri, gender, size = 44, showRing, hasStory, anima
     }
   }, [hasStory, animate]);
 
-  // Always resolve to an image — uploaded photo OR auto gender-based 3D avatar
+  // Always resolve to an image — uploaded photo OR auto gender-based Memoji-style avatar
   const avatarUri = uri ?? getAvatarUrl(name, gender);
 
   const inner = (
@@ -194,7 +213,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 0,
   },
-  storyRing: { alignItems: "center", justifyContent: "center", padding: 2 },
+  storyRing:   { alignItems: "center", justifyContent: "center", padding: 2 },
   storyBorder: { alignItems: "center", justifyContent: "center", padding: 2 },
-  ring: { borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
+  ring:        { borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
 });
