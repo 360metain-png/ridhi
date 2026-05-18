@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
+  BackHandler,
+  Easing,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +12,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -20,40 +22,105 @@ import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
-const { width, height } = Dimensions.get("window");
 
-const BG = "#08080F";
-const CARD = "#0F0F1C";
-const BORDER = "rgba(255,255,255,0.08)";
-const TEXT = "#EEEEF5";
-const MUTED = "#55556A";
-const PRIMARY = "#E91E8C";
+const BG       = "#08080F";
+const BORDER   = "rgba(255,255,255,0.08)";
+const TEXT     = "#EEEEF5";
+const MUTED    = "#55556A";
+const PRIMARY  = "#E91E8C";
 const SECONDARY = "#7B2FBE";
 const INPUT_BG = "#141424";
 
-export default function LoginScreen() {
-  const insets = useSafeAreaInsets();
-  const { login } = useAuth();
-  const [tab, setTab] = useState<"phone" | "email">("phone");
-  const [value, setValue] = useState("");
-  const [inputError, setInputError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<string | null>(null);
-  const [focused, setFocused] = useState(false);
+/* ── Floating hearts (same engine as onboarding) ─────────────────── */
+const FLOAT_ITEMS = [
+  { emoji: "❤️",  x: 0.06, size: 22, dur: 7200, delay: 0,    spin: 12  },
+  { emoji: "💕",  x: 0.20, size: 16, dur: 9000, delay: 700,  spin: -8  },
+  { emoji: "💗",  x: 0.38, size: 26, dur: 6800, delay: 1500, spin: 18  },
+  { emoji: "💖",  x: 0.58, size: 15, dur: 8500, delay: 300,  spin: -22 },
+  { emoji: "💓",  x: 0.76, size: 20, dur: 7800, delay: 2000, spin: 10  },
+  { emoji: "💝",  x: 0.90, size: 18, dur: 9500, delay: 1100, spin: -6  },
+  { emoji: "💞",  x: 0.14, size: 13, dur: 8200, delay: 2900, spin: 28  },
+  { emoji: "✨",  x: 0.48, size: 18, dur: 7000, delay: 450,  spin: -15 },
+  { emoji: "💫",  x: 0.68, size: 16, dur: 8800, delay: 3300, spin: 14  },
+  { emoji: "🌸",  x: 0.30, size: 18, dur: 9200, delay: 2600, spin: 20  },
+  { emoji: "💜",  x: 0.84, size: 22, dur: 7500, delay: 4000, spin: -28 },
+  { emoji: "🧡",  x: 0.50, size: 14, dur: 8000, delay: 1800, spin: 16  },
+];
 
-  const contentAnim = useRef(new Animated.Value(0)).current;
-  const orbAnim = useRef(new Animated.Value(0)).current;
+function FloatingHeart({
+  emoji, x, size, dur, delay, spin, screenWidth, screenHeight,
+}: {
+  emoji: string; x: number; size: number; dur: number; delay: number; spin: number;
+  screenWidth: number; screenHeight: number;
+}) {
+  const anim   = useRef(new Animated.Value(0)).current;
+  const wiggle = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(contentAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+    const t = setTimeout(() => {
+      Animated.loop(
+        Animated.timing(anim, { toValue: 1, duration: dur, easing: Easing.linear, useNativeDriver: true })
+      ).start();
       Animated.loop(
         Animated.sequence([
-          Animated.timing(orbAnim, { toValue: 1, duration: 4000, useNativeDriver: true }),
-          Animated.timing(orbAnim, { toValue: 0, duration: 4000, useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: 1,  duration: dur * 0.4, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: -1, duration: dur * 0.4, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: 0,  duration: dur * 0.2, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
         ])
-      ),
-    ]).start();
+      ).start();
+    }, delay);
+    return () => clearTimeout(t);
+  }, []);
+
+  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [screenHeight + size, -size * 2] });
+  const translateX = wiggle.interpolate({ inputRange: [-1, 0, 1], outputRange: [-14, 0, 14] });
+  const opacity    = anim.interpolate({ inputRange: [0, 0.07, 0.88, 1], outputRange: [0, 0.6, 0.6, 0] });
+  const rotate     = anim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", `${spin}deg`] });
+  const scale      = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.7, 1.1, 0.7] });
+
+  return (
+    <Animated.Text
+      style={{
+        position: "absolute",
+        left: x * screenWidth,
+        fontSize: size,
+        opacity,
+        transform: [{ translateY }, { translateX }, { rotate }, { scale }],
+        pointerEvents: "none",
+      } as object}
+      selectable={false}
+    >
+      {emoji}
+    </Animated.Text>
+  );
+}
+
+export default function LoginScreen() {
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const { login } = useAuth();
+
+  const [tab,          setTab]          = useState<"phone" | "email">("phone");
+  const [value,        setValue]        = useState("");
+  const [inputError,   setInputError]   = useState("");
+  const [loading,      setLoading]      = useState(false);
+  const [socialLoading,setSocialLoading]= useState<string | null>(null);
+  const [focused,      setFocused]      = useState(false);
+
+  const contentAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(contentAnim, { toValue: 1, duration: 700, useNativeDriver: true }).start();
+  }, []);
+
+  /* ── Android back — go to onboarding instead of crashing ───────── */
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      router.replace("/auth/onboarding");
+      return true; // consumed
+    });
+    return () => sub.remove();
   }, []);
 
   const validate = (): boolean => {
@@ -78,7 +145,7 @@ export default function LoginScreen() {
     return true;
   };
 
-  const handleContinue = async () => {
+  const handleContinue = useCallback(async () => {
     if (!validate()) return;
     setLoading(true);
     try {
@@ -94,67 +161,73 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [value, tab]);
 
-  const handleSocialLogin = async (provider: string) => {
+  const handleSocialLogin = useCallback(async (provider: string) => {
     setSocialLoading(provider);
     await new Promise((r) => setTimeout(r, 1000));
     setSocialLoading(null);
     login({
       id: "social_" + Date.now(),
       name: provider === "google" ? "Rahul Sharma" : provider === "apple" ? "Priya Singh" : "Arjun Kumar",
-      phone: "",
-      email: provider + "@ridhi.app",
-      avatar: "",
-      city: "Mumbai",
-      age: 25,
-      gender: "other",
-      interests: [],
-      coins: 100,
-      followers: 0,
-      following: 0,
-      posts: 0,
+      phone: "", email: provider + "@ridhi.app", avatar: "",
+      city: "Mumbai", age: 25, gender: "other", interests: [],
+      coins: 100, followers: 0, following: 0, posts: 0,
     });
     router.replace("/(tabs)");
-  };
+  }, [login]);
 
-  const handleGuestAccess = async () => {
+  const handleGuestAccess = useCallback(async () => {
     setSocialLoading("guest");
     await new Promise((r) => setTimeout(r, 600));
     setSocialLoading(null);
     login({
       id: "guest_" + Date.now(),
-      name: "Guest User",
-      phone: "",
-      email: "guest@ridhi.app",
-      avatar: "",
-      city: "India",
-      age: 18,
-      gender: "other",
-      interests: [],
-      coins: 20,
-      followers: 0,
-      following: 0,
-      posts: 0,
+      name: "Guest User", phone: "", email: "guest@ridhi.app", avatar: "",
+      city: "India", age: 18, gender: "other", interests: [],
+      coins: 20, followers: 0, following: 0, posts: 0,
     });
     router.replace("/(tabs)");
-  };
+  }, [login]);
 
-  const orbTranslate = orbAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
-  const orbOpacity = orbAnim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.18, 0.28, 0.18] });
+  const handleTabPhone = useCallback(() => { setTab("phone"); setValue(""); setInputError(""); }, []);
+  const handleTabEmail = useCallback(() => { setTab("email"); setValue(""); setInputError(""); }, []);
+  const handleChangeText = useCallback((v: string) => { setValue(v); if (inputError) setInputError(""); }, [inputError]);
+  const handleFocus = useCallback(() => setFocused(true),  []);
+  const handleBlur  = useCallback(() => setFocused(false), []);
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: BG }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <LinearGradient colors={[BG, "#0C0C18", BG]} style={StyleSheet.absoluteFill} />
+      {/* ── Dark gradient base ── */}
+      <LinearGradient colors={[BG, "#0C0618", BG]} style={StyleSheet.absoluteFill} />
 
-      <Animated.View style={[styles.orb1, { opacity: orbOpacity, transform: [{ translateY: orbTranslate }] }]} />
-      <Animated.View style={[styles.orb2, { opacity: orbOpacity, transform: [{ translateY: orbTranslate }] }]} />
+      {/* ── Floating hearts background ── */}
+      {FLOAT_ITEMS.map((item, i) => (
+        <FloatingHeart
+          key={i}
+          emoji={item.emoji}
+          x={item.x}
+          size={item.size}
+          dur={item.dur}
+          delay={item.delay}
+          spin={item.spin}
+          screenWidth={width}
+          screenHeight={height}
+        />
+      ))}
 
+      {/* ── Back button (goes to onboarding) ── */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable
+          onPress={() => router.replace("/auth/onboarding")}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel="Go back to onboarding"
+        >
           <Feather name="arrow-left" size={22} color={TEXT} />
         </Pressable>
       </View>
@@ -173,11 +246,9 @@ export default function LoginScreen() {
             },
           ]}
         >
+          {/* Logo */}
           <View style={styles.logoWrap}>
-            <LinearGradient
-              colors={[PRIMARY + "25", SECONDARY + "15"]}
-              style={styles.logoGlowRing}
-            />
+            <LinearGradient colors={[PRIMARY + "25", SECONDARY + "15"]} style={styles.logoGlowRing} />
             <Image source={LOGO} style={styles.logoImage} resizeMode="contain" />
           </View>
 
@@ -186,10 +257,14 @@ export default function LoginScreen() {
             <Text style={styles.subtitle}>India's fastest growing social community</Text>
           </View>
 
-          <View style={[styles.tabRow, { backgroundColor: "#141424" }]}>
+          {/* Phone / Email toggle */}
+          <View style={[styles.tabRow, { backgroundColor: INPUT_BG }]}>
             <Pressable
               style={[styles.tabBtn, tab === "phone" && styles.tabBtnActive]}
-              onPress={() => { setTab("phone"); setValue(""); setInputError(""); }}
+              onPress={handleTabPhone}
+              accessibilityRole="tab"
+              accessibilityLabel="Phone login"
+              accessibilityState={{ selected: tab === "phone" }}
             >
               {tab === "phone" && (
                 <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
@@ -199,7 +274,10 @@ export default function LoginScreen() {
             </Pressable>
             <Pressable
               style={[styles.tabBtn, tab === "email" && styles.tabBtnActive]}
-              onPress={() => { setTab("email"); setValue(""); setInputError(""); }}
+              onPress={handleTabEmail}
+              accessibilityRole="tab"
+              accessibilityLabel="Email login"
+              accessibilityState={{ selected: tab === "email" }}
             >
               {tab === "email" && (
                 <LinearGradient colors={[PRIMARY + "20", SECONDARY + "15"]} style={StyleSheet.absoluteFill} />
@@ -209,7 +287,18 @@ export default function LoginScreen() {
             </Pressable>
           </View>
 
-          <View style={[styles.inputWrap, focused && styles.inputFocused]}>
+          {/* Input */}
+          <View
+            style={[
+              styles.inputWrap,
+              focused && {
+                borderColor: PRIMARY + "60",
+                ...(Platform.OS === "web"
+                  ? { boxShadow: `0 0 10px ${PRIMARY}40` }
+                  : { shadowColor: PRIMARY, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 10 }),
+              },
+            ]}
+          >
             {tab === "phone" && (
               <View style={[styles.countryCode, { borderRightColor: BORDER }]}>
                 <Text style={styles.countryText}>🇮🇳 +91</Text>
@@ -220,11 +309,13 @@ export default function LoginScreen() {
               placeholder={tab === "phone" ? "Enter mobile number" : "Enter email address"}
               placeholderTextColor={MUTED}
               value={value}
-              onChangeText={(v) => { setValue(v); if (inputError) setInputError(""); }}
+              onChangeText={handleChangeText}
               keyboardType={tab === "phone" ? "phone-pad" : "email-address"}
               autoCapitalize="none"
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              returnKeyType="done"
+              onSubmitEditing={handleContinue}
               accessibilityLabel={tab === "phone" ? "Mobile number" : "Email address"}
             />
           </View>
@@ -240,22 +331,26 @@ export default function LoginScreen() {
             style={{ width: "100%" }}
           />
 
+          {/* Divider */}
           <View style={styles.dividerRow}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>or continue with</Text>
             <View style={styles.dividerLine} />
           </View>
 
+          {/* Social buttons */}
           <View style={styles.socialRow}>
-            {[
-              { id: "google", label: "Google", icon: null, letter: "G", color: "#FFFFFF" },
-              { id: "apple", label: "Apple", icon: "smartphone" as const, letter: null, color: "#FFFFFF" },
-              { id: "facebook", label: "Facebook", icon: null, letter: "f", color: "#1877F2" },
-            ].map(({ id, label, icon, letter, color }) => (
+            {([
+              { id: "google",   label: "Google",   letter: "G", color: "#FFFFFF" },
+              { id: "apple",    label: "Apple",     letter: "",  color: "#FFFFFF", icon: "smartphone" as const },
+              { id: "facebook", label: "Facebook",  letter: "f", color: "#1877F2" },
+            ] as Array<{ id: string; label: string; letter: string; color: string; icon?: React.ComponentProps<typeof Feather>["name"] }>).map(({ id, label, icon, letter, color }) => (
               <Pressable
                 key={id}
                 onPress={() => handleSocialLogin(id)}
                 style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.7 }]}
+                accessibilityRole="button"
+                accessibilityLabel={`Continue with ${label}`}
               >
                 <LinearGradient
                   colors={["#141424", "#1A1A2E"]}
@@ -273,7 +368,13 @@ export default function LoginScreen() {
             ))}
           </View>
 
-          <Pressable onPress={handleGuestAccess} style={styles.guestBtn}>
+          {/* Guest */}
+          <Pressable
+            onPress={handleGuestAccess}
+            style={styles.guestBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Continue as Guest"
+          >
             <LinearGradient
               colors={["rgba(255,255,255,0.04)", "rgba(255,255,255,0.06)"]}
               start={{ x: 0, y: 0 }}
@@ -300,36 +401,10 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
-  orb1: {
-    position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: PRIMARY,
-    top: -80,
-    left: -80,
-    shadowColor: PRIMARY,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 80,
-  },
-  orb2: {
-    position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: SECONDARY,
-    bottom: height * 0.15,
-    right: -60,
-    shadowColor: SECONDARY,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 60,
-  },
-  header: { paddingHorizontal: 20, paddingBottom: 4 },
-  backBtn: { padding: 8, alignSelf: "flex-start" },
-  scrollContent: { flexGrow: 1 },
+  container:    { flex: 1 },
+  header:       { paddingHorizontal: 20, paddingBottom: 4 },
+  backBtn:      { padding: 8, alignSelf: "flex-start" },
+  scrollContent:{ flexGrow: 1 },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -352,7 +427,7 @@ const styles = StyleSheet.create({
   },
   logoImage: { width: 68, height: 68 },
   titleGroup: { alignItems: "center", gap: 6 },
-  title: { fontSize: 26, fontFamily: "Inter_700Bold", color: TEXT, letterSpacing: -0.6 },
+  title:    { fontSize: 26, fontFamily: "Inter_700Bold",    color: TEXT,  letterSpacing: -0.6 },
   subtitle: { fontSize: 14, fontFamily: "Inter_400Regular", color: MUTED, textAlign: "center" },
   tabRow: {
     flexDirection: "row",
@@ -373,6 +448,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
     position: "relative",
+    minHeight: 44,
   },
   tabBtnActive: {
     borderWidth: 1,
@@ -390,19 +466,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 54,
   },
-  inputFocused: {
-    borderColor: PRIMARY + "60",
-    shadowColor: PRIMARY,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-  },
   countryCode: {
     paddingHorizontal: 14,
     height: "100%",
     justifyContent: "center",
     borderRightWidth: 1,
-    borderRightColor: BORDER,
   },
   countryText: { fontSize: 15, fontFamily: "Inter_500Medium", color: TEXT },
   input: {
@@ -412,11 +480,18 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: TEXT,
   },
-  errorText: { fontSize: 12, fontFamily: "Inter_400Regular", color: "#FF3B30", alignSelf: "flex-start", marginTop: -4, marginBottom: 4 },
-  dividerRow: { flexDirection: "row", alignItems: "center", width: "100%", gap: 10 },
+  errorText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: "#FF3B30",
+    alignSelf: "flex-start",
+    marginTop: -4,
+    marginBottom: 4,
+  },
+  dividerRow:  { flexDirection: "row", alignItems: "center", width: "100%", gap: 10 },
   dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: BORDER },
   dividerText: { fontSize: 12, fontFamily: "Inter_400Regular", color: MUTED },
-  socialRow: { flexDirection: "row", width: "100%", gap: 10 },
+  socialRow:   { flexDirection: "row", width: "100%", gap: 10 },
   socialBtn: {
     flex: 1,
     flexDirection: "column",
@@ -429,9 +504,10 @@ const styles = StyleSheet.create({
     gap: 5,
     overflow: "hidden",
     position: "relative",
+    minHeight: 70,
   },
   socialLetter: { fontSize: 20, fontFamily: "Inter_700Bold" },
-  socialLabel: { fontSize: 12, fontFamily: "Inter_500Medium", color: TEXT },
+  socialLabel:  { fontSize: 12, fontFamily: "Inter_500Medium", color: TEXT },
   guestBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -445,6 +521,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
     position: "relative",
+    minHeight: 50,
   },
   guestText: { fontSize: 14, fontFamily: "Inter_500Medium", color: MUTED },
   terms: {
