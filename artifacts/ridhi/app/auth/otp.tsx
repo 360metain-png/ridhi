@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -13,8 +12,6 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
-import { verifyOtp, resendOtp } from "@/services/api";
-import { useAuth } from "@/contexts/AuthContext";
 
 const OTP_LENGTH = 6;
 
@@ -22,12 +19,9 @@ export default function OtpScreen() {
   const { contact, type } = useLocalSearchParams<{ contact: string; type: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [timer, setTimer] = useState(30);
-  const [channel, setChannel] = useState<"sms" | "whatsapp" | null>(null);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -57,43 +51,11 @@ export default function OtpScreen() {
   const isComplete = otp.every((d) => d !== "");
 
   const handleVerify = async () => {
-    if (!contact) return;
-    setError("");
     setLoading(true);
-    try {
-      const code = otp.join("");
-      const result = await verifyOtp(contact, code);
-      await login({
-        id: result.userId ?? `user_${Date.now()}`,
-        phone: result.phone ?? contact,
-      });
-      router.replace("/auth/profile-setup");
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Verification failed. Please try again.";
-      setError(msg);
-      setOtp(Array(OTP_LENGTH).fill(""));
-      setTimeout(() => inputRefs.current[0]?.focus(), 100);
-    } finally {
-      setLoading(false);
-    }
+    await new Promise((r) => setTimeout(r, 1000));
+    setLoading(false);
+    router.replace("/auth/profile-setup");
   };
-
-  const handleResend = async () => {
-    if (!contact || timer > 0) return;
-    setError("");
-    try {
-      const result = await resendOtp(contact);
-      setChannel(result.channel ?? null);
-      setTimer(60);
-      setOtp(Array(OTP_LENGTH).fill(""));
-      setTimeout(() => inputRefs.current[0]?.focus(), 100);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not resend OTP.";
-      Alert.alert("Error", msg);
-    }
-  };
-
-  const channelLabel = channel === "whatsapp" ? "WhatsApp" : channel === "sms" ? "SMS" : type === "phone" ? "WhatsApp / SMS" : "email";
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -110,10 +72,8 @@ export default function OtpScreen() {
 
         <Text style={[styles.title, { color: colors.foreground }]}>Verify OTP</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          {`We've sent a 6-digit code via ${channelLabel} to`}{"\n"}
-          <Text style={{ color: colors.foreground, fontFamily: "Inter_600SemiBold" }}>
-            {type === "phone" ? `+91 ${contact}` : contact}
-          </Text>
+          We've sent a 6-digit code to{"\n"}
+          <Text style={{ color: colors.foreground, fontFamily: "Inter_600SemiBold" }}>{contact}</Text>
         </Text>
 
         <View style={styles.otpRow}>
@@ -125,12 +85,12 @@ export default function OtpScreen() {
                 styles.otpBox,
                 {
                   backgroundColor: colors.muted,
-                  borderColor: error ? "#FF3B30" : digit ? colors.primary : colors.border,
+                  borderColor: digit ? colors.primary : colors.border,
                   color: colors.foreground,
                 },
               ]}
               value={digit}
-              onChangeText={(t) => { handleChange(t, i); if (error) setError(""); }}
+              onChangeText={(t) => handleChange(t, i)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
               keyboardType="number-pad"
               maxLength={1}
@@ -139,10 +99,6 @@ export default function OtpScreen() {
             />
           ))}
         </View>
-
-        {!!error && (
-          <Text style={styles.errorText}>{error}</Text>
-        )}
 
         <GradientButton
           label="Verify & Continue"
@@ -155,7 +111,7 @@ export default function OtpScreen() {
         <Pressable
           disabled={timer > 0}
           style={styles.resend}
-          onPress={handleResend}
+          onPress={() => setTimer(30)}
         >
           <Text style={[styles.resendText, { color: timer > 0 ? colors.mutedForeground : colors.primary }]}>
             {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
@@ -197,11 +153,4 @@ const styles = StyleSheet.create({
   },
   resend: { paddingVertical: 4 },
   resendText: { fontSize: 14, fontFamily: "Inter_500Medium" },
-  errorText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: "#FF3B30",
-    textAlign: "center",
-    marginTop: -8,
-  },
 });

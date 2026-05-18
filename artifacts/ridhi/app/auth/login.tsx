@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Animated,
   Dimensions,
   Image,
@@ -19,7 +18,6 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
-import { sendOtp } from "@/services/api";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 const { width, height } = Dimensions.get("window");
@@ -83,18 +81,9 @@ export default function LoginScreen() {
   const handleContinue = async () => {
     if (!validate()) return;
     setLoading(true);
-    try {
-      const contact = tab === "phone"
-        ? value.trim().replace(/\D/g, "")
-        : value.trim();
-      await sendOtp(contact, tab);
-      router.push({ pathname: "/auth/otp", params: { contact, type: tab } });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
-      Alert.alert("Error", msg);
-    } finally {
-      setLoading(false);
-    }
+    await new Promise((r) => setTimeout(r, 800));
+    setLoading(false);
+    router.push({ pathname: "/auth/otp", params: { contact: value.trim(), type: tab } });
   };
 
   const handleSocialLogin = async (provider: string) => {
