@@ -8,7 +8,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -214,7 +213,6 @@ export default function AdsManagerScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="creator" />
       {/* Header */}
       <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={[styles.header, { paddingTop: topPad + 10 }]}>
         <View style={styles.topBar}>

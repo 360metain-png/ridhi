@@ -16,7 +16,6 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const BADGES = [
   { id: "b1", name: "First Post", icon: "edit-3", desc: "Published your first post", earned: true, color: "#E91E8C" },
@@ -67,7 +66,6 @@ export default function ReferralScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="wallet" />
       <LinearGradient
         colors={[colors.primary + "25", colors.secondary + "15", "transparent"]}
         style={[styles.header, { paddingTop: topPad + 10 }]}

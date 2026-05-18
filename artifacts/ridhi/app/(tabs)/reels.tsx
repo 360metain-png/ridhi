@@ -17,7 +17,6 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { WatermarkBadge } from "@/components/WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
 
 const REELS = [
@@ -251,7 +250,6 @@ export default function ReelsScreen() {
 
   return (
     <View style={styles.container}>
-      <FloatingEmojiBg preset="reels" />
       <SwipeUpHint label="Swipe up for next reel" bottomOffset={100} delay={1000} />
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>

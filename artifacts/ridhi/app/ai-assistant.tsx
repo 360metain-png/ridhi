@@ -16,7 +16,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -134,7 +133,6 @@ export default function AIAssistantScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="match" />
       <LinearGradient
         colors={[colors.secondary + "22", colors.primary + "10", "transparent"]}
         style={[styles.headerGlow, { height: topPad + 160, pointerEvents: "none" }]}

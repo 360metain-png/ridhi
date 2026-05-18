@@ -23,7 +23,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarPicker, getAvatarOptions, getAvatarUrl } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -409,7 +408,6 @@ export default function ProfileScreen() {
     </Modal>
 
     {/* ── Main profile scroll ───────────────────────────────────────────── */}
-    <FloatingEmojiBg preset="profile" />
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}

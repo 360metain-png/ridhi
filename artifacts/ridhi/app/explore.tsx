@@ -16,7 +16,6 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 const CARD_W = (width - 48) / 2;
@@ -90,7 +89,6 @@ export default function ExploreScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="explore" />
       <View
         style={[
           styles.header,

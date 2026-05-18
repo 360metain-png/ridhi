@@ -17,7 +17,6 @@ import { useColors } from "@/hooks/useColors";
 import { useApp, LANGUAGES } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 function SettingRow({
   icon,
@@ -98,7 +97,6 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="settings" />
       <View
         style={[
           styles.header,

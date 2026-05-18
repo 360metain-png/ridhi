@@ -19,7 +19,6 @@ import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { CHATS } from "@/data/mockData";
 import { Avatar } from "@/components/Avatar";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 interface Message {
   id: string;
@@ -179,7 +178,6 @@ export default function ChatDetailScreen() {
       behavior="padding"
       keyboardVerticalOffset={0}
     >
-      <FloatingEmojiBg preset="chatDetail" />
       <View
         style={[
           styles.header,

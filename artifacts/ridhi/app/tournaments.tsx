@@ -14,7 +14,6 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -186,7 +185,6 @@ export default function TournamentsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="match" />
       <LinearGradient
         colors={["#1A0A2E", colors.secondary + "50", colors.background]}
         style={[styles.header, { paddingTop: topPad + 8 }]}

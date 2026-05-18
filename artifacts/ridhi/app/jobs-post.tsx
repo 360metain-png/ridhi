@@ -17,7 +17,6 @@ import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 type JobType = "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
 type SalaryUnit = "Month" | "Day" | "Hour" | "Project";
@@ -264,7 +263,6 @@ export default function JobsPostScreen() {
       style={[fpStyles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <FloatingEmojiBg preset="communities" />
       {/* Header */}
       <LinearGradient
         colors={["#E91E8C", "#7B2FBE"]}

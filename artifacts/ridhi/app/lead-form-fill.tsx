@@ -8,7 +8,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 // ── Mock advertiser & form (in production these come from the campaign data) ──
 const ADVERTISER = {
@@ -86,7 +85,6 @@ export default function LeadFormFillScreen() {
   if (submitted) {
     return (
       <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="creator" />
         <View style={[styles.topBar, { paddingTop: topPad + 10 }]}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color={colors.foreground} />

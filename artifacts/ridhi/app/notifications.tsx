@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { NOTIFICATIONS, MARKETING_NOTIFICATIONS, type MarketingNotification } from "@/data/mockData";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 type TabKey = "all" | "social" | "promos";
 
@@ -247,7 +246,6 @@ export default function NotificationsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="notifications" />
       <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={24} color={colors.foreground} />

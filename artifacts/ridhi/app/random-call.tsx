@@ -19,7 +19,6 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -247,7 +246,6 @@ export default function RandomCallScreen() {
   // ──────────────────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="match" />
       {/* Header */}
       <LinearGradient
         colors={[colors.secondary + "30", colors.primary + "15", "transparent"]}

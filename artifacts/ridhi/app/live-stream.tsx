@@ -25,7 +25,6 @@ import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -299,7 +298,6 @@ export default function LiveStreamScreen() {
   if (view === "watch" && selectedRoom) {
     return (
       <View style={[styles.container, { backgroundColor: "#000" }]}>
-      <FloatingEmojiBg preset="reels" />
         <LinearGradient
           colors={[colors.secondary + "80", colors.primary + "50", "transparent"]}
           style={styles.watchVideo}

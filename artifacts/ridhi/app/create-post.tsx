@@ -20,7 +20,6 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const { width } = Dimensions.get("window");
 
@@ -232,7 +231,6 @@ export default function CreatePostScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="feed" />
       <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
           <Feather name="x" size={24} color={colors.foreground} />

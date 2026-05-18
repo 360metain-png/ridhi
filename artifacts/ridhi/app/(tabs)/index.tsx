@@ -29,7 +29,6 @@ import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS, type Ban
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
 
 const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: string; tag: string }> = [
@@ -709,7 +708,6 @@ export default function FeedScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="feed" />
       <SwipeUpHint label="Scroll to explore" bottomOffset={130} delay={1400} />
       <LinearGradient
         colors={[colors.primary + "18", colors.secondary + "08", "transparent"]}

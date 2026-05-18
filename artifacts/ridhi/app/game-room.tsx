@@ -19,7 +19,6 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { LudoGame } from "@/components/LudoGame";
 import { CarromGame } from "@/components/CarromGame";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -126,7 +125,6 @@ export default function GameRoomScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FloatingEmojiBg preset="match" />
       <LinearGradient
         colors={["#1A0A2E", colors.secondary + "35", colors.background]}
         style={[styles.header, { paddingTop: topPad + 8 }]}

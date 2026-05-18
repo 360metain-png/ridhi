@@ -19,7 +19,6 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, getDefaultMessages, type RoomMessage } from "@/data/chatrooms";
 import { Avatar } from "@/components/Avatar";
-import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 
 const STICKERS = ["😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎", "🤯", "👑"];
 const QUICK_REPLIES = ["👍", "🔥 Facts!", "Agree!", "😂", "❤️", "🙏 Thanks"];
@@ -210,7 +209,6 @@ export default function ChatroomDetailScreen() {
   if (!room) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }]}>
-      <FloatingEmojiBg preset="chatDetail" />
         <Text style={{ color: colors.mutedForeground }}>Room not found</Text>
       </View>
     );
