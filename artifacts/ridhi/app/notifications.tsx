@@ -298,7 +298,7 @@ export default function NotificationsScreen() {
               onTap={() => { markSocialRead(item.id); router.push(getNavTarget(item.type) as any); }}
             />
           )}
-          contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 24 }}
+          contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
           ListEmptyComponent={<EmptyState colors={colors} />}
         />
       ) : null)}
@@ -315,7 +315,7 @@ export default function NotificationsScreen() {
               onMarkRead={() => markPromoRead(item.id)}
             />
           )}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, gap: 16, paddingBottom: Platform.OS === "web" ? 84 : 24 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, gap: 16, paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
           ListEmptyComponent={<EmptyState colors={colors} />}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         />
@@ -323,7 +323,7 @@ export default function NotificationsScreen() {
 
       {tab === "all" && (
         <ScrollView
-          contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 24 }}
+          contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
           showsVerticalScrollIndicator={false}
         >
           {promoUnread > 0 && (

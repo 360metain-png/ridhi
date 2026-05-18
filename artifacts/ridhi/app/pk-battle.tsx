@@ -305,7 +305,7 @@ export default function PKBattleScreen() {
       <FlatList
         data={LIVE_BATTLES}
         keyExtractor={(b) => b.id}
-        contentContainerStyle={{ padding: 12, gap: 10 }}
+        contentContainerStyle={{ padding: 12, gap: 10, paddingBottom: insets.bottom + 20 }}
         renderItem={({ item }) => {
           const t = item.leftCoins + item.rightCoins;
           const lp = t > 0 ? item.leftCoins / t : 0.5;

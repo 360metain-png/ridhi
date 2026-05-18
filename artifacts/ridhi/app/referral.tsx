@@ -77,7 +77,7 @@ export default function ReferralScreen() {
         <CoinBadge amount={user?.coins ?? 0} size="sm" />
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
         <View style={[styles.streakCard, { borderColor: colors.border }]}>
           <LinearGradient colors={[colors.gold + "30", colors.accent + "15"]} style={styles.streakInner}>
             <View style={styles.streakLeft}>

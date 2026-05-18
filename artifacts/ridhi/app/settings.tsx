@@ -114,7 +114,7 @@ export default function SettingsScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 32 }}>
         {user && (
           <Pressable
             onPress={() => Alert.alert("Edit Profile", "Update your name, photo, bio, and interests.", [{ text: "Cancel", style: "cancel" }, { text: "Edit Profile", onPress: () => router.push("/(tabs)/profile" as any) }])}

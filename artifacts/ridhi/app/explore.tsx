@@ -135,7 +135,7 @@ export default function ExploreScreen() {
         ))}
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 20 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 20 }}>
         {activeTab === "trending" && (
           <View>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Trending Now</Text>

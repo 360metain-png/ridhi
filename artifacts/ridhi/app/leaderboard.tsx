@@ -142,7 +142,7 @@ export default function LeaderboardScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         <View style={styles.podium}>
           {[top3[1], top3[0], top3[2]].map((entry, i) => {
             const podiumOrder = [2, 1, 3];

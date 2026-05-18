@@ -61,7 +61,7 @@ export default function GroupChatScreen() {
   const [text, setText] = useState("");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 84 : 20;
+  const bottomPad = Platform.OS === "web" ? 84 : insets.bottom + 16;
 
   const send = () => {
     if (!text.trim()) return;

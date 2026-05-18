@@ -384,7 +384,7 @@ export default function KYCScreen() {
 
       <StepBar current={step} colors={colors} />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}>
 
         {/* ── STEP 1: Personal Info ─────────────────────────────────── */}
         {step === 1 && (

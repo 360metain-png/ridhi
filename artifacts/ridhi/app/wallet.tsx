@@ -173,7 +173,7 @@ export default function WalletScreen() {
 
   return (
     <View style={[styles.outerWrap, { backgroundColor: colors.background }]}>
-      <ScrollView ref={scrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         {/* ── Wallet Card ── */}
         <LinearGradient colors={[colors.primary, colors.secondary]} style={[styles.walletCard, { paddingTop: topPad + 16 }]}>
           <View style={styles.walletHeader}>

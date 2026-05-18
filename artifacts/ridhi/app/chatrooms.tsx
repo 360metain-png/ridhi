@@ -290,7 +290,7 @@ export default function ChatroomsScreen() {
           ...discover.map((r) => ({ type: "room", ...r })),
         ] as any[]}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: (Platform.OS === "web" ? 84 : 80) + 16 }}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 16 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
           if (item.type === "header") {

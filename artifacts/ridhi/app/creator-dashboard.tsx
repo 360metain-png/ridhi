@@ -101,7 +101,7 @@ export default function CreatorDashboardScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 32 }}
+        contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 32 }}
       >
         {/* ── KYC Gate Banner ── */}
         <Pressable

@@ -233,7 +233,7 @@ export default function AdsManagerScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 60 }]}>
         {/* Stats */}
         <View style={styles.statsRow}>
           <StatCard label="Active Campaigns" value={String(activeCnt)}         sub="Running now"                      color="#34C759" />

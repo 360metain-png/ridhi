@@ -553,7 +553,7 @@ export default function SubscriptionScreen() {
       </LinearGradient>
 
       {/* ── Content ── */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 60 }}>
 
         {/* ══════════════ VIP PLANS ══════════════ */}
         {section === "plans" && (

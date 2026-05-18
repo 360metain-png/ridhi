@@ -245,7 +245,7 @@ export default function CreatePostScreen() {
         />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 32 }}>
         <View style={styles.typeRow}>
           {POST_TYPES.map((type) => (
             <Pressable

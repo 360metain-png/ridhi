@@ -180,7 +180,7 @@ export default function AdsCreateScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 50 }]}>
 
         {/* ── STEP 1: Business & Objective ── */}
         {step === 1 && (

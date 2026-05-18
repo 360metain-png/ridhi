@@ -111,7 +111,7 @@ export default function GamesScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         <View style={styles.gameFilterRow}>
           {(["all", "ludo", "carrom"] as GameType[]).map((g) => (
             <Pressable

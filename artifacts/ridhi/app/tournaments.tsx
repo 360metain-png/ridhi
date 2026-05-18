@@ -221,7 +221,7 @@ export default function TournamentsScreen() {
         ))}
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         {tab === "daily" && (
           <>
             <View style={styles.rewardTable}>
