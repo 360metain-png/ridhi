@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Globe, UserPlus, Heart, TrendingUp, IndianRupee, Search, Check,
-  X, Pause, Play, Eye, AlertTriangle, Clock, Calendar, Users,
-  Target, BarChart2, Zap, Filter, Crown,
+  Globe, UserPlus, Heart, IndianRupee, Search, Check,
+  X, Pause, Play, AlertTriangle, Clock, Users,
+  Target, Zap, Filter, Crown, ChevronDown, ChevronUp,
+  ClipboardList, Phone, Mail, MapPin, Download,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
@@ -53,6 +54,217 @@ const PROMOTIONS: Promotion[] = [
   { id: "p7",  user: "Sneha Joshi",    userCity: "Hyderabad", plan: "VIP Diamond", target: "profile", objective: "reach",     gender: "All",   age: "All",   city: "Hyderabad",     interests: [],                         budgetPerDay: 250, durationDays: 3,  totalBudget: 750,   estReach: "18K–27K",   actualReach: undefined, leads: undefined, reactions: undefined, spentSoFar: 0, submittedAt: "17 May", status: "rejected" },
   { id: "p8",  user: "Aditya Shah",    userCity: "Jaipur",    plan: "Gold",        target: "post",    objective: "leads",     gender: "Women", age: "18–24", city: "Jaipur",        interests: ["Fashion","Travel"],       budgetPerDay: 100, durationDays: 7,  totalBudget: 700,   estReach: "3.5K–6K",   actualReach: 5600,  leads: 198, reactions: undefined, spentSoFar: 700, startDate: "10 May", endDate: "16 May", submittedAt: "9 May", status: "completed" },
 ];
+
+// ── Lead Form types & mock data ────────────────────────────────────────────────
+interface LeadField { key: string; label: string; }
+interface LeadSubmission {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  city?: string;
+  answers: Record<string, string>;
+  submittedAt: string;
+}
+interface LeadForm {
+  id: string;
+  advertiser: string;
+  advertiserCity: string;
+  plan: "Gold" | "VIP Diamond";
+  campaignId: string;
+  title: string;
+  fields: LeadField[];
+  customQuestions: string[];
+  totalSubmissions: number;
+  submissions: LeadSubmission[];
+  createdAt: string;
+  status: "active" | "paused" | "completed";
+}
+
+const LEAD_FORMS: LeadForm[] = [
+  {
+    id: "lf1",
+    advertiser: "Dev Raj",
+    advertiserCity: "Bangalore",
+    plan: "Gold",
+    campaignId: "p3",
+    title: "Get a Free Tech Consultation",
+    fields: [
+      { key: "name",  label: "Full Name"     },
+      { key: "phone", label: "Phone Number"  },
+      { key: "email", label: "Email Address" },
+      { key: "city",  label: "City"          },
+    ],
+    customQuestions: [
+      "What type of project do you need help with?",
+      "What is your budget range (₹)?",
+      "Do you have an existing app or website?",
+      "When do you want to start?",
+    ],
+    totalSubmissions: 312,
+    submissions: [
+      { id: "s1", name: "Rahul Kumar",  phone: "+91 98765 43210", email: "rahul@example.com",  city: "Delhi",   answers: { q0: "Mobile App",    q1: "₹1L–₹3L",  q2: "No",  q3: "Immediately"    }, submittedAt: "18 May, 2:30 PM" },
+      { id: "s2", name: "Ananya Mehta", phone: "+91 87654 32109", email: "ananya@example.com", city: "Pune",    answers: { q0: "Web App",       q1: "₹50K–₹1L", q2: "Yes", q3: "Within 1 month" }, submittedAt: "18 May, 10:15 AM" },
+      { id: "s3", name: "Kavya K.",     phone: "+91 76543 21098", email: "kavya@example.com",  city: "Chennai", answers: { q0: "API / Backend",  q1: "₹25K–₹50K",q2: "No",  q3: "In 3+ months"  }, submittedAt: "17 May, 6:00 PM" },
+      { id: "s4", name: "Vikram S.",    phone: "+91 65432 10987", city: "Mumbai",              answers: { q0: "All of the above", q1: "₹3L+",   q2: "Yes", q3: "Immediately"    }, submittedAt: "17 May, 3:45 PM" },
+    ],
+    createdAt: "13 May",
+    status: "paused",
+  },
+  {
+    id: "lf2",
+    advertiser: "Aditya Shah",
+    advertiserCity: "Jaipur",
+    plan: "Gold",
+    campaignId: "p8",
+    title: "Fashion Styling Consultation",
+    fields: [
+      { key: "name",  label: "Full Name"    },
+      { key: "phone", label: "Phone Number" },
+      { key: "city",  label: "City"         },
+      { key: "age",   label: "Age"          },
+    ],
+    customQuestions: [
+      "What is your style preference?",
+      "Occasion you need styling for?",
+    ],
+    totalSubmissions: 198,
+    submissions: [
+      { id: "s5", name: "Priya S.",  phone: "+91 91234 56789", city: "Jaipur",   answers: { q0: "Casual chic",   q1: "Wedding" }, submittedAt: "15 May, 11:00 AM" },
+      { id: "s6", name: "Meera D.", phone: "+91 80123 45678", city: "Ahmedabad", answers: { q0: "Ethnic/Indian", q1: "Festival" }, submittedAt: "14 May, 4:20 PM" },
+    ],
+    createdAt: "9 May",
+    status: "completed",
+  },
+];
+
+// ── Lead Form Card ─────────────────────────────────────────────────────────────
+function LeadFormCard({ form }: { form: LeadForm }) {
+  const [expanded, setExpanded] = useState(false);
+  const planColor = form.plan === "VIP Diamond"
+    ? "text-violet-600 border-violet-300 bg-violet-50 dark:bg-violet-950/20"
+    : "text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/20";
+  const statusColor = form.status === "active"
+    ? "text-green-600 bg-green-50 border-green-200"
+    : form.status === "paused"
+    ? "text-amber-600 bg-amber-50 border-amber-200"
+    : "text-slate-600 bg-slate-100 border-slate-200";
+
+  return (
+    <Card className="border border-border">
+      <CardContent className="p-4 space-y-3">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 shrink-0">
+            <ClipboardList className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-sm">{form.title}</span>
+              <Badge variant="outline" className={`text-[10px] ${planColor} gap-0.5`}>
+                <Crown className="w-2.5 h-2.5 inline mr-0.5" />{form.plan}
+              </Badge>
+              <Badge variant="outline" className={`text-[10px] border ${statusColor}`}>
+                {form.status.charAt(0).toUpperCase() + form.status.slice(1)}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
+              <span className="flex items-center gap-1"><Users className="w-3 h-3" />{form.advertiser} · {form.advertiserCity}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />Created {form.createdAt}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { label: "Total Leads",      val: form.totalSubmissions.toLocaleString(), color: "text-blue-600" },
+            { label: "Form Fields",      val: form.fields.length,                     color: "text-violet-600" },
+            { label: "Custom Questions", val: form.customQuestions.length,            color: "text-rose-600" },
+          ].map(({ label, val, color }) => (
+            <div key={label} className="bg-muted/50 rounded-lg p-2.5 text-center">
+              <div className={`text-lg font-bold ${color}`}>{val}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Fields collected */}
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground mb-1.5">FIELDS COLLECTED</p>
+          <div className="flex flex-wrap gap-1.5">
+            {form.fields.map(f => (
+              <span key={f.key} className="text-[10px] bg-blue-50 dark:bg-blue-950/30 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">{f.label}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Custom questions */}
+        {form.customQuestions.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">CUSTOM QUESTIONS</p>
+            <div className="space-y-1">
+              {form.customQuestions.map((q, i) => (
+                <div key={i} className="text-xs text-foreground flex gap-1.5">
+                  <span className="text-muted-foreground shrink-0">{i + 1}.</span>
+                  <span>{q}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Toggle submissions */}
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="w-full flex items-center justify-between text-xs font-semibold text-blue-600 pt-2 border-t border-border/50"
+        >
+          <span>View Submissions ({form.submissions.length} shown of {form.totalSubmissions})</span>
+          {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </button>
+
+        {/* Submissions list */}
+        {expanded && (
+          <div className="space-y-2 mt-1">
+            {form.submissions.map((sub) => (
+              <div key={sub.id} className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 font-bold text-xs">
+                      {sub.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{sub.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{sub.submittedAt}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                    {sub.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{sub.phone}</span>}
+                    {sub.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{sub.email}</span>}
+                    {sub.city  && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{sub.city}</span>}
+                  </div>
+                </div>
+                {Object.keys(sub.answers).length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {form.customQuestions.map((q, qi) => sub.answers[`q${qi}`] ? (
+                      <div key={qi} className="bg-background rounded p-2 text-xs">
+                        <p className="text-muted-foreground truncate">{q}</p>
+                        <p className="font-semibold text-foreground mt-0.5">{sub.answers[`q${qi}`]}</p>
+                      </div>
+                    ) : null)}
+                  </div>
+                )}
+              </div>
+            ))}
+            <Button size="sm" variant="outline" className="w-full h-7 text-xs gap-1.5 mt-1">
+              <Download className="w-3 h-3" /> Export All {form.totalSubmissions} Leads as CSV
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 // ── Chart data ─────────────────────────────────────────────────────────────────
 const spendData = [
@@ -310,7 +522,7 @@ export default function Promotions() {
 
       {/* ── Tabs ── */}
       <Tabs defaultValue="pending">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="pending" className="gap-2">
             Pending Review
             {pendingCnt > 0 && <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{pendingCnt}</span>}
@@ -323,6 +535,11 @@ export default function Promotions() {
           </TabsTrigger>
           <TabsTrigger value="history">
             History ({completed.length})
+          </TabsTrigger>
+          <TabsTrigger value="leadforms" className="gap-1.5">
+            <ClipboardList className="w-3.5 h-3.5" />
+            Lead Forms
+            <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{LEAD_FORMS.length}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -345,6 +562,29 @@ export default function Promotions() {
           {completed.length === 0
             ? <Card><CardContent className="p-8 text-center text-muted-foreground">No completed campaigns yet.</CardContent></Card>
             : completed.map(p => <PromoCard key={p.id} promo={p} onAction={handleAction} />)}
+        </TabsContent>
+
+        {/* ── Lead Forms tab ── */}
+        <TabsContent value="leadforms" className="mt-4 space-y-4">
+          {/* Summary bar */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: "Lead Forms",       val: LEAD_FORMS.length,                                          color: "text-blue-600",   bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-200" },
+              { label: "Total Submissions",val: LEAD_FORMS.reduce((s, f) => s + f.totalSubmissions, 0).toLocaleString(), color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/20 border-violet-200" },
+              { label: "Avg. per Form",    val: Math.round(LEAD_FORMS.reduce((s, f) => s + f.totalSubmissions, 0) / LEAD_FORMS.length).toLocaleString(), color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/20 border-rose-200" },
+            ].map(({ label, val, color, bg }) => (
+              <Card key={label} className={`border ${bg}`}>
+                <CardContent className="p-3 text-center">
+                  <div className={`text-2xl font-bold ${color}`}>{val}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            {LEAD_FORMS.map(form => <LeadFormCard key={form.id} form={form} />)}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

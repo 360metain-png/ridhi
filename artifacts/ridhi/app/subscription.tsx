@@ -185,6 +185,25 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
             </Pressable>
           ))}
 
+          {/* Lead form prompt — appears only when Leads is selected */}
+          {objective === "leads" && (
+            <Pressable
+              onPress={() => router.push("/lead-form-builder" as any)}
+              style={[styles.leadFormPrompt, { backgroundColor: "#2196F312", borderColor: "#2196F340" }]}
+            >
+              <View style={[styles.leadFormIcon, { backgroundColor: "#2196F320" }]}>
+                <Feather name="clipboard" size={20} color="#2196F3" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.leadFormTitle, { color: colors.foreground }]}>Build a Lead Form</Text>
+                <Text style={[styles.leadFormSub, { color: colors.mutedForeground }]}>
+                  Create a custom form — name, phone, requirements — shown when users click your ad
+                </Text>
+              </View>
+              <Feather name="arrow-right" size={16} color="#2196F3" />
+            </Pressable>
+          )}
+
           {/* What to promote */}
           <Text style={[styles.miniLabel, { color: colors.foreground }]}>Promote</Text>
           <View style={styles.promoteRow}>
@@ -749,4 +768,10 @@ const styles = StyleSheet.create({
   ctaSub:          { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   ctaBtn:          { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   ctaBtnText:      { color: "#fff", fontSize: 12, fontFamily: "Inter_700Bold" },
+
+  // Lead form prompt (Leads objective)
+  leadFormPrompt:  { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 14, borderWidth: 1.5, padding: 14 },
+  leadFormIcon:    { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  leadFormTitle:   { fontSize: 14, fontFamily: "Inter_700Bold" },
+  leadFormSub:     { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2, lineHeight: 17 },
 });
