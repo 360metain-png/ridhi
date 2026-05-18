@@ -448,7 +448,7 @@ export function LudoGame({ onWin }: Props) {
           <Text style={{ fontSize: CELL * 0.45, color: "#FFB800", opacity: 0.5 }}>←←←←←</Text>
         </View>
         {/* Tokens */}
-        <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        <View style={[StyleSheet.absoluteFill, { pointerEvents: "box-none" }]}>
           {tokenViews()}
         </View>
       </View>

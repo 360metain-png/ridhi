@@ -157,8 +157,7 @@ function BurstRing({ delay, color, maxScale }: { delay: number; color: string; m
 
   return (
     <Animated.View
-      style={[styles.burstRing, { borderColor: color, transform: [{ scale }], opacity }]}
-      pointerEvents="none"
+      style={[styles.burstRing, { borderColor: color, transform: [{ scale }], opacity, pointerEvents: "none" }]}
     />
   );
 }
@@ -280,8 +279,7 @@ function CoinToastItem({ data, onDone }: { data: CoinToastData; onDone: () => vo
 
   return (
     <Animated.View
-      style={[styles.toastInner, { transform: [{ translateY }, { scale }], opacity }]}
-      pointerEvents="none"
+      style={[styles.toastInner, { transform: [{ translateY }, { scale }], opacity, pointerEvents: "none" }]}
     >
       {/* Glow halo */}
       <Animated.View
@@ -364,7 +362,7 @@ export function CoinFountainOverlay({
 }) {
   if (toasts.length === 0) return null;
   return (
-    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFillObject, { pointerEvents: "none" }]}>
       {toasts.map((toast) => (
         <View key={toast.id} style={[styles.toastWrapper, { bottom: toast.bottom ?? 180 }]}>
           <CoinToastItem data={toast} onDone={() => onRemove(toast.id)} />

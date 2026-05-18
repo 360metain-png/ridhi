@@ -771,7 +771,7 @@ export default function RandomCallScreen() {
 
       {/* ── Complaint submitted toast ── */}
       {reportDone && (
-        <View style={styles.callToast} pointerEvents="none">
+        <View style={[styles.callToast, { pointerEvents: "none" }]}>
           <Feather name="check-circle" size={15} color="#34C759" />
           <Text style={styles.callToastText}>Complaint submitted to Ridhi team 🙏</Text>
         </View>

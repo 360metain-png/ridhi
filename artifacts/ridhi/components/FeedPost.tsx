@@ -75,7 +75,7 @@ function HeartBurst({ visible }: { visible: boolean }) {
 
   const angles = [0, 60, 120, 180, 240, 300];
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <View style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}>
       {angles.map((angle, i) => {
         const rad = (angle * Math.PI) / 180;
         const x = Math.cos(rad) * 18;
@@ -144,8 +144,7 @@ export const FeedPost = React.memo(function FeedPost({
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <LinearGradient
           colors={post.isLiked ? ["rgba(233,30,140,0.05)", "transparent"] : ["transparent", "transparent"]}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
         />
 
         {/* ── Header ── */}

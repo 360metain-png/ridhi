@@ -79,8 +79,7 @@ function BigGiftOverlay({ gift, onDone }: { gift: typeof LIVE_GIFTS[0]; onDone: 
 
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFillObject, styles.bigGiftOverlay, { opacity }]}
-      pointerEvents="none"
+      style={[StyleSheet.absoluteFillObject, styles.bigGiftOverlay, { opacity, pointerEvents: "none" }]}
     >
       <Animated.View
         style={[

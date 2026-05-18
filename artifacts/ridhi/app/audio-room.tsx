@@ -122,11 +122,11 @@ function FloatingOrb({ color, size, x, delay }: { color: string; size: number; x
   }, []);
   return (
     <Animated.View
-      pointerEvents="none"
       style={{
         position: "absolute",
         bottom: 80,
         left: x,
+        pointerEvents: "none",
         width: size,
         height: size,
         borderRadius: size / 2,
@@ -585,7 +585,7 @@ export default function AudioRoomScreen() {
 
         {/* ── Complaint toast ── */}
         {reportDone && (
-          <View style={styles.toast} pointerEvents="none">
+          <View style={[styles.toast, { pointerEvents: "none" }]}>
             <Feather name="check-circle" size={15} color="#34C759" />
             <Text style={styles.toastText}>Complaint submitted to Ridhi team 🙏</Text>
           </View>

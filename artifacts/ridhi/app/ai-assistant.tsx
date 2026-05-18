@@ -135,8 +135,7 @@ export default function AIAssistantScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[colors.secondary + "22", colors.primary + "10", "transparent"]}
-        style={[styles.headerGlow, { height: topPad + 160 }]}
-        pointerEvents="none"
+        style={[styles.headerGlow, { height: topPad + 160, pointerEvents: "none" }]}
       />
 
       <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: colors.surface + "F0", borderBottomColor: colors.border }]}>

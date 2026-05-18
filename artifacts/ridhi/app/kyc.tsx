@@ -291,7 +291,7 @@ export default function KYCScreen() {
   if (submitted) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <LinearGradient colors={["#22C55E20", "#22C55E08", "transparent"]} style={[styles.successGlow, { paddingTop: topPad }]} pointerEvents="none" />
+        <LinearGradient colors={["#22C55E20", "#22C55E08", "transparent"]} style={[styles.successGlow, { paddingTop: topPad, pointerEvents: "none" }]} />
         <ScrollView contentContainerStyle={[styles.successWrap, { paddingTop: topPad + 20 }]}>
           <View style={[styles.successIcon, { backgroundColor: "#22C55E20" }]}>
             <Feather name="shield" size={48} color="#22C55E" />
@@ -363,7 +363,7 @@ export default function KYCScreen() {
   // ── Main flow ─────────────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <LinearGradient colors={[colors.secondary + "20", colors.primary + "10", "transparent"]} style={[styles.headerGlow, { height: topPad + 140 }]} pointerEvents="none" />
+      <LinearGradient colors={[colors.secondary + "20", colors.primary + "10", "transparent"]} style={[styles.headerGlow, { height: topPad + 140, pointerEvents: "none" }]} />
 
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 10, borderBottomColor: colors.border, backgroundColor: colors.background + "F8" }]}>

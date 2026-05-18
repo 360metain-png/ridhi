@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -209,7 +209,8 @@ export default function FeedScreen() {
     }
     const result: FeedItem[] = [];
     raw.forEach((post, i) => {
-      result.push({ kind: "post", post });
+      const enriched = { ...post, isOwn: post.isOwn || post.userName === user?.name };
+      result.push({ kind: "post", post: enriched });
       if (activeBanners.length > 0 && (i + 1) % 5 === 0) {
         result.push({
           kind: "ad",
@@ -219,7 +220,7 @@ export default function FeedScreen() {
       }
     });
     return result;
-  }, [activeTab, localPosts, forYouPosts, activeBanners]);
+  }, [activeTab, localPosts, forYouPosts, activeBanners, user?.name]);
 
   const nearYouPosts = useMemo(() => localPosts.slice(0, 5), [localPosts]);
   const trendingLocalPosts = useMemo(() =>
@@ -250,7 +251,11 @@ export default function FeedScreen() {
     }, 400);
   }, []);
 
-  const handleFeedScroll = (e: { nativeEvent: { contentOffset: { y: number } } }) => {
+  const postsRef = useRef<Post[]>(posts);
+  postsRef.current = posts;
+  const emptyFn = useCallback(() => {}, []);
+
+  const handleFeedScroll = useCallback((e: { nativeEvent: { contentOffset: { y: number } } }) => {
     if (!recsShown.current && e.nativeEvent.contentOffset.y > 160) {
       recsShown.current = true;
       Animated.timing(recsFadeAnim, {
@@ -259,9 +264,9 @@ export default function FeedScreen() {
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, [recsFadeAnim]);
 
-  const handleLike = (id: string) => {
+  const handleLike = useCallback((id: string) => {
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
@@ -269,18 +274,18 @@ export default function FeedScreen() {
           : p
       )
     );
-  };
+  }, []);
 
-  const handleOpenComments = (postId: string) => {
+  const handleOpenComments = useCallback((postId: string) => {
     setCommentPostId(postId);
     setCommentText("");
-  };
+  }, []);
 
   // ── Post menu handlers ────────────────────────────────────────────────────
-  const handleMenuPress = (id: string, isOwn: boolean) => {
-    const found = posts.find((p) => p.id === id);
+  const handleMenuPress = useCallback((id: string, isOwn: boolean) => {
+    const found = postsRef.current.find((p) => p.id === id);
     setPostMenu({ id, isOwn, content: found?.content, privacy: found?.privacy });
-  };
+  }, []);
 
   const handleOpenEdit = () => {
     if (!postMenu) return;
@@ -359,11 +364,11 @@ export default function FeedScreen() {
     setStoryViewId(null);
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await new Promise((r) => setTimeout(r, 1200));
     setRefreshing(false);
-  };
+  }, []);
 
   const getActivePosts = (): Post[] => {
     switch (activeTab) {
@@ -704,8 +709,7 @@ export default function FeedScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[colors.primary + "18", colors.secondary + "08", "transparent"]}
-        style={[styles.headerGlow, { height: topPad + 120 }]}
-        pointerEvents="none"
+        style={[styles.headerGlow, { height: topPad + 120, pointerEvents: "none" }]}
       />
 
       <Animated.View
@@ -807,10 +811,10 @@ export default function FeedScreen() {
           if (item.kind === "ad") return <BannerAd ad={item.ad} />;
           return (
             <FeedPost
-              post={{ ...item.post, isOwn: item.post.isOwn || item.post.userName === user?.name }}
+              post={item.post}
               onLike={handleLike}
               onComment={handleOpenComments}
-              onProfile={() => {}}
+              onProfile={emptyFn}
               onMenuPress={handleMenuPress}
             />
           );
@@ -828,6 +832,11 @@ export default function FeedScreen() {
         }
         contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews={Platform.OS !== "web"}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        initialNumToRender={5}
+        updateCellsBatchingPeriod={50}
       />
 
       {/* ── Special Client Popup Ad ── */}
@@ -1155,7 +1164,7 @@ export default function FeedScreen() {
 
       {/* ── Report Success Toast ───────────────────────────────────────────── */}
       {reportDone && (
-        <View style={[styles.toast, { backgroundColor: "#1C1C2E" }]} pointerEvents="none">
+        <View style={[styles.toast, { backgroundColor: "#1C1C2E", pointerEvents: "none" }]}>
           <Feather name="check-circle" size={16} color="#34C759" />
           <Text style={styles.toastText}>Report submitted. Thank you! 🙏</Text>
         </View>

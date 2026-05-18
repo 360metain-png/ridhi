@@ -19,7 +19,7 @@ export function WatermarkBadge({ position = "bottom-right", size = "sm", opacity
   }[position];
 
   return (
-    <View pointerEvents="none" style={[styles.wrap, posStyle, { opacity }]}>
+    <View style={[styles.wrap, posStyle, { opacity, pointerEvents: "none" }]}>
       <Image source={LOGO} style={{ width: dim, height: dim }} resizeMode="contain" />
     </View>
   );
