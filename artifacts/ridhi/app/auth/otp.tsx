@@ -18,7 +18,11 @@ import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
 const OTP_LENGTH = 6;
 
 export default function OtpScreen() {
-  const { contact, type } = useLocalSearchParams<{ contact: string; type: string }>();
+  const { contact, type, demoOtp: initialDemoOtp } = useLocalSearchParams<{
+    contact: string;
+    type: string;
+    demoOtp?: string;
+  }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -27,6 +31,7 @@ export default function OtpScreen() {
   const [timer, setTimer] = useState(30);
   const [error, setError] = useState("");
   const [resendMsg, setResendMsg] = useState("");
+  const [demoOtp, setDemoOtp] = useState<string | undefined>(initialDemoOtp);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -58,6 +63,15 @@ export default function OtpScreen() {
     }
   }, [otp]);
 
+  /** Auto-fill the OTP boxes when user taps the demo banner */
+  const handleAutoFill = useCallback(() => {
+    if (!demoOtp || demoOtp.length !== 6) return;
+    const digits = demoOtp.split("");
+    setOtp(digits);
+    setError("");
+    inputRefs.current[5]?.focus();
+  }, [demoOtp]);
+
   const isComplete = otp.every((d) => d !== "");
 
   const handleVerify = async () => {
@@ -84,14 +98,21 @@ export default function OtpScreen() {
     setResendMsg("");
     setError("");
     try {
-      await apiFetch("/api/auth/resend-otp", {
+      const resp = await apiFetch("/api/auth/resend-otp", {
         method: "POST",
         body: JSON.stringify({ contact, type }),
-      });
+      }) as { demo?: boolean; otp?: string };
       setTimer(30);
       setOtp(Array(OTP_LENGTH).fill(""));
       inputRefs.current[0]?.focus();
-      setResendMsg("OTP resent successfully");
+      // Update demo OTP if the server returned a new one
+      if (resp?.demo && resp?.otp) {
+        setDemoOtp(resp.otp);
+        setResendMsg("New OTP generated");
+      } else {
+        setDemoOtp(undefined);
+        setResendMsg("OTP resent successfully");
+      }
       setTimeout(() => setResendMsg(""), 3000);
     } catch (err: unknown) {
       const msg = err instanceof ApiError ? err.message : "Failed to resend OTP.";
@@ -120,6 +141,23 @@ export default function OtpScreen() {
           We've sent a 6-digit code to{"\n"}
           <Text style={{ color: colors.foreground, fontFamily: "Inter_600SemiBold" }}>{contact}</Text>
         </Text>
+
+        {/* ── Demo OTP banner ─────────────────────────────────────────── */}
+        {!!demoOtp && (
+          <Pressable onPress={handleAutoFill} style={styles.demoBanner} accessibilityRole="button" accessibilityLabel="Tap to auto-fill OTP">
+            <LinearGradient
+              colors={["#7B2FBE22", "#E91E8C18"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Feather name="info" size={15} color="#E91E8C" style={{ marginRight: 8 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.demoBannerTitle}>Test Mode — tap to auto-fill</Text>
+              <Text style={styles.demoBannerCode}>{demoOtp}</Text>
+            </View>
+            <Feather name="chevron-right" size={16} color="#7B2FBE" />
+          </Pressable>
+        )}
 
         <View style={styles.otpRow}>
           {otp.map((digit, i) => (
@@ -192,7 +230,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 24,
     alignItems: "center",
-    gap: 24,
+    gap: 20,
   },
   iconBg: {
     width: 80,
@@ -203,7 +241,31 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 26, fontFamily: "Inter_700Bold", letterSpacing: -0.5 },
   subtitle: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 22 },
-  otpRow: { flexDirection: "row", gap: 10, marginVertical: 8 },
+  demoBanner: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#7B2FBE44",
+    overflow: "hidden",
+  },
+  demoBannerTitle: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "#E91E8C",
+    letterSpacing: 0.3,
+    marginBottom: 2,
+  },
+  demoBannerCode: {
+    fontSize: 22,
+    fontFamily: "Inter_700Bold",
+    color: "#EEEEF5",
+    letterSpacing: 6,
+  },
+  otpRow: { flexDirection: "row", gap: 10, marginVertical: 4 },
   otpBox: {
     width: 48,
     height: 56,
@@ -217,13 +279,13 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "#FF3B30",
     textAlign: "center",
-    marginTop: -12,
+    marginTop: -8,
   },
   successText: {
     fontSize: 13,
     fontFamily: "Inter_500Medium",
     textAlign: "center",
-    marginTop: -12,
+    marginTop: -8,
   },
   resend: { paddingVertical: 4 },
   resendText: { fontSize: 14, fontFamily: "Inter_500Medium" },

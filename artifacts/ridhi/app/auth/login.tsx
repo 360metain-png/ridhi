@@ -150,11 +150,13 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const { apiFetch } = await import("@/utils/api");
-      await apiFetch("/api/auth/send-otp", {
+      const resp = await apiFetch("/api/auth/send-otp", {
         method: "POST",
         body: JSON.stringify({ contact: value.trim(), type: tab }),
-      });
-      router.push({ pathname: "/auth/otp", params: { contact: value.trim(), type: tab } });
+      }) as { demo?: boolean; otp?: string };
+      const params: Record<string, string> = { contact: value.trim(), type: tab };
+      if (resp?.demo && resp?.otp) params.demoOtp = resp.otp;
+      router.push({ pathname: "/auth/otp", params });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
       setInputError(msg);

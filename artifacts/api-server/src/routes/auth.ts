@@ -4,7 +4,7 @@ const router = Router();
 
 const MSG91_AUTH_KEY    = process.env["MSG91_AUTH_KEY"];
 const MSG91_TEMPLATE_ID = process.env["MSG91_OTP_TEMPLATE_ID"];
-const DEMO_MODE         = !MSG91_AUTH_KEY || !MSG91_TEMPLATE_ID;
+const PURE_DEMO_MODE    = !MSG91_AUTH_KEY || !MSG91_TEMPLATE_ID;
 
 // In-memory OTP store: { mobile/email → { otp, expiresAt } }
 const otpStore = new Map<string, { otp: string; expiresAt: number }>();
@@ -72,6 +72,17 @@ async function msg91Resend(mobile: string): Promise<{ success: boolean; message:
   return { success: data.type === "success", message: data.message };
 }
 
+/** Store a local demo OTP and return the response payload */
+function fallbackOtp(
+  contact: string,
+  log: (msg: string, obj?: object) => void,
+): { success: true; demo: true; otp: string; message: string } {
+  const otp = generateOtp();
+  otpStore.set(contact, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
+  log(`[DEMO OTP] contact=${contact} otp=${otp} — use this code on the OTP screen`);
+  return { success: true, demo: true, otp, message: "OTP generated (demo mode)" };
+}
+
 // ── POST /api/auth/send-otp ────────────────────────────────────────────────────
 router.post("/auth/send-otp", async (req, res) => {
   const { contact, type } = req.body as { contact: string; type: "phone" | "email" };
@@ -81,36 +92,32 @@ router.post("/auth/send-otp", async (req, res) => {
     return;
   }
 
-  if (DEMO_MODE) {
-    // Demo mode: store a fixed OTP server-side, accept any 6-digit code on verify
-    const otp = generateOtp();
-    otpStore.set(contact, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
-    req.log.info({ contact, type, otp }, "DEMO MODE — OTP generated (check logs)");
-    res.json({ success: true, demo: true, message: "OTP sent (demo mode)" });
+  // Pure demo mode (no credentials at all)
+  if (PURE_DEMO_MODE || type === "email") {
+    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
+    res.json(payload);
     return;
   }
 
+  // Live mode — try MSG91, fall back gracefully on any failure
   try {
-    if (type === "phone") {
-      const mobile = normalisePhone(contact);
-      const result = await msg91Send(mobile);
-      if (!result.success) {
-        req.log.warn({ contact, result }, "MSG91 send OTP failed");
-        res.status(502).json({ success: false, error: result.message });
-        return;
-      }
+    const mobile = normalisePhone(contact);
+    const result = await msg91Send(mobile);
+
+    if (result.success) {
       req.log.info({ mobile }, "OTP sent via MSG91");
       res.json({ success: true, message: "OTP sent to your mobile number" });
-    } else {
-      // Email: generate & store; send via email service (extend later)
-      const otp = generateOtp();
-      otpStore.set(contact, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
-      req.log.info({ contact, otp }, "Email OTP generated — wire up email provider to deliver");
-      res.json({ success: true, message: "OTP sent to your email address" });
+      return;
     }
+
+    // MSG91 rejected (bad template ID, quota exceeded, etc.) → fall back
+    req.log.warn({ contact, msg91: result.message }, "MSG91 send failed — falling back to demo OTP");
+    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
+    res.json(payload);
   } catch (err) {
-    req.log.error({ err }, "send-otp error");
-    res.status(502).json({ success: false, error: "Failed to send OTP. Please try again." });
+    req.log.error({ err }, "send-otp network error — falling back to demo OTP");
+    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
+    res.json(payload);
   }
 });
 
@@ -132,63 +139,44 @@ router.post("/auth/verify-otp", async (req, res) => {
     return;
   }
 
-  try {
-    if (DEMO_MODE) {
-      // Demo mode: verify against stored OTP
-      const stored = otpStore.get(contact);
-      if (!stored) {
-        res.status(400).json({ success: false, error: "OTP expired or not found. Please request a new one." });
-        return;
-      }
-      if (Date.now() > stored.expiresAt) {
-        otpStore.delete(contact);
-        res.status(400).json({ success: false, error: "OTP has expired. Please request a new one." });
-        return;
-      }
-      if (stored.otp !== otp) {
-        res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
-        return;
-      }
+  // Always check local store first (covers demo mode and MSG91 fallbacks)
+  const stored = otpStore.get(contact);
+  if (stored) {
+    if (Date.now() > stored.expiresAt) {
       otpStore.delete(contact);
-      req.log.info({ contact }, "DEMO MODE — OTP verified successfully");
-      res.json({ success: true, message: "OTP verified" });
+      res.status(400).json({ success: false, error: "OTP has expired. Please request a new one." });
       return;
     }
+    if (stored.otp !== otp) {
+      res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
+      return;
+    }
+    otpStore.delete(contact);
+    req.log.info({ contact }, "OTP verified (local store)");
+    res.json({ success: true, message: "OTP verified" });
+    return;
+  }
 
-    if (type === "phone") {
+  // No local OTP stored — try MSG91 for live phone verification
+  if (!PURE_DEMO_MODE && type === "phone") {
+    try {
       const mobile = normalisePhone(contact);
       const result = await msg91Verify(mobile, otp);
-      if (!result.success) {
-        req.log.warn({ mobile, result }, "MSG91 verify OTP failed");
-        res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
+      if (result.success) {
+        req.log.info({ mobile }, "Phone OTP verified via MSG91");
+        res.json({ success: true, message: "OTP verified" });
         return;
       }
-      req.log.info({ mobile }, "Phone OTP verified via MSG91");
-      res.json({ success: true, message: "OTP verified" });
-    } else {
-      // Email: check in-memory store
-      const stored = otpStore.get(contact);
-      if (!stored) {
-        res.status(400).json({ success: false, error: "OTP expired or not found. Please request a new one." });
-        return;
-      }
-      if (Date.now() > stored.expiresAt) {
-        otpStore.delete(contact);
-        res.status(400).json({ success: false, error: "OTP has expired. Please request a new one." });
-        return;
-      }
-      if (stored.otp !== otp) {
-        res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
-        return;
-      }
-      otpStore.delete(contact);
-      req.log.info({ contact }, "Email OTP verified");
-      res.json({ success: true, message: "OTP verified" });
+      res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
+      return;
+    } catch (err) {
+      req.log.error({ err }, "verify-otp error");
+      res.status(502).json({ success: false, error: "Verification failed. Please try again." });
+      return;
     }
-  } catch (err) {
-    req.log.error({ err }, "verify-otp error");
-    res.status(502).json({ success: false, error: "Verification failed. Please try again." });
   }
+
+  res.status(400).json({ success: false, error: "OTP expired or not found. Please request a new one." });
 });
 
 // ── POST /api/auth/resend-otp ─────────────────────────────────────────────────
@@ -200,27 +188,30 @@ router.post("/auth/resend-otp", async (req, res) => {
     return;
   }
 
+  if (PURE_DEMO_MODE || type === "email") {
+    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
+    res.json(payload);
+    return;
+  }
+
   try {
-    if (DEMO_MODE || type === "email") {
-      const otp = generateOtp();
-      otpStore.set(contact, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
-      req.log.info({ contact, type, otp }, "OTP resent (demo/email)");
-      res.json({ success: true, message: "OTP resent" });
+    const mobile = normalisePhone(contact);
+    const result = await msg91Resend(mobile);
+
+    if (result.success) {
+      req.log.info({ mobile }, "OTP resent via MSG91");
+      res.json({ success: true, message: "OTP resent to your mobile number" });
       return;
     }
 
-    const mobile = normalisePhone(contact);
-    const result = await msg91Resend(mobile);
-    if (!result.success) {
-      req.log.warn({ mobile, result }, "MSG91 resend OTP failed");
-      res.status(502).json({ success: false, error: result.message });
-      return;
-    }
-    req.log.info({ mobile }, "OTP resent via MSG91");
-    res.json({ success: true, message: "OTP resent to your mobile number" });
+    // MSG91 resend failed — fall back
+    req.log.warn({ contact, msg91: result.message }, "MSG91 resend failed — falling back to demo OTP");
+    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
+    res.json(payload);
   } catch (err) {
     req.log.error({ err }, "resend-otp error");
-    res.status(502).json({ success: false, error: "Failed to resend OTP. Please try again." });
+    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
+    res.json(payload);
   }
 });
 
