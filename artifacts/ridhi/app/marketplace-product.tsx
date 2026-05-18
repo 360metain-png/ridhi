@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  Modal, Platform, Pressable, ScrollView, StyleSheet,
+  Platform, Pressable, ScrollView, StyleSheet,
   Text, View,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -8,9 +8,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PaymentSheet } from "@/components/PaymentSheet";
 import { PRODUCTS, type Product } from "./marketplace";
-
-type PayMethod = "upi" | "card" | "netbanking" | "wallet";
 
 const COND_COLOR: Record<string, string> = {
   "New":      "#34C759",
@@ -19,13 +18,6 @@ const COND_COLOR: Record<string, string> = {
   "Fair":     "#FF6B35",
 };
 
-const PAY_METHODS: { key: PayMethod; label: string; icon: string; desc: string }[] = [
-  { key: "upi",        label: "UPI",            icon: "zap",        desc: "PhonePe, GPay, Paytm" },
-  { key: "card",       label: "Credit/Debit Card",icon: "credit-card",desc: "Visa, Mastercard, RuPay" },
-  { key: "netbanking", label: "Net Banking",    icon: "globe",      desc: "All major banks" },
-  { key: "wallet",     label: "Ridhi Wallet",   icon: "star",       desc: `Balance: ₹2,450` },
-];
-
 export default function MarketplaceProductScreen() {
   const colors    = useColors();
   const insets    = useSafeAreaInsets();
@@ -33,23 +25,8 @@ export default function MarketplaceProductScreen() {
   const { id }    = useLocalSearchParams<{ id: string }>();
   const product: Product = PRODUCTS.find(p => p.id === id) ?? PRODUCTS[0];
 
-  const [showPayModal,  setShowPayModal]  = useState(false);
-  const [payMethod,     setPayMethod]     = useState<PayMethod>("upi");
-  const [payStep,       setPayStep]       = useState<"select" | "confirm" | "success">("select");
-  const [saved,         setSaved]         = useState(false);
-
-  const commission  = Math.ceil(product.price * 0.05);
-  const sellerGets  = product.price - commission;
-
-  const handlePay = () => {
-    if (payStep === "select")  { setPayStep("confirm"); return; }
-    if (payStep === "confirm") { setPayStep("success"); return; }
-  };
-
-  const closeModal = () => {
-    setShowPayModal(false);
-    setPayStep("select");
-  };
+  const [showPaySheet, setShowPaySheet] = useState(false);
+  const [saved,        setSaved]        = useState(false);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -161,7 +138,7 @@ export default function MarketplaceProductScreen() {
           <Text style={[styles.buyBarPrice, { color: colors.primary }]}>₹{product.price.toLocaleString()}</Text>
           {product.negotiable && <Text style={[styles.buyBarNego, { color: colors.mutedForeground }]}>Negotiable</Text>}
         </View>
-        <Pressable onPress={() => setShowPayModal(true)} style={styles.buyNowBtn}>
+        <Pressable onPress={() => setShowPaySheet(true)} style={styles.buyNowBtn}>
           <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.buyNowBtnGrad}>
             <Feather name="shopping-bag" size={16} color="#fff" />
             <Text style={styles.buyNowText}>Buy Now</Text>
@@ -169,159 +146,14 @@ export default function MarketplaceProductScreen() {
         </Pressable>
       </View>
 
-      {/* ── Payment Modal ── */}
-      <Modal visible={showPayModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={closeModal}>
-        <View style={[styles.modalRoot, { backgroundColor: colors.background }]}>
-          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-            <Text style={[styles.modalTitle, { color: colors.foreground }]}>
-              {payStep === "success" ? "Payment Successful" : "Complete Payment"}
-            </Text>
-            {payStep !== "success" && (
-              <Pressable onPress={closeModal} style={styles.modalClose}>
-                <Feather name="x" size={22} color={colors.foreground} />
-              </Pressable>
-            )}
-          </View>
-
-          <ScrollView contentContainerStyle={styles.modalScroll}>
-            {/* SELECT method */}
-            {payStep === "select" && (
-              <>
-                {/* Order summary */}
-                <View style={[styles.orderSummary, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <Text style={[styles.orderSummaryTitle, { color: colors.mutedForeground }]}>ORDER SUMMARY</Text>
-                  <View style={styles.orderItem}>
-                    <Text style={styles.orderEmoji}>{product.emoji}</Text>
-                    <Text style={[styles.orderName, { color: colors.foreground }]} numberOfLines={1}>{product.title}</Text>
-                    <Text style={[styles.orderPrice, { color: colors.primary }]}>₹{product.price.toLocaleString()}</Text>
-                  </View>
-                  <View style={[styles.orderDivider, { backgroundColor: colors.border }]} />
-                  <View style={[styles.orderRow, styles.orderTotal, { borderTopColor: colors.border }]}>
-                    <Text style={[styles.orderRowLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>Total payable</Text>
-                    <Text style={[styles.orderRowVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 18 }]}>₹{product.price.toLocaleString()}</Text>
-                  </View>
-                </View>
-
-                {/* Payment methods */}
-                <Text style={[styles.payMethodLabel, { color: colors.mutedForeground }]}>PAYMENT METHOD</Text>
-                {PAY_METHODS.map((m) => {
-                  const sel = payMethod === m.key;
-                  return (
-                    <Pressable
-                      key={m.key}
-                      onPress={() => setPayMethod(m.key)}
-                      style={[styles.payMethodCard, {
-                        backgroundColor: sel ? colors.primary + "12" : colors.card,
-                        borderColor: sel ? colors.primary : colors.border,
-                        borderWidth: sel ? 1.5 : 1,
-                      }]}
-                    >
-                      <View style={[styles.payMethodIcon, { backgroundColor: sel ? colors.primary + "20" : colors.muted }]}>
-                        <Feather name={m.icon as any} size={18} color={sel ? colors.primary : colors.mutedForeground} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.payMethodName, { color: colors.foreground }]}>{m.label}</Text>
-                        <Text style={[styles.payMethodDesc, { color: colors.mutedForeground }]}>{m.desc}</Text>
-                      </View>
-                      <View style={[styles.payRadio, { borderColor: sel ? colors.primary : colors.border, backgroundColor: sel ? colors.primary : "transparent" }]}>
-                        {sel && <Feather name="check" size={10} color="#fff" />}
-                      </View>
-                    </Pressable>
-                  );
-                })}
-
-                <Pressable onPress={handlePay} style={styles.payBtn}>
-                  <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payBtnGrad}>
-                    <Feather name="lock" size={15} color="#fff" />
-                    <Text style={styles.payBtnText}>Pay Securely  ₹{product.price.toLocaleString()}</Text>
-                  </LinearGradient>
-                </Pressable>
-                <Text style={[styles.payFooter, { color: colors.mutedForeground }]}>
-                  🔒 Payments are encrypted and secured by Ridhi. Your card details are never stored.
-                </Text>
-              </>
-            )}
-
-            {/* CONFIRM */}
-            {payStep === "confirm" && (
-              <View style={styles.confirmWrap}>
-                <View style={[styles.confirmBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <Text style={styles.confirmEmoji}>{product.emoji}</Text>
-                  <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Confirm Payment</Text>
-                  <Text style={[styles.confirmSub, { color: colors.mutedForeground }]}>
-                    You are about to pay
-                  </Text>
-                  <Text style={[styles.confirmAmount, { color: colors.primary }]}>₹{product.price.toLocaleString()}</Text>
-                  <Text style={[styles.confirmSub, { color: colors.mutedForeground }]}>
-                    via {PAY_METHODS.find(m => m.key === payMethod)?.label}
-                    {"\n"}to {product.seller} for "{product.title}"
-                  </Text>
-                </View>
-
-                <View style={[styles.confirmBreakdown, { backgroundColor: colors.muted }]}>
-                  <Feather name="alert-circle" size={14} color={colors.mutedForeground} />
-                  <Text style={[styles.confirmBreakdownText, { color: colors.mutedForeground }]}>
-                    Ridhi is not responsible for this transaction. By proceeding you agree to transact at your own risk.
-                  </Text>
-                </View>
-
-                <Pressable onPress={handlePay} style={styles.payBtn}>
-                  <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payBtnGrad}>
-                    <Feather name="check" size={15} color="#fff" />
-                    <Text style={styles.payBtnText}>Confirm & Pay ₹{product.price.toLocaleString()}</Text>
-                  </LinearGradient>
-                </Pressable>
-                <Pressable onPress={() => setPayStep("select")} style={[styles.cancelBtn, { borderColor: colors.border }]}>
-                  <Text style={[styles.cancelBtnText, { color: colors.foreground }]}>Back</Text>
-                </Pressable>
-              </View>
-            )}
-
-            {/* SUCCESS */}
-            {payStep === "success" && (
-              <View style={styles.successWrap}>
-                <LinearGradient colors={["#34C759", "#2196F3"]} style={styles.successIcon}>
-                  <Feather name="check" size={40} color="#fff" />
-                </LinearGradient>
-                <Text style={[styles.successTitle, { color: colors.foreground }]}>Payment Successful!</Text>
-                <Text style={[styles.successSub, { color: colors.mutedForeground }]}>
-                  ₹{product.price.toLocaleString()} paid to {product.seller}
-                </Text>
-
-                <View style={[styles.receiptCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                  <Text style={[styles.receiptLabel, { color: colors.mutedForeground }]}>TRANSACTION DETAILS</Text>
-                  {[
-                    { label: "Item",           val: product.title },
-                    { label: "Amount Paid",    val: `₹${product.price.toLocaleString()}` },
-                    { label: "Payment Method", val: PAY_METHODS.find(m => m.key === payMethod)?.label ?? "" },
-                    { label: "Transaction ID", val: "TXN" + Math.random().toString(36).slice(2, 10).toUpperCase() },
-                    { label: "Seller",         val: product.seller },
-                    { label: "Status",         val: "✅ Confirmed" },
-                  ].map(({ label, val }) => (
-                    <View key={label} style={[styles.receiptRow, { borderBottomColor: colors.border }]}>
-                      <Text style={[styles.receiptRowLabel, { color: colors.mutedForeground }]}>{label}</Text>
-                      <Text style={[styles.receiptRowVal, { color: colors.foreground }]}>{val}</Text>
-                    </View>
-                  ))}
-                </View>
-
-                <View style={[styles.sellerCreditNote, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-                  <Feather name="alert-circle" size={14} color={colors.mutedForeground} />
-                  <Text style={[styles.sellerCreditText, { color: colors.mutedForeground }]}>
-                    Ridhi will not and never be responsible for any buying & selling transactions. All dealings are directly between buyer and seller.
-                  </Text>
-                </View>
-
-                <Pressable onPress={() => { closeModal(); router.back(); }} style={styles.payBtn}>
-                  <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payBtnGrad}>
-                    <Text style={styles.payBtnText}>Back to Marketplace</Text>
-                  </LinearGradient>
-                </Pressable>
-              </View>
-            )}
-          </ScrollView>
-        </View>
-      </Modal>
+      <PaymentSheet
+        visible={showPaySheet}
+        onClose={() => setShowPaySheet(false)}
+        onSuccess={() => { setShowPaySheet(false); router.back(); }}
+        amount={product.price}
+        label={product.title}
+        sublabel={`Seller: ${product.seller}`}
+      />
     </View>
   );
 }

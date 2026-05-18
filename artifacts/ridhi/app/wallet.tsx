@@ -22,6 +22,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
 import { CoinFountainOverlay, AnimatedCoinBalance, useCoinToasts } from "@/components/CoinFountain";
+import { PaymentSheet } from "@/components/PaymentSheet";
 
 const { width } = Dimensions.get("window");
 
@@ -154,10 +155,20 @@ export default function WalletScreen() {
     fire({ type: "credit", amount: 10, label: "Daily Reward", sublabel: "User", bottom: 200 });
   };
 
+  const [pendingPack, setPendingPack] = useState<typeof COIN_PACKAGES[0] | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+
   const onRecharge = (pack: typeof COIN_PACKAGES[0]) => {
-    const total = pack.coins + ((pack as any).bonus ?? 0);
+    setPendingPack(pack);
+    setShowPayment(true);
+  };
+
+  const handlePaySuccess = () => {
+    if (!pendingPack) return;
+    const total = pendingPack.coins + ((pendingPack as any).bonus ?? 0);
     addCoins(total);
-    fire({ type: "credit", amount: total, label: "Recharge", sublabel: pack.label, large: total >= 500, bottom: 200 });
+    fire({ type: "credit", amount: total, label: "Recharge", sublabel: pendingPack.label, large: total >= 500, bottom: 200 });
+    setPendingPack(null);
   };
 
   return (
@@ -379,6 +390,15 @@ export default function WalletScreen() {
 
       {/* ── Coin Fountain Overlay ── */}
       <CoinFountainOverlay toasts={toasts} onRemove={remove} />
+
+      <PaymentSheet
+        visible={showPayment}
+        onClose={() => setShowPayment(false)}
+        onSuccess={() => { handlePaySuccess(); setShowPayment(false); }}
+        amount={pendingPack ? parseInt(String(pendingPack.price).replace(/[^0-9]/g, "")) : 0}
+        label={pendingPack ? pendingPack.label : ""}
+        sublabel={pendingPack ? `${pendingPack.coins}${(pendingPack as any).bonus ? ` + ${(pendingPack as any).bonus} bonus` : ""} coins` : ""}
+      />
     </View>
   );
 }

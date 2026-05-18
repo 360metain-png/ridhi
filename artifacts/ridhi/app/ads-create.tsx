@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PaymentSheet } from "@/components/PaymentSheet";
 
 // ── Types & Consts ─────────────────────────────────────────────────────────────
 type AdFormat   = "feed" | "story" | "reel" | "banner" | "explore";
@@ -91,6 +92,9 @@ export default function AdsCreateScreen() {
   const canStep2 = headline.trim().length >= 3 && cta.length > 0;
   const canStep3 = cities.length > 0;
   const canStep4 = dailyBudget !== "" && Number(dailyBudget) >= 100;
+
+  const [showPayment, setShowPayment] = useState(false);
+  const totalWithGst = Math.round((totalBudget || 0) * 1.18);
 
   // ── Done state ────────────────────────────────────────────────────────────────
   if (step === "done") {
@@ -562,7 +566,7 @@ export default function AdsCreateScreen() {
                 <Feather name="arrow-left" size={16} color={colors.foreground} />
                 <Text style={[styles.backStepText, { color: colors.foreground }]}>Back</Text>
               </Pressable>
-              <Pressable onPress={() => { if (canStep4) setStep("done"); }} style={[styles.nextFlex, { opacity: canStep4 ? 1 : 0.4 }]}>
+              <Pressable onPress={() => { if (canStep4) setShowPayment(true); }} style={[styles.nextFlex, { opacity: canStep4 ? 1 : 0.4 }]}>
                 <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.nextGrad}>
                   <Feather name="send" size={15} color="#fff" />
                   <Text style={styles.nextText}>Submit Campaign</Text>
@@ -572,6 +576,15 @@ export default function AdsCreateScreen() {
           </View>
         )}
       </ScrollView>
+
+      <PaymentSheet
+        visible={showPayment}
+        onClose={() => setShowPayment(false)}
+        onSuccess={() => { setShowPayment(false); setStep("done"); }}
+        amount={totalBudget}
+        label="Ad Campaign"
+        sublabel={`₹${Number(dailyBudget).toLocaleString()}/day × ${duration} days`}
+      />
     </View>
   );
 }

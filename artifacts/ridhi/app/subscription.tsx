@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PaymentSheet } from "@/components/PaymentSheet";
 
 const { width } = Dimensions.get("window");
 
@@ -175,6 +176,7 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
   const [budget,    setBudget]    = useState(100);
   const [duration,  setDuration]  = useState(3);
   const [promote,   setPromote]   = useState<"profile" | "post">("profile");
+  const [showBoostPay, setShowBoostPay] = useState(false);
 
   const obj = OBJECTIVES.find(o => o.id === objective)!;
   const total = budget * duration;
@@ -399,7 +401,7 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
               <Feather name="arrow-left" size={16} color={colors.foreground} />
               <Text style={[bs.backTxt, { color: colors.foreground }]}>Back</Text>
             </Pressable>
-            <Pressable onPress={() => setStep("done")} style={{ flex: 1 }}>
+            <Pressable onPress={() => setShowBoostPay(true)} style={{ flex: 1 }}>
               <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={bs.nextGrad}>
                 <Feather name="zap" size={16} color="#fff" />
                 <Text style={bs.nextTxt}>Launch for ₹{total}</Text>
@@ -408,6 +410,15 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
           </View>
         </View>
       )}
+
+      <PaymentSheet
+        visible={showBoostPay}
+        onClose={() => setShowBoostPay(false)}
+        onSuccess={() => { setShowBoostPay(false); setStep("done"); }}
+        amount={total}
+        label={`Ridhi Boost · ${duration} day${duration > 1 ? "s" : ""}`}
+        sublabel={`₹${budget}/day × ${duration} days`}
+      />
     </View>
   );
 }
@@ -481,6 +492,9 @@ export default function SubscriptionScreen() {
   const [selectedPlan, setSelectedPlan] = useState("gold");
   const [showCompare,  setShowCompare]  = useState(false);
   const [unlockCat,    setUnlockCat]    = useState(0);
+  const [payAmount,    setPayAmount]    = useState(0);
+  const [payLabel,     setPayLabel]     = useState("");
+  const [showPayment,  setShowPayment]  = useState(false);
 
   const currentPlan = PLANS.find(p => p.id === selectedPlan)!;
 
@@ -649,11 +663,13 @@ export default function SubscriptionScreen() {
                   </View>
 
                   {plan.id !== "free" && (
-                    <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
-                      <Text style={styles.subBtnTxt}>
-                        {sel ? `Upgrade to ${plan.name} — ${plan.price}${plan.period}` : `Subscribe — ${plan.price}${plan.period}`}
-                      </Text>
-                    </LinearGradient>
+                    <Pressable onPress={() => { setPayAmount(parseInt(plan.price.replace(/[^0-9]/g, ""))); setPayLabel(`${plan.name} Plan`); setShowPayment(true); }}>
+                      <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                        <Text style={styles.subBtnTxt}>
+                          {sel ? `Upgrade to ${plan.name} — ${plan.price}${plan.period}` : `Subscribe — ${plan.price}${plan.period}`}
+                        </Text>
+                      </LinearGradient>
+                    </Pressable>
                   )}
                 </Pressable>
               );
@@ -765,7 +781,7 @@ export default function SubscriptionScreen() {
                     <Text style={[styles.fanName, { color: colors.foreground }]}>{tier.name}</Text>
                     <Text style={[styles.fanPrice, { color: tier.color }]}>{tier.price}</Text>
                   </View>
-                  <Pressable style={[styles.joinBtn, { backgroundColor: tier.color }]}>
+                  <Pressable style={[styles.joinBtn, { backgroundColor: tier.color }]} onPress={() => { setPayAmount(parseInt(tier.price.replace(/[^0-9]/g, ""))); setPayLabel(`${tier.name} Fan Club`); setShowPayment(true); }}>
                     <Text style={styles.joinTxt}>Join</Text>
                   </Pressable>
                 </View>
@@ -797,6 +813,14 @@ export default function SubscriptionScreen() {
           </View>
         )}
       </ScrollView>
+
+      <PaymentSheet
+        visible={showPayment}
+        onClose={() => setShowPayment(false)}
+        onSuccess={() => setShowPayment(false)}
+        amount={payAmount}
+        label={payLabel}
+      />
     </View>
   );
 }
