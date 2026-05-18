@@ -31,6 +31,7 @@ import BusinessAds   from "@/pages/business-ads";
 import AIHub         from "@/pages/ai-hub";
 import KYC           from "@/pages/kyc";
 import Handbook      from "@/pages/handbook";
+import SpecialAds    from "@/pages/special-ads";
 import AdminLayout   from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/promotions":   ["super_admin", "admin"],
   "/marketplace":    ["super_admin", "admin"],
   "/business-ads":  ["super_admin", "admin"],
+  "/special-ads":   ["super_admin", "admin"],
   "/gaming":         ["super_admin", "admin"],
   "/live-streams": ["super_admin", "admin", "agent", "host"],
   "/ai-hub":       ["super_admin", "admin"],
@@ -140,6 +142,7 @@ function Router() {
       <Route path="/ai-hub"       component={() => <RoleRoute component={AIHub}        path="/ai-hub" />} />
       <Route path="/kyc"          component={() => <RoleRoute component={KYC}          path="/kyc" />} />
       <Route path="/handbook"     component={() => <RoleRoute component={Handbook}     path="/handbook" />} />
+      <Route path="/special-ads"  component={() => <RoleRoute component={SpecialAds}  path="/special-ads" />} />
       <Route component={NotFound} />
     </Switch>
   );

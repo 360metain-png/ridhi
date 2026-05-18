@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ShieldAlert, UsersRound, Coins, IndianRupee,
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
-  Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag,
+  Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -57,8 +57,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Commerce",
     items: [
-      { name: "Marketplace",    href: "/marketplace",   icon: ShoppingBag, badge: "4", allowedRoles: SA_A },
-      { name: "Business Ads",   href: "/business-ads",  icon: Zap,         badge: "3", allowedRoles: SA_A },
+      { name: "Marketplace",       href: "/marketplace",   icon: ShoppingBag, badge: "4", allowedRoles: SA_A },
+      { name: "Business Ads",      href: "/business-ads",  icon: Zap,         badge: "3", allowedRoles: SA_A },
+      { name: "Special Client Ads", href: "/special-ads",  icon: Crown,                   allowedRoles: SA_A },
     ],
   },
   {

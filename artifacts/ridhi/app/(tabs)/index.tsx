@@ -25,7 +25,9 @@ import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { Avatar } from "@/components/Avatar";
-import { INITIAL_POSTS, STORIES, REGIONAL_POSTS } from "@/data/mockData";
+import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS } from "@/data/mockData";
+import { BannerAd } from "@/components/BannerAd";
+import { PopupAd } from "@/components/PopupAd";
 
 const AI_PICKS: Array<{ id: string; userName: string; reason: string; preview: string; tag: string }> = [
   { id: "ai1", userName: "Priya Sharma", reason: "Based on your interest in Dance", preview: "New Bollywood challenge taking India by storm 💃🔥", tag: "#RidhiDance" },
@@ -149,6 +151,17 @@ export default function FeedScreen() {
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
   const [storyViewId, setStoryViewId] = useState<string | null>(null);
+
+  // ── Special Client Ads ────────────────────────────────────────────────────
+  const activePopup = POPUP_ADS.find((a) => a.active) ?? null;
+  const activeBanners = BANNER_ADS.filter((a) => a.active);
+  const [popupDismissed, setPopupDismissed] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  useEffect(() => {
+    if (!activePopup) return;
+    const t = setTimeout(() => setShowPopup(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
 
   // ── Post menu / edit / delete / report state ─────────────────────────────
   const [postMenu, setPostMenu] = useState<{ id: string; isOwn: boolean; content?: string; privacy?: string } | null>(null);
@@ -760,15 +773,22 @@ export default function FeedScreen() {
       <FlatList
         data={getActivePosts()}
         keyExtractor={(p) => p.id}
-        renderItem={({ item }) => (
-          <FeedPost
-            post={{ ...item, isOwn: item.isOwn || item.userName === user?.name }}
-            onLike={handleLike}
-            onComment={handleOpenComments}
-            onProfile={() => {}}
-            onMenuPress={handleMenuPress}
-          />
-        )}
+        renderItem={({ item, index }) => {
+          const showBanner = activeBanners.length > 0 && (index + 1) % 5 === 0;
+          const banner = showBanner ? activeBanners[Math.floor(index / 5) % activeBanners.length] : null;
+          return (
+            <View>
+              <FeedPost
+                post={{ ...item, isOwn: item.isOwn || item.userName === user?.name }}
+                onLike={handleLike}
+                onComment={handleOpenComments}
+                onProfile={() => {}}
+                onMenuPress={handleMenuPress}
+              />
+              {banner && <BannerAd ad={banner} />}
+            </View>
+          );
+        }}
         ListHeaderComponent={renderListHeader}
         ListEmptyComponent={activeTab === "Local" ? renderEmptyLocal : null}
         onScroll={handleFeedScroll}
@@ -783,6 +803,14 @@ export default function FeedScreen() {
         contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* ── Special Client Popup Ad ── */}
+      {showPopup && !popupDismissed && activePopup && (
+        <PopupAd
+          ad={activePopup}
+          onDismiss={() => { setPopupDismissed(true); setShowPopup(false); }}
+        />
+      )}
 
       {/* ── Comment Sheet ── */}
       <Modal

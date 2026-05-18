@@ -727,6 +727,147 @@ export interface MarketingNotification {
   read: boolean;
 }
 
+// ── Special Client Ads ────────────────────────────────────────────────────────
+export interface BannerAdConfig {
+  id: string;
+  title: string;
+  headline: string;
+  body: string;
+  ctaText: string;
+  ctaRoute: string;
+  gradient: [string, string];
+  textColor: "white" | "dark";
+  clientName: string;
+  clientTier: "Diamond" | "Gold" | "Premium";
+  position: "feed" | "top" | "bottom";
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  impressions: number;
+  clicks: number;
+}
+
+export interface PopupAdConfig {
+  id: string;
+  title: string;
+  headline: string;
+  body: string;
+  ctaText: string;
+  ctaRoute: string;
+  gradient: [string, string];
+  textColor: "white" | "dark";
+  clientName: string;
+  clientTier: "Diamond" | "Gold" | "Premium";
+  type: "fullscreen" | "center" | "bottomsheet";
+  dismissAfterSecs: number;
+  frequency: "once" | "daily" | "every_open";
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  impressions: number;
+  clicks: number;
+}
+
+export const BANNER_ADS: BannerAdConfig[] = [
+  {
+    id: "ba1",
+    title: "Arjun's Premium Deal",
+    headline: "Exclusive: Diamond Members Get 3× Coins Today!",
+    body: "Recharge any pack and triple your coins. Special offer for Ridhi Diamond members only.",
+    ctaText: "Claim Offer",
+    ctaRoute: "/wallet",
+    gradient: ["#7B2FBE", "#E91E8C"],
+    textColor: "white",
+    clientName: "Arjun Malhotra",
+    clientTier: "Diamond",
+    position: "feed",
+    startDate: "2025-05-01",
+    endDate: "2025-06-30",
+    active: true,
+    impressions: 48200,
+    clicks: 3610,
+  },
+  {
+    id: "ba2",
+    title: "Priya Fashion Store",
+    headline: "🛍️ Flat 50% Off — Priya's Fashion Week",
+    body: "India's top fashion brands now on Ridhi Marketplace. Shop now and get free delivery!",
+    ctaText: "Shop Now",
+    ctaRoute: "/(tabs)",
+    gradient: ["#FF6B35", "#F7C59F"],
+    textColor: "white",
+    clientName: "Priya Kapoor",
+    clientTier: "Gold",
+    position: "feed",
+    startDate: "2025-05-15",
+    endDate: "2025-05-31",
+    active: true,
+    impressions: 31500,
+    clicks: 2240,
+  },
+  {
+    id: "ba3",
+    title: "Vikram Tech Launch",
+    headline: "🚀 New Tech Products — Early Access for Ridhi Users",
+    body: "Be the first to own the latest gadgets. Exclusive early access and special discounts for Ridhi users.",
+    ctaText: "Explore Now",
+    ctaRoute: "/(tabs)",
+    gradient: ["#1D4ED8", "#06B6D4"],
+    textColor: "white",
+    clientName: "Vikram Reddy",
+    clientTier: "Gold",
+    position: "feed",
+    startDate: "2025-05-10",
+    endDate: "2025-06-15",
+    active: false,
+    impressions: 12800,
+    clicks: 890,
+  },
+];
+
+export const POPUP_ADS: PopupAdConfig[] = [
+  {
+    id: "pa1",
+    title: "Diwali VIP Popup",
+    headline: "🪔 Happy Diwali from Ridhi!",
+    body: "As our Diamond member, enjoy 2× coins + free Premium upgrade for 7 days. Your exclusive Diwali gift is waiting!",
+    ctaText: "Claim My Gift",
+    ctaRoute: "/wallet",
+    gradient: ["#7B2FBE", "#E91E8C"],
+    textColor: "white",
+    clientName: "Arjun Malhotra",
+    clientTier: "Diamond",
+    type: "center",
+    dismissAfterSecs: 0,
+    frequency: "once",
+    startDate: "2025-10-20",
+    endDate: "2025-11-05",
+    active: true,
+    impressions: 8400,
+    clicks: 6120,
+  },
+  {
+    id: "pa2",
+    title: "Flash Sale Interstitial",
+    headline: "⚡ 4-Hour Flash Sale — Ends Soon!",
+    body: "500 coins for just ₹149! This deal disappears at midnight. Don't miss it!",
+    ctaText: "Buy Now — ₹149",
+    ctaRoute: "/wallet",
+    gradient: ["#FF9500", "#FF3B30"],
+    textColor: "white",
+    clientName: "Nisha Shah",
+    clientTier: "Diamond",
+    type: "center",
+    dismissAfterSecs: 5,
+    frequency: "daily",
+    startDate: "2025-05-18",
+    endDate: "2025-05-18",
+    active: true,
+    impressions: 22100,
+    clicks: 9800,
+  },
+];
+
 export const MARKETING_NOTIFICATIONS: MarketingNotification[] = [
   {
     id: "m1",
