@@ -38,8 +38,8 @@ const PLANS = [
   {
     id: "vip", name: "VIP Diamond", badge: "DIAMOND", price: "₹599", period: "/month",
     color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
-    coinsDay: 500, calls: "Unlimited", badge2: "Diamond badge",
-    features: ["500 coins/day", "Unlimited everything", "Diamond VIP badge", "Featured creator status", "VIP exclusive content", "Advanced analytics", "Custom profile effects", "Dedicated account manager", "Priority ad placement", "Ad-free experience", "Early feature access"],
+    coinsDay: 200, calls: "Unlimited", badge2: "Diamond badge",
+    features: ["200 coins/day", "Unlimited everything", "Diamond VIP badge", "Featured creator status", "VIP exclusive content", "Advanced analytics", "Custom profile effects", "Dedicated account manager", "Priority ad placement", "Ad-free experience", "Early feature access"],
     locked: [],
   },
 ];
@@ -92,7 +92,7 @@ const UNLOCK_CATEGORIES = [
     items: [
       { label: "50 Coins / Day",        plan: "silver", icon: "gift"        },
       { label: "150 Coins / Day",       plan: "gold",   icon: "gift"        },
-      { label: "500 Coins / Day",       plan: "vip",    icon: "gift"        },
+      { label: "200 Coins / Day",       plan: "vip",    icon: "gift"        },
       { label: "Priority Ad Placement", plan: "vip",    icon: "target"      },
     ],
   },
@@ -414,7 +414,7 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
 // ── Plan comparison matrix ─────────────────────────────────────────────────────
 const COMPARE_ROWS = [
-  { label: "Daily Coins",         free: "20",           silver: "50",            gold: "150",             vip: "500"             },
+  { label: "Daily Coins",         free: "20",           silver: "50",            gold: "150",             vip: "200"             },
   { label: "Random Calls",        free: "✗",            silver: "5/day",         gold: "Unlimited",       vip: "Unlimited"       },
   { label: "Stories",             free: "5/day",        silver: "Unlimited",     gold: "Unlimited",       vip: "Unlimited"       },
   { label: "Communities",         free: "5",            silver: "20",            gold: "Unlimited",       vip: "Unlimited"       },
