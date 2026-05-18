@@ -48,6 +48,7 @@ export interface PaymentSheetProps {
   label: string;
   sublabel?: string;
   walletBalance?: number;
+  noGst?: boolean;
 }
 
 // ── UPI Apps ───────────────────────────────────────────────────────────────────
@@ -108,7 +109,7 @@ function Spinner({ color }: { color: string }) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export function PaymentSheet({ visible, onClose, onSuccess, amount, label, sublabel, walletBalance = 2450 }: PaymentSheetProps) {
+export function PaymentSheet({ visible, onClose, onSuccess, amount, label, sublabel, walletBalance = 2450, noGst = false }: PaymentSheetProps) {
   const colors = useColors();
 
   const [step,        setStep]        = useState<PayStep>("select");
@@ -144,7 +145,7 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
     }
   }, [step]);
 
-  const gst = Math.round(amount * 0.18);
+  const gst = noGst ? 0 : Math.round(amount * 0.18);
   const total = amount + gst;
 
   const canPay = () => {
@@ -244,8 +245,12 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
                   {sublabel && <Text style={[styles.amountSub, { color: colors.mutedForeground }]}>{sublabel}</Text>}
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
-                  <Text style={[styles.amountLabel, { color: colors.mutedForeground }]}>+ GST (18%)</Text>
-                  <Text style={[styles.gstVal, { color: "#FF8C42" }]}>+₹{gst.toLocaleString("en-IN")}</Text>
+                  {!noGst && (
+                    <>
+                      <Text style={[styles.amountLabel, { color: colors.mutedForeground }]}>+ GST (18%)</Text>
+                      <Text style={[styles.gstVal, { color: "#FF8C42" }]}>+₹{gst.toLocaleString("en-IN")}</Text>
+                    </>
+                  )}
                   <View style={[styles.totalPill, { backgroundColor: colors.primary }]}>
                     <Text style={styles.totalPillText}>Total ₹{total.toLocaleString("en-IN")}</Text>
                   </View>
