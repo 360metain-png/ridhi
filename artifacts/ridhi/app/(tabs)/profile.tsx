@@ -559,6 +559,7 @@ export default function ProfileScreen() {
           { icon: "trending-up",  label: "Create Ad",        route: "/ads-create",       color: "#2196F3" },
           { icon: "shield", label: "E-KYC Verification", route: "/kyc", color: "#22C55E" },
 
+          { icon: "mic", label: "Podcasts", route: "/podcasts", color: "#E91E8C" },
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
           { icon: "zap", label: "Gaming Arena", route: "/games", color: "#4CAF50" },
           { icon: "award", label: "Tournaments", route: "/tournaments", color: "#FFB800" },

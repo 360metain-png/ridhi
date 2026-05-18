@@ -53,6 +53,8 @@ function RootLayoutNav() {
       <Stack.Screen name="tournaments" options={{ presentation: "card" }} />
       <Stack.Screen name="ads-create" options={{ presentation: "card" }} />
       <Stack.Screen name="ads-manager" options={{ presentation: "card" }} />
+      <Stack.Screen name="podcasts" options={{ presentation: "card" }} />
+      <Stack.Screen name="podcast-create" options={{ presentation: "modal" }} />
       <Stack.Screen name="ai-assistant" options={{ presentation: "card" }} />
       <Stack.Screen name="chatrooms" options={{ presentation: "card" }} />
       <Stack.Screen name="kyc" options={{ presentation: "card" }} />
