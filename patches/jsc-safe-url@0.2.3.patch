@@ -1,0 +1,16 @@
+diff --git a/index.js b/index.js
+index b64d03f6335539d5879a0eb9369167aea668e497..af61d7772cb7260dcf1800377807a60a1a529504 100644
+--- a/index.js
++++ b/index.js
+@@ -71,9 +71,8 @@ function toJscSafeUrl(urlToConvert /*:string */) /*:string */ {
+     parsedUrl.queryWithoutQuestionMark.length > 0 &&
+     (parsedUrl.path === "" || parsedUrl.path === "/")
+   ) {
+-    throw new Error(
+-      `The given URL "${urlToConvert}" has an empty path and cannot be converted to a JSC-safe format.`
+-    );
++    // Return as-is when path is empty/root — Replit proxy URLs have this form
++    return urlToConvert;
+   }
+   return (
+     parsedUrl.schemeAndAuthority +

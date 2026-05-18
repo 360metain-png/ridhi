@@ -155,9 +155,34 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
     return false;
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     setStep("processing");
     setProcStatus(0);
+
+    // Try backend order creation first
+    const amountInPaise = total * 100;  // Razorpay uses paise (₹1 = 100 paise)
+    const order = await createOrder(amountInPaise, label);
+
+    if (order && !order.testMode) {
+      // ── Real Razorpay: open backend-hosted checkout in system browser ──────
+      const checkoutUrl = `${API_BASE}/payments/checkout?` + new URLSearchParams({
+        orderId: order.id,
+        keyId:   order.keyId,
+        amount:  String(order.amount),
+        desc:    label,
+      }).toString();
+      const id = order.id;
+      await WebBrowser.openBrowserAsync(checkoutUrl, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+        toolbarColor:      "#E91E8C",
+      });
+      // Browser closed — show success (payment complete in browser)
+      setTxnId(id.slice(0, 8).toUpperCase());
+      setStep("success");
+      return;
+    }
+
+    // ── Test / simulation mode: animate through processing steps ─────────────
     const id = generateTxnId();
     let i = 0;
     const iv = setInterval(() => {

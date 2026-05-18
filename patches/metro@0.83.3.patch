@@ -1,0 +1,13 @@
+diff --git a/src/HmrServer.js b/src/HmrServer.js
+index ffdd55956fed85134fea3363fc74e9392aef508a..f99ee3315ff0ae320f5c5f686bbd9d63d90b2239 100644
+--- a/src/HmrServer.js
++++ b/src/HmrServer.js
+@@ -193,7 +193,7 @@ class HmrServer {
+         case "register-entrypoints":
+           return Promise.all(
+             data.entryPoints.map((entryPoint) =>
+-              this._registerEntryPoint(client, entryPoint, sendFn),
++              this._registerEntryPoint(client, entryPoint, sendFn).catch((_err) => { debug("Ignoring HMR entry point error: %s", _err.message); }),
+             ),
+           );
+         case "log":
