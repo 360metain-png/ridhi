@@ -200,6 +200,13 @@ export default function FeedScreen() {
         Animated.timing(liveIndicator, { toValue: 0.4, duration: 700, useNativeDriver: true }),
       ])
     ).start();
+    // Fade in recommendations immediately after a short mount delay
+    setTimeout(() => {
+      if (!recsShown.current) {
+        recsShown.current = true;
+        Animated.timing(recsFadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+      }
+    }, 400);
   }, []);
 
   const handleFeedScroll = (e: { nativeEvent: { contentOffset: { y: number } } }) => {
