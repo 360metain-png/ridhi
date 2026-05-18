@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  Platform, Pressable, ScrollView, StyleSheet,
+  Alert, Platform, Pressable, ScrollView, StyleSheet,
   Text, TextInput, View,
 } from "react-native";
 import { router } from "expo-router";
@@ -46,17 +46,23 @@ export default function MarketplaceSellScreen() {
   const [description,setDescription]= useState("");
   const [category,   setCategory]   = useState<Category | null>(null);
 
+  // Step 1 — Photos
+  const [photoCount, setPhotoCount] = useState(0);
+
   // Step 2 — Price & condition
   const [price,      setPrice]      = useState("");
   const [negotiable, setNegotiable] = useState(false);
   const [condition,  setCondition]  = useState<Condition | null>(null);
   const [city,       setCity]       = useState<string | null>(null);
+  const [address,    setAddress]    = useState("");
+  const [pincode,    setPincode]    = useState("");
+  const [kycDone,    setKycDone]    = useState(false);
 
   // Step 3 — Review & submit
   const [agreed, setAgreed] = useState(false);
 
   const canStep1 = title.trim().length >= 3 && category !== null;
-  const canStep2 = price.trim() !== "" && condition !== null && city !== null;
+  const canStep2 = price.trim() !== "" && condition !== null && city !== null && address.trim().length >= 5 && pincode.length === 6 && kycDone;
   const canStep3 = agreed;
 
   // ── Done ──────────────────────────────────────────────────────────────────────
@@ -108,7 +114,7 @@ export default function MarketplaceSellScreen() {
               <Text style={styles.browseBtnText}>Browse Marketplace</Text>
             </LinearGradient>
           </Pressable>
-          <Pressable onPress={() => { setStep(1); setTitle(""); setDescription(""); setCategory(null); setPrice(""); setCondition(null); setCity(null); setAgreed(false); }}
+          <Pressable onPress={() => { setStep(1); setTitle(""); setDescription(""); setCategory(null); setPhotoCount(0); setPrice(""); setNegotiable(false); setCondition(null); setCity(null); setAddress(""); setPincode(""); setKycDone(false); setAgreed(false); }}
             style={[styles.anotherBtn, { borderColor: colors.border }]}>
             <Text style={[styles.anotherBtnText, { color: colors.foreground }]}>List Another Item</Text>
           </Pressable>
@@ -198,6 +204,41 @@ export default function MarketplaceSellScreen() {
                 );
               })}
             </View>
+
+            {/* Product Photos */}
+            <Text style={[styles.fieldLabel, { color: colors.foreground }]}>Product Photos *</Text>
+            <Text style={[styles.photHint, { color: colors.mutedForeground }]}>Add clear photos to attract more buyers. Min 1 required.</Text>
+
+            <View style={styles.photoRow}>
+              <Pressable
+                style={[styles.photoBtn, { backgroundColor: colors.card, borderColor: colors.primary }]}
+                onPress={() => {
+                  Alert.alert("Upload from Gallery", "Select photos from your gallery", [{ text: "OK", onPress: () => setPhotoCount(p => Math.min(p + 1, 6)) }]);
+                }}
+              >
+                <Feather name="image" size={22} color={colors.primary} />
+                <Text style={[styles.photoBtnTxt, { color: colors.foreground }]}>Upload from Gallery</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.photoBtn, { backgroundColor: colors.card, borderColor: "#7B2FBE" }]}
+                onPress={() => {
+                  Alert.alert("Take a Photo", "Open camera to capture product photos", [{ text: "OK", onPress: () => setPhotoCount(p => Math.min(p + 1, 6)) }]);
+                }}
+              >
+                <Feather name="camera" size={22} color="#7B2FBE" />
+                <Text style={[styles.photoBtnTxt, { color: colors.foreground }]}>Take a Photo</Text>
+              </Pressable>
+            </View>
+
+            {photoCount > 0 && (
+              <View style={[styles.photoCount, { backgroundColor: "#34C75912", borderColor: "#34C75940" }]}>
+                <Feather name="check-circle" size={14} color="#34C759" />
+                <Text style={[styles.photoCountTxt, { color: "#34C759" }]}>{photoCount} photo{photoCount > 1 ? "s" : ""} added</Text>
+                <Pressable onPress={() => setPhotoCount(0)} style={{ marginLeft: "auto" }}>
+                  <Feather name="x" size={14} color={colors.mutedForeground} />
+                </Pressable>
+              </View>
+            )}
 
             <Pressable
               onPress={() => { if (canStep1) setStep(2); }}
@@ -296,6 +337,76 @@ export default function MarketplaceSellScreen() {
               })}
             </View>
 
+            {/* Full Address */}
+            <Text style={[styles.fieldLabel, { color: colors.foreground }]}>Full Address *</Text>
+            <TextInput
+              style={[styles.input, styles.textarea, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+              placeholder="House/Flat No., Street, Area, Locality"
+              placeholderTextColor={colors.mutedForeground}
+              value={address}
+              onChangeText={setAddress}
+              multiline
+              numberOfLines={3}
+              maxLength={200}
+            />
+
+            <Text style={[styles.fieldLabel, { color: colors.foreground }]}>Pincode *</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+              placeholder="6-digit pincode"
+              placeholderTextColor={colors.mutedForeground}
+              value={pincode}
+              onChangeText={v => setPincode(v.replace(/[^0-9]/g, "").slice(0, 6))}
+              keyboardType="numeric"
+              maxLength={6}
+            />
+
+            {/* KYC / Identity Verification */}
+            <View style={[styles.kycCard, { backgroundColor: kycDone ? "#34C75912" : "#2196F312", borderColor: kycDone ? "#34C75940" : "#2196F340" }]}>
+              <View style={styles.kycTop}>
+                <Feather name={kycDone ? "check-circle" : "shield"} size={20} color={kycDone ? "#34C759" : "#2196F3"} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.kycTitle, { color: colors.foreground }]}>
+                    {kycDone ? "Identity Verified ✓" : "Seller Identity Verification Required"}
+                  </Text>
+                  <Text style={[styles.kycSub, { color: colors.mutedForeground }]}>
+                    {kycDone
+                      ? "Your Aadhaar/PAN has been verified successfully."
+                      : "Upload a valid government ID (Aadhaar / PAN Card / Passport) to list your product."}
+                  </Text>
+                </View>
+              </View>
+              {!kycDone && (
+                <Pressable
+                  onPress={() => {
+                    Alert.alert(
+                      "Upload Identity Proof",
+                      "Choose document to upload",
+                      [
+                        { text: "Aadhaar Card", onPress: () => setKycDone(true) },
+                        { text: "PAN Card",     onPress: () => setKycDone(true) },
+                        { text: "Passport",     onPress: () => setKycDone(true) },
+                        { text: "Cancel", style: "cancel" },
+                      ]
+                    );
+                  }}
+                  style={[styles.kycBtn, { backgroundColor: "#2196F3" }]}
+                >
+                  <Feather name="upload" size={14} color="#fff" />
+                  <Text style={styles.kycBtnTxt}>Upload ID Proof</Text>
+                </Pressable>
+              )}
+            </View>
+
+            {!canStep2 && (
+              <View style={[styles.verifyHint, { backgroundColor: colors.muted }]}>
+                <Feather name="info" size={12} color={colors.mutedForeground} />
+                <Text style={[styles.verifyHintTxt, { color: colors.mutedForeground }]}>
+                  Fill address, 6-digit pincode, and verify your identity to proceed.
+                </Text>
+              </View>
+            )}
+
             <View style={styles.navRow}>
               <Pressable onPress={() => setStep(1)} style={[styles.backStepBtn, { borderColor: colors.border }]}>
                 <Feather name="arrow-left" size={16} color={colors.foreground} />
@@ -361,6 +472,14 @@ export default function MarketplaceSellScreen() {
               </View>
             </View>
 
+            {/* Buyer verification notice */}
+            <View style={[styles.buyerVerifyNote, { backgroundColor: "#FFB80012", borderColor: "#FFB80040" }]}>
+              <Feather name="users" size={14} color="#FFB800" />
+              <Text style={[styles.buyerVerifyTxt, { color: colors.mutedForeground }]}>
+                Only buyers with verified identity and address can purchase your listing.
+              </Text>
+            </View>
+
             {/* Terms */}
             <Pressable onPress={() => setAgreed(a => !a)}
               style={[styles.termsRow, { backgroundColor: agreed ? "#34C75912" : colors.card, borderColor: agreed ? "#34C75950" : colors.border }]}>
@@ -368,7 +487,9 @@ export default function MarketplaceSellScreen() {
                 {agreed && <Feather name="check" size={12} color="#fff" />}
               </View>
               <Text style={[styles.termsText, { color: colors.mutedForeground }]}>
-                I agree to Ridhi Marketplace Terms. My listing is genuine, legal, and accurately described. Ridhi will retain 5% on each successful sale.
+                I agree to Ridhi Marketplace Terms. My listing is genuine, legal, and accurately described. Ridhi will retain 5% on each successful sale.{"\n\n"}
+                <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.foreground }}>Important: </Text>
+                Ridhi will not and never be responsible for any buying & selling transactions on this platform. All transactions are entirely between buyer and seller at their own risk and discretion.
               </Text>
             </Pressable>
 
@@ -449,6 +570,22 @@ const styles = StyleSheet.create({
   commRowLabel:{ fontSize: 13, fontFamily: "Inter_400Regular" },
   commRowVal: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   commTotal:  { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 13 },
+  photHint:       { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17, marginTop: -8 },
+  photoRow:       { flexDirection: "row", gap: 10 },
+  photoBtn:       { flex: 1, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1.5, borderRadius: 14, borderStyle: "dashed", paddingVertical: 18 },
+  photoBtnTxt:    { fontSize: 12, fontFamily: "Inter_500Medium", textAlign: "center" },
+  photoCount:     { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 10, borderWidth: 1, padding: 10 },
+  photoCountTxt:  { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  kycCard:        { borderRadius: 14, borderWidth: 1, padding: 14, gap: 10 },
+  kycTop:         { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  kycTitle:       { fontSize: 14, fontFamily: "Inter_700Bold" },
+  kycSub:         { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 3, lineHeight: 17 },
+  kycBtn:         { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, paddingVertical: 10 },
+  kycBtnTxt:      { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  verifyHint:     { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 10, padding: 10 },
+  verifyHintTxt:  { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular" },
+  buyerVerifyNote:{ flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 10, borderWidth: 1, padding: 10 },
+  buyerVerifyTxt: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
   termsRow:   { flexDirection: "row", alignItems: "flex-start", gap: 10, borderRadius: 12, borderWidth: 1, padding: 12 },
   termsCheck: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, alignItems: "center", justifyContent: "center", marginTop: 2, flexShrink: 0 },
   termsText:  { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
