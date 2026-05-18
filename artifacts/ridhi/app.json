@@ -1,9 +1,10 @@
 {
   "expo": {
-    "name": "Ridhi",
+    "name": "Ridhi – India Social & Dating",
     "slug": "ridhi",
     "version": "1.0.0",
-    "description": "India's #1 social networking and dating app — connect, share, and find love.",
+    "description": "India's #1 social networking and dating app — meet Indians, share reels, and find love in 13 languages.",
+    "githubUrl": "https://github.com/ridhi/ridhi-app",
     "orientation": "portrait",
     "icon": "./assets/images/ridhi_logo.png",
     "scheme": "ridhi",

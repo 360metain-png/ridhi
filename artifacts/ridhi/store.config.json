@@ -1,0 +1,84 @@
+{
+  "configVersion": 0,
+
+  "apple": {
+    "info": {
+      "en-US": {
+        "title": "Ridhi – India Social & Dating",
+        "subtitle": "Meet Indians. Chat. Find Love.",
+        "description": "🇮🇳 India's #1 Social Networking & Dating App\n\nRidhi brings millions of Indians together — to share moments, make real friends, and find love, all in their own language.\n\n──────────────────────────\n✨ WHY RIDHI?\n──────────────────────────\n\n🔥 SOCIAL FEED & REELS\nShare photos, short videos, and reels with your city, your people, your culture. Follow creators, react with emojis, and go viral across India.\n\n💕 DATING & MATCHING\nSwipe, match, and connect with people who share your interests, language, and values. Smart AI filters help you find the right match in your state or anywhere in India.\n\n💬 CHAT IN YOUR LANGUAGE\nMessage in Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi, and 5 more Indian languages. Voice messages, emoji, GIFs — the way Indians really talk.\n\n🎥 LIVE STREAMS & AUDIO ROOMS\nGo live, host audio rooms, join communities, and grow your following. Earn coins and become a verified creator.\n\n🏘️ COMMUNITIES\nJoin groups based on your city, college, interests, and culture. 10+ categories including Cricket, Bollywood, Food, Tech, Fitness, and more.\n\n🎮 GAMES & PK BATTLES\nPlay casual games with friends, battle other streamers, and win prizes on the leaderboard.\n\n🪙 COIN WALLET & CREATOR EARNINGS\nSend virtual gifts, earn coins from your content, and withdraw real money. India's first creator monetisation built for regional audiences.\n\n📣 BUSINESS ADS PLATFORM\nCreate targeted ad campaigns for your business. Reach users in specific Indian states with Hindi, regional language, and interest-based targeting.\n\n──────────────────────────\n🛡️ SAFE & TRUSTED\n──────────────────────────\n• Phone-verified accounts\n• AI-powered content moderation\n• Report & block in one tap\n• KYC verification for creators\n• End-to-end encrypted chats\n\n──────────────────────────\n🌍 BUILT FOR INDIA\n──────────────────────────\n• 13 Indian languages supported\n• State & city-based discovery\n• Lightweight & optimised for Indian networks\n• Dark mode & accessibility-first design\n• Works on 2G/3G/4G/5G\n\n──────────────────────────\n📲 GET STARTED FREE\n──────────────────────────\nDownload Ridhi, sign up with your phone in 30 seconds, and start connecting with millions of Indians today. Love, friendship, community — it all starts here.\n\nFollow us: @ridhiapp\nWebsite: https://ridhi.app\nSupport: support@ridhi.app",
+        "keywords": [
+          "dating india",
+          "indian social app",
+          "meet indians",
+          "hindi dating",
+          "shaadi app",
+          "desi dating",
+          "india chat",
+          "love india",
+          "indian friends",
+          "reels india",
+          "social india",
+          "indian match",
+          "girl boy meet",
+          "india community"
+        ],
+        "releaseNotes": "🎉 What's New in Ridhi v1.0\n\n• Smart state-based ad targeting — reach users in specific Indian states\n• Ad image upload with live campaign preview\n• Faster app startup — 60% lighter on first load\n• Icon rendering improved across all screens\n• Bug fixes and performance improvements\n\nLove Ridhi? Leave us a ⭐⭐⭐⭐⭐ review — it helps more Indians discover us!",
+        "marketingUrl": "https://ridhi.app",
+        "supportUrl": "https://ridhi.app/support",
+        "privacyPolicyUrl": "https://ridhi.app/privacy"
+      },
+      "hi": {
+        "title": "रिधि – भारतीय सोशल ऐप",
+        "subtitle": "मिलें, बात करें, प्यार पाएं",
+        "description": "🇮🇳 भारत का नंबर 1 सोशल नेटवर्किंग और डेटिंग ऐप\n\nरिधि पर लाखों भारतीयों से मिलें — अपनी भाषा में बात करें, रील्स शेयर करें, और सच्चा प्यार पाएं।\n\n✨ रिधि क्यों?\n• अपनी भाषा में चैट करें — हिंदी, तमिल, तेलुगु, बंगाली और 9 अन्य भाषाएं\n• स्वाइप करें और अपने राज्य के लोगों से मिलें\n• रील्स और लाइव स्ट्रीम से पैसे कमाएं\n• अपने शहर और कॉलेज के कम्युनिटी में जुड़ें\n\nआज ही डाउनलोड करें — बिल्कुल फ्री!",
+        "keywords": [
+          "भारतीय डेटिंग",
+          "हिंदी सोशल ऐप",
+          "शादी ऐप",
+          "भारत चैट",
+          "दोस्त बनाएं",
+          "रील्स इंडिया"
+        ],
+        "releaseNotes": "🎉 रिधि v1.0 में नया क्या है\n• राज्य-आधारित विज्ञापन टार्गेटिंग\n• तेज़ ऐप लोडिंग\n• बग फिक्स और बेहतर परफॉर्मेंस"
+      }
+    },
+    "categories": ["SOCIAL_NETWORKING", "LIFESTYLE"],
+    "ageRating": {
+      "ageRatingOverride": "17+"
+    },
+    "reviewInformation": {
+      "firstName": "Ridhi",
+      "lastName": "Support",
+      "phoneNumber": "+91-9999999999",
+      "emailAddress": "review@ridhi.app",
+      "demoUsername": "demo_user",
+      "demoPassword": "Demo@1234",
+      "notes": "This is a social networking and dating app for Indian users. Login with phone number OTP. A demo OTP will be shown on screen in demo mode. Please use the demo credentials provided above to access the app without real SMS."
+    }
+  },
+
+  "googlePlay": {
+    "info": {
+      "en-US": {
+        "title": "Ridhi – India Social Dating App",
+        "shortDescription": "Meet Indians, share reels & find love in 13 languages. India's #1 app.",
+        "fullDescription": "🇮🇳 RIDHI — INDIA'S #1 SOCIAL NETWORKING & DATING APP\n\nConnect with millions of Indians, share your moments, and find love — all in your language, your way.\n\n──────────────────────────\n🔥 TOP FEATURES\n──────────────────────────\n\n📸 SOCIAL FEED & VIRAL REELS\nPost photos, short videos, and reels. Go viral across India. React, comment, and share with millions of users from your city and beyond.\n\n💕 SMART DATING & MATCHING\nSwipe right, match, and chat. Advanced AI filters find people by state, language, interests, and age. Your perfect match is waiting on Ridhi.\n\n💬 CHAT IN 13 INDIAN LANGUAGES\nHindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi, Malayalam, Odia, Assamese, Urdu, and English. Voice messages, GIFs, and stickers.\n\n🎥 LIVE STREAMS & AUDIO ROOMS\nGo live from anywhere in India. Host audio rooms, earn virtual gifts, and grow your fanbase. Verified creator programme available.\n\n🏘️ 10+ COMMUNITIES\nJoin groups by city, college, interest. Cricket, Bollywood, Food, Fitness, Tech, Travel, Business, and more.\n\n🎮 GAMES & PK BATTLES\nPlay mini-games, challenge streamers in PK battles, and win real prizes on weekly leaderboards.\n\n🪙 EARN REAL MONEY\nCreators earn through coins, gifts, brand deals, and the Ridhi Partner Programme. Withdraw directly to UPI or bank account.\n\n📣 BUSINESS ADVERTISING\nBusinesses can create targeted ads reaching users in specific Indian states with Hindi and regional language targeting. Start from ₹100/day.\n\n──────────────────────────\n🛡️ SAFETY & PRIVACY\n──────────────────────────\n✅ Phone-verified accounts only\n✅ AI-powered content moderation 24/7\n✅ End-to-end encrypted private chats\n✅ KYC verification for top creators\n✅ One-tap block & report\n✅ Privacy controls for every post\n\n──────────────────────────\n🌍 MADE FOR INDIA\n──────────────────────────\n🗣 13 Indian languages\n📍 State & city-based discovery\n⚡ Optimised for Indian networks (2G/3G/4G/5G)\n🌙 Dark mode & Light mode\n♿ Accessibility-first design\n📱 Works on all Android devices (Android 6+)\n\n──────────────────────────\n📲 JOIN MILLIONS OF INDIANS\n──────────────────────────\nSign up free in 30 seconds with your phone number. No email required. Ridhi — where India connects.\n\n🌐 ridhi.app | 📧 support@ridhi.app | 📱 @ridhiapp",
+        "video": ""
+      },
+      "hi-IN": {
+        "title": "रिधि – भारतीय सोशल डेटिंग ऐप",
+        "shortDescription": "13 भाषाओं में मिलें, रील्स शेयर करें और प्यार पाएं। भारत का #1 ऐप।",
+        "fullDescription": "🇮🇳 रिधि — भारत का नंबर 1 सोशल नेटवर्किंग और डेटिंग ऐप\n\nलाखों भारतीयों से जुड़ें, अपने पल शेयर करें और अपनी भाषा में प्यार पाएं।\n\n🔥 मुख्य विशेषताएं:\n• सोशल फीड और वायरल रील्स\n• स्मार्ट डेटिंग और मैचिंग (AI-आधारित)\n• 13 भारतीय भाषाओं में चैट\n• लाइव स्ट्रीम और ऑडियो रूम\n• 10+ कम्युनिटी\n• पैसे कमाएं — UPI पर निकालें\n\n30 सेकंड में मुफ़्त साइन अप करें!"
+      }
+    },
+    "categories": {
+      "appCategory": "SOCIAL",
+      "appSubCategory": "COMMUNICATION"
+    },
+    "contentRating": {
+      "androidTvContentRating": "NOT_APPLICABLE",
+      "ageGroup": "MATURE"
+    }
+  }
+}
