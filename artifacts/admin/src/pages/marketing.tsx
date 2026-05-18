@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   Bell, Megaphone, Send, Clock, Users, Eye, CheckCircle2, Plus,
-  MessageSquare, Mail, MessageCircle, Smartphone, Globe, BarChart2,
-  Zap, Target, TrendingUp, AlertCircle,
+  MessageSquare, Mail, Smartphone, BarChart2,
+  Target, TrendingUp, AlertCircle, Tag, X, Pencil, Trash2, Play, Pause,
 } from "lucide-react";
 import { mockCampaigns, type Campaign } from "@/data/mock-data";
 import { useToast } from "@/hooks/use-toast";
@@ -481,51 +482,299 @@ function EmailTab() {
   );
 }
 
+// ── New Campaign Modal ────────────────────────────────────────────────────────
+const CAMPAIGN_TYPES = [
+  { value: "Push",     label: "Push Notification", icon: Bell,          color: "text-violet-400" },
+  { value: "SMS",      label: "SMS",                icon: Smartphone,    color: "text-blue-400"   },
+  { value: "WhatsApp", label: "WhatsApp Broadcast", icon: MessageSquare, color: "text-emerald-400"},
+  { value: "Email",    label: "Email Campaign",     icon: Mail,          color: "text-amber-400"  },
+  { value: "Multi",    label: "Multi-Channel",      icon: Megaphone,     color: "text-pink-400"   },
+];
+
+const PROMO_CATEGORIES = [
+  "Festival Offer", "Discount / Coupon", "New Feature", "Re-engagement",
+  "Referral Program", "Flash Sale", "VIP / Premium Upgrade", "Event Announcement",
+];
+
+function NewCampaignModal({ open, onClose, onSave }: {
+  open: boolean;
+  onClose: () => void;
+  onSave: (c: Campaign) => void;
+}) {
+  const { toast } = useToast();
+  const [name,       setName]       = useState("");
+  const [type,       setType]       = useState("Push");
+  const [category,   setCategory]   = useState("Festival Offer");
+  const [audience,   setAudience]   = useState("all");
+  const [message,    setMessage]    = useState("");
+  const [promoCode,  setPromoCode]  = useState("");
+  const [startDate,  setStartDate]  = useState("");
+  const [endDate,    setEndDate]    = useState("");
+  const [loading,    setLoading]    = useState(false);
+
+  const reset = () => { setName(""); setType("Push"); setCategory("Festival Offer"); setAudience("all"); setMessage(""); setPromoCode(""); setStartDate(""); setEndDate(""); };
+
+  const handleSave = async () => {
+    if (!name.trim() || !message.trim() || !startDate || !endDate) {
+      toast({ title: "Missing fields", description: "Fill in name, message and dates.", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 900));
+    setLoading(false);
+    const newC: Campaign = {
+      id: `c-${Date.now()}`,
+      name: name.trim(),
+      type,
+      reach: Math.floor(Math.random() * 80000) + 20000,
+      clicks: 0,
+      conversions: 0,
+      status: "Draft",
+      startDate,
+      endDate,
+    };
+    onSave(newC);
+    toast({ title: "✅ Campaign Created", description: `"${name}" saved as Draft. Activate it to start sending.` });
+    reset();
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-primary" /> New Marketing Campaign
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5 py-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 space-y-1.5">
+              <Label className="text-sm font-medium">Campaign Name</Label>
+              <Input placeholder="e.g. Diwali 2025 Coins Offer" className="bg-background border-border" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Channel</Label>
+              <Select value={type} onValueChange={setType}>
+                <SelectTrigger className="bg-background border-border">
+                  <SelectValue>
+                    {(() => { const t = CAMPAIGN_TYPES.find((x) => x.value === type); return t ? <span className="flex items-center gap-2"><t.icon className={`w-3.5 h-3.5 ${t.color}`} />{t.label}</span> : null; })()}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {CAMPAIGN_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      <span className="flex items-center gap-2"><t.icon className={`w-3.5 h-3.5 ${t.color}`} />{t.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Campaign Category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PROMO_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="col-span-2 space-y-1.5">
+              <Label className="text-sm font-medium">Target Audience</Label>
+              <AudienceSelect value={audience} onChange={setAudience} />
+            </div>
+
+            <div className="col-span-2 space-y-1.5">
+              <Label className="text-sm font-medium">Message / Creative</Label>
+              <Textarea
+                placeholder="Write your promotional message here… Use {name} for personalisation."
+                className="bg-background border-border resize-none"
+                rows={4}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={320}
+              />
+              <p className="text-xs text-muted-foreground text-right">{message.length}/320</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium flex items-center gap-1.5"><Tag className="w-3.5 h-3.5 text-muted-foreground" /> Promo Code (optional)</Label>
+              <Input placeholder="e.g. DIWALI50" className="bg-background border-border font-mono uppercase" value={promoCode} onChange={(e) => setPromoCode(e.target.value.toUpperCase())} maxLength={16} />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-muted-foreground" /> Start Date</Label>
+                  <Input type="date" className="bg-background border-border" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-muted-foreground" /> End Date</Label>
+                  <Input type="date" className="bg-background border-border" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </div>
+              </div>
+            </div>
+
+            {message && (
+              <div className="col-span-2 space-y-1.5">
+                <Label className="text-sm font-medium">Preview</Label>
+                <div className="bg-background border border-border rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg,#7B2FBE,#E91E8C)" }}>
+                      {(() => { const t = CAMPAIGN_TYPES.find((x) => x.value === type); return t ? <t.icon className="w-4 h-4 text-white" /> : <Bell className="w-4 h-4 text-white" />; })()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-sm font-semibold text-foreground truncate">{name || "Campaign Name"}</p>
+                        {promoCode && <Badge variant="outline" className="text-xs font-mono border-primary/30 text-primary">{promoCode}</Badge>}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{message}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">now · Ridhi · {category}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => { reset(); onClose(); }} className="border-border">
+            <X className="w-3.5 h-3.5 mr-1.5" /> Cancel
+          </Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSave} disabled={loading}>
+            {loading
+              ? <span className="flex items-center gap-2"><span className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />Saving…</span>
+              : <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5" />Create Campaign</span>}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Campaigns Tab ────────────────────────────────────────────────────────────
 function CampaignsTab({ campaigns, setCampaigns }: { campaigns: Campaign[]; setCampaigns: (c: Campaign[]) => void }) {
+  const { toast } = useToast();
+  const [showModal, setShowModal] = useState(false);
+  const [filter, setFilter] = useState<"All" | "Draft" | "Active" | "Completed">("All");
+
+  const filtered = filter === "All" ? campaigns : campaigns.filter((c) => c.status === filter);
+
+  const toggleStatus = (id: string) => {
+    setCampaigns(campaigns.map((c) => {
+      if (c.id !== id) return c;
+      const next = c.status === "Active" ? "Draft" : c.status === "Draft" ? "Active" : c.status;
+      toast({ title: next === "Active" ? "▶ Campaign Activated" : "⏸ Campaign Paused", description: `"${c.name}" is now ${next}.` });
+      return { ...c, status: next };
+    }));
+  };
+
+  const deleteCampaign = (id: string) => {
+    const c = campaigns.find((x) => x.id === id);
+    setCampaigns(campaigns.filter((x) => x.id !== id));
+    toast({ title: "🗑 Campaign Deleted", description: `"${c?.name}" was removed.` });
+  };
+
+  const FILTER_TABS: Array<"All" | "Draft" | "Active" | "Completed"> = ["All", "Active", "Draft", "Completed"];
+
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold">Marketing Campaigns</CardTitle>
-          <Button size="sm" className="h-8 bg-primary hover:bg-primary/90 text-xs">
+    <>
+      <NewCampaignModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={(c) => setCampaigns([c, ...campaigns])}
+      />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-1 bg-muted/40 rounded-lg p-1">
+            {FILTER_TABS.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filter === f ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {f}
+                {f !== "All" && (
+                  <span className="ml-1.5 opacity-70">({campaigns.filter((c) => c.status === f).length})</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <Button size="sm" className="h-8 bg-primary hover:bg-primary/90 text-xs" onClick={() => setShowModal(true)}>
             <Plus className="w-3.5 h-3.5 mr-1" /> New Campaign
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-muted-foreground text-xs font-semibold">Campaign</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold">Channel</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold text-right">Reach</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold text-right">Clicks</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold text-right">Conv.</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold">Duration</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {campaigns.map((c) => (
-              <TableRow key={c.id} className="border-border hover:bg-muted/30">
-                <TableCell className="font-medium text-foreground text-sm">{c.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="text-xs border-border text-muted-foreground">{c.type}</Badge>
-                </TableCell>
-                <TableCell className="text-right text-sm text-muted-foreground">{(c.reach / 1000).toFixed(0)}K</TableCell>
-                <TableCell className="text-right text-sm text-foreground font-medium">{c.clicks.toLocaleString()}</TableCell>
-                <TableCell className="text-right text-sm text-emerald-400 font-semibold">{c.conversions}</TableCell>
-                <TableCell className="text-xs text-muted-foreground">{c.startDate} → {c.endDate}</TableCell>
-                <TableCell>
-                  <Badge className={`text-xs border ${CAMPAIGN_STATUS[c.status]}`}>{c.status}</Badge>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+
+        <Card className="bg-card border-border">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-border hover:bg-transparent">
+                  <TableHead className="text-muted-foreground text-xs font-semibold">Campaign</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold">Channel</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold text-right">Reach</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold text-right">Clicks</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold text-right">Conv.</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold">Duration</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold">Status</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground text-sm py-8">
+                      No campaigns found. Create one to get started.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {filtered.map((c) => (
+                  <TableRow key={c.id} className="border-border hover:bg-muted/30">
+                    <TableCell className="font-medium text-foreground text-sm max-w-[180px] truncate">{c.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs border-border text-muted-foreground">{c.type}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-sm text-muted-foreground">{(c.reach / 1000).toFixed(0)}K</TableCell>
+                    <TableCell className="text-right text-sm text-foreground font-medium">{c.clicks.toLocaleString()}</TableCell>
+                    <TableCell className="text-right text-sm text-emerald-400 font-semibold">{c.conversions}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{c.startDate} → {c.endDate}</TableCell>
+                    <TableCell>
+                      <Badge className={`text-xs border ${CAMPAIGN_STATUS[c.status]}`}>{c.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {c.status !== "Completed" && (
+                          <button
+                            onClick={() => toggleStatus(c.id)}
+                            className={`p-1.5 rounded-md hover:bg-muted/60 transition-colors ${c.status === "Active" ? "text-amber-400" : "text-emerald-400"}`}
+                            title={c.status === "Active" ? "Pause" : "Activate"}
+                          >
+                            {c.status === "Active" ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteCampaign(c.id)}
+                          className="p-1.5 rounded-md hover:bg-muted/60 text-muted-foreground hover:text-red-400 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
 

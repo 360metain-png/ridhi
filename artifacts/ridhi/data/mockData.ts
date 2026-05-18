@@ -700,14 +700,141 @@ export const CHATS: ChatPreview[] = [
 ];
 
 export const NOTIFICATIONS = [
-  { id: "n1", type: "like", actor: "Ananya Singh", content: "liked your photo", timeAgo: "5m", read: false },
-  { id: "n2", type: "match", actor: "Shreya Kapoor", content: "you have a new match!", timeAgo: "20m", read: false },
-  { id: "n3", type: "comment", actor: "Rahul Mehta", content: "commented: \"Wow amazing shot!\"", timeAgo: "1h", read: false },
-  { id: "n4", type: "coin", actor: "System", content: "Daily login reward: +10 coins", timeAgo: "2h", read: true },
-  { id: "n5", type: "follow", actor: "Kavya Reddy", content: "started following you", timeAgo: "3h", read: true },
-  { id: "n6", type: "match", actor: "Pooja Nair", content: "you have a new match!", timeAgo: "5h", read: true },
-  { id: "n7", type: "like", actor: "Meera Patel", content: "liked your post", timeAgo: "1d", read: true },
-  { id: "n8", type: "coin", actor: "System", content: "Referral reward: +50 coins added", timeAgo: "2d", read: true },
+  { id: "n1", type: "like",    actor: "Ananya Singh",  content: "liked your photo",                  timeAgo: "5m",  read: false },
+  { id: "n2", type: "match",   actor: "Shreya Kapoor", content: "you have a new match!",             timeAgo: "20m", read: false },
+  { id: "n3", type: "comment", actor: "Rahul Mehta",   content: "commented: \"Wow amazing shot!\"",  timeAgo: "1h",  read: false },
+  { id: "n4", type: "coin",    actor: "System",        content: "Daily login reward: +10 coins",     timeAgo: "2h",  read: true  },
+  { id: "n5", type: "follow",  actor: "Kavya Reddy",   content: "started following you",             timeAgo: "3h",  read: true  },
+  { id: "n6", type: "match",   actor: "Pooja Nair",    content: "you have a new match!",             timeAgo: "5h",  read: true  },
+  { id: "n7", type: "like",    actor: "Meera Patel",   content: "liked your post",                   timeAgo: "1d",  read: true  },
+  { id: "n8", type: "coin",    actor: "System",        content: "Referral reward: +50 coins added",  timeAgo: "2d",  read: true  },
+];
+
+export interface MarketingNotification {
+  id: string;
+  type: "offer" | "discount" | "news" | "promo";
+  title: string;
+  body: string;
+  channel: "push" | "sms" | "whatsapp" | "email" | "inapp";
+  cta: string;
+  ctaRoute: string;
+  code?: string;
+  expiresIn?: string;
+  tag?: string;
+  gradient: [string, string];
+  icon: string;
+  timeAgo: string;
+  read: boolean;
+}
+
+export const MARKETING_NOTIFICATIONS: MarketingNotification[] = [
+  {
+    id: "m1",
+    type: "offer",
+    title: "🪔 Diwali Special: 2× Coins!",
+    body: "Recharge any pack today and get double coins. Limited-time Diwali gift from Team Ridhi!",
+    channel: "push",
+    cta: "Claim Now",
+    ctaRoute: "/wallet",
+    code: "DIWALI2X",
+    expiresIn: "Expires in 18 hours",
+    tag: "Festival Offer",
+    gradient: ["#FF6B35", "#F7C59F"],
+    icon: "🪔",
+    timeAgo: "10m",
+    read: false,
+  },
+  {
+    id: "m2",
+    type: "discount",
+    title: "💜 50% Off — Premium Upgrade",
+    body: "Upgrade to Ridhi Premium and enjoy unlimited likes, super swipes & profile boost at half the price.",
+    channel: "whatsapp",
+    cta: "Upgrade Now",
+    ctaRoute: "/wallet",
+    code: "PREMIUM50",
+    expiresIn: "Ends in 2 days",
+    tag: "Members Only",
+    gradient: ["#7B2FBE", "#E91E8C"],
+    icon: "💜",
+    timeAgo: "1h",
+    read: false,
+  },
+  {
+    id: "m3",
+    type: "news",
+    title: "🚀 Reels 2.0 is Live!",
+    body: "Record & post 60-second reels with duet mode, music tracks & AR filters. Available for all users now!",
+    channel: "push",
+    cta: "Try Reels",
+    ctaRoute: "/(tabs)/reels",
+    tag: "New Feature",
+    gradient: ["#4A90E2", "#7B2FBE"],
+    icon: "🚀",
+    timeAgo: "3h",
+    read: false,
+  },
+  {
+    id: "m4",
+    type: "promo",
+    title: "🎁 Refer & Earn ₹50 Per Friend",
+    body: "Invite your friends to Ridhi and earn ₹50 per successful sign-up — no limit! Your current earnings: ₹0",
+    channel: "sms",
+    cta: "Invite Friends",
+    ctaRoute: "/(tabs)/profile",
+    code: "INVITE50",
+    tag: "Earn Money",
+    gradient: ["#34C759", "#00B4D8"],
+    icon: "🎁",
+    timeAgo: "6h",
+    read: true,
+  },
+  {
+    id: "m5",
+    type: "discount",
+    title: "⚡ Flash Sale: 500 Coins at ₹199",
+    body: "Our biggest coin discount ever — 500 coins for just ₹199 (50% off regular price). Only 4 hours left!",
+    channel: "email",
+    cta: "Buy Now",
+    ctaRoute: "/wallet",
+    code: "FLASH500",
+    expiresIn: "Expires in 4 hours",
+    tag: "Flash Sale",
+    gradient: ["#FF9500", "#FF3B30"],
+    icon: "⚡",
+    timeAgo: "2h",
+    read: true,
+  },
+  {
+    id: "m6",
+    type: "news",
+    title: "📢 IPL Season — Live Reactions!",
+    body: "Watch IPL matches and react live with your friends on Ridhi. Special IPL frames & stickers available now.",
+    channel: "whatsapp",
+    cta: "Join Now",
+    ctaRoute: "/(tabs)",
+    tag: "Live Event",
+    gradient: ["#1D4ED8", "#F59E0B"],
+    icon: "📢",
+    timeAgo: "1d",
+    read: true,
+  },
+  {
+    id: "m7",
+    type: "offer",
+    title: "🌟 VIP Membership — First Month Free",
+    body: "Try Ridhi VIP free for 30 days. Enjoy profile boosts, priority matching, and ad-free experience.",
+    channel: "email",
+    cta: "Start Free Trial",
+    ctaRoute: "/wallet",
+    code: "VIP30FREE",
+    expiresIn: "Offer ends Sunday",
+    tag: "VIP Exclusive",
+    gradient: ["#7B2FBE", "#C084FC"],
+    icon: "🌟",
+    timeAgo: "2d",
+    read: true,
+  },
 ];
 
 export const COIN_PACKAGES = [
