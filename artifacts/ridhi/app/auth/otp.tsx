@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -12,6 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+import { apiFetch, ApiError } from "@/utils/api";
 
 const OTP_LENGTH = 6;
 
@@ -21,7 +22,10 @@ export default function OtpScreen() {
   const insets = useSafeAreaInsets();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [timer, setTimer] = useState(30);
+  const [error, setError] = useState("");
+  const [resendMsg, setResendMsg] = useState("");
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -29,32 +33,71 @@ export default function OtpScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleChange = (text: string, index: number) => {
+  const handleChange = useCallback((text: string, index: number) => {
     const digit = text.replace(/[^0-9]/g, "").slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = digit;
-    setOtp(newOtp);
+    setOtp((prev) => {
+      const next = [...prev];
+      next[index] = digit;
+      return next;
+    });
+    setError("");
     if (digit && index < OTP_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-  };
+  }, []);
 
-  const handleKeyPress = (key: string, index: number) => {
+  const handleKeyPress = useCallback((key: string, index: number) => {
     if (key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
-      const newOtp = [...otp];
-      newOtp[index - 1] = "";
-      setOtp(newOtp);
+      setOtp((prev) => {
+        const next = [...prev];
+        next[index - 1] = "";
+        return next;
+      });
     }
-  };
+  }, [otp]);
 
   const isComplete = otp.every((d) => d !== "");
 
   const handleVerify = async () => {
+    if (!isComplete) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    router.replace("/auth/profile-setup");
+    setError("");
+    try {
+      await apiFetch("/api/auth/verify-otp", {
+        method: "POST",
+        body: JSON.stringify({ contact, type, otp: otp.join("") }),
+      });
+      router.replace("/auth/profile-setup");
+    } catch (err: unknown) {
+      const msg = err instanceof ApiError ? err.message : "Verification failed. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (timer > 0 || resendLoading) return;
+    setResendLoading(true);
+    setResendMsg("");
+    setError("");
+    try {
+      await apiFetch("/api/auth/resend-otp", {
+        method: "POST",
+        body: JSON.stringify({ contact, type }),
+      });
+      setTimer(30);
+      setOtp(Array(OTP_LENGTH).fill(""));
+      inputRefs.current[0]?.focus();
+      setResendMsg("OTP resent successfully");
+      setTimeout(() => setResendMsg(""), 3000);
+    } catch (err: unknown) {
+      const msg = err instanceof ApiError ? err.message : "Failed to resend OTP.";
+      setError(msg);
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -85,7 +128,11 @@ export default function OtpScreen() {
                 styles.otpBox,
                 {
                   backgroundColor: colors.muted,
-                  borderColor: digit ? colors.primary : colors.border,
+                  borderColor: error
+                    ? "#FF3B30"
+                    : digit
+                    ? colors.primary
+                    : colors.border,
                   color: colors.foreground,
                 },
               ]}
@@ -100,22 +147,34 @@ export default function OtpScreen() {
           ))}
         </View>
 
+        {!!error && (
+          <Text style={styles.errorText}>{error}</Text>
+        )}
+
+        {!!resendMsg && (
+          <Text style={[styles.successText, { color: colors.primary }]}>{resendMsg}</Text>
+        )}
+
         <GradientButton
           label="Verify & Continue"
           onPress={handleVerify}
           loading={loading}
-          disabled={!isComplete}
+          disabled={!isComplete || loading}
           style={{ width: "100%" }}
         />
 
         <Pressable
-          disabled={timer > 0}
+          disabled={timer > 0 || resendLoading}
           style={styles.resend}
-          onPress={() => setTimer(30)}
+          onPress={handleResend}
         >
-          <Text style={[styles.resendText, { color: timer > 0 ? colors.mutedForeground : colors.primary }]}>
-            {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
-          </Text>
+          {resendLoading ? (
+            <Text style={[styles.resendText, { color: colors.mutedForeground }]}>Sending…</Text>
+          ) : (
+            <Text style={[styles.resendText, { color: timer > 0 ? colors.mutedForeground : colors.primary }]}>
+              {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+            </Text>
+          )}
         </Pressable>
       </View>
     </View>
@@ -150,6 +209,19 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     fontSize: 22,
     fontFamily: "Inter_700Bold",
+  },
+  errorText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#FF3B30",
+    textAlign: "center",
+    marginTop: -12,
+  },
+  successText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    textAlign: "center",
+    marginTop: -12,
   },
   resend: { paddingVertical: 4 },
   resendText: { fontSize: 14, fontFamily: "Inter_500Medium" },

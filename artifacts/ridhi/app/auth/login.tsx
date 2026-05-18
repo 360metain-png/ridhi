@@ -81,9 +81,19 @@ export default function LoginScreen() {
   const handleContinue = async () => {
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    router.push({ pathname: "/auth/otp", params: { contact: value.trim(), type: tab } });
+    try {
+      const { apiFetch } = await import("@/utils/api");
+      await apiFetch("/api/auth/send-otp", {
+        method: "POST",
+        body: JSON.stringify({ contact: value.trim(), type: tab }),
+      });
+      router.push({ pathname: "/auth/otp", params: { contact: value.trim(), type: tab } });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send OTP. Please try again.";
+      setInputError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = async (provider: string) => {
