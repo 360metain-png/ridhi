@@ -22,6 +22,8 @@ type JobType = "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
 type SalaryUnit = "Month" | "Day" | "Hour" | "Project";
 type Experience = "Fresher" | "0–1 yr" | "1–3 yrs" | "3–5 yrs" | "5–10 yrs" | "10+ yrs";
 
+const JOB_POST_COST = 50; // coins deducted per job posting
+
 const CATEGORIES = [
   "IT & Tech", "Healthcare", "Education", "Finance", "Retail",
   "Construction", "Hospitality", "Transport", "Marketing", "Design",
@@ -122,7 +124,7 @@ function Field({ label, required, colors, children }: {
 export default function JobsPostScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, deductCoins } = useAuth();
 
   const [title,      setTitle]      = useState("");
   const [company,    setCompany]    = useState("");
@@ -140,11 +142,26 @@ export default function JobsPostScreen() {
   const [experience, setExperience] = useState<Experience | "">("");
   const [openings,   setOpenings]   = useState("1");
   const [submitted,  setSubmitted]  = useState(false);
+  const [posting,    setPosting]    = useState(false);
+  const [coinError,  setCoinError]  = useState(false);
 
   const verifiedPhone = user?.phone ?? "";
   const verifiedEmail = user?.email ?? "";
+  const userCoins = user?.coins ?? 0;
 
-  const canSubmit = title.trim() && company.trim() && category && jobType && jobState && jobDistrict && salaryMin && desc.trim() && (verifiedPhone || verifiedEmail);
+  const canSubmit = !!(title.trim() && company.trim() && category && jobType && jobState && jobDistrict && salaryMin && desc.trim() && (verifiedPhone || verifiedEmail));
+
+  const handlePost = async () => {
+    if (!canSubmit || posting) return;
+    setPosting(true);
+    const ok = await deductCoins(JOB_POST_COST);
+    setPosting(false);
+    if (ok) {
+      setSubmitted(true);
+    } else {
+      setCoinError(true);
+    }
+  };
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -156,97 +173,40 @@ export default function JobsPostScreen() {
 
   const inputStyle = [fpStyles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }];
 
-  const userPlan = user?.plan ?? "free";
-  const isPremium = userPlan !== "free";
-
-  if (!isPremium) {
+  if (coinError) {
     return (
       <View style={[fpStyles.container, { backgroundColor: colors.background }]}>
-        <LinearGradient
-          colors={["#E91E8C", "#7B2FBE"]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-          style={[fpStyles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 10 : 0) }]}
-        >
-          <View style={fpStyles.header}>
-            <Pressable onPress={() => router.back()} style={fpStyles.backBtn}>
-              <Feather name="arrow-left" size={20} color="#fff" />
-            </Pressable>
-            <View style={{ flex: 1 }}>
-              <Text style={fpStyles.headerTitle}>Post a Job</Text>
-              <Text style={fpStyles.headerSub}>Premium feature</Text>
-            </View>
+        <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={[fpStyles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 10 : 0) }]}>
+          <Pressable onPress={() => router.back()} style={fpStyles.backBtn}>
+            <Feather name="arrow-left" size={20} color="#fff" />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={fpStyles.headerTitle}>Post a Job</Text>
+            <Text style={fpStyles.headerSub}>Costs {JOB_POST_COST} coins</Text>
           </View>
         </LinearGradient>
-
-        <ScrollView contentContainerStyle={[fpStyles.scroll, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
-          {/* Lock illustration */}
-          <View style={[fpStyles.paywallHero, { borderColor: "#E91E8C40" }]}>
-            <LinearGradient
-              colors={["#E91E8C22", "#7B2FBE22"]}
-              style={fpStyles.paywallIconWrap}
-            >
-              <Feather name="award" size={52} color="#E91E8C" />
-            </LinearGradient>
-            <Text style={[fpStyles.paywallTitle, { color: colors.foreground }]}>Premium Members Only</Text>
-            <Text style={[fpStyles.paywallSub, { color: colors.mutedForeground }]}>
-              Job posting is a premium feature. Upgrade to Silver or above to post jobs and reach thousands of candidates near you — for free.
-            </Text>
+        <View style={[fpStyles.successWrap, { paddingTop: insets.top + 40 }]}>
+          <View style={[fpStyles.successIcon, { backgroundColor: "#FF3B3022" }]}>
+            <Feather name="alert-circle" size={52} color="#FF3B30" />
           </View>
-
-          {/* Benefits list */}
-          <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>What you unlock</Text>
-          <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border, gap: 12 }]}>
-            {[
-              { icon: "briefcase", color: "#E91E8C", text: "Post unlimited job listings for free" },
-              { icon: "check-circle", color: "#34C759", text: "Verified phone & email shown to applicants" },
-              { icon: "map-pin", color: "#7B2FBE", text: "Reach candidates across any state or district" },
-              { icon: "users", color: "#2196F3", text: "Tap into Ridhi's growing talent network" },
-              { icon: "shield", color: "#FF9500", text: "Trusted — listings from verified Ridhi users" },
-              { icon: "trending-up", color: "#FFB800", text: "Priority placement in search results" },
-            ].map(({ icon, color, text }) => (
-              <View key={text} style={fpStyles.benefitRow}>
-                <View style={[fpStyles.benefitIcon, { backgroundColor: color + "20" }]}>
-                  <Feather name={icon as any} size={16} color={color} />
-                </View>
-                <Text style={[fpStyles.benefitText, { color: colors.foreground }]}>{text}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Plan chips */}
-          <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>Choose a plan</Text>
-          <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border, gap: 10 }]}>
-            {[
-              { id: "silver", name: "Silver",      price: "₹99/mo",  color: "#A0A0A0", icon: "shield"  },
-              { id: "gold",   name: "Gold",        price: "₹249/mo", color: "#FFB800", icon: "award"   },
-              { id: "vip",    name: "VIP Diamond", price: "₹599/mo", color: "#E91E8C", icon: "zap"     },
-            ].map((p) => (
-              <View key={p.id} style={[fpStyles.planRow, { backgroundColor: p.color + "12", borderColor: p.color + "40" }]}>
-                <Feather name={p.icon as any} size={18} color={p.color} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[fpStyles.planName, { color: colors.foreground }]}>{p.name}</Text>
-                </View>
-                <Text style={[fpStyles.planPrice, { color: p.color }]}>{p.price}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* CTA */}
-          <Pressable onPress={() => router.push("/subscription" as any)}>
-            <LinearGradient
-              colors={["#E91E8C", "#7B2FBE"]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={fpStyles.submitBtn}
-            >
-              <Feather name="zap" size={18} color="#fff" />
-              <Text style={fpStyles.submitText}>Upgrade to Post Jobs</Text>
+          <Text style={[fpStyles.successTitle, { color: colors.foreground }]}>Not Enough Coins</Text>
+          <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>
+            Posting a job costs{" "}
+            <Text style={{ color: "#E91E8C", fontFamily: "Inter_700Bold" }}>🪙 {JOB_POST_COST} coins</Text>.
+            {"\n"}Your balance: <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {userCoins}</Text>
+            {"\n\n"}Recharge your Ridhi Wallet to continue.
+          </Text>
+          <Pressable onPress={() => router.push("/wallet" as any)} style={fpStyles.successBtn}>
+            <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={fpStyles.successBtnGrad}>
+              <Feather name="zap" size={16} color="#fff" />
+              <Text style={fpStyles.successBtnText}>Recharge Wallet</Text>
             </LinearGradient>
           </Pressable>
-
-          <Pressable onPress={() => router.back()} style={{ alignItems: "center", marginTop: 16 }}>
-            <Text style={[fpStyles.disclaimer, { color: colors.mutedForeground }]}>Maybe later — go back</Text>
+          <Pressable onPress={() => setCoinError(false)} style={{ marginTop: 12 }}>
+            <Text style={[fpStyles.postAnotherLink, { color: colors.mutedForeground }]}>← Back to form</Text>
           </Pressable>
-        </ScrollView>
+        </View>
       </View>
     );
   }
@@ -262,6 +222,12 @@ export default function JobsPostScreen() {
             <Feather name="check-circle" size={56} color="#E91E8C" />
           </LinearGradient>
           <Text style={[fpStyles.successTitle, { color: colors.foreground }]}>Job Posted!</Text>
+          <View style={[fpStyles.coinDeductedBadge, { backgroundColor: "#7B2FBE18", borderColor: "#7B2FBE30" }]}>
+            <Text style={{ fontSize: 14 }}>🪙</Text>
+            <Text style={[fpStyles.coinDeductedText, { color: "#7B2FBE" }]}>
+              {JOB_POST_COST} coins deducted · Balance: {(user?.coins ?? 0)} coins
+            </Text>
+          </View>
           <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>
             Your job listing for{"\n"}
             <Text style={{ color: "#E91E8C", fontFamily: "Inter_700Bold" }}>"{title}"</Text>
@@ -311,7 +277,7 @@ export default function JobsPostScreen() {
           <Text style={fpStyles.headerSub}>Reach candidates near you</Text>
         </View>
         <View style={fpStyles.freeBadge}>
-          <Text style={fpStyles.freeBadgeText}>FREE</Text>
+          <Text style={fpStyles.freeBadgeText}>🪙 {JOB_POST_COST} coins</Text>
         </View>
       </LinearGradient>
 
@@ -536,20 +502,47 @@ export default function JobsPostScreen() {
           )}
         </View>
 
+        {/* Coin cost summary */}
+        <View style={[fpStyles.coinSummary, { backgroundColor: "#7B2FBE14", borderColor: "#7B2FBE30" }]}>
+          <View style={fpStyles.coinSummaryRow}>
+            <Feather name="zap" size={14} color="#7B2FBE" />
+            <Text style={[fpStyles.coinSummaryText, { color: "#7B2FBE" }]}>
+              Posting costs <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {JOB_POST_COST} coins</Text>
+            </Text>
+          </View>
+          <View style={fpStyles.coinSummaryRow}>
+            <Feather name="pocket" size={14} color={userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30"} />
+            <Text style={[fpStyles.coinSummaryText, { color: userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30" }]}>
+              Your balance: <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {userCoins}</Text>
+              {userCoins < JOB_POST_COST ? "  · Insufficient — recharge wallet" : "  · Ready to post!"}
+            </Text>
+          </View>
+        </View>
+
         {/* Submit */}
         <Pressable
-          onPress={() => { if (canSubmit) setSubmitted(true); }}
-          style={{ opacity: canSubmit ? 1 : 0.5, marginTop: 8 }}
+          onPress={handlePost}
+          disabled={!canSubmit || posting || userCoins < JOB_POST_COST}
+          style={{ opacity: (canSubmit && !posting && userCoins >= JOB_POST_COST) ? 1 : 0.5, marginTop: 4 }}
         >
           <LinearGradient
             colors={["#E91E8C", "#7B2FBE"]}
             start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
             style={fpStyles.submitBtn}
           >
-            <Feather name="send" size={18} color="#fff" />
-            <Text style={fpStyles.submitText}>Post Job — It's Free!</Text>
+            <Feather name={posting ? "loader" : "send"} size={18} color="#fff" />
+            <Text style={fpStyles.submitText}>
+              {posting ? "Posting…" : userCoins < JOB_POST_COST ? "Insufficient Coins" : `Post Job — 🪙${JOB_POST_COST}`}
+            </Text>
           </LinearGradient>
         </Pressable>
+        {userCoins < JOB_POST_COST && (
+          <Pressable onPress={() => router.push("/wallet" as any)} style={{ alignItems: "center", marginTop: 8 }}>
+            <Text style={{ color: "#E91E8C", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
+              + Recharge Wallet
+            </Text>
+          </Pressable>
+        )}
         <Text style={[fpStyles.disclaimer, { color: colors.mutedForeground }]}>
           By posting, you agree that the listing is genuine and complies with applicable labour laws.
         </Text>
@@ -621,6 +614,13 @@ const fpStyles = StyleSheet.create({
   sheetTitle:      { fontSize: 17, fontFamily: "Inter_700Bold", marginBottom: 12 },
   optionRow:       { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14, borderBottomWidth: 1 },
   optionText:      { fontSize: 15, fontFamily: "Inter_500Medium" },
+
+  coinSummary:        { borderRadius: 12, borderWidth: 1, padding: 12, gap: 8, marginTop: 8 },
+  coinSummaryRow:     { flexDirection: "row", alignItems: "center", gap: 8 },
+  coinSummaryText:    { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
+
+  coinDeductedBadge:  { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1, marginBottom: 12 },
+  coinDeductedText:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
   successWrap:     { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   successIcon:     { width: 100, height: 100, borderRadius: 50, alignItems: "center", justifyContent: "center", marginBottom: 24 },

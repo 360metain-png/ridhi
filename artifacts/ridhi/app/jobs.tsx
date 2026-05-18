@@ -15,7 +15,10 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
+
+const CONTACT_COST = 10; // coins to reveal poster contact details
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type JobType = "All" | "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
@@ -225,6 +228,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function JobsScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
+  const { user, deductCoins } = useAuth();
   const [search,      setSearch]      = useState("");
   const [typeFilter,  setTypeFilter]  = useState<JobType>("All");
   const [catFilter,   setCatFilter]   = useState<JobCategory>("All");
@@ -234,6 +238,31 @@ export default function JobsScreen() {
   const [modalStep,   setModalStep]   = useState<"state" | "district">("state");
   const [locSearch,   setLocSearch]   = useState("");
   const [savedIds,    setSavedIds]    = useState<Set<string>>(new Set());
+
+  // ── Coin gate state ────────────────────────────────────────────────────────
+  const [revealedIds,    setRevealedIds]    = useState<Set<string>>(new Set());
+  const [coinConfirmJob, setCoinConfirmJob] = useState<Job | null>(null);
+  const [coinError,      setCoinError]      = useState(false);
+  const [coinPending,    setCoinPending]    = useState(false);
+
+  const handleContactPress = (job: Job) => {
+    if (revealedIds.has(job.id)) return; // already unlocked — button should open directly
+    setCoinConfirmJob(job);
+  };
+
+  const handleConfirmContact = async () => {
+    if (!coinConfirmJob || coinPending) return;
+    setCoinPending(true);
+    const ok = await deductCoins(CONTACT_COST);
+    setCoinPending(false);
+    if (ok) {
+      setRevealedIds((prev) => { const n = new Set(prev); n.add(coinConfirmJob.id); return n; });
+      setCoinConfirmJob(null);
+    } else {
+      setCoinConfirmJob(null);
+      setCoinError(true);
+    }
+  };
 
   const filtered = useMemo(() => {
     return JOBS.filter((j) => {
@@ -337,27 +366,39 @@ export default function JobsScreen() {
         ))}
       </View>
 
-      {/* Verified contact row */}
-      <View style={[styles.contactStrip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-        <View style={styles.contactItem}>
-          <Feather name="phone" size={11} color="#25D366" />
-          <Text style={[styles.contactVal, { color: colors.foreground }]}>{j.posterPhone}</Text>
-          <View style={styles.vBadge}>
-            <Feather name="check-circle" size={9} color="#34C759" />
-            <Text style={styles.vBadgeText}>Verified</Text>
-          </View>
-        </View>
-        {j.posterEmail && (
+      {/* Verified contact row — locked until coins paid */}
+      {revealedIds.has(j.id) ? (
+        <View style={[styles.contactStrip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
           <View style={styles.contactItem}>
-            <Feather name="mail" size={11} color="#2196F3" />
-            <Text style={[styles.contactVal, { color: colors.foreground }]} numberOfLines={1}>{j.posterEmail}</Text>
+            <Feather name="phone" size={11} color="#25D366" />
+            <Text style={[styles.contactVal, { color: colors.foreground }]}>{j.posterPhone}</Text>
             <View style={styles.vBadge}>
               <Feather name="check-circle" size={9} color="#34C759" />
               <Text style={styles.vBadgeText}>Verified</Text>
             </View>
           </View>
-        )}
-      </View>
+          {j.posterEmail && (
+            <View style={styles.contactItem}>
+              <Feather name="mail" size={11} color="#2196F3" />
+              <Text style={[styles.contactVal, { color: colors.foreground }]} numberOfLines={1}>{j.posterEmail}</Text>
+              <View style={styles.vBadge}>
+                <Feather name="check-circle" size={9} color="#34C759" />
+                <Text style={styles.vBadgeText}>Verified</Text>
+              </View>
+            </View>
+          )}
+        </View>
+      ) : (
+        <View style={[styles.contactStrip, { backgroundColor: "#7B2FBE12", borderColor: "#7B2FBE30" }]}>
+          <Feather name="lock" size={13} color="#7B2FBE" />
+          <Text style={[styles.contactVal, { color: "#7B2FBE", flex: 1 }]}>
+            Pay {CONTACT_COST} coins to reveal contact details
+          </Text>
+          <View style={[styles.coinCostBadge, { backgroundColor: "#7B2FBE22" }]}>
+            <Text style={[styles.coinCostText, { color: "#7B2FBE" }]}>🪙 {CONTACT_COST}</Text>
+          </View>
+        </View>
+      )}
 
       {/* Footer */}
       <View style={styles.cardFooter}>
@@ -365,19 +406,24 @@ export default function JobsScreen() {
           {timeAgo(j.postedHoursAgo)}
         </Text>
         <Pressable
-          onPress={() => {}}
+          onPress={() => handleContactPress(j)}
           style={[styles.applyBtn, {
-            backgroundColor: j.contactType === "apply" ? "#E91E8C"
-              : j.contactType === "whatsapp" ? "#25D366" : "#2196F3",
+            backgroundColor: revealedIds.has(j.id)
+              ? (j.contactType === "apply" ? "#E91E8C" : j.contactType === "whatsapp" ? "#25D366" : "#2196F3")
+              : "#7B2FBE",
           }]}
         >
           <Feather
-            name={j.contactType === "apply" ? "send" : j.contactType === "whatsapp" ? "message-circle" : "phone"}
+            name={revealedIds.has(j.id)
+              ? (j.contactType === "apply" ? "send" : j.contactType === "whatsapp" ? "message-circle" : "phone")
+              : "unlock"}
             size={12}
             color="#fff"
           />
           <Text style={styles.applyBtnText}>
-            {j.contactType === "apply" ? "Apply Now" : j.contactType === "whatsapp" ? "WhatsApp" : "Call Now"}
+            {revealedIds.has(j.id)
+              ? (j.contactType === "apply" ? "Apply Now" : j.contactType === "whatsapp" ? "WhatsApp" : "Call Now")
+              : `Unlock · 🪙${CONTACT_COST}`}
           </Text>
         </Pressable>
       </View>
@@ -406,10 +452,15 @@ export default function JobsScreen() {
               <Feather name="chevron-down" size={12} color="rgba(255,255,255,0.8)" />
             </Pressable>
           </View>
-          <Pressable onPress={() => router.push("/jobs-post" as any)} style={styles.postJobBtn}>
-            <Feather name="plus" size={15} color="#E91E8C" />
-            <Text style={styles.postJobBtnText}>Post Job</Text>
-          </Pressable>
+          <View style={{ alignItems: "flex-end", gap: 4 }}>
+            <View style={styles.coinBalanceBadge}>
+              <Text style={styles.coinBalanceText}>🪙 {user?.coins ?? 0}</Text>
+            </View>
+            <Pressable onPress={() => router.push("/jobs-post" as any)} style={styles.postJobBtn}>
+              <Feather name="plus" size={15} color="#E91E8C" />
+              <Text style={styles.postJobBtnText}>Post Job</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Search */}
@@ -527,6 +578,86 @@ export default function JobsScreen() {
           <Text style={styles.fabText}>Post a Job</Text>
         </LinearGradient>
       </Pressable>
+
+      {/* ── Coin Confirm Modal ─────────────────────────────────────────────── */}
+      <Modal visible={!!coinConfirmJob} transparent animationType="fade" onRequestClose={() => setCoinConfirmJob(null)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setCoinConfirmJob(null)} />
+        <View style={styles.coinModalWrap}>
+          <View style={[styles.coinModal, { backgroundColor: colors.card }]}>
+            <LinearGradient colors={["#7B2FBE22", "#E91E8C11"]} style={StyleSheet.absoluteFill} />
+            <View style={[styles.coinModalIcon, { backgroundColor: "#7B2FBE22" }]}>
+              <Text style={{ fontSize: 32 }}>🪙</Text>
+            </View>
+            <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Unlock Contact Details</Text>
+            <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
+              {coinConfirmJob?.title}{"\n"}at {coinConfirmJob?.company}
+            </Text>
+            <View style={[styles.coinModalRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+              <View style={styles.coinModalStat}>
+                <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Cost</Text>
+                <Text style={[styles.coinModalStatVal, { color: "#E91E8C" }]}>🪙 {CONTACT_COST}</Text>
+              </View>
+              <View style={[styles.coinModalDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.coinModalStat}>
+                <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
+                <Text style={[styles.coinModalStatVal, { color: (user?.coins ?? 0) >= CONTACT_COST ? "#34C759" : "#FF3B30" }]}>
+                  🪙 {user?.coins ?? 0}
+                </Text>
+              </View>
+            </View>
+            {(user?.coins ?? 0) < CONTACT_COST ? (
+              <>
+                <Text style={[styles.coinModalWarn, { color: "#FF3B30" }]}>
+                  Not enough coins. Recharge your wallet to continue.
+                </Text>
+                <Pressable onPress={() => { setCoinConfirmJob(null); router.push("/wallet" as any); }}
+                  style={[styles.coinModalBtn, { backgroundColor: "#E91E8C" }]}>
+                  <Feather name="zap" size={15} color="#fff" />
+                  <Text style={styles.coinModalBtnText}>Recharge Wallet</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.coinModalNote, { color: colors.mutedForeground }]}>
+                  Phone number, email &amp; contact button will be revealed permanently for this listing.
+                </Text>
+                <Pressable onPress={handleConfirmContact} disabled={coinPending}
+                  style={[styles.coinModalBtn, { backgroundColor: "#7B2FBE", opacity: coinPending ? 0.6 : 1 }]}>
+                  <Feather name="unlock" size={15} color="#fff" />
+                  <Text style={styles.coinModalBtnText}>{coinPending ? "Processing…" : `Confirm — Pay 🪙${CONTACT_COST}`}</Text>
+                </Pressable>
+              </>
+            )}
+            <Pressable onPress={() => setCoinConfirmJob(null)} style={{ marginTop: 10 }}>
+              <Text style={[styles.coinModalCancel, { color: colors.mutedForeground }]}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Insufficient Coins Error Modal ─────────────────────────────────── */}
+      <Modal visible={coinError} transparent animationType="fade" onRequestClose={() => setCoinError(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setCoinError(false)} />
+        <View style={styles.coinModalWrap}>
+          <View style={[styles.coinModal, { backgroundColor: colors.card }]}>
+            <View style={[styles.coinModalIcon, { backgroundColor: "#FF3B3022" }]}>
+              <Feather name="alert-circle" size={36} color="#FF3B30" />
+            </View>
+            <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Not Enough Coins</Text>
+            <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
+              You need at least {CONTACT_COST} coins to reach a job poster.{"\n"}Recharge your Ridhi Wallet to continue.
+            </Text>
+            <Pressable onPress={() => { setCoinError(false); router.push("/wallet" as any); }}
+              style={[styles.coinModalBtn, { backgroundColor: "#E91E8C" }]}>
+              <Feather name="zap" size={15} color="#fff" />
+              <Text style={styles.coinModalBtnText}>Go to Wallet</Text>
+            </Pressable>
+            <Pressable onPress={() => setCoinError(false)} style={{ marginTop: 10 }}>
+              <Text style={[styles.coinModalCancel, { color: colors.mutedForeground }]}>Maybe later</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       {/* Location picker modal — two-step: State → District */}
       <Modal visible={locModal} transparent animationType="slide" onRequestClose={() => setLocModal(false)}>
@@ -671,11 +802,16 @@ const styles = StyleSheet.create({
   skillChip:        { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
   skillText:        { fontSize: 11, fontFamily: "Inter_400Regular" },
 
+  coinBalanceBadge: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
+  coinBalanceText:  { fontSize: 11, fontFamily: "Inter_700Bold", color: "#fff" },
+
   contactStrip:     { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8, gap: 5, marginBottom: 10 },
   contactItem:      { flexDirection: "row", alignItems: "center", gap: 6 },
   contactVal:       { flex: 1, fontSize: 12, fontFamily: "Inter_500Medium" },
   vBadge:           { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#34C75918", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
   vBadgeText:       { fontSize: 10, fontFamily: "Inter_700Bold", color: "#34C759" },
+  coinCostBadge:    { flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  coinCostText:     { fontSize: 11, fontFamily: "Inter_700Bold" },
 
   cardFooter:       { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   postedTime:       { fontSize: 11, fontFamily: "Inter_400Regular" },
@@ -691,7 +827,23 @@ const styles = StyleSheet.create({
   fabGradient:      { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 13, borderRadius: 30, elevation: 6, shadowColor: "#E91E8C", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8 },
   fabText:          { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
 
-  modalOverlay:     { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
+  modalOverlay:     { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
+
+  coinModalWrap:    { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
+  coinModal:        { width: "100%", borderRadius: 24, padding: 24, alignItems: "center", overflow: "hidden", gap: 10 },
+  coinModalIcon:    { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginBottom: 4 },
+  coinModalTitle:   { fontSize: 20, fontFamily: "Inter_700Bold", textAlign: "center" },
+  coinModalSub:     { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
+  coinModalRow:     { flexDirection: "row", width: "100%", borderRadius: 14, borderWidth: 1, paddingVertical: 12, paddingHorizontal: 16, marginVertical: 4 },
+  coinModalStat:    { flex: 1, alignItems: "center", gap: 4 },
+  coinModalDivider: { width: 1, marginHorizontal: 8 },
+  coinModalStatLabel: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  coinModalStatVal: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  coinModalNote:    { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 18 },
+  coinModalWarn:    { fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center" },
+  coinModalBtn:     { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 16, width: "100%", justifyContent: "center", marginTop: 4 },
+  coinModalBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  coinModalCancel:  { fontSize: 13, fontFamily: "Inter_400Regular" },
   locSheet:         { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "78%", flex: 1 },
   sheetHandle:      { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 14 },
   locSheetHeader:   { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
