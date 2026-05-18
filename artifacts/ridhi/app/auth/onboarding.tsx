@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Easing,
   Image,
   FlatList,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -19,7 +19,7 @@ import { GradientButton } from "@/components/GradientButton";
 const LOGO     = require("../../assets/images/ridhi_logo.png");
 const LOGO_NEW = require("../../assets/images/ridhi_logo_new.png");
 
-type SlideType = "logo" | "emoji" | "icon";
+type SlideType = "logo" | "emoji";
 
 const SLIDES = [
   {
@@ -30,8 +30,6 @@ const SLIDES = [
     subtitle: "Join millions of Indians sharing moments, building friendships, and finding love",
     primary: "#E91E8C",
     secondary: "#7B2FBE",
-    orb1: "#E91E8C",
-    orb2: "#7B2FBE",
   },
   {
     id: "2",
@@ -41,8 +39,6 @@ const SLIDES = [
     subtitle: "Smart matching powered by your interests, location, and personality — across India",
     primary: "#FF6B35",
     secondary: "#E91E8C",
-    orb1: "#FF6B35",
-    orb2: "#E91E8C",
   },
   {
     id: "3",
@@ -52,78 +48,97 @@ const SLIDES = [
     subtitle: "Share reels, go live, earn coins, and grow your creator empire on Ridhi",
     primary: "#7B2FBE",
     secondary: "#4A90E2",
-    orb1: "#7B2FBE",
-    orb2: "#00BCD4",
   },
 ];
 
-function FloatingOrb({ color, size, x, y, delay }: { color: string; size: number; x: number; y: number; delay: number }) {
-  const anim = useRef(new Animated.Value(0)).current;
+// Each floating item: emoji, start position (0–1 of width), size, speed, delay, rotation
+const FLOAT_ITEMS = [
+  { emoji: "❤️",  x: 0.08, size: 28, dur: 7000, delay: 0,    spin: 15  },
+  { emoji: "💕",  x: 0.22, size: 20, dur: 9000, delay: 800,  spin: -10 },
+  { emoji: "💗",  x: 0.40, size: 32, dur: 6500, delay: 1600, spin: 20  },
+  { emoji: "💖",  x: 0.60, size: 18, dur: 8500, delay: 400,  spin: -25 },
+  { emoji: "💓",  x: 0.78, size: 26, dur: 7500, delay: 2200, spin: 12  },
+  { emoji: "💝",  x: 0.92, size: 22, dur: 9500, delay: 1200, spin: -8  },
+  { emoji: "💞",  x: 0.15, size: 16, dur: 8000, delay: 3000, spin: 30  },
+  { emoji: "💘",  x: 0.50, size: 24, dur: 6000, delay: 500,  spin: -18 },
+  { emoji: "🌸",  x: 0.30, size: 20, dur: 9000, delay: 2800, spin: 22  },
+  { emoji: "✨",  x: 0.70, size: 18, dur: 7200, delay: 1800, spin: -5  },
+  { emoji: "💫",  x: 0.85, size: 22, dur: 8800, delay: 3500, spin: 14  },
+  { emoji: "🌺",  x: 0.05, size: 20, dur: 7800, delay: 4200, spin: -20 },
+  { emoji: "❤️",  x: 0.55, size: 14, dur: 9200, delay: 600,  spin: 8   },
+  { emoji: "💜",  x: 0.38, size: 26, dur: 7000, delay: 3800, spin: -30 },
+  { emoji: "🧡",  x: 0.72, size: 18, dur: 8200, delay: 2400, spin: 16  },
+  { emoji: "💛",  x: 0.18, size: 22, dur: 6800, delay: 4600, spin: -12 },
+];
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(anim, { toValue: 1, duration: 3000 + delay, useNativeDriver: true }),
-        Animated.timing(anim, { toValue: 0, duration: 3000 + delay, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -20] });
-  const opacity    = anim.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.12, 0.22, 0.12] });
-
-  return (
-    <Animated.View
-      style={[
-        {
-          position: "absolute",
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-          left: x,
-          top: y,
-          opacity,
-          transform: [{ translateY }],
-        },
-        Platform.OS === "web"
-          ? { boxShadow: `0 0 ${size * 0.4}px ${color}` } as object
-          : { shadowColor: color, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: size * 0.4 },
-      ]}
-    />
-  );
-}
-
-function Particle({ color, delay, screenWidth, screenHeight }: { color: string; delay: number; screenWidth: number; screenHeight: number }) {
-  const x    = useRef(Math.random() * screenWidth).current;
-  const anim = useRef(new Animated.Value(0)).current;
-  const size = 2 + Math.random() * 3;
+function FloatingHeart({
+  emoji, x, size, dur, delay, spin, screenWidth, screenHeight,
+}: {
+  emoji: string; x: number; size: number; dur: number; delay: number; spin: number;
+  screenWidth: number; screenHeight: number;
+}) {
+  const anim   = useRef(new Animated.Value(0)).current;
+  const wiggle = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const t = setTimeout(() => {
+      // Rise from bottom to top — loops indefinitely
       Animated.loop(
-        Animated.timing(anim, { toValue: 1, duration: 4000 + Math.random() * 3000, useNativeDriver: true })
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: dur,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      // Gentle horizontal wiggle
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(wiggle, { toValue: 1,  duration: dur * 0.4, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: -1, duration: dur * 0.4, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(wiggle, { toValue: 0,  duration: dur * 0.2, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        ])
       ).start();
     }, delay);
     return () => clearTimeout(t);
   }, []);
 
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [screenHeight, -50] });
-  const opacity    = anim.interpolate({ inputRange: [0, 0.1, 0.9, 1], outputRange: [0, 0.7, 0.7, 0] });
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [screenHeight + size, -size * 2],
+  });
+  const translateX = wiggle.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [-18, 0, 18],
+  });
+  const opacity = anim.interpolate({
+    inputRange: [0, 0.06, 0.88, 1],
+    outputRange: [0, 0.75, 0.75, 0],
+  });
+  const rotate = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", `${spin}deg`],
+  });
+  const scale = anim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.7, 1.1, 0.7],
+  });
 
   return (
-    <Animated.View
+    <Animated.Text
       style={{
         position: "absolute",
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        left: x,
+        left: x * screenWidth,
+        fontSize: size,
         opacity,
-        transform: [{ translateY }],
+        transform: [{ translateY }, { translateX }, { rotate }, { scale }],
+        pointerEvents: "none",
       }}
-    />
+      selectable={false}
+    >
+      {emoji}
+    </Animated.Text>
   );
 }
 
@@ -149,19 +164,19 @@ function SlideContent({
       iconAnim.setValue(0);
 
       Animated.stagger(100, [
-        Animated.spring(iconAnim,    { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 10 }),
-        Animated.timing(titleAnim,   { toValue: 1, duration: 480, useNativeDriver: true }),
-        Animated.timing(subtitleAnim,{ toValue: 1, duration: 480, useNativeDriver: true }),
+        Animated.spring(iconAnim,     { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 10 }),
+        Animated.timing(titleAnim,    { toValue: 1, duration: 480, useNativeDriver: true }),
+        Animated.timing(subtitleAnim, { toValue: 1, duration: 480, useNativeDriver: true }),
       ]).start();
 
       const breathe = Animated.loop(
         Animated.sequence([
           Animated.parallel([
             Animated.timing(iconPulse, { toValue: 1.055, duration: 1400, useNativeDriver: true }),
-            Animated.timing(iconGlow,  { toValue: 1,    duration: 1400, useNativeDriver: true }),
+            Animated.timing(iconGlow,  { toValue: 1,     duration: 1400, useNativeDriver: true }),
           ]),
           Animated.parallel([
-            Animated.timing(iconPulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
+            Animated.timing(iconPulse, { toValue: 1,   duration: 1400, useNativeDriver: true }),
             Animated.timing(iconGlow,  { toValue: 0.4, duration: 1400, useNativeDriver: true }),
           ]),
         ])
@@ -182,26 +197,21 @@ function SlideContent({
           { transform: [{ scale: Animated.multiply(iconAnim, iconPulse) }] },
         ]}
       >
-        {/* Outer glow halo */}
+        {/* Glow halo */}
         <Animated.View
-          style={[
-            {
-              position: "absolute",
-              width: RING_SIZE + 40,
-              height: RING_SIZE + 40,
-              borderRadius: (RING_SIZE + 40) / 2,
-              borderWidth: 1,
-              borderColor: item.primary + "30",
-              backgroundColor: item.primary + "12",
-              opacity: iconGlow,
-            },
-            Platform.OS === "web"
-              ? { boxShadow: `0 0 40px ${item.primary}50` } as object
-              : { shadowColor: item.primary, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 40, elevation: 0 },
-          ]}
+          style={{
+            position: "absolute",
+            width: RING_SIZE + 40,
+            height: RING_SIZE + 40,
+            borderRadius: (RING_SIZE + 40) / 2,
+            borderWidth: 1,
+            borderColor: item.primary + "30",
+            backgroundColor: item.primary + "10",
+            opacity: iconGlow,
+          }}
         />
 
-        {/* Gradient ring */}
+        {/* Gradient outer ring */}
         <LinearGradient
           colors={[item.primary + "40", item.secondary + "25"]}
           style={{
@@ -212,36 +222,28 @@ function SlideContent({
             justifyContent: "center",
           }}
         >
-          {/* Inner filled circle */}
+          {/* Gradient inner circle */}
           <LinearGradient
             colors={[item.primary, item.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[
-              {
-                width: CIRCLE_SIZE,
-                height: CIRCLE_SIZE,
-                borderRadius: CIRCLE_SIZE / 2,
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-              },
-              Platform.OS === "web"
-                ? { boxShadow: `0 10px 24px ${item.primary}50` } as object
-                : { shadowColor: item.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 24, elevation: 14 },
-            ]}
+            style={{
+              width: CIRCLE_SIZE,
+              height: CIRCLE_SIZE,
+              borderRadius: CIRCLE_SIZE / 2,
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
           >
-            {/* SLIDE ILLUSTRATION */}
             {item.type === "logo" ? (
-              /* Ridhi logo — slide 1 */
               <Image
                 source={LOGO_NEW}
                 style={{ width: CIRCLE_SIZE * 0.72, height: CIRCLE_SIZE * 0.72 }}
                 resizeMode="contain"
               />
             ) : (
-              /* Big emoji illustration — slides 2 & 3 */
-              <Text style={{ fontSize: CIRCLE_SIZE * 0.42, lineHeight: CIRCLE_SIZE * 0.52 }}>
+              <Text style={{ fontSize: CIRCLE_SIZE * 0.44, lineHeight: CIRCLE_SIZE * 0.54 }}>
                 {item.emoji}
               </Text>
             )}
@@ -277,11 +279,11 @@ function SlideContent({
 }
 
 export default function OnboardingScreen() {
-  const insets    = useSafeAreaInsets();
+  const insets  = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
-  const flatRef   = useRef<FlatList>(null);
-  const logoAnim  = useRef(new Animated.Value(0)).current;
+  const flatRef    = useRef<FlatList>(null);
+  const logoAnim   = useRef(new Animated.Value(0)).current;
   const footerAnim = useRef(new Animated.Value(0)).current;
 
   const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -290,8 +292,8 @@ export default function OnboardingScreen() {
 
   useEffect(() => {
     Animated.stagger(200, [
-      Animated.spring(logoAnim,  { toValue: 1, useNativeDriver: true, speed: 10 }),
-      Animated.timing(footerAnim,{ toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.spring(logoAnim,   { toValue: 1, useNativeDriver: true, speed: 10 }),
+      Animated.timing(footerAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
     ]).start();
   }, []);
 
@@ -305,31 +307,32 @@ export default function OnboardingScreen() {
     }
   };
 
-  const currentSlide   = SLIDES[activeIndex];
-  const particleColors = [currentSlide.primary, currentSlide.secondary, "#ffffff"];
+  const currentSlide = SLIDES[activeIndex];
 
   return (
     <View style={styles.container}>
+      {/* Dark gradient base */}
       <LinearGradient
-        colors={["#08080F", "#0A0A18", "#08080F"]}
+        colors={["#08080F", "#0D0618", "#08080F"]}
         style={StyleSheet.absoluteFill}
       />
 
-      <FloatingOrb color={currentSlide.orb1} size={Math.min(width * 0.75, 280)} x={-60}        y={-40}          delay={0}    />
-      <FloatingOrb color={currentSlide.orb2} size={Math.min(width * 0.60, 220)} x={width - 140} y={height * 0.3} delay={800}  />
-      <FloatingOrb color={currentSlide.orb1} size={Math.min(width * 0.45, 160)} x={width * 0.2} y={height * 0.6} delay={1400} />
-
-      {Array.from({ length: 12 }).map((_, i) => (
-        <Particle
+      {/* ── FLOATING HEARTS & EMOJIS ───────────────────────────── */}
+      {FLOAT_ITEMS.map((item, i) => (
+        <FloatingHeart
           key={i}
-          color={particleColors[i % particleColors.length]}
-          delay={i * 400}
+          emoji={item.emoji}
+          x={item.x}
+          size={item.size}
+          dur={item.dur}
+          delay={item.delay}
+          spin={item.spin}
           screenWidth={width}
           screenHeight={height}
         />
       ))}
 
-      {/* ── LOGO HEADER ─── */}
+      {/* ── LOGO HEADER ──────────────────────────────────────────── */}
       <Animated.View
         style={[
           styles.logoHeader,
@@ -349,7 +352,7 @@ export default function OnboardingScreen() {
         </View>
       </Animated.View>
 
-      {/* ── SLIDES ─── */}
+      {/* ── SLIDES ──────────────────────────────────────────────── */}
       <FlatList
         ref={flatRef}
         data={SLIDES}
@@ -365,7 +368,7 @@ export default function OnboardingScreen() {
         )}
       />
 
-      {/* ── FOOTER ─── */}
+      {/* ── FOOTER ──────────────────────────────────────────────── */}
       <Animated.View
         style={[
           styles.footer,
