@@ -1,6 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
-  Dimensions,
   FlatList,
   Platform,
   Pressable,
@@ -8,6 +7,7 @@ import {
   Text,
   View,
   ViewToken,
+  useWindowDimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -17,8 +17,6 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { WatermarkBadge } from "@/components/WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
-
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const REELS = [
   {
@@ -83,31 +81,45 @@ const REELS = [
   },
 ];
 
-const ITEM_HEIGHT = SCREEN_HEIGHT;
+const ICON_HITSLOP = { top: 12, bottom: 12, left: 12, right: 12 };
 
-function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean }) {
+function ReelItem({
+  reel,
+  isActive,
+  screenHeight,
+  screenWidth,
+}: {
+  reel: (typeof REELS)[0];
+  isActive: boolean;
+  screenHeight: number;
+  screenWidth: number;
+}) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likes);
   const { saveWithWatermark, saving, saved } = useWatermark();
 
-  const handleLike = () => {
+  const handleLike = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLiked((l) => !l);
     setLikeCount((c) => (liked ? c - 1 : c + 1));
-  };
+  }, [liked]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     saveWithWatermark();
-  };
+  }, [saveWithWatermark]);
 
-  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-  const bottomPad = Platform.OS === "web" ? 84 : 60;
+  const fmt = useCallback(
+    (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
+    []
+  );
+
+  const bottomPad = Platform.OS === "web" ? 84 : Math.max(insets.bottom, 16) + 44;
 
   return (
-    <View style={[styles.reel, { height: ITEM_HEIGHT }]}>
+    <View style={{ width: screenWidth, height: screenHeight, overflow: "hidden" }}>
       <LinearGradient
         colors={reel.gradient}
         style={StyleSheet.absoluteFill}
@@ -115,46 +127,74 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
         end={{ x: 1, y: 1 }}
       />
       <View style={styles.reelOverlay}>
-        <View style={[styles.reelCenter]}>
+        <View style={styles.reelCenter}>
           <Text style={styles.reelEmoji}>{reel.emoji}</Text>
           <Text style={styles.reelPlayHint}>Reel Preview</Text>
         </View>
       </View>
-      {/* Persistent watermark — visible on all reel content including screenshots */}
+
       <WatermarkBadge position="top-right" size="sm" opacity={0.5} />
 
       <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.7)"]}
-        style={[styles.reelBottom, { paddingBottom: bottomPad + 20 }]}
+        colors={["transparent", "rgba(0,0,0,0.75)"]}
+        style={[styles.reelBottom, { paddingBottom: bottomPad }]}
       >
         <View style={styles.reelInfo}>
           <View style={styles.reelUserRow}>
             <Avatar name={reel.userName} size={36} />
-            <View>
-              <Text style={styles.reelUserName}>{reel.userName}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.reelUserName} numberOfLines={1}>
+                {reel.userName}
+              </Text>
               <Text style={styles.reelCity}>{reel.userCity}</Text>
             </View>
-            <Pressable style={styles.followBtn}>
+            <Pressable
+              style={styles.followBtn}
+              hitSlop={ICON_HITSLOP}
+              accessibilityRole="button"
+              accessibilityLabel={`Follow ${reel.userName}`}
+            >
               <Text style={styles.followText}>Follow</Text>
             </Pressable>
           </View>
-          <Text style={styles.reelCaption} numberOfLines={2}>{reel.caption}</Text>
+          <Text style={styles.reelCaption} numberOfLines={2}>
+            {reel.caption}
+          </Text>
         </View>
 
         <View style={styles.reelActions}>
-          <Pressable style={styles.reelAction} onPress={handleLike}>
-            <Feather name="heart" size={28} color={liked ? colors.primary : "#fff"} />
-            <Text style={styles.reelActionCount}>{fmt(likeCount)}</Text>
+          <Pressable
+            style={styles.reelAction}
+            onPress={handleLike}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel={liked ? "Unlike" : "Like"}
+          >
+            <Feather
+              name="heart"
+              size={28}
+              color={liked ? colors.primary : "#fff"}
+            />
+            <Text style={[styles.reelActionCount, liked && { color: colors.primary }]}>
+              {fmt(likeCount)}
+            </Text>
           </Pressable>
-          <Pressable style={styles.reelAction}>
+          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Comment">
             <Feather name="message-circle" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.comments)}</Text>
           </Pressable>
-          <Pressable style={styles.reelAction}>
+          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
           </Pressable>
-          <Pressable style={styles.reelAction} onPress={handleSave} disabled={saving}>
+          <Pressable
+            style={styles.reelAction}
+            onPress={handleSave}
+            disabled={saving}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel={saved ? "Saved" : "Save reel"}
+          >
             <Feather
               name={saved ? "check-circle" : "download"}
               size={28}
@@ -164,7 +204,7 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
               {saving ? "…" : saved ? "Saved" : "Save"}
             </Text>
           </Pressable>
-          <Pressable style={styles.reelAction}>
+          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="More options">
             <Feather name="more-vertical" size={28} color="#fff" />
           </Pressable>
         </View>
@@ -176,18 +216,46 @@ function ReelItem({ reel, isActive }: { reel: typeof REELS[0]; isActive: boolean
 export default function ReelsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const onViewRef = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    if (viewableItems[0]) setActiveIndex(viewableItems[0].index ?? 0);
-  });
+  const onViewRef = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems[0]) setActiveIndex(viewableItems[0].index ?? 0);
+    }
+  );
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: (typeof REELS)[0]; index: number }) => (
+      <ReelItem
+        reel={item}
+        isActive={index === activeIndex}
+        screenHeight={screenHeight}
+        screenWidth={screenWidth}
+      />
+    ),
+    [activeIndex, screenHeight, screenWidth]
+  );
+
+  const getItemLayout = useCallback(
+    (_: unknown, index: number) => ({
+      length: screenHeight,
+      offset: screenHeight * index,
+      index,
+    }),
+    [screenHeight]
+  );
 
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>
-        <Pressable>
+        <Pressable
+          hitSlop={ICON_HITSLOP}
+          accessibilityRole="button"
+          accessibilityLabel="Open camera"
+        >
           <Feather name="camera" size={24} color="#fff" />
         </Pressable>
       </View>
@@ -199,12 +267,14 @@ export default function ReelsScreen() {
         showsVerticalScrollIndicator={false}
         snapToAlignment="start"
         decelerationRate="fast"
-        getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
+        getItemLayout={getItemLayout}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={{ viewAreaCoveragePercentThreshold: 80 }}
-        renderItem={({ item, index }) => (
-          <ReelItem reel={item} isActive={index === activeIndex} />
-        )}
+        renderItem={renderItem}
+        removeClippedSubviews={Platform.OS !== "web"}
+        maxToRenderPerBatch={3}
+        windowSize={5}
+        initialNumToRender={2}
       />
     </View>
   );
@@ -223,11 +293,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   topTitle: { color: "#fff", fontSize: 20, fontFamily: "Inter_700Bold" },
-  reel: { width: SCREEN_WIDTH, overflow: "hidden" },
-  reelOverlay: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
+  reelOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   reelCenter: { alignItems: "center", gap: 12 },
   reelEmoji: { fontSize: 80 },
-  reelPlayHint: { color: "rgba(255,255,255,0.6)", fontSize: 14, fontFamily: "Inter_500Medium" },
+  reelPlayHint: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+  },
   reelBottom: {
     position: "absolute",
     bottom: 0,
@@ -236,24 +313,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 80,
     gap: 12,
   },
-  reelInfo: { flex: 1, gap: 8 },
+  reelInfo: { flex: 1, gap: 10 },
   reelUserRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   reelUserName: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
-  reelCity: { color: "rgba(255,255,255,0.7)", fontSize: 12, fontFamily: "Inter_400Regular" },
+  reelCity: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
   followBtn: {
     borderWidth: 1.5,
     borderColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 20,
-    marginLeft: 4,
+    minWidth: 64,
+    alignItems: "center",
   },
-  followText: { color: "#fff", fontSize: 12, fontFamily: "Inter_600SemiBold" },
-  reelCaption: { color: "#fff", fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
-  reelActions: { gap: 20, alignItems: "center" },
-  reelAction: { alignItems: "center", gap: 4 },
-  reelActionCount: { color: "#fff", fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  followText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  reelCaption: {
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 20,
+  },
+  reelActions: { gap: 22, alignItems: "center" },
+  reelAction: { alignItems: "center", gap: 4, minWidth: 44, minHeight: 44, justifyContent: "center" },
+  reelActionCount: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+  },
 });

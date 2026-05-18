@@ -2,7 +2,7 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
-import { Animated, Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Animated, Platform, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 
@@ -172,10 +172,9 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     backgroundColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 0,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 0 12px rgba(233,30,140,0.6)" }
+      : { shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.6, shadowRadius: 12, elevation: 0 }),
   },
   activeDot: {
     position: "absolute",
@@ -196,10 +195,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
-    shadowColor: "#E91E8C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.55,
-    shadowRadius: 14,
-    elevation: 10,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 4px 14px rgba(233,30,140,0.55)" }
+      : { shadowColor: "#E91E8C", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 14, elevation: 10 }),
   },
 });

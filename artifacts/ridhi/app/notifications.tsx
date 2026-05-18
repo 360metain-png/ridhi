@@ -299,6 +299,10 @@ export default function NotificationsScreen() {
             />
           )}
           contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
+          removeClippedSubviews={Platform.OS !== "web"}
+          maxToRenderPerBatch={8}
+          windowSize={8}
+          initialNumToRender={10}
           ListEmptyComponent={<EmptyState colors={colors} />}
         />
       ) : null)}
@@ -316,6 +320,10 @@ export default function NotificationsScreen() {
             />
           )}
           contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 16, gap: 16, paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
+          removeClippedSubviews={Platform.OS !== "web"}
+          maxToRenderPerBatch={8}
+          windowSize={8}
+          initialNumToRender={10}
           ListEmptyComponent={<EmptyState colors={colors} />}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
         />

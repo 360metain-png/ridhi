@@ -23,6 +23,7 @@ export default function ChatScreen() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<Tab>("direct");
 
+
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
 
@@ -106,6 +107,11 @@ export default function ChatScreen() {
               <View style={[styles.separator, { backgroundColor: colors.border }]} />
             )}
             contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
+            removeClippedSubviews={Platform.OS !== "web"}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={12}
+            keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <View style={styles.empty}>
                 <Feather name="message-circle" size={40} color={colors.muted} />
@@ -130,7 +136,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   title: { fontSize: 24, fontFamily: "Inter_700Bold" },
-  composeBtn: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  composeBtn: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   tabRow: { flexDirection: "row", borderBottomWidth: StyleSheet.hairlineWidth },
   tabBtn: { flex: 1, alignItems: "center", paddingVertical: 12 },
   tabLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
