@@ -57,7 +57,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Commerce",
     items: [
-      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag, badge: "4", allowedRoles: SA_A },
+      { name: "Marketplace",    href: "/marketplace",   icon: ShoppingBag, badge: "4", allowedRoles: SA_A },
+      { name: "Business Ads",   href: "/business-ads",  icon: Zap,         badge: "3", allowedRoles: SA_A },
     ],
   },
   {
@@ -156,8 +157,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/calls":        "Audio & Video Calls",
     "/recordings":   "Call Recordings & Room Activity",
     "/promotions":   "User Promotions & Boosts",
-    "/marketplace":  "Ridhi Marketplace",
-    "/ai-hub":       "AI Hub",
+    "/marketplace":   "Ridhi Marketplace",
+    "/business-ads":  "Business Ads Manager",
+    "/ai-hub":        "AI Hub",
     "/kyc":          "E-KYC Verification",
     "/handbook":     "Platform Handbook",
   };

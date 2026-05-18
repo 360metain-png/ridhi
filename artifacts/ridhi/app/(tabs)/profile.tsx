@@ -555,6 +555,8 @@ export default function ProfileScreen() {
         {[
           { icon: "shopping-bag", label: "Marketplace",       route: "/marketplace",      color: "#E91E8C" },
           { icon: "tag",          label: "Sell a Product",   route: "/marketplace-sell", color: "#FF6B35" },
+          { icon: "zap",          label: "Ridhi Ads",        route: "/ads-manager",      color: "#7B2FBE" },
+          { icon: "trending-up",  label: "Create Ad",        route: "/ads-create",       color: "#2196F3" },
           { icon: "shield", label: "E-KYC Verification", route: "/kyc", color: "#22C55E" },
 
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
