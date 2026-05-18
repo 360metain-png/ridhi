@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
-import { Avatar } from "@/components/Avatar";
+import { Avatar, AvatarPicker, getAvatarOptions, getAvatarUrl } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 
@@ -144,8 +144,17 @@ export default function ProfileScreen() {
     }
   };
 
+  const [showAvatarGrid, setShowAvatarGrid] = useState(false);
+
   const useAutoAvatar = () => {
     setEditAvatar(undefined);
+    setAvatarSheet(false);
+    setShowAvatarGrid(false);
+  };
+
+  const selectAvatarFromGrid = (uri: string) => {
+    setEditAvatar(uri);
+    setShowAvatarGrid(false);
     setAvatarSheet(false);
   };
 
@@ -330,18 +339,40 @@ export default function ProfileScreen() {
           <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
         </Pressable>
 
-        <Pressable onPress={useAutoAvatar} style={styles.avatarPickerOption}>
+        <Pressable
+          onPress={() => setShowAvatarGrid((v) => !v)}
+          style={[styles.avatarPickerOption, { borderBottomColor: colors.border }]}
+        >
           <View style={[styles.avatarPickerIcon, { backgroundColor: colors.secondary + "18" }]}>
-            <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.avatarPickerGrad}>
-              <Text style={styles.avatarPickerInitial}>
-                {(editNickname || user.name).charAt(0).toUpperCase()}
-              </Text>
-            </LinearGradient>
+            <Text style={{ fontSize: 22 }}>🤖</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.avatarPickerOptionTitle, { color: colors.foreground }]}>Use Auto Avatar</Text>
+            <Text style={[styles.avatarPickerOptionTitle, { color: colors.foreground }]}>Choose 3D Avatar</Text>
             <Text style={[styles.avatarPickerOptionSub, { color: colors.mutedForeground }]}>
-              Gradient initials — unique to you
+              {user.gender === "female" ? "Feminine" : user.gender === "male" ? "Masculine" : "Neutral"} avatars matched to your gender
+            </Text>
+          </View>
+          <Feather name={showAvatarGrid ? "chevron-up" : "chevron-down"} size={18} color={colors.mutedForeground} />
+        </Pressable>
+
+        {showAvatarGrid && (
+          <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+            <AvatarPicker
+              gender={user.gender}
+              selected={editAvatar}
+              onSelect={selectAvatarFromGrid}
+            />
+          </View>
+        )}
+
+        <Pressable onPress={useAutoAvatar} style={styles.avatarPickerOption}>
+          <View style={[styles.avatarPickerIcon, { backgroundColor: colors.muted }]}>
+            <Feather name="refresh-cw" size={20} color={colors.mutedForeground} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.avatarPickerOptionTitle, { color: colors.foreground }]}>Reset to Default</Text>
+            <Text style={[styles.avatarPickerOptionSub, { color: colors.mutedForeground }]}>
+              Auto-generate from your name & gender
             </Text>
           </View>
           {!editAvatar && <Feather name="check-circle" size={18} color={colors.primary} />}

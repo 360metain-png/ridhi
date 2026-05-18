@@ -17,6 +17,7 @@ import * as Location from "expo-location";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
+import { Avatar, AvatarPicker, getAvatarUrl, getAvatarOptions } from "@/components/Avatar";
 
 const { width } = Dimensions.get("window");
 
@@ -143,7 +144,7 @@ function detectStateFromGeocode(addr: Location.LocationGeocodedAddress): string 
   return null;
 }
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 // ─── screen ───────────────────────────────────────────────────────────────────
 
@@ -162,12 +163,14 @@ export default function ProfileSetupScreen() {
   // step 2 — age + gender
   const [age, setAge]       = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
-  // step 3 — state + GPS
+  // step 3 — avatar picker
+  const [avatarUri, setAvatarUri] = useState("");
+  // step 4 — state + GPS
   const [state, setState]   = useState("");
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState("");
-  // step 4 — interests
+  // step 5 — interests
   const [interests, setInterests] = useState<string[]>([]);
   const [loading, setLoading]     = useState(false);
 
@@ -181,6 +184,7 @@ export default function ProfileSetupScreen() {
     !!language,
     name.length >= 2,
     !!gender && parseInt(age) >= 18,
+    true, // avatar step — always valid (has auto-generated default)
     !!state,
     interests.length >= 3,
   ][step];
@@ -188,6 +192,7 @@ export default function ProfileSetupScreen() {
   const handleNext = async () => {
     if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
     setLoading(true);
+    const resolvedAvatar = avatarUri || getAvatarUrl(name, gender);
     await login({
       name,
       nickname: nickname.trim() || name,
@@ -197,6 +202,7 @@ export default function ProfileSetupScreen() {
       state,
       language,
       interests,
+      avatar: resolvedAvatar,
       coins: 100,
       locationCoords: coords ?? undefined,
       registeredAt: new Date().toISOString(),
@@ -374,7 +380,54 @@ export default function ProfileSetupScreen() {
       ),
     },
 
-    // ── 3: state ──────────────────────────────────────────────────────────────
+    // ── 3: avatar picker ──────────────────────────────────────────────────────
+    {
+      title: "Choose your avatar",
+      subtitle: "Pick a 3D avatar that represents you",
+      content: (
+        <View style={{ width: "100%", gap: 16, alignItems: "center" }}>
+          {/* Large preview of selected (or auto) avatar */}
+          <View style={styles.avatarPreviewWrap}>
+            <Avatar
+              name={name || "You"}
+              uri={avatarUri || undefined}
+              gender={gender || undefined}
+              size={110}
+              hasStory
+            />
+            <View style={[styles.avatarPreviewBadge, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "30" }]}>
+              <Text style={[styles.avatarPreviewBadgeText, { color: colors.primary }]}>
+                {avatarUri ? "✨ Custom avatar" : "✨ Auto-generated for you"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ width: "100%", gap: 10 }}>
+            <AvatarPicker
+              gender={gender || undefined}
+              selected={avatarUri}
+              onSelect={setAvatarUri}
+            />
+          </View>
+
+          <Pressable
+            onPress={() => setAvatarUri("")}
+            style={[styles.resetAvatarBtn, { borderColor: colors.border }]}
+          >
+            <Feather name="refresh-cw" size={13} color={colors.mutedForeground} />
+            <Text style={[styles.resetAvatarText, { color: colors.mutedForeground }]}>
+              Reset to auto-generated
+            </Text>
+          </Pressable>
+
+          <Text style={[styles.avatarNote, { color: colors.mutedForeground }]}>
+            You can always change this later in your profile settings
+          </Text>
+        </View>
+      ),
+    },
+
+    // ── 4: state ──────────────────────────────────────────────────────────────
     {
       title: "Where are you from?",
       subtitle: "Select your state in India",
@@ -637,6 +690,14 @@ const styles = StyleSheet.create({
   tagsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   tag:      { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1.5 },
   tagText:  { fontSize: 14, fontFamily: "Inter_500Medium" },
+
+  // avatar picker step
+  avatarPreviewWrap:      { alignItems: "center", gap: 12 },
+  avatarPreviewBadge:     { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  avatarPreviewBadgeText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  resetAvatarBtn:         { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
+  resetAvatarText:        { fontSize: 12, fontFamily: "Inter_400Regular" },
+  avatarNote:             { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 20 },
 
   footer: { paddingHorizontal: 24, paddingTop: 12 },
 });

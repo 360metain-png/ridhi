@@ -52,6 +52,7 @@ const DEFAULT_USER: UserProfile = {
   city: "Mumbai",
   language: "Hindi",
   interests: ["Music", "Travel", "Food", "Fitness", "Books"],
+  avatar: "https://api.dicebear.com/7.x/lorelei/png?seed=priya&size=200&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
   coins: 250,
   followers: 128,
   following: 94,
