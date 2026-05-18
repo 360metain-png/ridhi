@@ -112,6 +112,7 @@ export default function RandomCallScreen() {
   const [favs, setFavs]                 = useState<string[]>(["h2"]);
   const [showTab, setShowTab]           = useState<"all" | "favs">("all");
   const [reportVisible, setReportVisible] = useState(false);
+  const [reportDone, setReportDone]       = useState(false);
   const [preferGender, setPreferGender] = useState<PreferGender>("Any");
   const [preferLanguage, setPreferLanguage] = useState<string>(user?.language ?? "Any Language");
 
@@ -719,18 +720,42 @@ export default function RandomCallScreen() {
         </View>
       )}
 
-      {/* Report Modal */}
+      {/* Complaint against Host Modal */}
       <Modal visible={reportVisible} transparent animationType="slide" onRequestClose={() => setReportVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setReportVisible(false)}>
           <View style={[styles.reportSheet, { backgroundColor: colors.card }]}>
-            <Text style={[styles.reportTitle, { color: colors.foreground }]}>Report / Block</Text>
-            {["Inappropriate behavior", "Harassment", "Fake profile", "Underage", "Spam", "Other"].map((r) => (
+            <View style={[styles.reportHandle, { backgroundColor: colors.border }]} />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 4 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: colors.destructive + "18", alignItems: "center", justifyContent: "center" }}>
+                <Feather name="flag" size={16} color={colors.destructive} />
+              </View>
+              <View>
+                <Text style={[styles.reportTitle, { color: colors.foreground, marginBottom: 0 }]}>Complaint against Host</Text>
+                <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>
+                  {callType === "video" ? "Video" : "Audio"} call · Your report is confidential
+                </Text>
+              </View>
+            </View>
+            {[
+              "Inappropriate or offensive language",
+              "Harassment or personal attacks",
+              "Abusive behavior during call",
+              "Scam or fraud attempt",
+              "Nudity or explicit content",
+              "Underage host",
+              "Other",
+            ].map((r) => (
               <Pressable
                 key={r}
-                onPress={() => setReportVisible(false)}
+                onPress={() => {
+                  setReportVisible(false);
+                  setReportDone(true);
+                  setTimeout(() => setReportDone(false), 2500);
+                }}
                 style={[styles.reportItem, { borderColor: colors.border }]}
               >
-                <Text style={[styles.reportItemText, { color: colors.destructive }]}>{r}</Text>
+                <Text style={[styles.reportItemText, { color: colors.foreground }]}>{r}</Text>
+                <Feather name="chevron-right" size={14} color={colors.mutedForeground} />
               </Pressable>
             ))}
             <Pressable
@@ -738,11 +763,19 @@ export default function RandomCallScreen() {
               style={[styles.blockBtn, { backgroundColor: colors.destructive + "18", borderColor: colors.destructive + "30" }]}
             >
               <Feather name="slash" size={16} color={colors.destructive} />
-              <Text style={[styles.blockText, { color: colors.destructive }]}>Block This User</Text>
+              <Text style={[styles.blockText, { color: colors.destructive }]}>Block & End Call</Text>
             </Pressable>
           </View>
         </Pressable>
       </Modal>
+
+      {/* ── Complaint submitted toast ── */}
+      {reportDone && (
+        <View style={styles.callToast} pointerEvents="none">
+          <Feather name="check-circle" size={15} color="#34C759" />
+          <Text style={styles.callToastText}>Complaint submitted to Ridhi team 🙏</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -874,12 +907,15 @@ const styles = StyleSheet.create({
   endBtn: { width: 62, height: 62, borderRadius: 31, backgroundColor: "#FF3B30", alignItems: "center", justifyContent: "center" },
 
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
-  reportSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, gap: 0 },
-  reportTitle: { fontSize: 18, fontFamily: "Inter_700Bold", marginBottom: 16 },
-  reportItem: { paddingVertical: 14, borderBottomWidth: StyleSheet.hairlineWidth },
-  reportItemText: { fontSize: 15, fontFamily: "Inter_500Medium" },
+  reportSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, gap: 0 },
+  reportHandle: { width: 36, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 16 },
+  reportTitle: { fontSize: 16, fontFamily: "Inter_700Bold", marginBottom: 0 },
+  reportItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth },
+  reportItemText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   blockBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, padding: 14, borderRadius: 14, borderWidth: 1, marginTop: 12 },
   blockText: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  callToast: { position: "absolute", bottom: 120, alignSelf: "center", flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 24, backgroundColor: "#1C1C2E", shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 10, elevation: 8 },
+  callToastText: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
 
   // ── Gender preference ──────────────────────────────────────────────────────
   genderRow: { flexDirection: "row", gap: 10, marginBottom: 4 },

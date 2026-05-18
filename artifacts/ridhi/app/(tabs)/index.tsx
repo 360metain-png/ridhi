@@ -155,7 +155,7 @@ export default function FeedScreen() {
   const [editTarget, setEditTarget] = useState<{ id: string; text: string } | null>(null);
   const [editText, setEditText] = useState("");
   const [privacyTarget, setPrivacyTarget] = useState<string | null>(null);
-  const [reportTarget, setReportTarget] = useState<{ id: string; target: "post" | "user" | "host" } | null>(null);
+  const [reportTarget, setReportTarget] = useState<{ id: string; target: "post" | "user" } | null>(null);
   const [reportDone, setReportDone] = useState(false);
   const storyProgress = useRef(new Animated.Value(0)).current;
 
@@ -260,7 +260,7 @@ export default function FeedScreen() {
     setPrivacyTarget(null);
   };
 
-  const handleOpenReport = (target: "post" | "user" | "host") => {
+  const handleOpenReport = (target: "post" | "user") => {
     if (!postMenu) return;
     setReportTarget({ id: postMenu.id, target });
     setPostMenu(null);
@@ -950,11 +950,10 @@ export default function FeedScreen() {
             </>
           ) : (
             <>
-              {(["post", "user", "host"] as const).map((target) => {
+              {(["post", "user"] as const).map((target) => {
                 const cfg = {
-                  post: { icon: "flag" as const,     label: "Report Post",     desc: "Content is inappropriate or harmful",  color: "#FF9500" },
-                  user: { icon: "user-x" as const,   label: "Report User",     desc: "Fake account, harassment or spam",      color: "#FF3B30" },
-                  host: { icon: "radio" as const,     label: "Report Host",     desc: "Abusive behavior during live streams",  color: "#E91E8C" },
+                  post: { icon: "flag" as const,   label: "Report Post", desc: "Content is inappropriate or harmful", color: "#FF9500" },
+                  user: { icon: "user-x" as const, label: "Report User", desc: "Fake account, harassment or spam",    color: "#FF3B30" },
                 };
                 const { icon, label, desc, color } = cfg[target];
                 return (

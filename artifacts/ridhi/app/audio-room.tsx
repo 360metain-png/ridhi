@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Animated,
   Easing,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -381,6 +382,8 @@ export default function AudioRoomScreen() {
   const [raised, setRaised]             = useState(false);
   const [category, setCategory]         = useState("All");
   const [reaction, setReaction]         = useState<string | null>(null);
+  const [reportVisible, setReportVisible] = useState(false);
+  const [reportDone, setReportDone]       = useState(false);
   const reactionAnim                    = useRef(new Animated.Value(0)).current;
 
   // header wave
@@ -510,6 +513,15 @@ export default function AudioRoomScreen() {
             {/* mic */}
             <MicButton muted={muted} onToggle={() => setMuted((v) => !v)} colors={colors} />
 
+            {/* report host */}
+            <Pressable
+              onPress={() => setReportVisible(true)}
+              style={[styles.sideCtrlBtn, { borderColor: "rgba(255,59,48,0.25)" }]}
+            >
+              <Feather name="flag" size={20} color="#FF9500" />
+              <Text style={[styles.sideCtrlLabel, { color: "#FF9500" }]}>Report</Text>
+            </Pressable>
+
             {/* leave */}
             <Pressable
               onPress={() => setActiveRoom(null)}
@@ -520,6 +532,64 @@ export default function AudioRoomScreen() {
             </Pressable>
           </View>
         </LinearGradient>
+
+        {/* ── Complaint against Host Modal ── */}
+        <Modal visible={reportVisible} transparent animationType="slide" onRequestClose={() => setReportVisible(false)}>
+          <Pressable
+            style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "flex-end" }}
+            onPress={() => setReportVisible(false)}
+          >
+            <View style={styles.reportSheet}>
+              <View style={styles.reportHandle} />
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: "rgba(255,149,0,0.18)", alignItems: "center", justifyContent: "center" }}>
+                  <Feather name="flag" size={16} color="#FF9500" />
+                </View>
+                <View>
+                  <Text style={styles.reportTitle}>Complaint against Host</Text>
+                  <Text style={styles.reportSub}>Audio Room · Confidential</Text>
+                </View>
+              </View>
+              {[
+                "Inappropriate or offensive language",
+                "Harassment or personal attacks",
+                "Abusive moderation",
+                "Scam or fraud attempt",
+                "Nudity or explicit content",
+                "Underage host",
+                "Other",
+              ].map((reason) => (
+                <Pressable
+                  key={reason}
+                  style={styles.reportItem}
+                  onPress={() => {
+                    setReportVisible(false);
+                    setReportDone(true);
+                    setTimeout(() => setReportDone(false), 2500);
+                  }}
+                >
+                  <Text style={styles.reportItemText}>{reason}</Text>
+                  <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.4)" />
+                </Pressable>
+              ))}
+              <Pressable
+                onPress={() => { setActiveRoom(null); setReportVisible(false); }}
+                style={styles.blockBtn}
+              >
+                <Feather name="slash" size={16} color="#FF3B30" />
+                <Text style={styles.blockBtnText}>Leave & Block Host</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Modal>
+
+        {/* ── Complaint toast ── */}
+        {reportDone && (
+          <View style={styles.toast} pointerEvents="none">
+            <Feather name="check-circle" size={15} color="#34C759" />
+            <Text style={styles.toastText}>Complaint submitted to Ridhi team 🙏</Text>
+          </View>
+        )}
       </View>
     );
   }
@@ -700,4 +770,16 @@ const styles = StyleSheet.create({
 
   micBtn:  { width: 68, height: 68, borderRadius: 34, alignItems: "center", justifyContent: "center" },
   micGlow: { position: "absolute", width: 68, height: 68, borderRadius: 34 },
+
+  // ── Complaint sheet ─────────────────────────────────────────────────────
+  reportSheet:    { backgroundColor: "#1A1025", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+  reportHandle:   { width: 36, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.15)", alignSelf: "center", marginBottom: 16 },
+  reportTitle:    { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  reportSub:      { fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.45)", marginTop: 1 },
+  reportItem:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(255,255,255,0.08)" },
+  reportItemText: { fontSize: 14, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.85)" },
+  blockBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, paddingVertical: 14, borderRadius: 14, backgroundColor: "rgba(255,59,48,0.12)", borderWidth: 1, borderColor: "rgba(255,59,48,0.25)" },
+  blockBtnText:   { fontSize: 14, fontFamily: "Inter_700Bold", color: "#FF3B30" },
+  toast:          { position: "absolute", bottom: 140, alignSelf: "center", flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 18, paddingVertical: 11, borderRadius: 24, backgroundColor: "#1C1C2E", elevation: 8 },
+  toastText:      { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });
