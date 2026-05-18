@@ -25,7 +25,7 @@ import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { Avatar } from "@/components/Avatar";
-import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS } from "@/data/mockData";
+import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS, type BannerAdConfig } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -140,6 +140,10 @@ const COMMUNITY_POSTS: Post[] = [
   },
 ];
 
+type FeedItem =
+  | { kind: "post"; post: Post }
+  | { kind: "ad"; ad: BannerAdConfig; adKey: string };
+
 export default function FeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -193,6 +197,29 @@ export default function FeedScreen() {
     const others = posts.filter((p) => p.userCity?.toLowerCase() !== userCity.toLowerCase());
     return [...local, ...others];
   }, [posts, userCity]);
+
+  const feedData = useMemo((): FeedItem[] => {
+    let raw: Post[];
+    switch (activeTab) {
+      case "Local":     raw = localPosts; break;
+      case "Trending":  raw = TRENDING_POSTS; break;
+      case "Community": raw = COMMUNITY_POSTS; break;
+      case "Following": raw = INITIAL_POSTS.slice(0, 3); break;
+      default:          raw = forYouPosts;
+    }
+    const result: FeedItem[] = [];
+    raw.forEach((post, i) => {
+      result.push({ kind: "post", post });
+      if (activeBanners.length > 0 && (i + 1) % 5 === 0) {
+        result.push({
+          kind: "ad",
+          ad: activeBanners[Math.floor(i / 5) % activeBanners.length],
+          adKey: `ad-${i}`,
+        });
+      }
+    });
+    return result;
+  }, [activeTab, localPosts, forYouPosts, activeBanners]);
 
   const nearYouPosts = useMemo(() => localPosts.slice(0, 5), [localPosts]);
   const trendingLocalPosts = useMemo(() =>
@@ -774,22 +801,18 @@ export default function FeedScreen() {
       </View>
 
       <FlatList
-        data={getActivePosts()}
-        keyExtractor={(p) => p.id}
-        renderItem={({ item, index }) => {
-          const showBanner = activeBanners.length > 0 && (index + 1) % 5 === 0;
-          const banner = showBanner ? activeBanners[Math.floor(index / 5) % activeBanners.length] : null;
+        data={feedData}
+        keyExtractor={(item) => item.kind === "post" ? item.post.id : item.adKey}
+        renderItem={({ item }) => {
+          if (item.kind === "ad") return <BannerAd ad={item.ad} />;
           return (
-            <View>
-              <FeedPost
-                post={{ ...item, isOwn: item.isOwn || item.userName === user?.name }}
-                onLike={handleLike}
-                onComment={handleOpenComments}
-                onProfile={() => {}}
-                onMenuPress={handleMenuPress}
-              />
-              {banner && <BannerAd ad={banner} />}
-            </View>
+            <FeedPost
+              post={{ ...item.post, isOwn: item.post.isOwn || item.post.userName === user?.name }}
+              onLike={handleLike}
+              onComment={handleOpenComments}
+              onProfile={() => {}}
+              onMenuPress={handleMenuPress}
+            />
           );
         }}
         ListHeaderComponent={renderListHeader}
