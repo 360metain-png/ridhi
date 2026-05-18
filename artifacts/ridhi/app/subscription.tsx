@@ -137,11 +137,11 @@ const OBJECTIVES = [
 
 const CITIES    = ["Anywhere in India","Delhi","Mumbai","Bangalore","Chennai","Hyderabad","Pune","Kolkata","Jaipur","Ahmedabad","Kochi"];
 const INTERESTS = ["Music","Travel","Gaming","Food","Fashion","Sports","Tech","Fitness","Movies","Comedy","Dance","Art"];
-const BUDGETS   = [
-  { label: "₹50/day",  value: 50,  reach: "800–1.2K" },
-  { label: "₹100/day", value: 100, reach: "2–3.5K"   },
-  { label: "₹250/day", value: 250, reach: "6–9K"      },
-  { label: "₹500/day", value: 500, reach: "14–20K"    },
+const BUDGETS = [
+  { label: "₹50/day",  value: 50,  lo: 800,   hi: 1200,  reach: "800–1.2K/day"  },
+  { label: "₹100/day", value: 100, lo: 2000,  hi: 3500,  reach: "2K–3.5K/day"   },
+  { label: "₹250/day", value: 250, lo: 6000,  hi: 9000,  reach: "6K–9K/day"     },
+  { label: "₹500/day", value: 500, lo: 14000, hi: 20000, reach: "14K–20K/day"   },
 ];
 const DURATIONS = [
   { label: "1 day",   days: 1  },
@@ -150,13 +150,18 @@ const DURATIONS = [
   { label: "14 days", days: 14 },
 ];
 
-function estimateReach(budgetVal: number, days: number, obj: BoostObjective) {
+function fmtPeople(n: number): string {
+  if (n >= 100000) return `${(n / 100000).toFixed(1)}L`;
+  if (n >= 1000)   return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}K`;
+  return `${Math.round(n)}`;
+}
+
+function estimateReach(budgetVal: number, days: number, obj: BoostObjective): string {
   const mult = obj === "reach" ? 1 : obj === "reactions" ? 0.65 : 0.5;
-  const base  = BUDGETS.find(b => b.value === budgetVal)?.reach ?? "800–1.2K";
-  const [lo, hi] = base.replace("K", "").split("–").map(Number);
-  const lo2 = Math.round(lo * days * mult * 1000 / 1000);
-  const hi2 = Math.round(hi * days * mult * 1000 / 1000);
-  return hi2 >= 1000 ? `${(lo2 / 1000).toFixed(0)}K–${(hi2 / 1000).toFixed(0)}K people` : `${lo2}–${hi2} people`;
+  const bud  = BUDGETS.find(b => b.value === budgetVal) ?? BUDGETS[0];
+  const lo   = Math.round(bud.lo * days * mult);
+  const hi   = Math.round(bud.hi * days * mult);
+  return `${fmtPeople(lo)}–${fmtPeople(hi)} people`;
 }
 
 // ── Boost section (3-step) ─────────────────────────────────────────────────────
