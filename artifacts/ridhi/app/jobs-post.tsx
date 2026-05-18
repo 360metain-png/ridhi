@@ -159,6 +159,101 @@ export default function JobsPostScreen() {
 
   const inputStyle = [fpStyles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }];
 
+  const userPlan = user?.plan ?? "free";
+  const isPremium = userPlan !== "free";
+
+  if (!isPremium) {
+    return (
+      <View style={[fpStyles.container, { backgroundColor: colors.background }]}>
+        <LinearGradient
+          colors={["#E91E8C", "#7B2FBE"]}
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+          style={[fpStyles.header, { paddingTop: insets.top + (Platform.OS === "web" ? 10 : 0) }]}
+        >
+          <View style={fpStyles.header}>
+            <Pressable onPress={() => router.back()} style={fpStyles.backBtn}>
+              <Feather name="arrow-left" size={20} color="#fff" />
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={fpStyles.headerTitle}>Post a Job</Text>
+              <Text style={fpStyles.headerSub}>Premium feature</Text>
+            </View>
+          </View>
+        </LinearGradient>
+
+        <ScrollView contentContainerStyle={[fpStyles.scroll, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
+          {/* Lock illustration */}
+          <View style={[fpStyles.paywallHero, { borderColor: "#E91E8C40" }]}>
+            <LinearGradient
+              colors={["#E91E8C22", "#7B2FBE22"]}
+              style={fpStyles.paywallIconWrap}
+            >
+              <Feather name="award" size={52} color="#E91E8C" />
+            </LinearGradient>
+            <Text style={[fpStyles.paywallTitle, { color: colors.foreground }]}>Premium Members Only</Text>
+            <Text style={[fpStyles.paywallSub, { color: colors.mutedForeground }]}>
+              Job posting is a premium feature. Upgrade to Silver or above to post jobs and reach thousands of candidates near you — for free.
+            </Text>
+          </View>
+
+          {/* Benefits list */}
+          <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>What you unlock</Text>
+          <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border, gap: 12 }]}>
+            {[
+              { icon: "briefcase", color: "#E91E8C", text: "Post unlimited job listings for free" },
+              { icon: "check-circle", color: "#34C759", text: "Verified phone & email shown to applicants" },
+              { icon: "map-pin", color: "#7B2FBE", text: "Reach candidates in your city" },
+              { icon: "users", color: "#2196F3", text: "Tap into Ridhi's growing talent network" },
+              { icon: "shield", color: "#FF9500", text: "Trusted — listings from verified Ridhi users" },
+              { icon: "trending-up", color: "#FFB800", text: "Priority placement in search results" },
+            ].map(({ icon, color, text }) => (
+              <View key={text} style={fpStyles.benefitRow}>
+                <View style={[fpStyles.benefitIcon, { backgroundColor: color + "20" }]}>
+                  <Feather name={icon as any} size={16} color={color} />
+                </View>
+                <Text style={[fpStyles.benefitText, { color: colors.foreground }]}>{text}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Plan chips */}
+          <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>Choose a plan</Text>
+          <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border, gap: 10 }]}>
+            {[
+              { id: "silver", name: "Silver",      price: "₹99/mo",  color: "#A0A0A0", icon: "shield"  },
+              { id: "gold",   name: "Gold",        price: "₹249/mo", color: "#FFB800", icon: "award"   },
+              { id: "vip",    name: "VIP Diamond", price: "₹599/mo", color: "#E91E8C", icon: "zap"     },
+            ].map((p) => (
+              <View key={p.id} style={[fpStyles.planRow, { backgroundColor: p.color + "12", borderColor: p.color + "40" }]}>
+                <Feather name={p.icon as any} size={18} color={p.color} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[fpStyles.planName, { color: colors.foreground }]}>{p.name}</Text>
+                </View>
+                <Text style={[fpStyles.planPrice, { color: p.color }]}>{p.price}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* CTA */}
+          <Pressable onPress={() => router.push("/subscription" as any)}>
+            <LinearGradient
+              colors={["#E91E8C", "#7B2FBE"]}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={fpStyles.submitBtn}
+            >
+              <Feather name="zap" size={18} color="#fff" />
+              <Text style={fpStyles.submitText}>Upgrade to Post Jobs</Text>
+            </LinearGradient>
+          </Pressable>
+
+          <Pressable onPress={() => router.back()} style={{ alignItems: "center", marginTop: 16 }}>
+            <Text style={[fpStyles.disclaimer, { color: colors.mutedForeground }]}>Maybe later — go back</Text>
+          </Pressable>
+        </ScrollView>
+      </View>
+    );
+  }
+
   if (submitted) {
     return (
       <View style={[fpStyles.container, { backgroundColor: colors.background }]}>
@@ -473,6 +568,17 @@ const fpStyles = StyleSheet.create({
   submitBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 16, borderRadius: 16 },
   submitText:      { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
   disclaimer:      { fontSize: 11, textAlign: "center", marginTop: 12, lineHeight: 16 },
+
+  paywallHero:         { alignItems: "center", borderRadius: 20, borderWidth: 1, padding: 28, marginBottom: 4, gap: 14 },
+  paywallIconWrap:     { width: 100, height: 100, borderRadius: 50, alignItems: "center", justifyContent: "center" },
+  paywallTitle:        { fontSize: 22, fontFamily: "Inter_700Bold", textAlign: "center" },
+  paywallSub:          { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
+  benefitRow:          { flexDirection: "row", alignItems: "center", gap: 12 },
+  benefitIcon:         { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  benefitText:         { flex: 1, fontSize: 14, fontFamily: "Inter_500Medium", lineHeight: 20 },
+  planRow:             { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 12, borderWidth: 1 },
+  planName:            { fontSize: 15, fontFamily: "Inter_700Bold" },
+  planPrice:           { fontSize: 14, fontFamily: "Inter_700Bold" },
 
   verifiedNote:        { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1 },
   verifiedNoteText:    { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },

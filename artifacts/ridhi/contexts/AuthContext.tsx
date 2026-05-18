@@ -20,6 +20,7 @@ export interface UserProfile {
   following: number;
   posts: number;
   isVerified: boolean;
+  plan?: "free" | "silver" | "gold" | "vip";
   createdAt: string;
   locationCoords?: { latitude: number; longitude: number };
   registeredAt?: string;
