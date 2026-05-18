@@ -51,7 +51,15 @@
       ]
     },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/icon.png",
+      "bundler": "metro",
+      "output": "static",
+      "name": "Ridhi — India's #1 Social & Dating App",
+      "shortName": "Ridhi",
+      "description": "India's #1 social networking and dating app — connect with millions of Indians, share moments in your language, and find love.",
+      "themeColor": "#E91E8C",
+      "backgroundColor": "#0A0A0F",
+      "lang": "en-IN"
     },
     "plugins": [
       [
