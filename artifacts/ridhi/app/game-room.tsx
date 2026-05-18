@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+import { LudoGame } from "@/components/LudoGame";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -284,7 +285,7 @@ export default function GameRoomScreen() {
 
         <View style={styles.boardArea}>
           {game === "ludo" ? (
-            <LudoBoardPreview colors={colors} />
+            <LudoGame onWin={() => {}} />
           ) : (
             <CarromBoardPreview colors={colors} />
           )}
