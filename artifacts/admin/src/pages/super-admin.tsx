@@ -11,6 +11,8 @@ import {
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
   Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle,
   Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
+  Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag,
+  Languages, Layers, Megaphone,
 } from "lucide-react";
 
 const ADMIN_ROLES = [
@@ -150,6 +152,103 @@ const WEBHOOKS = [
   { name: "New Registration", url: "https://api.ridhi.app/webhooks/signup", events: ["user.created", "user.verified"], active: false, lastTriggered: "3d ago" },
 ];
 
+type FeatureStatus = "live" | "beta" | "testing" | "disabled";
+interface AppFeature {
+  id: string; name: string; desc: string;
+  phase: string; audience: string; status: FeatureStatus; enabled: boolean;
+}
+interface FeatureCategory {
+  id: string; category: string; icon: React.ComponentType<{ className?: string }>;
+  color: string; bg: string; borderColor: string; features: AppFeature[];
+}
+
+const FEATURE_FLAGS: FeatureCategory[] = [
+  {
+    id: "core", category: "Core & Authentication",
+    icon: Shield, color: "text-purple-600", bg: "bg-purple-50", borderColor: "border-purple-200",
+    features: [
+      { id: "onboarding",    name: "Onboarding Carousel",    desc: "3-slide welcome flow shown to new users on first launch",                        phase: "1", audience: "New Users",      status: "live",  enabled: true  },
+      { id: "otp-login",    name: "Phone OTP Login",         desc: "6-digit OTP via SMS — primary login method for Indian users",                    phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "email-login",  name: "Email Login",             desc: "Email + password authentication alternative",                                   phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "profile-setup",name: "Profile Setup Wizard",    desc: "4-step onboarding: name, age/gender, city, interests",                          phase: "1", audience: "New Users",      status: "live",  enabled: true  },
+      { id: "guest-access", name: "Guest Browse Mode",       desc: "Limited feed browsing without creating an account",                             phase: "2", audience: "Guests",         status: "beta",  enabled: false },
+    ],
+  },
+  {
+    id: "feed", category: "Feed & Content",
+    icon: Layers, color: "text-blue-600", bg: "bg-blue-50", borderColor: "border-blue-200",
+    features: [
+      { id: "home-feed",    name: "Home Feed",               desc: "Main feed with For You / Trending / Local / Following / Community tabs",        phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "stories",      name: "Stories",                 desc: "24-hour disappearing stories with animated progress bar viewer",                phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "reels",        name: "Reels (Vertical Video)",  desc: "TikTok-style full-screen vertical video feed with loop playback",               phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "create-post",  name: "Create Post (6 types)",   desc: "Text, photo, video, reel, story, poll — with hashtag suggestions",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "explore",      name: "Explore & Search",        desc: "Trending posts grid, suggested users, trending hashtags",                      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "communities",  name: "Communities",             desc: "Browse & join communities — 10 categories, join/leave, member count",          phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "promo-banner", name: "Promo Banner (Home Feed)","desc": "Auto-sliding gradient promo cards between feed posts (5 cards, 3s rotation)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "banner-ads",   name: "Inline Banner Ads",       desc: "Sponsored banner ads injected every 5th post in the feed",                    phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+    ],
+  },
+  {
+    id: "social", category: "Social & Communication",
+    icon: MessageSquare, color: "text-pink-600", bg: "bg-pink-50", borderColor: "border-pink-200",
+    features: [
+      { id: "dating-swipe", name: "Dating Swipe (Match Tab)", desc: "Tinder-style card swipe for dating & friend matching",                        phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "chat",         name: "Chat & Messaging",         desc: "1-on-1 chat with text, emoji, coin gifts, media sharing",                    phase: "1", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "live-streams", name: "Live Streams",             desc: "Real-time broadcasting with gifts, chat, co-host & PK battles",              phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
+      { id: "random-calls", name: "Random Video / Audio Calls","desc": "Stranger matching for coin-based random calls",                           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "audio-rooms",  name: "Audio Rooms",              desc: "Multi-user audio rooms — podcast, Q&A, karaoke style",                      phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+    ],
+  },
+  {
+    id: "gaming", category: "In-App Gaming",
+    icon: Gamepad2, color: "text-green-600", bg: "bg-green-50", borderColor: "border-green-200",
+    features: [
+      { id: "ludo",         name: "Ludo Board Game",         desc: "Classic Ludo — up to 4 players, playable inside chat or gaming hub",          phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "carrom",       name: "Carrom Board Game",       desc: "Digital carrom with realistic striker and piece physics",                     phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+      { id: "spin-wheel",   name: "Lucky Spin Wheel",        desc: "Daily spin for bonus coins and prizes (planned)",                            phase: "3", audience: "All Users",      status: "testing", enabled: false },
+      { id: "quiz",         name: "Live Quiz Battles",       desc: "Real-time quiz competition with coin wagering (planned)",                    phase: "3", audience: "All Users",      status: "testing", enabled: false },
+    ],
+  },
+  {
+    id: "commerce", category: "Commerce & Coins",
+    icon: ShoppingBag, color: "text-yellow-600", bg: "bg-yellow-50", borderColor: "border-yellow-200",
+    features: [
+      { id: "coin-wallet",       name: "Coin Wallet & Recharge",   desc: "Ridhi Coins balance, daily reward, ₹49–₹499 recharge packs",           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "coin-fountain",     name: "Coin Fountain Animations", desc: "Burst & rain coin animations during gifts in live streams",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "creator-dashboard", name: "Creator Dashboard",        desc: "Analytics, views chart, top content, earnings breakdown & withdrawal", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "marketplace",       name: "Marketplace",              desc: "Digital items: filters, frames, effects & avatar sticker packs",       phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+      { id: "business-ads",      name: "Business Ads Manager",     desc: "Self-serve ad creation for businesses targeting Ridhi's audience",     phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
+      { id: "special-ads",       name: "Special Client Popup Ads", desc: "Full-screen premium popup ads — Super Admin managed only",            phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "promotions",        name: "User Promotions & Boosts", desc: "Profile boost and visibility promotion tools for regular users",       phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "subscriptions",     name: "Creator Subscriptions",    desc: "Monthly fan subscription tiers for exclusive content (planned)",      phase: "3", audience: "Hosts/Creators", status: "testing", enabled: false },
+    ],
+  },
+  {
+    id: "ai", category: "AI & Safety",
+    icon: Cpu, color: "text-cyan-600", bg: "bg-cyan-50", borderColor: "border-cyan-200",
+    features: [
+      { id: "ai-assistant",   name: "AI Assistant (Priya AI)",   desc: "In-app AI chat for user support, icebreakers & content suggestions",    phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+      { id: "ai-moderation",  name: "AI Content Moderation",     desc: "Automated detection of NSFW, spam, hate speech & misinformation",      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "kyc",            name: "E-KYC Verification",        desc: "Aadhaar/PAN identity verification for hosts, creators & high earners",  phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "watermark",      name: "Creator Watermark Badge",   desc: "Auto-overlay Ridhi watermark on creator content for brand protection",  phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "ai-matchmaking", name: "AI Smart Matchmaking",      desc: "ML-powered compatibility scoring for better dating matches (planned)",  phase: "3", audience: "All Users",      status: "testing", enabled: false },
+      { id: "deepfake-detect","name": "Deepfake Detection",      desc: "AI model to flag AI-generated or manipulated media in uploads (planned)",phase: "3", audience: "All Users",     status: "testing", enabled: false },
+    ],
+  },
+  {
+    id: "platform", category: "Platform & Settings",
+    icon: Globe, color: "text-orange-600", bg: "bg-orange-50", borderColor: "border-orange-200",
+    features: [
+      { id: "dark-mode",      name: "Dark / Light / System Theme", desc: "Full dark mode with system-preference auto-detection",                 phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "multi-lang",     name: "13 Indian Language Support", desc: "English + Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali, Gujarati, Marathi, Punjabi, Odia, Urdu, Assamese", phase: "2", audience: "All Users", status: "live", enabled: true },
+      { id: "notifications",  name: "In-App Notifications Center","desc": "Notification feed for likes, matches, gifts, system alerts & more",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "push-notif",     name: "Push Notifications (FCM)",   desc: "Firebase Cloud Messaging background push alerts",                      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "regional-feed",  name: "Regional Language Feed",     desc: "Feed content filtered by selected app language & region",             phase: "3", audience: "All Users",      status: "testing", enabled: false },
+      { id: "share-sheet",    name: "Native Share Sheet",         desc: "Share posts to WhatsApp, Instagram, Telegram & more (planned)",       phase: "3", audience: "All Users",      status: "testing", enabled: false },
+    ],
+  },
+];
+
 const CATEGORY_COLORS: Record<string, string> = {
   Core: "bg-purple-100 text-purple-700",
   Content: "bg-blue-100 text-blue-700",
@@ -189,7 +288,28 @@ export default function SuperAdminPage() {
   const [platformApis, setPlatformApis] = useState(PLATFORM_APIS);
   const [integrations, setIntegrations] = useState(INTEGRATIONS);
   const [webhooks, setWebhooks] = useState(WEBHOOKS);
+  const [featureFlags, setFeatureFlags] = useState(FEATURE_FLAGS);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const totalFeatures   = featureFlags.reduce((n, c) => n + c.features.length, 0);
+  const enabledFeatures = featureFlags.reduce((n, c) => n + c.features.filter(f => f.enabled).length, 0);
+  const betaFeatures    = featureFlags.reduce((n, c) => n + c.features.filter(f => f.status === "beta").length, 0);
+  const testingFeatures = featureFlags.reduce((n, c) => n + c.features.filter(f => f.status === "testing").length, 0);
+
+  const toggleFeature = (categoryId: string, featureId: string) =>
+    setFeatureFlags(prev => prev.map(c => c.id !== categoryId ? c : {
+      ...c, features: c.features.map(f => f.id !== featureId ? f : { ...f, enabled: !f.enabled }),
+    }));
+
+  const enableAllInCategory = (categoryId: string) =>
+    setFeatureFlags(prev => prev.map(c => c.id !== categoryId ? c : {
+      ...c, features: c.features.map(f => ({ ...f, enabled: true })),
+    }));
+
+  const disableAllInCategory = (categoryId: string) =>
+    setFeatureFlags(prev => prev.map(c => c.id !== categoryId ? c : {
+      ...c, features: c.features.map(f => f.status === "live" || f.status === "beta" ? { ...f, enabled: false } : f),
+    }));
 
   const toggleApi = (id: string) =>
     setPlatformApis((prev) => prev.map((a) => a.id === id ? { ...a, enabled: !a.enabled } : a));
@@ -306,6 +426,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="security" className="text-xs gap-1.5">
             <Shield className="w-3.5 h-3.5" /> Security
+          </TabsTrigger>
+          <TabsTrigger value="features" className="text-xs gap-1.5">
+            <Flame className="w-3.5 h-3.5" /> Features
           </TabsTrigger>
         </TabsList>
 
@@ -996,6 +1119,161 @@ export default function SuperAdminPage() {
               ))}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ─── FEATURES TAB ─── */}
+        <TabsContent value="features" className="mt-4 space-y-6">
+
+          {/* Header banner */}
+          <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 flex items-center gap-4">
+            <div className="p-2.5 rounded-xl bg-orange-500">
+              <Flame className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-orange-900">Feature Flag Control Centre</p>
+              <p className="text-sm text-orange-700 mt-0.5">
+                Enable or disable any Ridhi app feature globally — changes take effect on next session refresh.
+                Testing/planned features are locked until promoted to beta.
+              </p>
+            </div>
+          </div>
+
+          {/* KPI Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Total Features",    value: `${totalFeatures}`,                       icon: Layers,     color: "text-purple-600 bg-purple-50" },
+              { label: "Live & Enabled",    value: `${enabledFeatures}`,                     icon: CheckCircle,color: "text-green-600 bg-green-50"   },
+              { label: "Beta Features",     value: `${betaFeatures}`,                        icon: Zap,        color: "text-blue-600 bg-blue-50"     },
+              { label: "In Testing",        value: `${testingFeatures}`,                     icon: Activity,   color: "text-yellow-600 bg-yellow-50" },
+            ].map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${stat.color}`}><stat.icon className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Status legend */}
+          <div className="flex items-center gap-4 flex-wrap text-xs">
+            <span className="font-semibold text-muted-foreground">Status key:</span>
+            {[
+              { label: "Live",    cls: "bg-green-100 text-green-700 border-green-200" },
+              { label: "Beta",    cls: "bg-blue-100 text-blue-700 border-blue-200"   },
+              { label: "Testing", cls: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+              { label: "Disabled",cls: "bg-gray-100 text-gray-600 border-gray-200"  },
+            ].map((s) => (
+              <Badge key={s.label} variant="outline" className={`text-xs ${s.cls}`}>{s.label}</Badge>
+            ))}
+            <span className="text-muted-foreground ml-2">· Phase badges show which development phase shipped the feature</span>
+          </div>
+
+          {/* Feature categories */}
+          {featureFlags.map((cat) => {
+            const enabledCount = cat.features.filter(f => f.enabled).length;
+            return (
+              <Card key={cat.id} className={`border ${cat.borderColor}`}>
+                <CardHeader className="py-3 flex flex-row items-center justify-between flex-wrap gap-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <div className={`p-1.5 rounded-lg ${cat.bg}`}>
+                      <cat.icon className={`w-4 h-4 ${cat.color}`} />
+                    </div>
+                    <span>{cat.category}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {enabledCount}/{cat.features.length} enabled
+                    </Badge>
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
+                      onClick={() => enableAllInCategory(cat.id)}>
+                      <CheckCircle className="w-3 h-3 text-green-600" /> Enable All
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
+                      onClick={() => disableAllInCategory(cat.id)}>
+                      <XCircle className="w-3 h-3 text-red-500" /> Disable Live
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {cat.features.map((feat) => {
+                      const statusCls: Record<string, string> = {
+                        live:     "bg-green-100 text-green-700 border-green-200",
+                        beta:     "bg-blue-100 text-blue-700 border-blue-200",
+                        testing:  "bg-yellow-100 text-yellow-700 border-yellow-200",
+                        disabled: "bg-gray-100 text-gray-600 border-gray-200",
+                      };
+                      const phaseCls: Record<string, string> = {
+                        "1": "bg-purple-100 text-purple-700",
+                        "2": "bg-indigo-100 text-indigo-700",
+                        "3": "bg-orange-100 text-orange-700",
+                      };
+                      const isLocked = feat.status === "testing";
+                      return (
+                        <div
+                          key={feat.id}
+                          className={`flex items-center gap-4 px-4 py-3 transition-colors ${
+                            feat.enabled ? "hover:bg-muted/20" : "hover:bg-muted/10 opacity-70"
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                              <span className={`font-medium text-sm ${!feat.enabled ? "text-muted-foreground" : ""}`}>
+                                {feat.name}
+                              </span>
+                              <Badge variant="outline" className={`text-[10px] px-1.5 h-4 ${statusCls[feat.status]}`}>
+                                {feat.status}
+                              </Badge>
+                              <Badge variant="secondary" className={`text-[10px] px-1.5 h-4 ${phaseCls[feat.phase] ?? ""}`}>
+                                Phase {feat.phase}
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                                {feat.audience}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{feat.desc}</p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {isLocked ? (
+                              <div className="flex items-center gap-1.5">
+                                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground">Locked</span>
+                              </div>
+                            ) : (
+                              <>
+                                <Switch
+                                  checked={feat.enabled}
+                                  onCheckedChange={() => toggleFeature(cat.id, feat.id)}
+                                />
+                                <span className={`text-xs font-medium w-14 ${feat.enabled ? "text-green-600" : "text-muted-foreground"}`}>
+                                  {feat.enabled ? "Enabled" : "Disabled"}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+
+          {/* Upcoming features note */}
+          <div className="rounded-xl border border-dashed border-muted-foreground/30 bg-muted/20 p-4 text-center">
+            <Flame className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium text-muted-foreground">More features in the pipeline</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              Phase 3 features (spin wheel, quiz battles, live shopping, regional feed) are in development.
+              Promote a feature from <em>Testing → Beta → Live</em> via the backend config API.
+            </p>
+          </div>
+
         </TabsContent>
       </Tabs>
     </div>
