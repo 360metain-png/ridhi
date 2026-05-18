@@ -125,8 +125,8 @@ export function SplashAnimation({ onAnimationComplete, isReady }: Props) {
     if (!isReady) return;
     stopLoops();
     Animated.parallel([
-      Animated.timing(exitOpacity, { toValue: 0, duration: 480, easing: Easing.in(Easing.ease), useNativeDriver: true }),
-      Animated.timing(exitScale,   { toValue: 1.06, duration: 480, easing: Easing.in(Easing.ease), useNativeDriver: true }),
+      Animated.timing(exitOpacity, { toValue: 0, duration: 280, easing: Easing.in(Easing.ease), useNativeDriver: true }),
+      Animated.timing(exitScale,   { toValue: 1.04, duration: 280, easing: Easing.in(Easing.ease), useNativeDriver: true }),
     ]).start(({ finished }) => { if (finished) onAnimationComplete(); });
   }, [isReady, stopLoops, onAnimationComplete]);
 
