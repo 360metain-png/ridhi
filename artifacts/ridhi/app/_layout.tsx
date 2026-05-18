@@ -55,9 +55,8 @@ function RootLayoutNav() {
       <Stack.Screen name="chatrooms" options={{ presentation: "card" }} />
       <Stack.Screen name="kyc" options={{ presentation: "card" }} />
       <Stack.Screen name="withdraw" options={{ presentation: "card" }} />
-      <Stack.Screen name="marketplace" options={{ presentation: "card" }} />
-      <Stack.Screen name="marketplace-sell" options={{ presentation: "card" }} />
-      <Stack.Screen name="marketplace-product" options={{ presentation: "card" }} />
+      <Stack.Screen name="jobs" options={{ presentation: "card" }} />
+      <Stack.Screen name="jobs-post" options={{ presentation: "card" }} />
       <Stack.Screen name="help-support" options={{ presentation: "card" }} />
       <Stack.Screen name="about" options={{ presentation: "card" }} />
       <Stack.Screen name="terms" options={{ presentation: "card" }} />
