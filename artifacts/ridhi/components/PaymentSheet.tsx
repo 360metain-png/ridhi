@@ -14,7 +14,27 @@ import {
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
 import { useColors } from "@/hooks/useColors";
+
+// ── API helpers ────────────────────────────────────────────────────────────────
+const API_BASE = process.env["EXPO_PUBLIC_DOMAIN"]
+  ? `https://${process.env["EXPO_PUBLIC_DOMAIN"]}/api`
+  : "/api";
+
+async function createOrder(amountInPaise: number, label: string) {
+  try {
+    const res = await fetch(`${API_BASE}/payments/create-order`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ amount: amountInPaise, notes: { label } }),
+    });
+    if (!res.ok) return null;
+    return await res.json() as { id: string; amount: number; testMode: boolean; keyId: string };
+  } catch {
+    return null;
+  }
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type PayStep = "select" | "processing" | "success";
