@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { LudoGame } from "@/components/LudoGame";
+import { CarromGame } from "@/components/CarromGame";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -43,101 +44,7 @@ const OPPONENT = {
   winRate: "64%",
 };
 
-const LUDO_GRID_SIZE = Math.min(width - 40, 340);
-const SAFE_SPOTS = [1, 9, 14, 22, 27, 35, 40, 48];
 
-function LudoBoardPreview({ colors }: { colors: any }) {
-  return (
-    <View style={[styles.boardWrapper, { width: LUDO_GRID_SIZE, height: LUDO_GRID_SIZE }]}>
-      <LinearGradient
-        colors={[colors.secondary + "25", colors.primary + "10"]}
-        style={[styles.boardBg, { borderColor: colors.border }]}
-      >
-        <View style={styles.boardQuadrant}>
-          <LinearGradient colors={["#E91E8C40", "#E91E8C20"]} style={styles.quadHome}>
-            <View style={styles.pieceGrid}>
-              {[0, 1, 2, 3].map((i) => (
-                <View key={i} style={[styles.piece, { backgroundColor: "#E91E8C" }]} />
-              ))}
-            </View>
-          </LinearGradient>
-          <LinearGradient colors={["#4CAF5040", "#4CAF5020"]} style={styles.quadHome}>
-            <View style={styles.pieceGrid}>
-              {[0, 1, 2, 3].map((i) => (
-                <View key={i} style={[styles.piece, { backgroundColor: "#4CAF50" }]} />
-              ))}
-            </View>
-          </LinearGradient>
-        </View>
-        <View style={[styles.boardCenter, { backgroundColor: colors.card }]}>
-          <Text style={styles.boardCenterText}>🏆</Text>
-        </View>
-        <View style={styles.boardQuadrant}>
-          <LinearGradient colors={["#FFB80040", "#FFB80020"]} style={styles.quadHome}>
-            <View style={styles.pieceGrid}>
-              {[0, 1, 2, 3].map((i) => (
-                <View key={i} style={[styles.piece, { backgroundColor: "#FFB800" }]} />
-              ))}
-            </View>
-          </LinearGradient>
-          <LinearGradient colors={["#7B2FBE40", "#7B2FBE20"]} style={styles.quadHome}>
-            <View style={styles.pieceGrid}>
-              {[0, 1, 2, 3].map((i) => (
-                <View key={i} style={[styles.piece, { backgroundColor: "#7B2FBE" }]} />
-              ))}
-            </View>
-          </LinearGradient>
-        </View>
-        <View style={styles.boardLabel}>
-          <Text style={[styles.boardLabelText, { color: colors.mutedForeground }]}>Tap to enter game</Text>
-        </View>
-      </LinearGradient>
-    </View>
-  );
-}
-
-function CarromBoardPreview({ colors }: { colors: any }) {
-  const SIZE = LUDO_GRID_SIZE;
-  return (
-    <View style={[styles.boardWrapper, { width: SIZE, height: SIZE }]}>
-      <LinearGradient
-        colors={["#3E2723", "#4E342E", "#3E2723"]}
-        style={[styles.boardBg, { borderColor: "#8D6E63", borderWidth: 3 }]}
-      >
-        <View style={[styles.carromInner, { borderColor: "rgba(255,255,255,0.15)" }]}>
-          <View style={[styles.carromCenter, { borderColor: "rgba(255,255,255,0.3)" }]}>
-            <Text style={{ fontSize: 24 }}>⚫</Text>
-          </View>
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
-            const angle = (i / 9) * 2 * Math.PI;
-            const r = 50;
-            const x = r * Math.cos(angle);
-            const y = r * Math.sin(angle);
-            return (
-              <View
-                key={i}
-                style={[
-                  styles.carromPiece,
-                  {
-                    backgroundColor: i % 2 === 0 ? "#fff" : "#212121",
-                    transform: [{ translateX: x }, { translateY: y }],
-                  },
-                ]}
-              />
-            );
-          })}
-        </View>
-        <View style={[styles.carromCorner, { top: 8, left: 8 }]} />
-        <View style={[styles.carromCorner, { top: 8, right: 8 }]} />
-        <View style={[styles.carromCorner, { bottom: 8, left: 8 }]} />
-        <View style={[styles.carromCorner, { bottom: 8, right: 8 }]} />
-        <View style={styles.boardLabel}>
-          <Text style={[styles.boardLabelText, { color: "rgba(255,255,255,0.5)" }]}>Tap to enter game</Text>
-        </View>
-      </LinearGradient>
-    </View>
-  );
-}
 
 export default function GameRoomScreen() {
   const colors = useColors();
@@ -285,9 +192,9 @@ export default function GameRoomScreen() {
 
         <View style={styles.boardArea}>
           {game === "ludo" ? (
-            <LudoGame onWin={() => {}} />
+            <LudoGame onWin={endGame} />
           ) : (
-            <CarromBoardPreview colors={colors} />
+            <CarromGame onWin={endGame} />
           )}
         </View>
 
@@ -454,20 +361,6 @@ const styles = StyleSheet.create({
   coinBattleLabels: { flexDirection: "row", justifyContent: "space-between" },
   coinBattleLabel: { fontSize: 12, fontFamily: "Inter_700Bold" },
   boardArea: { alignItems: "center", paddingVertical: 16 },
-  boardWrapper: { borderRadius: 16, overflow: "hidden" },
-  boardBg: { flex: 1, padding: 12 },
-  boardQuadrant: { flex: 1, flexDirection: "row", gap: 6 },
-  quadHome: { flex: 1, borderRadius: 10, padding: 10, alignItems: "center", justifyContent: "center" },
-  pieceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, width: 50 },
-  piece: { width: 18, height: 18, borderRadius: 9 },
-  boardCenter: { position: "absolute", top: "40%", left: "40%", width: "20%", height: "20%", borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  boardCenterText: { fontSize: 20 },
-  boardLabel: { position: "absolute", bottom: 10, left: 0, right: 0, alignItems: "center" },
-  boardLabelText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  carromInner: { position: "absolute", top: 12, left: 12, right: 12, bottom: 12, borderRadius: 8, borderWidth: 2, alignItems: "center", justifyContent: "center" },
-  carromCenter: { width: 60, height: 60, borderRadius: 30, borderWidth: 2, alignItems: "center", justifyContent: "center" },
-  carromPiece: { position: "absolute", width: 20, height: 20, borderRadius: 10 },
-  carromCorner: { position: "absolute", width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: "rgba(255,255,255,0.3)" },
   controlsRow: { flexDirection: "row", justifyContent: "center", gap: 12, marginHorizontal: 20, padding: 14, borderRadius: 20, borderWidth: 1 },
   controlBtn: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", borderWidth: 1 },
   controlEmoji: { fontSize: 20 },
