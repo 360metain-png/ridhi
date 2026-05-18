@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ShieldAlert, UsersRound, Coins, IndianRupee,
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
-  Lock, UserCog, ChevronDown, ChevronRight, FolderOpen, Zap, Crown,
+  Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -52,6 +52,12 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA_A  },
       { name: "Gaming",             href: "/gaming",       icon: Gamepad2, allowedRoles: SA_A  },
       { name: "Live Streams",       href: "/live-streams", icon: Radio,    allowedRoles: ALL   },
+    ],
+  },
+  {
+    label: "Commerce",
+    items: [
+      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag, badge: "4", allowedRoles: SA_A },
     ],
   },
   {
@@ -150,6 +156,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/calls":        "Audio & Video Calls",
     "/recordings":   "Call Recordings & Room Activity",
     "/promotions":   "User Promotions & Boosts",
+    "/marketplace":  "Ridhi Marketplace",
     "/ai-hub":       "AI Hub",
     "/kyc":          "E-KYC Verification",
     "/handbook":     "Platform Handbook",

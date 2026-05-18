@@ -553,6 +553,8 @@ export default function ProfileScreen() {
 
       <View style={styles.quickLinks}>
         {[
+          { icon: "shopping-bag", label: "Marketplace",       route: "/marketplace",      color: "#E91E8C" },
+          { icon: "tag",          label: "Sell a Product",   route: "/marketplace-sell", color: "#FF6B35" },
           { icon: "shield", label: "E-KYC Verification", route: "/kyc", color: "#22C55E" },
 
           { icon: "users", label: "Communities", route: "/communities", color: "#7B2FBE" },
