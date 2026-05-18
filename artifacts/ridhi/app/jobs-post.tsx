@@ -15,10 +15,10 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@/contexts/AuthContext";
 
 type JobType = "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
 type SalaryUnit = "Month" | "Day" | "Hour" | "Project";
-type ContactType = "WhatsApp" | "Call" | "Email" | "Apply Link";
 type Experience = "Fresher" | "0–1 yr" | "1–3 yrs" | "3–5 yrs" | "5–10 yrs" | "10+ yrs";
 
 const CATEGORIES = [
@@ -33,7 +33,6 @@ const CITIES = [
 ];
 const JOB_TYPES: JobType[] = ["Full-time", "Part-time", "Freelance", "Internship", "Gig"];
 const SALARY_UNITS: SalaryUnit[] = ["Month", "Day", "Hour", "Project"];
-const CONTACT_TYPES: ContactType[] = ["WhatsApp", "Call", "Email", "Apply Link"];
 const EXPERIENCE_LEVELS: Experience[] = ["Fresher", "0–1 yr", "1–3 yrs", "3–5 yrs", "5–10 yrs", "10+ yrs"];
 
 interface OptionPickerProps {
@@ -127,26 +126,28 @@ function Field({ label, required, colors, children }: {
 export default function JobsPostScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
 
-  const [title,       setTitle]       = useState("");
-  const [company,     setCompany]     = useState("");
-  const [category,    setCategory]    = useState("");
-  const [jobType,     setJobType]     = useState<JobType | "">("");
-  const [city,        setCity]        = useState("");
-  const [area,        setArea]        = useState("");
-  const [salaryMin,   setSalaryMin]   = useState("");
-  const [salaryMax,   setSalaryMax]   = useState("");
-  const [salaryUnit,  setSalaryUnit]  = useState<SalaryUnit>("Month");
-  const [desc,        setDesc]        = useState("");
-  const [skillInput,  setSkillInput]  = useState("");
-  const [skills,      setSkills]      = useState<string[]>([]);
-  const [experience,  setExperience]  = useState<Experience | "">("");
-  const [openings,    setOpenings]    = useState("1");
-  const [contactType, setContactType] = useState<ContactType>("WhatsApp");
-  const [contactVal,  setContactVal]  = useState("");
-  const [submitted,   setSubmitted]   = useState(false);
+  const [title,      setTitle]      = useState("");
+  const [company,    setCompany]    = useState("");
+  const [category,   setCategory]   = useState("");
+  const [jobType,    setJobType]    = useState<JobType | "">("");
+  const [city,       setCity]       = useState("");
+  const [area,       setArea]       = useState("");
+  const [salaryMin,  setSalaryMin]  = useState("");
+  const [salaryMax,  setSalaryMax]  = useState("");
+  const [salaryUnit, setSalaryUnit] = useState<SalaryUnit>("Month");
+  const [desc,       setDesc]       = useState("");
+  const [skillInput, setSkillInput] = useState("");
+  const [skills,     setSkills]     = useState<string[]>([]);
+  const [experience, setExperience] = useState<Experience | "">("");
+  const [openings,   setOpenings]   = useState("1");
+  const [submitted,  setSubmitted]  = useState(false);
 
-  const canSubmit = title.trim() && company.trim() && category && jobType && city && salaryMin && desc.trim() && contactVal.trim();
+  const verifiedPhone = user?.phone ?? "";
+  const verifiedEmail = user?.email ?? "";
+
+  const canSubmit = title.trim() && company.trim() && category && jobType && city && salaryMin && desc.trim() && (verifiedPhone || verifiedEmail);
 
   const addSkill = () => {
     const s = skillInput.trim();
@@ -191,7 +192,7 @@ export default function JobsPostScreen() {
               <Text style={fpStyles.successBtnText}>View Jobs Board</Text>
             </LinearGradient>
           </Pressable>
-          <Pressable onPress={() => { setSubmitted(false); setTitle(""); setCompany(""); setCategory(""); setJobType(""); setCity(""); setArea(""); setSalaryMin(""); setSalaryMax(""); setDesc(""); setSkills([]); setContactVal(""); }}>
+          <Pressable onPress={() => { setSubmitted(false); setTitle(""); setCompany(""); setCategory(""); setJobType(""); setCity(""); setArea(""); setSalaryMin(""); setSalaryMax(""); setDesc(""); setSkills([]); }}>
             <Text style={[fpStyles.postAnotherLink, { color: "#E91E8C" }]}>+ Post Another Job</Text>
           </Pressable>
         </View>
@@ -362,30 +363,61 @@ export default function JobsPostScreen() {
           </Field>
         </View>
 
-        {/* ── Section: Contact ── */}
-        <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>How to Contact</Text>
+        {/* ── Section: Verified Contact ── */}
+        <Text style={[fpStyles.sectionTitle, { color: colors.foreground }]}>Contact Info (Verified)</Text>
         <View style={[fpStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Field label="Contact Method" required colors={colors}>
-            <ChipGroup options={CONTACT_TYPES} value={contactType} onChange={(v) => setContactType(v as ContactType)} colors={colors} />
-          </Field>
-          <Field
-            label={contactType === "Email" ? "Email Address" : contactType === "Apply Link" ? "Application URL" : `${contactType} Number`}
-            required colors={colors}
-          >
-            <TextInput
-              style={inputStyle}
-              placeholder={
-                contactType === "Email"       ? "hr@company.com" :
-                contactType === "Apply Link"  ? "https://…" :
-                "+91 98765 43210"
-              }
-              placeholderTextColor={colors.mutedForeground}
-              value={contactVal}
-              onChangeText={setContactVal}
-              keyboardType={contactType === "Email" ? "email-address" : contactType === "Apply Link" ? "url" : "phone-pad"}
-              autoCapitalize="none"
-            />
-          </Field>
+          <View style={[fpStyles.verifiedNote, { backgroundColor: "#34C75912", borderColor: "#34C75940" }]}>
+            <Feather name="shield" size={14} color="#34C759" />
+            <Text style={[fpStyles.verifiedNoteText, { color: colors.mutedForeground }]}>
+              Your verified Ridhi contact details will be shown to job seekers. You cannot change these here — update them in your profile settings.
+            </Text>
+          </View>
+
+          {verifiedPhone ? (
+            <View style={[fpStyles.verifiedRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={[fpStyles.verifiedIconWrap, { backgroundColor: "#25D36620" }]}>
+                <Feather name="phone" size={16} color="#25D366" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[fpStyles.verifiedLabel, { color: colors.mutedForeground }]}>Phone Number</Text>
+                <Text style={[fpStyles.verifiedValue, { color: colors.foreground }]}>{verifiedPhone}</Text>
+              </View>
+              <View style={fpStyles.verifiedBadge}>
+                <Feather name="check-circle" size={12} color="#34C759" />
+                <Text style={fpStyles.verifiedBadgeText}>Verified</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={[fpStyles.missingContact, { backgroundColor: "#FF9500" + "15", borderColor: "#FF9500" + "40" }]}>
+              <Feather name="alert-circle" size={14} color="#FF9500" />
+              <Text style={[fpStyles.missingContactText, { color: colors.mutedForeground }]}>
+                No verified phone found. Add your phone number in Profile → Settings.
+              </Text>
+            </View>
+          )}
+
+          {verifiedEmail ? (
+            <View style={[fpStyles.verifiedRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <View style={[fpStyles.verifiedIconWrap, { backgroundColor: "#2196F320" }]}>
+                <Feather name="mail" size={16} color="#2196F3" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[fpStyles.verifiedLabel, { color: colors.mutedForeground }]}>Email Address</Text>
+                <Text style={[fpStyles.verifiedValue, { color: colors.foreground }]}>{verifiedEmail}</Text>
+              </View>
+              <View style={fpStyles.verifiedBadge}>
+                <Feather name="check-circle" size={12} color="#34C759" />
+                <Text style={fpStyles.verifiedBadgeText}>Verified</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={[fpStyles.missingContact, { backgroundColor: "#FF9500" + "15", borderColor: "#FF9500" + "40" }]}>
+              <Feather name="alert-circle" size={14} color="#FF9500" />
+              <Text style={[fpStyles.missingContactText, { color: colors.mutedForeground }]}>
+                No email found. Add your email in Profile → Settings.
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Submit */}
@@ -441,6 +473,17 @@ const fpStyles = StyleSheet.create({
   submitBtn:       { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 16, borderRadius: 16 },
   submitText:      { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
   disclaimer:      { fontSize: 11, textAlign: "center", marginTop: 12, lineHeight: 16 },
+
+  verifiedNote:        { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1 },
+  verifiedNoteText:    { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
+  verifiedRow:         { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 12, borderWidth: 1 },
+  verifiedIconWrap:    { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  verifiedLabel:       { fontSize: 11, fontFamily: "Inter_500Medium", marginBottom: 2 },
+  verifiedValue:       { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  verifiedBadge:       { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#34C75918", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
+  verifiedBadgeText:   { fontSize: 11, fontFamily: "Inter_700Bold", color: "#34C759" },
+  missingContact:      { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 10, borderWidth: 1 },
+  missingContactText:  { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 
   modalOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
   optionSheet:     { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: 480 },

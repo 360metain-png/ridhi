@@ -43,6 +43,8 @@ interface Job {
   verified: boolean;
   description: string;
   contactType: "whatsapp" | "call" | "apply";
+  posterPhone: string;
+  posterEmail?: string;
 }
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
@@ -54,7 +56,7 @@ const JOBS: Job[] = [
     skills: ["React Native", "TypeScript", "REST APIs"],
     experience: "2-4 years", postedHoursAgo: 3, openings: 2, urgent: true, verified: true,
     description: "Join our growing team building social apps for 10M+ users across India.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 98102 33456", posterEmail: "hr@techspark.in",
   },
   {
     id: "2", title: "Staff Nurse (ICU)", company: "Sunrise Hospital",
@@ -63,7 +65,7 @@ const JOBS: Job[] = [
     skills: ["ICU Care", "Patient Monitoring", "BLS/ACLS"],
     experience: "1-3 years", postedHoursAgo: 6, openings: 5, urgent: true, verified: true,
     description: "Reputed multi-specialty hospital seeking dedicated ICU nurses. Accommodation provided.",
-    contactType: "call",
+    contactType: "call", posterPhone: "+91 99204 71820", posterEmail: "nursing@sunrisehospital.com",
   },
   {
     id: "3", title: "Delivery Partner", company: "Zomato / Swiggy Network",
@@ -72,7 +74,7 @@ const JOBS: Job[] = [
     skills: ["Two-wheeler licence", "Smartphone"],
     experience: "Fresher OK", postedHoursAgo: 1, openings: 50, urgent: false, verified: true,
     description: "Earn ₹800-₹1500/day. Flexible hours. Petrol allowance included.",
-    contactType: "whatsapp",
+    contactType: "whatsapp", posterPhone: "+91 96300 12345",
   },
   {
     id: "4", title: "UI/UX Designer", company: "Pixel Studio India",
@@ -81,7 +83,7 @@ const JOBS: Job[] = [
     skills: ["Figma", "Sketch", "Prototyping"],
     experience: "2-5 years", postedHoursAgo: 10, openings: 1, urgent: false, verified: true,
     description: "Design mobile-first experiences for fintech & social apps.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 91122 87654", posterEmail: "careers@pixelstudio.in",
   },
   {
     id: "5", title: "School Teacher (Maths)", company: "Delhi Public School",
@@ -90,7 +92,7 @@ const JOBS: Job[] = [
     skills: ["Maths", "Classroom Management", "CBSE"],
     experience: "B.Ed required", postedHoursAgo: 20, openings: 3, urgent: false, verified: true,
     description: "CBSE school hiring experienced Maths teacher for grades 9-12.",
-    contactType: "call",
+    contactType: "call", posterPhone: "+91 98110 34567", posterEmail: "principal@dpsdwarka.edu.in",
   },
   {
     id: "6", title: "Accountant (GST & TDS)", company: "Mehta & Associates",
@@ -99,7 +101,7 @@ const JOBS: Job[] = [
     skills: ["Tally", "GST Filing", "TDS Returns"],
     experience: "2+ years", postedHoursAgo: 14, openings: 2, urgent: false, verified: false,
     description: "CA firm seeking sharp accountant familiar with Tally Prime & latest GST rules.",
-    contactType: "whatsapp",
+    contactType: "whatsapp", posterPhone: "+91 94261 55432",
   },
   {
     id: "7", title: "Retail Sales Executive", company: "Reliance Trends",
@@ -108,7 +110,7 @@ const JOBS: Job[] = [
     skills: ["Customer Service", "Sales", "Hindi/English/Tamil"],
     experience: "Fresher OK", postedHoursAgo: 5, openings: 10, urgent: true, verified: true,
     description: "Join one of India's largest retail chains. Weekly incentives + bonus.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 90034 22100", posterEmail: "talent@reliancetrends.com",
   },
   {
     id: "8", title: "Freelance Photographer", company: "Self / Events",
@@ -117,7 +119,7 @@ const JOBS: Job[] = [
     skills: ["DSLR", "Lightroom", "Portrait", "Events"],
     experience: "Portfolio required", postedHoursAgo: 30, openings: 4, urgent: false, verified: false,
     description: "Wedding & event photography gigs — weekend projects available now.",
-    contactType: "whatsapp",
+    contactType: "whatsapp", posterPhone: "+91 87920 31456",
   },
   {
     id: "9", title: "Security Guard (Night Shift)", company: "G4S India",
@@ -126,7 +128,7 @@ const JOBS: Job[] = [
     skills: ["Security Training", "Physical Fitness"],
     experience: "Ex-Army preferred", postedHoursAgo: 48, openings: 20, urgent: false, verified: true,
     description: "Reputed security firm hiring for IT park deployments. Uniform & ID provided.",
-    contactType: "call",
+    contactType: "call", posterPhone: "+91 99400 67832", posterEmail: "recruit@g4sindia.com",
   },
   {
     id: "10", title: "Digital Marketing Intern", company: "GrowthHackers Co.",
@@ -135,7 +137,7 @@ const JOBS: Job[] = [
     skills: ["Instagram", "Meta Ads", "Content Writing"],
     experience: "Fresher / Student", postedHoursAgo: 8, openings: 3, urgent: false, verified: true,
     description: "6-month paid internship. Learn performance marketing hands-on with a startup.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 80234 98765", posterEmail: "intern@growthhackers.co",
   },
   {
     id: "11", title: "Cook (North Indian Cuisine)", company: "Spice Garden Restaurant",
@@ -144,7 +146,7 @@ const JOBS: Job[] = [
     skills: ["North Indian", "Tandoor", "Bulk Cooking"],
     experience: "3+ years", postedHoursAgo: 12, openings: 2, urgent: true, verified: false,
     description: "Popular dine-in & delivery restaurant. Staff meals + tips included.",
-    contactType: "whatsapp",
+    contactType: "whatsapp", posterPhone: "+91 94142 65432",
   },
   {
     id: "12", title: "Domestic Helper (Live-in)", company: "Private Household",
@@ -153,7 +155,7 @@ const JOBS: Job[] = [
     skills: ["Cooking", "Cleaning", "Childcare"],
     experience: "Any", postedHoursAgo: 24, openings: 1, urgent: false, verified: false,
     description: "Trusted family in Noida Sector 62 seeking reliable live-in helper. Food & room provided.",
-    contactType: "call",
+    contactType: "call", posterPhone: "+91 98181 23456",
   },
   {
     id: "13", title: "Civil Site Supervisor", company: "Mahindra Constructions",
@@ -162,7 +164,7 @@ const JOBS: Job[] = [
     skills: ["AutoCAD", "Site Management", "Civil Engg"],
     experience: "5+ years", postedHoursAgo: 36, openings: 4, urgent: false, verified: true,
     description: "Leading construction firm hiring for residential township project.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 98225 44321", posterEmail: "hr@mahindraconstructions.com",
   },
   {
     id: "14", title: "Backend Developer (Node.js)", company: "FinPay Technologies",
@@ -171,7 +173,7 @@ const JOBS: Job[] = [
     skills: ["Node.js", "PostgreSQL", "Redis", "AWS"],
     experience: "3-6 years", postedHoursAgo: 4, openings: 1, urgent: true, verified: true,
     description: "High-growth fintech startup processing ₹100Cr+ monthly. Equity + ESOP offered.",
-    contactType: "apply",
+    contactType: "apply", posterPhone: "+91 91670 88900", posterEmail: "tech@finpay.in",
   },
   {
     id: "15", title: "Cab Driver (App-based)", company: "Ola / Uber Network",
@@ -180,7 +182,7 @@ const JOBS: Job[] = [
     skills: ["Commercial Licence", "Smartphone", "Route Knowledge"],
     experience: "1+ year driving", postedHoursAgo: 2, openings: 100, urgent: false, verified: true,
     description: "Join the Ola/Uber network. Incentives up to ₹5000/week. Own vehicle required.",
-    contactType: "whatsapp",
+    contactType: "whatsapp", posterPhone: "+91 95401 77200",
   },
 ];
 
@@ -329,6 +331,28 @@ export default function JobsScreen() {
             <Text style={[styles.skillText, { color: colors.mutedForeground }]}>{s}</Text>
           </View>
         ))}
+      </View>
+
+      {/* Verified contact row */}
+      <View style={[styles.contactStrip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+        <View style={styles.contactItem}>
+          <Feather name="phone" size={11} color="#25D366" />
+          <Text style={[styles.contactVal, { color: colors.foreground }]}>{j.posterPhone}</Text>
+          <View style={styles.vBadge}>
+            <Feather name="check-circle" size={9} color="#34C759" />
+            <Text style={styles.vBadgeText}>Verified</Text>
+          </View>
+        </View>
+        {j.posterEmail && (
+          <View style={styles.contactItem}>
+            <Feather name="mail" size={11} color="#2196F3" />
+            <Text style={[styles.contactVal, { color: colors.foreground }]} numberOfLines={1}>{j.posterEmail}</Text>
+            <View style={styles.vBadge}>
+              <Feather name="check-circle" size={9} color="#34C759" />
+              <Text style={styles.vBadgeText}>Verified</Text>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Footer */}
@@ -571,6 +595,12 @@ const styles = StyleSheet.create({
   skillsRow:        { flexDirection: "row", gap: 6, flexWrap: "wrap", marginBottom: 12 },
   skillChip:        { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, borderWidth: 1 },
   skillText:        { fontSize: 11, fontFamily: "Inter_400Regular" },
+
+  contactStrip:     { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8, gap: 5, marginBottom: 10 },
+  contactItem:      { flexDirection: "row", alignItems: "center", gap: 6 },
+  contactVal:       { flex: 1, fontSize: 12, fontFamily: "Inter_500Medium" },
+  vBadge:           { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "#34C75918", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+  vBadgeText:       { fontSize: 10, fontFamily: "Inter_700Bold", color: "#34C759" },
 
   cardFooter:       { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   postedTime:       { fontSize: 11, fontFamily: "Inter_400Regular" },
