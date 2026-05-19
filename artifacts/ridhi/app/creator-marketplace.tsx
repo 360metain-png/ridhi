@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -13,8 +15,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
+import { RidhiCoin } from "@/components/RidhiCoin";
+
+const PITCH_COST   = 100;
+const CONNECT_COST = 1000;
 
 const { width } = Dimensions.get("window");
 
@@ -198,10 +205,75 @@ export default function CreatorMarketplaceScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const topPad  = Platform.OS === "web" ? 67 : insets.top;
+  const { user, deductCoins } = useAuth();
 
-  const [tab,      setTab]      = useState<TabType>("discover");
-  const [category, setCategory] = useState<Category>("All");
-  const [pitched,  setPitched]  = useState<Record<string, boolean>>({});
+  const [tab,       setTab]      = useState<TabType>("discover");
+  const [category,  setCategory] = useState<Category>("All");
+  const [pitched,   setPitched]  = useState<Record<string, boolean>>({});
+  const [connected, setConnected] = useState<Record<string, boolean>>({});
+
+  // Coin confirmation modal
+  const [coinModal, setCoinModal] = useState<{
+    visible: boolean;
+    title: string;
+    desc: string;
+    cost: number;
+    onConfirm: () => void;
+  }>({ visible: false, title: "", desc: "", cost: 0, onConfirm: () => {} });
+
+  const closeCoinModal = () => setCoinModal((m) => ({ ...m, visible: false }));
+
+  const handlePitch = (deal: typeof DEALS[0]) => {
+    if (pitched[deal.id]) return;
+    setCoinModal({
+      visible: true,
+      title: `Pitch to ${deal.brand}`,
+      desc: `Pitching sends your profile to the brand and uses ${PITCH_COST} Ridhi Coins. The brand reviews all pitches and shortlists the best fit.`,
+      cost: PITCH_COST,
+      onConfirm: async () => {
+        closeCoinModal();
+        const ok = await deductCoins(PITCH_COST);
+        if (ok) {
+          setPitched((p) => ({ ...p, [deal.id]: true }));
+        } else {
+          Alert.alert(
+            "Not enough coins 🪙",
+            `You need ${PITCH_COST} coins to pitch. You currently have ${user?.coins ?? 0} coins.\n\nTop up your wallet to continue.`,
+            [
+              { text: "Top Up Wallet", onPress: () => router.push("/wallet") },
+              { text: "Cancel", style: "cancel" },
+            ]
+          );
+        }
+      },
+    });
+  };
+
+  const handleConnect = (pitchId: string, brandName: string) => {
+    if (connected[pitchId]) return;
+    setCoinModal({
+      visible: true,
+      title: `Connect with ${brandName}`,
+      desc: `Unlocking contact details costs ${CONNECT_COST} Ridhi Coins. Once connected, the brand's contact person details will be revealed so you can coordinate directly.`,
+      cost: CONNECT_COST,
+      onConfirm: async () => {
+        closeCoinModal();
+        const ok = await deductCoins(CONNECT_COST);
+        if (ok) {
+          setConnected((p) => ({ ...p, [pitchId]: true }));
+        } else {
+          Alert.alert(
+            "Not enough coins 🪙",
+            `You need ${CONNECT_COST} coins to connect. You currently have ${user?.coins ?? 0} coins.\n\nTop up your wallet to continue.`,
+            [
+              { text: "Top Up Wallet", onPress: () => router.push("/wallet") },
+              { text: "Cancel", style: "cancel" },
+            ]
+          );
+        }
+      },
+    });
+  };
 
   const filtered = DEALS.filter((d) => category === "All" || d.category === category);
   const featured = filtered.filter((d) => d.featured);
@@ -229,7 +301,10 @@ export default function CreatorMarketplaceScreen() {
             <Text style={styles.headerTitle}>Creator Marketplace</Text>
             <Text style={styles.headerSub}>Get paid by top Indian brands 🎯</Text>
           </View>
-          <View style={{ width: 36 }} />
+          <Pressable onPress={() => router.push("/wallet")} style={styles.coinChip}>
+            <RidhiCoin size={14} />
+            <Text style={styles.coinChipText}>{(user?.coins ?? 0).toLocaleString()}</Text>
+          </Pressable>
         </View>
 
         {/* Stats strip */}
@@ -329,12 +404,20 @@ export default function CreatorMarketplaceScreen() {
                         <Text style={[styles.featuredMetaText, { color: colors.mutedForeground }]}>{deal.slotsLeft} slots left</Text>
                       </View>
                       <Pressable
-                        onPress={() => setPitched((p) => ({ ...p, [deal.id]: true }))}
+                        onPress={() => handlePitch(deal)}
                         style={[styles.pitchBtn, { backgroundColor: pitched[deal.id] ? colors.muted : deal.logoColor }]}
                       >
-                        <Text style={[styles.pitchBtnText, { color: pitched[deal.id] ? colors.mutedForeground : "#fff" }]}>
-                          {pitched[deal.id] ? "Pitched ✓" : "Pitch Now"}
-                        </Text>
+                        {pitched[deal.id] ? (
+                          <Text style={[styles.pitchBtnText, { color: colors.mutedForeground }]}>Pitched ✓</Text>
+                        ) : (
+                          <View style={styles.pitchBtnInner}>
+                            <Text style={[styles.pitchBtnText, { color: "#fff" }]}>Pitch Now</Text>
+                            <View style={styles.pitchCoinBadge}>
+                              <RidhiCoin size={11} />
+                              <Text style={styles.pitchCoinText}>{PITCH_COST}</Text>
+                            </View>
+                          </View>
+                        )}
                       </Pressable>
                     </Pressable>
                   ))}
@@ -403,15 +486,23 @@ export default function CreatorMarketplaceScreen() {
                         </View>
                       </View>
                       <Pressable
-                        onPress={() => setPitched((p) => ({ ...p, [deal.id]: true }))}
+                        onPress={() => handlePitch(deal)}
                         style={[
                           styles.dealPitchBtn,
                           { backgroundColor: pitched[deal.id] ? colors.muted : deal.logoColor + "20", borderColor: pitched[deal.id] ? colors.border : deal.logoColor },
                         ]}
                       >
-                        <Text style={[styles.dealPitchText, { color: pitched[deal.id] ? colors.mutedForeground : deal.logoColor }]}>
-                          {pitched[deal.id] ? "Pitched ✓" : "Pitch"}
-                        </Text>
+                        {pitched[deal.id] ? (
+                          <Text style={[styles.dealPitchText, { color: colors.mutedForeground }]}>Pitched ✓</Text>
+                        ) : (
+                          <View style={styles.pitchBtnInner}>
+                            <Text style={[styles.dealPitchText, { color: deal.logoColor }]}>Pitch</Text>
+                            <View style={[styles.pitchCoinBadge, { backgroundColor: deal.logoColor + "20" }]}>
+                              <RidhiCoin size={10} />
+                              <Text style={[styles.pitchCoinText, { color: deal.logoColor }]}>{PITCH_COST}</Text>
+                            </View>
+                          </View>
+                        )}
                       </Pressable>
                     </View>
                   </View>
@@ -451,13 +542,34 @@ export default function CreatorMarketplaceScreen() {
             <Text style={[styles.sectionTitle, { color: colors.foreground, marginTop: 20, marginBottom: 12 }]}>Active Pitches</Text>
 
             {MY_PITCHES.map((p) => (
-              <View key={p.id} style={[styles.pitchCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View key={p.id} style={[styles.pitchCard, { backgroundColor: colors.card, borderColor: p.status === "Shortlisted" ? "#22C55E40" : colors.border }]}>
+                {p.status === "Shortlisted" && (
+                  <LinearGradient colors={["#22C55E08", "transparent"]} style={StyleSheet.absoluteFill} />
+                )}
                 <View style={[styles.pitchCardLogo, { backgroundColor: colors.muted }]}>
                   <Text style={{ fontSize: 24 }}>{p.logo}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.pitchCardBrand, { color: colors.foreground }]}>{p.brand}</Text>
                   <Text style={[styles.pitchCardDays, { color: colors.mutedForeground }]}>Submitted {p.submittedDays}d ago</Text>
+                  {/* Connect CTA for shortlisted */}
+                  {p.status === "Shortlisted" && (
+                    connected[p.id] ? (
+                      <View style={styles.contactReveal}>
+                        <Feather name="check-circle" size={12} color="#22C55E" />
+                        <Text style={[styles.contactRevealText, { color: "#22C55E" }]}>Connected · brand will reach out shortly</Text>
+                      </View>
+                    ) : (
+                      <Pressable
+                        onPress={() => handleConnect(p.id, p.brand)}
+                        style={[styles.connectBtn, { borderColor: "#22C55E50", backgroundColor: "#22C55E10" }]}
+                      >
+                        <RidhiCoin size={12} />
+                        <Text style={[styles.connectBtnText, { color: "#22C55E" }]}>{CONNECT_COST} · Connect & Reveal Contact</Text>
+                        <Feather name="unlock" size={13} color="#22C55E" />
+                      </Pressable>
+                    )
+                  )}
                 </View>
                 <View style={[styles.statusBadge, { backgroundColor: p.statusColor + "20", borderColor: p.statusColor + "40" }]}>
                   <Text style={[styles.statusText, { color: p.statusColor }]}>{p.status}</Text>
@@ -574,6 +686,68 @@ export default function CreatorMarketplaceScreen() {
         )}
 
       </ScrollView>
+
+      {/* ── Coin Confirmation Modal ──────────────────────────────────────── */}
+      <Modal
+        visible={coinModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={closeCoinModal}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeCoinModal}>
+          <Pressable style={[styles.modalBox, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => {}}>
+            {/* Icon */}
+            <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.modalIconBg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+              <RidhiCoin size={28} />
+            </LinearGradient>
+
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>{coinModal.title}</Text>
+            <Text style={[styles.modalDesc, { color: colors.mutedForeground }]}>{coinModal.desc}</Text>
+
+            {/* Cost row */}
+            <View style={[styles.modalCostRow, { backgroundColor: "#FFB80012", borderColor: "#FFB80030" }]}>
+              <Text style={[styles.modalCostLabel, { color: colors.mutedForeground }]}>Cost</Text>
+              <View style={styles.modalCostRight}>
+                <RidhiCoin size={18} />
+                <Text style={[styles.modalCostVal, { color: "#FFB800" }]}>{coinModal.cost.toLocaleString()} coins</Text>
+              </View>
+            </View>
+
+            {/* Balance */}
+            <View style={[styles.modalBalRow, { borderColor: colors.border }]}>
+              <Text style={[styles.modalBalLabel, { color: colors.mutedForeground }]}>Your balance</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <RidhiCoin size={14} />
+                <Text style={[styles.modalBalVal, {
+                  color: (user?.coins ?? 0) >= coinModal.cost ? colors.foreground : "#FF5252"
+                }]}>
+                  {(user?.coins ?? 0).toLocaleString()} coins
+                  {(user?.coins ?? 0) < coinModal.cost ? " (insufficient)" : ""}
+                </Text>
+              </View>
+            </View>
+
+            {/* Actions */}
+            <View style={styles.modalActions}>
+              <Pressable onPress={closeCoinModal} style={[styles.modalCancelBtn, { borderColor: colors.border, backgroundColor: colors.muted }]}>
+                <Text style={[styles.modalCancelText, { color: colors.mutedForeground }]}>Cancel</Text>
+              </Pressable>
+              <Pressable onPress={coinModal.onConfirm} style={[styles.modalConfirmBtn, { opacity: (user?.coins ?? 0) >= coinModal.cost ? 1 : 0.45 }]}>
+                <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.modalConfirmGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                  <Text style={styles.modalConfirmText}>Confirm & Pay</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+
+            {(user?.coins ?? 0) < coinModal.cost && (
+              <Pressable onPress={() => { closeCoinModal(); router.push("/wallet"); }} style={styles.topUpLink}>
+                <Feather name="plus-circle" size={14} color="#E91E8C" />
+                <Text style={[styles.topUpLinkText, { color: "#E91E8C" }]}>Top up Ridhi Coins</Text>
+              </Pressable>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -624,8 +798,14 @@ const styles = StyleSheet.create({
   featuredMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   featuredMetaText: { fontSize: 11, fontFamily: "Inter_400Regular" },
   featuredMetaDot: { fontSize: 12 },
+  coinChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "rgba(255,184,0,0.18)", borderRadius: 16, paddingHorizontal: 10, paddingVertical: 5 },
+  coinChipText: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#FFB800" },
+
   pitchBtn: { borderRadius: 10, paddingVertical: 9, alignItems: "center", marginTop: 2 },
   pitchBtnText: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  pitchBtnInner: { flexDirection: "row", alignItems: "center", gap: 6 },
+  pitchCoinBadge: { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 },
+  pitchCoinText: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#fff" },
 
   // deal list cards
   dealCard: { borderRadius: 16, borderWidth: 1, marginBottom: 12, overflow: "hidden", flexDirection: "row" },
@@ -664,9 +844,35 @@ const styles = StyleSheet.create({
   pitchCardLogo: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", flexShrink: 0 },
   pitchCardBrand: { fontSize: 14, fontFamily: "Inter_700Bold" },
   pitchCardDays: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1, alignSelf: "flex-start" },
   statusText: { fontSize: 11, fontFamily: "Inter_700Bold" },
+  connectBtn:     { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 6, marginTop: 8, alignSelf: "flex-start" },
+  connectBtnText: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  contactReveal:     { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6 },
+  contactRevealText: { fontSize: 12, fontFamily: "Inter_500Medium" },
   emptyBox: { borderRadius: 16, borderWidth: 1, borderStyle: "dashed", padding: 32, alignItems: "center", gap: 8, marginTop: 8 },
+
+  // coin modal
+  modalOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.65)", justifyContent: "flex-end", alignItems: "center" },
+  modalBox:        { width: "100%", borderTopLeftRadius: 28, borderTopRightRadius: 28, borderWidth: 1, padding: 24, gap: 14, alignItems: "center" },
+  modalIconBg:     { width: 62, height: 62, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 2 },
+  modalTitle:      { fontSize: 19, fontFamily: "Inter_700Bold", textAlign: "center" },
+  modalDesc:       { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 20, textAlign: "center" },
+  modalCostRow:    { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", borderRadius: 14, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 12 },
+  modalCostLabel:  { fontSize: 13, fontFamily: "Inter_500Medium" },
+  modalCostRight:  { flexDirection: "row", alignItems: "center", gap: 6 },
+  modalCostVal:    { fontSize: 17, fontFamily: "Inter_700Bold" },
+  modalBalRow:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
+  modalBalLabel:   { fontSize: 13, fontFamily: "Inter_400Regular" },
+  modalBalVal:     { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  modalActions:    { flexDirection: "row", gap: 12, width: "100%", marginTop: 4 },
+  modalCancelBtn:  { flex: 1, borderRadius: 14, borderWidth: 1, paddingVertical: 14, alignItems: "center" },
+  modalCancelText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  modalConfirmBtn: { flex: 2, borderRadius: 14, overflow: "hidden" },
+  modalConfirmGrad:  { paddingVertical: 14, alignItems: "center" },
+  modalConfirmText:  { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  topUpLink:       { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 4 },
+  topUpLinkText:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   emptyTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
   emptySubtext: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 19 },
   tipsCard: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 12 },
