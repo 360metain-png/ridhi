@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -14,7 +16,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
+import { RidhiCoin } from "@/components/RidhiCoin";
+
+const DEAL_POST_COST = 1000;
 
 const { width } = Dimensions.get("window");
 
@@ -88,6 +94,12 @@ export default function BrandPostDealScreen() {
     }
   };
 
+  const { user, deductCoins } = useAuth();
+
+  // Coin confirmation modal
+  const [coinModal, setCoinModal] = useState(false);
+  const closeCoinModal = () => setCoinModal(false);
+
   const togglePlatform = (p: string) => {
     setSelectedPlats((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
@@ -103,7 +115,25 @@ export default function BrandPostDealScreen() {
 
   const handleNext = () => {
     if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
-    setSubmitted(true);
+    // Final step — show coin confirmation before posting
+    setCoinModal(true);
+  };
+
+  const handleConfirmPost = async () => {
+    closeCoinModal();
+    const ok = await deductCoins(DEAL_POST_COST);
+    if (ok) {
+      setSubmitted(true);
+    } else {
+      Alert.alert(
+        "Not enough coins 🪙",
+        `Posting a deal costs ${DEAL_POST_COST} Ridhi Coins. You currently have ${user?.coins ?? 0} coins.\n\nTop up your wallet to continue.`,
+        [
+          { text: "Top Up Wallet", onPress: () => router.push("/wallet") },
+          { text: "Cancel", style: "cancel" },
+        ]
+      );
+    }
   };
 
   const progress = (step + 1) / TOTAL_STEPS;
@@ -458,6 +488,22 @@ export default function BrandPostDealScreen() {
             <Text style={[styles.stepTitle, { color: colors.foreground }]}>Final details</Text>
             <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Hashtags and a creator brief make your deal far more likely to get quality pitches</Text>
 
+            {/* Coin cost banner */}
+            <View style={styles.coinBanner}>
+              <View style={styles.coinBannerLeft}>
+                <RidhiCoin size={22} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.coinBannerTitle}>Posting costs 1,000 Ridhi Coins</Text>
+                  <Text style={styles.coinBannerSub}>Your balance: 🪙 {(user?.coins ?? 0).toLocaleString("en-IN")} coins</Text>
+                </View>
+              </View>
+              {(user?.coins ?? 0) < DEAL_POST_COST && (
+                <Pressable onPress={() => router.push("/wallet")} style={styles.coinBannerTopUp}>
+                  <Text style={styles.coinBannerTopUpText}>Top Up</Text>
+                </Pressable>
+              )}
+            </View>
+
             <Field label="Hashtags * (add at least 1)" icon="hash" color={colors.primary}>
               <View style={{ flexDirection: "row", gap: 8 }}>
                 <TextInput
@@ -530,12 +576,79 @@ export default function BrandPostDealScreen() {
 
       {/* Bottom CTA */}
       <View style={[styles.bottomBar, { paddingBottom: Platform.OS === "web" ? 24 : insets.bottom + 12, backgroundColor: colors.background, borderTopColor: colors.border }]}>
+        {step === TOTAL_STEPS - 1 && (
+          <View style={styles.coinCostRow}>
+            <RidhiCoin size={16} />
+            <Text style={styles.coinCostText}>1,000 coins will be deducted on posting</Text>
+          </View>
+        )}
         <GradientButton
-          label={step === TOTAL_STEPS - 1 ? "Post Deal  🚀" : "Continue  →"}
+          label={step === TOTAL_STEPS - 1 ? "Review & Pay 🪙 1,000" : "Continue  →"}
           onPress={handleNext}
           disabled={!canProceed}
         />
       </View>
+
+      {/* ── Coin confirmation modal ──────────────────────────────────────── */}
+      <Modal visible={coinModal} transparent animationType="slide" onRequestClose={closeCoinModal}>
+        <Pressable style={styles.modalOverlay} onPress={closeCoinModal}>
+          <Pressable
+            style={[styles.modalBox, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            {/* Icon */}
+            <View style={[styles.modalIconBg, { backgroundColor: "#FFB80018" }]}>
+              <RidhiCoin size={36} />
+            </View>
+
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Post Deal for 1,000 Coins</Text>
+            <Text style={[styles.modalDesc, { color: colors.mutedForeground }]}>
+              "{title || "Your campaign"}" will go live instantly and creators can start pitching within minutes.
+            </Text>
+
+            {/* Cost row */}
+            <View style={[styles.modalCostRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
+              <Text style={[styles.modalCostLabel, { color: colors.mutedForeground }]}>Deal posting fee</Text>
+              <View style={styles.modalCostRight}>
+                <RidhiCoin size={18} />
+                <Text style={[styles.modalCostVal, { color: "#FFB800" }]}>1,000</Text>
+              </View>
+            </View>
+
+            {/* Balance row */}
+            <View style={[styles.modalBalRow, { borderTopColor: colors.border }]}>
+              <Text style={[styles.modalBalLabel, { color: colors.mutedForeground }]}>Your balance</Text>
+              <Text style={[styles.modalBalVal, { color: (user?.coins ?? 0) >= DEAL_POST_COST ? "#22C55E" : "#EF4444" }]}>
+                🪙 {(user?.coins ?? 0).toLocaleString("en-IN")} coins
+              </Text>
+            </View>
+
+            {/* Low balance notice */}
+            {(user?.coins ?? 0) < DEAL_POST_COST && (
+              <Pressable onPress={() => { closeCoinModal(); router.push("/wallet"); }} style={styles.topUpLink}>
+                <Feather name="zap" size={14} color="#E91E8C" />
+                <Text style={[styles.topUpLinkText, { color: "#E91E8C" }]}>Top up Ridhi Coins to continue</Text>
+              </Pressable>
+            )}
+
+            {/* Actions */}
+            <View style={styles.modalActions}>
+              <Pressable onPress={closeCoinModal} style={[styles.modalCancelBtn, { borderColor: colors.border }]}>
+                <Text style={[styles.modalCancelText, { color: colors.mutedForeground }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleConfirmPost}
+                style={[styles.modalConfirmBtn, (user?.coins ?? 0) < DEAL_POST_COST && { opacity: 0.45 }]}
+                disabled={(user?.coins ?? 0) < DEAL_POST_COST}
+              >
+                <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.modalConfirmGrad}>
+                  <Text style={styles.modalConfirmText}>Confirm & Pay 🪙</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -617,7 +730,39 @@ const styles = StyleSheet.create({
   previewTags:   { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 4 },
   previewTag:    { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
 
-  bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
+  bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth, gap: 8 },
+  coinCostRow: { flexDirection: "row", alignItems: "center", gap: 6, justifyContent: "center" },
+  coinCostText: { fontSize: 12, fontFamily: "Inter_500Medium", color: "#FFB800" },
+
+  // coin banner (step 3)
+  coinBanner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderRadius: 14, borderWidth: 1.5, borderColor: "#FFB80050", backgroundColor: "#FFB80010", paddingHorizontal: 14, paddingVertical: 12, gap: 10 },
+  coinBannerLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
+  coinBannerTitle: { fontSize: 13, fontFamily: "Inter_700Bold", color: "#FFB800" },
+  coinBannerSub: { fontSize: 11, fontFamily: "Inter_400Regular", color: "#FFB800", opacity: 0.75, marginTop: 2 },
+  coinBannerTopUp: { backgroundColor: "#FFB800", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
+  coinBannerTopUpText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#000" },
+
+  // coin modal
+  modalOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.65)", justifyContent: "flex-end" },
+  modalBox:        { borderTopLeftRadius: 28, borderTopRightRadius: 28, borderWidth: 1, padding: 24, gap: 14, alignItems: "center" },
+  modalIconBg:     { width: 64, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", marginBottom: 2 },
+  modalTitle:      { fontSize: 19, fontFamily: "Inter_700Bold", textAlign: "center" },
+  modalDesc:       { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 20, textAlign: "center" },
+  modalCostRow:    { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", borderRadius: 14, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 12 },
+  modalCostLabel:  { fontSize: 13, fontFamily: "Inter_500Medium" },
+  modalCostRight:  { flexDirection: "row", alignItems: "center", gap: 6 },
+  modalCostVal:    { fontSize: 17, fontFamily: "Inter_700Bold" },
+  modalBalRow:     { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
+  modalBalLabel:   { fontSize: 13, fontFamily: "Inter_400Regular" },
+  modalBalVal:     { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  modalActions:    { flexDirection: "row", gap: 12, width: "100%", marginTop: 4 },
+  modalCancelBtn:  { flex: 1, borderRadius: 14, borderWidth: 1, paddingVertical: 14, alignItems: "center" },
+  modalCancelText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  modalConfirmBtn: { flex: 2, borderRadius: 14, overflow: "hidden" },
+  modalConfirmGrad:  { paddingVertical: 14, alignItems: "center" },
+  modalConfirmText:  { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+  topUpLink:       { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 4 },
+  topUpLinkText:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
   // success
   successBg:    { alignItems: "center", gap: 12, padding: 32, paddingBottom: 40 },
