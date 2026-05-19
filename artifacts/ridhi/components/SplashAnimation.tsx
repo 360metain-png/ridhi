@@ -423,7 +423,7 @@ export function SplashAnimation({ onAnimationComplete, isReady }: Props) {
             },
           ]}
         >
-          Connect · Share · Love
+          India's Social Universe
         </Animated.Text>
       </View>
 

@@ -256,7 +256,7 @@ export default function LoginScreen() {
 
           <View style={styles.titleGroup}>
             <Text style={styles.title}>Welcome to Ridhi</Text>
-            <Text style={styles.subtitle}>India's fastest growing social community</Text>
+            <Text style={styles.subtitle}>India's Social Universe</Text>
           </View>
 
           {/* Phone / Email toggle */}
