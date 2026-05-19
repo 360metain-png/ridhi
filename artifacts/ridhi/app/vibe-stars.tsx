@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Platform,
   Pressable,
@@ -8,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -33,58 +35,79 @@ const ZODIAC_SIGNS = [
   { id: "pisces",      name: "Pisces",      emoji: "♓", dates: "Feb 19 – Mar 20", element: "Water", color: "#26C6DA" },
 ];
 
-const DAILY_HOROSCOPES: Record<string, { love: string; career: string; energy: string; lucky: string; rating: number }> = {
-  aries:       { love: "A surprise message will make your heart flutter today. Be open to unexpected connections.", career: "Your boldness impresses someone important — speak up in that meeting.", energy: "High", lucky: "Red", rating: 4 },
-  taurus:      { love: "Slow and steady wins — someone is falling for your warm, grounded nature.", career: "A financial opportunity knocks. Review it carefully before committing.", energy: "Steady", lucky: "Green", rating: 4 },
-  gemini:      { love: "Your wit is magnetic today. A flirty conversation could turn into something real.", career: "Two ideas collide into a brilliant solution — trust your instincts.", energy: "Buzzing", lucky: "Yellow", rating: 5 },
-  cancer:      { love: "Emotional honesty opens a deeper bond. Say what you feel — it's the right moment.", career: "Home-related decisions favour you. Trust your intuition over logic today.", energy: "Calm", lucky: "Silver", rating: 3 },
-  leo:         { love: "You're glowing and everyone notices. Someone admires you from afar — smile back.", career: "A leadership moment arrives. Step forward with confidence.", energy: "Radiant", lucky: "Gold", rating: 5 },
-  virgo:       { love: "Small gestures matter most today. Notice who remembers your preferences.", career: "Your attention to detail saves the day — colleagues will be grateful.", energy: "Focused", lucky: "Navy", rating: 4 },
-  libra:       { love: "Balance is your superpower — you help someone feel truly seen and heard today.", career: "A negotiation works in your favour. Stay charming and firm.", energy: "Harmonious", lucky: "Pink", rating: 4 },
-  scorpio:     { love: "Intensity is a gift, not a curse. Someone craves the depth only you can offer.", career: "Hidden information comes to light — use it wisely, not aggressively.", energy: "Magnetic", lucky: "Maroon", rating: 4 },
-  sagittarius: { love: "Adventure-loving energy attracts a kindred spirit. Plan something spontaneous!", career: "An international or digital opportunity expands your horizon.", energy: "Free", lucky: "Purple", rating: 5 },
-  capricorn:   { love: "Patience is rewarded — a slow-burning connection gets warmer today.", career: "Steady effort compounds. What you planted last month begins to grow.", energy: "Grounded", lucky: "Brown", rating: 3 },
-  aquarius:    { love: "Your uniqueness is your biggest attraction. Embrace what makes you different.", career: "A unconventional idea earns respect from unlikely allies today.", energy: "Electric", lucky: "Blue", rating: 5 },
-  pisces:      { love: "Dreams and reality blur in the best way — someone from your past resurfaces.", career: "Creative work flows effortlessly. Block out distractions and create.", energy: "Dreamy", lucky: "Turquoise", rating: 4 },
+// ── Curated extras (energy, lucky, best match, rating) ────────────────────
+const HOROSCOPE_META: Record<string, { energy: string; lucky: string; rating: number }> = {
+  aries:       { energy: "High",      lucky: "Red",       rating: 4 },
+  taurus:      { energy: "Steady",    lucky: "Green",     rating: 4 },
+  gemini:      { energy: "Buzzing",   lucky: "Yellow",    rating: 5 },
+  cancer:      { energy: "Calm",      lucky: "Silver",    rating: 3 },
+  leo:         { energy: "Radiant",   lucky: "Gold",      rating: 5 },
+  virgo:       { energy: "Focused",   lucky: "Navy",      rating: 4 },
+  libra:       { energy: "Harmonious",lucky: "Pink",      rating: 4 },
+  scorpio:     { energy: "Magnetic",  lucky: "Maroon",    rating: 4 },
+  sagittarius: { energy: "Free",      lucky: "Purple",    rating: 5 },
+  capricorn:   { energy: "Grounded",  lucky: "Brown",     rating: 3 },
+  aquarius:    { energy: "Electric",  lucky: "Blue",      rating: 5 },
+  pisces:      { energy: "Dreamy",    lucky: "Turquoise", rating: 4 },
+};
+
+// ── Fallback text if API is unreachable ───────────────────────────────────
+const FALLBACK: Record<string, string> = {
+  aries:       "Bold moves pay off today. Trust your instincts — a new opportunity is closer than you think. In love, a surprising gesture will warm your heart.",
+  taurus:      "Patience brings rewards. Financial clarity arrives by midday. In relationships, your grounded nature is exactly what someone special needs right now.",
+  gemini:      "Your curiosity leads to a brilliant breakthrough. Conversations spark ideas. Romance is lively — someone is captivated by your quick wit today.",
+  cancer:      "Emotions run deep but beautifully. Express what you feel — honesty opens doors today. At work, your intuition guides you better than data alone.",
+  leo:         "You radiate confidence and others are drawn to your light. A leadership opportunity arises — own it. Love is warm and full of admiration.",
+  virgo:       "Precision and care set you apart today. A detail you notice changes everything. In love, small acts of kindness speak louder than grand gestures.",
+  libra:       "Harmony is your gift — you help people find common ground effortlessly. A long-standing matter finally balances out in your favour.",
+  scorpio:     "Depth and intensity are your superpowers. A hidden truth surfaces — handle it with wisdom. Passion runs high in relationships today.",
+  sagittarius: "Adventure calls! An unexpected invitation opens a new horizon. Stay optimistic — the universe is setting up something exciting for you.",
+  capricorn:   "Steady effort is compounding quietly. Trust the process. Someone at work recognises your dedication. Love deepens through shared goals.",
+  aquarius:    "Your originality turns heads today. An unconventional idea earns unexpected applause. Connections feel electric — embrace the unusual.",
+  pisces:      "Dreams feel close to reality. Creative energy flows freely — channel it. In love, a meaningful conversation deepens an existing bond.",
 };
 
 // ── Vibe / mood data ───────────────────────────────────────────────────────
 const VIBES = [
-  { id: "happy",      emoji: "😄", label: "Happy",        color: "#FFD700", grad: ["#FFD700","#FF8C00"] as [string,string], users: 2841 },
-  { id: "romantic",   emoji: "💕", label: "Romantic",     color: "#FF69B4", grad: ["#FF69B4","#E91E8C"] as [string,string], users: 1924 },
-  { id: "chill",      emoji: "😎", label: "Chill",        color: "#00BCD4", grad: ["#00BCD4","#0097A7"] as [string,string], users: 3102 },
-  { id: "anxious",    emoji: "😟", label: "Need Support", color: "#7B2FBE", grad: ["#7B2FBE","#512DA8"] as [string,string], users: 842  },
-  { id: "motivated",  emoji: "🔥", label: "Motivated",    color: "#FF5722", grad: ["#FF5722","#E64A19"] as [string,string], users: 1567 },
-  { id: "bored",      emoji: "😑", label: "Bored",        color: "#78909C", grad: ["#78909C","#546E7A"] as [string,string], users: 2209 },
-  { id: "excited",    emoji: "🎉", label: "Excited",      color: "#9C27B0", grad: ["#9C27B0","#673AB7"] as [string,string], users: 1388 },
-  { id: "grateful",   emoji: "🙏", label: "Grateful",     color: "#4CAF50", grad: ["#4CAF50","#388E3C"] as [string,string], users: 976  },
+  { id: "happy",     emoji: "😄", label: "Happy",        color: "#FFD700", grad: ["#FFD700","#FF8C00"] as [string,string], users: 2841 },
+  { id: "romantic",  emoji: "💕", label: "Romantic",     color: "#FF69B4", grad: ["#FF69B4","#E91E8C"] as [string,string], users: 1924 },
+  { id: "chill",     emoji: "😎", label: "Chill",        color: "#00BCD4", grad: ["#00BCD4","#0097A7"] as [string,string], users: 3102 },
+  { id: "anxious",   emoji: "😟", label: "Need Support", color: "#7B2FBE", grad: ["#7B2FBE","#512DA8"] as [string,string], users: 842  },
+  { id: "motivated", emoji: "🔥", label: "Motivated",    color: "#FF5722", grad: ["#FF5722","#E64A19"] as [string,string], users: 1567 },
+  { id: "bored",     emoji: "😑", label: "Bored",        color: "#78909C", grad: ["#78909C","#546E7A"] as [string,string], users: 2209 },
+  { id: "excited",   emoji: "🎉", label: "Excited",      color: "#9C27B0", grad: ["#9C27B0","#673AB7"] as [string,string], users: 1388 },
+  { id: "grateful",  emoji: "🙏", label: "Grateful",     color: "#4CAF50", grad: ["#4CAF50","#388E3C"] as [string,string], users: 976  },
 ];
 
-// ── People vibing now ──────────────────────────────────────────────────────
 const VIBING_PEOPLE = [
-  { id: "u1", name: "Priya S",   city: "Delhi",     vibe: "romantic",  sign: "Leo"     },
-  { id: "u2", name: "Arjun M",   city: "Mumbai",    vibe: "chill",     sign: "Scorpio" },
-  { id: "u3", name: "Kavya R",   city: "Bangalore", vibe: "happy",     sign: "Gemini"  },
-  { id: "u4", name: "Rohan V",   city: "Jaipur",    vibe: "motivated", sign: "Aries"   },
-  { id: "u5", name: "Sneha P",   city: "Pune",      city2: "",         vibe: "happy",  sign: "Libra"   },
-  { id: "u6", name: "Dev T",     city: "Hyderabad", vibe: "excited",   sign: "Aquarius"},
+  { id: "u1", name: "Priya S",  city: "Delhi",     vibe: "romantic",  sign: "Leo"      },
+  { id: "u2", name: "Arjun M",  city: "Mumbai",    vibe: "chill",     sign: "Scorpio"  },
+  { id: "u3", name: "Kavya R",  city: "Bangalore", vibe: "happy",     sign: "Gemini"   },
+  { id: "u4", name: "Rohan V",  city: "Jaipur",    vibe: "motivated", sign: "Aries"    },
+  { id: "u5", name: "Sneha P",  city: "Pune",      vibe: "happy",     sign: "Libra"    },
+  { id: "u6", name: "Dev T",    city: "Hyderabad", vibe: "excited",   sign: "Aquarius" },
 ];
 
-// ── Compatibility pairs ─────────────────────────────────────────────────────
 const COMPAT_PAIRS: Record<string, { best: string[]; challenging: string[] }> = {
-  aries:       { best: ["Leo","Sagittarius","Gemini"],      challenging: ["Cancer","Capricorn"] },
-  taurus:      { best: ["Virgo","Capricorn","Cancer"],      challenging: ["Leo","Aquarius"] },
-  gemini:      { best: ["Libra","Aquarius","Aries"],        challenging: ["Virgo","Pisces"] },
-  cancer:      { best: ["Scorpio","Pisces","Taurus"],       challenging: ["Aries","Libra"] },
-  leo:         { best: ["Aries","Sagittarius","Libra"],     challenging: ["Taurus","Scorpio"] },
-  virgo:       { best: ["Taurus","Capricorn","Cancer"],     challenging: ["Gemini","Sagittarius"] },
-  libra:       { best: ["Gemini","Aquarius","Leo"],         challenging: ["Cancer","Capricorn"] },
-  scorpio:     { best: ["Cancer","Pisces","Virgo"],         challenging: ["Leo","Aquarius"] },
-  sagittarius: { best: ["Aries","Leo","Aquarius"],          challenging: ["Virgo","Pisces"] },
-  capricorn:   { best: ["Taurus","Virgo","Scorpio"],        challenging: ["Aries","Libra"] },
-  aquarius:    { best: ["Gemini","Libra","Sagittarius"],    challenging: ["Taurus","Scorpio"] },
-  pisces:      { best: ["Cancer","Scorpio","Capricorn"],    challenging: ["Gemini","Sagittarius"] },
+  aries:       { best: ["Leo","Sagittarius","Gemini"],   challenging: ["Cancer","Capricorn"]     },
+  taurus:      { best: ["Virgo","Capricorn","Cancer"],   challenging: ["Leo","Aquarius"]         },
+  gemini:      { best: ["Libra","Aquarius","Aries"],     challenging: ["Virgo","Pisces"]         },
+  cancer:      { best: ["Scorpio","Pisces","Taurus"],    challenging: ["Aries","Libra"]          },
+  leo:         { best: ["Aries","Sagittarius","Libra"],  challenging: ["Taurus","Scorpio"]       },
+  virgo:       { best: ["Taurus","Capricorn","Cancer"],  challenging: ["Gemini","Sagittarius"]   },
+  libra:       { best: ["Gemini","Aquarius","Leo"],      challenging: ["Cancer","Capricorn"]     },
+  scorpio:     { best: ["Cancer","Pisces","Virgo"],      challenging: ["Leo","Aquarius"]         },
+  sagittarius: { best: ["Aries","Leo","Aquarius"],       challenging: ["Virgo","Pisces"]         },
+  capricorn:   { best: ["Taurus","Virgo","Scorpio"],     challenging: ["Aries","Libra"]          },
+  aquarius:    { best: ["Gemini","Libra","Sagittarius"], challenging: ["Taurus","Scorpio"]       },
+  pisces:      { best: ["Cancer","Scorpio","Capricorn"], challenging: ["Gemini","Sagittarius"]   },
 };
+
+// ── AsyncStorage cache key (one per calendar day) ─────────────────────────
+function todayCacheKey() {
+  const d = new Date();
+  return `ridhi_horoscopes_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
 
 type TabType = "horoscope" | "vibe" | "compat";
 
@@ -99,12 +122,86 @@ export default function VibeStarsScreen() {
   const [compatA, setCompatA]   = useState("leo");
   const [compatB, setCompatB]   = useState("scorpio");
 
+  // ── Live horoscope state ─────────────────────────────────────────────────
+  const [liveData,    setLiveData]    = useState<Record<string, string>>({});
+  const [loading,     setLoading]     = useState(true);
+  const [fetchError,  setFetchError]  = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [isLive,      setIsLive]      = useState(false);
+
+  const fetchHoroscopes = useCallback(async (forceRefresh = false) => {
+    setLoading(true);
+    setFetchError(false);
+    const cacheKey = todayCacheKey();
+
+    try {
+      // Check cache first (skip if force-refreshing)
+      if (!forceRefresh) {
+        const cached = await AsyncStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached) as { data: Record<string, string>; date: string };
+          setLiveData(parsed.data);
+          setLastUpdated(parsed.date);
+          setIsLive(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Fetch all 12 signs in parallel
+      const results = await Promise.allSettled(
+        ZODIAC_SIGNS.map(async (z) => {
+          const res = await fetch(
+            `https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${z.name}&day=TODAY`,
+            { signal: AbortSignal.timeout(8000) }
+          );
+          if (!res.ok) throw new Error("non-200");
+          const json = await res.json() as { success: boolean; data: { horoscope_data: string; date: string } };
+          if (!json.success) throw new Error("api-error");
+          return { id: z.id, text: json.data.horoscope_data, date: json.data.date };
+        })
+      );
+
+      const dataMap: Record<string, string> = {};
+      let dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long" });
+      let anySuccess = false;
+
+      results.forEach((r) => {
+        if (r.status === "fulfilled") {
+          dataMap[r.value.id] = r.value.text;
+          dateStr = r.value.date;
+          anySuccess = true;
+        }
+      });
+
+      if (anySuccess) {
+        await AsyncStorage.setItem(cacheKey, JSON.stringify({ data: dataMap, date: dateStr }));
+        setLiveData(dataMap);
+        setLastUpdated(dateStr);
+        setIsLive(true);
+      } else {
+        setFetchError(true);
+        setIsLive(false);
+      }
+    } catch {
+      setFetchError(true);
+      setIsLive(false);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchHoroscopes(); }, [fetchHoroscopes]);
+
+  // helpers
   const sign       = ZODIAC_SIGNS.find((z) => z.id === selectedSign)!;
-  const horoscope  = DAILY_HOROSCOPES[selectedSign];
+  const meta       = HOROSCOPE_META[selectedSign];
   const compat     = COMPAT_PAIRS[selectedSign];
   const compatCalc = COMPAT_PAIRS[compatA];
   const signBName  = ZODIAC_SIGNS.find((z) => z.id === compatB)?.name ?? "";
   const score      = compatCalc?.best.includes(signBName) ? 92 : compatCalc?.challenging.includes(signBName) ? 48 : 70;
+
+  const horoscopeText = liveData[selectedSign] || FALLBACK[selectedSign];
 
   const filteredPeople = selectedVibe
     ? VIBING_PEOPLE.filter((p) => p.vibe === selectedVibe)
@@ -128,7 +225,17 @@ export default function VibeStarsScreen() {
             <Text style={styles.headerTitle}>Vibe & Stars ✨</Text>
             <Text style={styles.headerSub}>Daily horoscope · Mood matching</Text>
           </View>
-          <View style={{ width: 36 }} />
+          {/* Refresh button */}
+          <Pressable
+            onPress={() => fetchHoroscopes(true)}
+            style={styles.refreshBtn}
+            disabled={loading}
+          >
+            {loading
+              ? <ActivityIndicator size={16} color="rgba(255,255,255,0.7)" />
+              : <Feather name="refresh-cw" size={16} color="rgba(255,255,255,0.7)" />
+            }
+          </Pressable>
         </View>
 
         {/* Tabs */}
@@ -151,6 +258,32 @@ export default function VibeStarsScreen() {
         {/* ── HOROSCOPE TAB ──────────────────────────────────────────────── */}
         {tab === "horoscope" && (
           <View style={{ paddingTop: 16 }}>
+
+            {/* Live / offline badge */}
+            <View style={styles.liveBadgeRow}>
+              {isLive ? (
+                <View style={[styles.liveBadge, { backgroundColor: "#22C55E18", borderColor: "#22C55E40" }]}>
+                  <View style={styles.liveDot} />
+                  <Text style={[styles.liveBadgeText, { color: "#22C55E" }]}>
+                    Live · {lastUpdated}
+                  </Text>
+                </View>
+              ) : fetchError ? (
+                <View style={[styles.liveBadge, { backgroundColor: "#FF575718", borderColor: "#FF575740" }]}>
+                  <Feather name="wifi-off" size={11} color="#FF5757" />
+                  <Text style={[styles.liveBadgeText, { color: "#FF5757" }]}>Offline — showing saved readings</Text>
+                  <Pressable onPress={() => fetchHoroscopes(true)}>
+                    <Text style={[styles.retryText, { color: "#FF5757" }]}>Retry</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={[styles.liveBadge, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                  <ActivityIndicator size={11} color={colors.mutedForeground} />
+                  <Text style={[styles.liveBadgeText, { color: colors.mutedForeground }]}>Fetching today's readings…</Text>
+                </View>
+              )}
+            </View>
+
             {/* Sign picker */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.signScroll}>
               {ZODIAC_SIGNS.map((z) => (
@@ -175,6 +308,7 @@ export default function VibeStarsScreen() {
                 colors={[sign.color + "30", sign.color + "10", "transparent"]}
                 style={[styles.horoCard, { borderColor: sign.color + "40", backgroundColor: colors.card }]}
               >
+                {/* Sign header */}
                 <View style={styles.horoCardTop}>
                   <View style={[styles.signBigEmoji, { backgroundColor: sign.color + "20", borderColor: sign.color + "40" }]}>
                     <Text style={styles.signBigEmojiText}>{sign.emoji}</Text>
@@ -182,45 +316,50 @@ export default function VibeStarsScreen() {
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.horoSignName, { color: colors.foreground }]}>{sign.name}</Text>
                     <Text style={[styles.horoSignDates, { color: colors.mutedForeground }]}>{sign.dates} · {sign.element}</Text>
-                    {/* Star rating */}
                     <View style={styles.starsRow}>
                       {[1,2,3,4,5].map((s) => (
-                        <Text key={s} style={{ fontSize: 14, opacity: s <= horoscope.rating ? 1 : 0.25 }}>⭐</Text>
+                        <Text key={s} style={{ fontSize: 14, opacity: s <= meta.rating ? 1 : 0.25 }}>⭐</Text>
                       ))}
                       <Text style={[styles.horoRatingText, { color: colors.mutedForeground }]}>Today</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* Love */}
+                {/* Today's Reading — live text */}
                 <View style={[styles.horoSection, { borderColor: colors.border }]}>
                   <View style={styles.horoSectionIcon}>
-                    <Text style={{ fontSize: 16 }}>💕</Text>
-                    <Text style={[styles.horoSectionTitle, { color: sign.color }]}>Love</Text>
+                    <Text style={{ fontSize: 16 }}>🔮</Text>
+                    <Text style={[styles.horoSectionTitle, { color: sign.color }]}>Today's Reading</Text>
+                    {isLive && (
+                      <View style={[styles.liveTag, { backgroundColor: "#22C55E20" }]}>
+                        <View style={styles.liveTagDot} />
+                        <Text style={[styles.liveTagText, { color: "#22C55E" }]}>LIVE</Text>
+                      </View>
+                    )}
                   </View>
-                  <Text style={[styles.horoText, { color: colors.foreground }]}>{horoscope.love}</Text>
+
+                  {loading && !horoscopeText ? (
+                    <View style={styles.skeletonBlock}>
+                      <View style={[styles.skeletonLine, { width: "100%", backgroundColor: colors.muted }]} />
+                      <View style={[styles.skeletonLine, { width: "90%",  backgroundColor: colors.muted }]} />
+                      <View style={[styles.skeletonLine, { width: "75%",  backgroundColor: colors.muted }]} />
+                    </View>
+                  ) : (
+                    <Text style={[styles.horoText, { color: colors.foreground }]}>{horoscopeText}</Text>
+                  )}
                 </View>
 
-                {/* Career */}
-                <View style={[styles.horoSection, { borderColor: colors.border }]}>
-                  <View style={styles.horoSectionIcon}>
-                    <Text style={{ fontSize: 16 }}>💼</Text>
-                    <Text style={[styles.horoSectionTitle, { color: sign.color }]}>Career</Text>
-                  </View>
-                  <Text style={[styles.horoText, { color: colors.foreground }]}>{horoscope.career}</Text>
-                </View>
-
-                {/* Energy + Lucky */}
+                {/* Energy + Lucky + Best match row */}
                 <View style={styles.horoMetaRow}>
                   <View style={[styles.horoMeta, { backgroundColor: sign.color + "18", borderColor: sign.color + "35" }]}>
                     <Text style={{ fontSize: 14 }}>⚡</Text>
                     <Text style={[styles.horoMetaLabel, { color: colors.mutedForeground }]}>Energy</Text>
-                    <Text style={[styles.horoMetaVal, { color: sign.color }]}>{horoscope.energy}</Text>
+                    <Text style={[styles.horoMetaVal, { color: sign.color }]}>{meta.energy}</Text>
                   </View>
                   <View style={[styles.horoMeta, { backgroundColor: sign.color + "18", borderColor: sign.color + "35" }]}>
                     <Text style={{ fontSize: 14 }}>🍀</Text>
                     <Text style={[styles.horoMetaLabel, { color: colors.mutedForeground }]}>Lucky</Text>
-                    <Text style={[styles.horoMetaVal, { color: sign.color }]}>{horoscope.lucky}</Text>
+                    <Text style={[styles.horoMetaVal, { color: sign.color }]}>{meta.lucky}</Text>
                   </View>
                   <View style={[styles.horoMeta, { backgroundColor: sign.color + "18", borderColor: sign.color + "35" }]}>
                     <Text style={{ fontSize: 14 }}>❤️</Text>
@@ -228,6 +367,12 @@ export default function VibeStarsScreen() {
                     <Text style={[styles.horoMetaVal, { color: sign.color }]}>{compat?.best[0]}</Text>
                   </View>
                 </View>
+
+                {/* Share nudge */}
+                <Pressable style={[styles.shareRow, { borderColor: sign.color + "30", backgroundColor: sign.color + "10" }]}>
+                  <Feather name="share-2" size={14} color={sign.color} />
+                  <Text style={[styles.shareText, { color: sign.color }]}>Share my horoscope</Text>
+                </Pressable>
               </LinearGradient>
 
               {/* People with same sign nearby */}
@@ -263,7 +408,6 @@ export default function VibeStarsScreen() {
             <Text style={[styles.vibeHeading, { color: colors.foreground }]}>How are you feeling today?</Text>
             <Text style={[styles.vibeSub, { color: colors.mutedForeground }]}>Connect with people sharing the same vibe right now</Text>
 
-            {/* Vibe grid */}
             <View style={styles.vibeGrid}>
               {VIBES.map((v) => (
                 <Pressable
@@ -272,7 +416,6 @@ export default function VibeStarsScreen() {
                   style={[
                     styles.vibeCard,
                     { borderColor: selectedVibe === v.id ? v.color : colors.border },
-                    selectedVibe === v.id && { backgroundColor: v.color + "18" },
                     { backgroundColor: selectedVibe === v.id ? v.color + "18" : colors.card },
                   ]}
                 >
@@ -290,7 +433,6 @@ export default function VibeStarsScreen() {
               ))}
             </View>
 
-            {/* People vibing now */}
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 24, marginBottom: 8 }]}>
               {selectedVibe ? `PEOPLE FEELING ${VIBES.find(v=>v.id===selectedVibe)?.label.toUpperCase()}` : "VIBING RIGHT NOW"}
             </Text>
@@ -306,9 +448,7 @@ export default function VibeStarsScreen() {
                     <Avatar name={person.name} size={42} />
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.nearbyName, { color: colors.foreground }]}>{person.name}</Text>
-                      <Text style={[styles.nearbyCity, { color: colors.mutedForeground }]}>
-                        {person.city} · {person.sign}
-                      </Text>
+                      <Text style={[styles.nearbyCity, { color: colors.mutedForeground }]}>{person.city} · {person.sign}</Text>
                     </View>
                     <View style={[styles.vibePill, { backgroundColor: vibe.color + "22", borderColor: vibe.color + "44" }]}>
                       <Text style={{ fontSize: 13 }}>{vibe.emoji}</Text>
@@ -335,27 +475,24 @@ export default function VibeStarsScreen() {
             <Text style={[styles.vibeHeading, { color: colors.foreground }]}>Zodiac Compatibility</Text>
             <Text style={[styles.vibeSub, { color: colors.mutedForeground }]}>See how well two signs match in love & life</Text>
 
-            {/* Pick pair */}
             <View style={styles.compatPair}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginBottom: 8 }]}>YOUR SIGN</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                  {ZODIAC_SIGNS.map((z) => (
-                    <Pressable
-                      key={z.id}
-                      onPress={() => setCompatA(z.id)}
-                      style={[
-                        styles.compatSignBtn,
-                        { borderColor: compatA === z.id ? z.color : colors.border },
-                        compatA === z.id && { backgroundColor: z.color + "22" },
-                      ]}
-                    >
-                      <Text style={{ fontSize: 18 }}>{z.emoji}</Text>
-                      <Text style={[styles.compatSignName, { color: compatA === z.id ? z.color : colors.mutedForeground }]}>{z.name}</Text>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
+              <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginBottom: 8 }]}>YOUR SIGN</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                {ZODIAC_SIGNS.map((z) => (
+                  <Pressable
+                    key={z.id}
+                    onPress={() => setCompatA(z.id)}
+                    style={[
+                      styles.compatSignBtn,
+                      { borderColor: compatA === z.id ? z.color : colors.border },
+                      compatA === z.id && { backgroundColor: z.color + "22" },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 18 }}>{z.emoji}</Text>
+                    <Text style={[styles.compatSignName, { color: compatA === z.id ? z.color : colors.mutedForeground }]}>{z.name}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
             </View>
 
             <View style={{ marginTop: 12 }}>
@@ -378,7 +515,6 @@ export default function VibeStarsScreen() {
               </ScrollView>
             </View>
 
-            {/* Score card */}
             {compatA !== compatB && (
               <View style={[styles.scoreCard, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 20 }]}>
                 <View style={styles.scoreTop}>
@@ -392,7 +528,7 @@ export default function VibeStarsScreen() {
                   </View>
                   <View style={{ alignItems: "center" }}>
                     <Text style={styles.scoreEmoji}>{ZODIAC_SIGNS.find(z=>z.id===compatB)?.emoji}</Text>
-                    <Text style={[styles.scoreName, { color: colors.foreground }]}>{ZODIAC_SIGNS.find(z=>z.id===compatB)?.name}</Text>
+                    <Text style={[styles.scoreName, { color: colors.foreground }]}>{signBName}</Text>
                   </View>
                 </View>
 
@@ -406,32 +542,26 @@ export default function VibeStarsScreen() {
                     : `${ZODIAC_SIGNS.find(z=>z.id===compatA)?.name} and ${signBName} may clash at first, but opposites can attract! Growth comes from learning each other's differences.`}
                 </Text>
 
-                {/* Categories */}
                 {[
-                  { label: "Love", score: score, icon: "💕" },
-                  { label: "Trust", score: Math.min(100, score + 5), icon: "🤝" },
-                  { label: "Communication", score: Math.max(30, score - 8), icon: "💬" },
+                  { label: "Love",          score: score,                     icon: "💕" },
+                  { label: "Trust",         score: Math.min(100, score + 5),  icon: "🤝" },
+                  { label: "Communication", score: Math.max(30, score - 8),   icon: "💬" },
                   { label: "Shared Values", score: Math.min(100, score + 10), icon: "🌱" },
                 ].map((cat) => (
                   <View key={cat.label} style={styles.catRow}>
                     <Text style={styles.catIcon}>{cat.icon}</Text>
                     <Text style={[styles.catLabel, { color: colors.mutedForeground }]}>{cat.label}</Text>
                     <View style={[styles.catBar, { backgroundColor: colors.muted }]}>
-                      <View
-                        style={[styles.catFill, {
-                          width: `${cat.score}%` as any,
-                          backgroundColor: cat.score >= 80 ? "#22C55E" : cat.score >= 60 ? "#FFB800" : "#FF5252",
-                        }]}
-                      />
+                      <View style={[styles.catFill, {
+                        width: `${cat.score}%` as any,
+                        backgroundColor: cat.score >= 80 ? "#22C55E" : cat.score >= 60 ? "#FFB800" : "#FF5252",
+                      }]} />
                     </View>
                     <Text style={[styles.catScore, { color: colors.mutedForeground }]}>{cat.score}%</Text>
                   </View>
                 ))}
 
-                <Pressable
-                  onPress={() => router.push("/match" as any)}
-                  style={[styles.findMatchBtn, { backgroundColor: "#E91E8C" }]}
-                >
+                <Pressable onPress={() => router.push("/match" as any)} style={[styles.findMatchBtn, { backgroundColor: "#E91E8C" }]}>
                   <Text style={styles.findMatchText}>Find {signBName} Matches 💕</Text>
                 </Pressable>
               </View>
@@ -457,22 +587,28 @@ export default function VibeStarsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
 
-  // header
   header: { paddingHorizontal: 20, paddingBottom: 0 },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 18 },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 14 },
   backBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.1)" },
+  refreshBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.1)" },
   headerTitle: { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff", textAlign: "center" },
   headerSub: { fontSize: 12, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)", textAlign: "center", marginTop: 2 },
 
-  // tabs
   tabRow: { flexDirection: "row", gap: 8, paddingBottom: 16 },
   tabBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.06)" },
   tabBtnActive: { backgroundColor: "rgba(255,255,255,0.18)" },
   tabEmoji: { fontSize: 14 },
   tabLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
+  // live badge
+  liveBadgeRow: { paddingHorizontal: 16, marginBottom: 10 },
+  liveBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1, alignSelf: "flex-start" },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: "#22C55E" },
+  liveBadgeText: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  retryText: { fontSize: 12, fontFamily: "Inter_700Bold", marginLeft: 4, textDecorationLine: "underline" },
+
   // sign picker
-  signScroll: { paddingHorizontal: 16, gap: 8, paddingBottom: 4 },
+  signScroll: { paddingHorizontal: 16, gap: 8, paddingBottom: 8 },
   signPill: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5 },
   signPillEmoji: { fontSize: 15 },
   signPillName: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
@@ -486,16 +622,23 @@ const styles = StyleSheet.create({
   horoSignDates: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   starsRow: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 6 },
   horoRatingText: { fontSize: 11, fontFamily: "Inter_400Regular", marginLeft: 4 },
-  horoSection: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12, gap: 6 },
+  horoSection: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12, gap: 8 },
   horoSectionIcon: { flexDirection: "row", alignItems: "center", gap: 6 },
-  horoSectionTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
-  horoText: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 21 },
+  horoSectionTitle: { fontSize: 13, fontFamily: "Inter_700Bold", flex: 1 },
+  liveTag: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 8 },
+  liveTagDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#22C55E" },
+  liveTagText: { fontSize: 9, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
+  horoText: { fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 22 },
+  skeletonBlock: { gap: 8, paddingVertical: 4 },
+  skeletonLine: { height: 13, borderRadius: 6, opacity: 0.4 },
   horoMetaRow: { flexDirection: "row", gap: 8, borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 12 },
   horoMeta: { flex: 1, borderRadius: 12, borderWidth: 1, padding: 10, alignItems: "center", gap: 3 },
   horoMetaLabel: { fontSize: 10, fontFamily: "Inter_400Regular" },
   horoMetaVal: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  shareRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderRadius: 12, paddingVertical: 10 },
+  shareText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
-  // shared nearby card
+  // shared
   sectionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8, marginBottom: 6 },
   nearbyCard: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
   nearbyRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12 },
@@ -537,7 +680,7 @@ const styles = StyleSheet.create({
   catScore: { fontSize: 11, fontFamily: "Inter_600SemiBold", width: 34, textAlign: "right" },
   findMatchBtn: { borderRadius: 12, paddingVertical: 13, alignItems: "center", marginTop: 4 },
   findMatchText: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
-  sameSignCard: { borderRadius: 20, borderWidth: 1, padding: 24, alignItems: "center", gap: 10, marginTop: 20 },
+  sameSignCard: { borderRadius: 20, borderWidth: 1, padding: 24, alignItems: "center", gap: 10 },
   sameSignText: { fontSize: 18, fontFamily: "Inter_700Bold" },
   sameSignSub: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
 });
