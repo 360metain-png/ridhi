@@ -212,7 +212,7 @@ const FEATURE_FLAGS: FeatureCategory[] = [
     icon: Gamepad2, color: "text-green-600", bg: "bg-green-50", borderColor: "border-green-200",
     features: [
       { id: "ludo",         name: "Ludo Board Game",         desc: "Classic Ludo — up to 4 players, playable inside chat or gaming hub",          phase: "2", audience: "All Users",      status: "live",  enabled: true  },
-      { id: "carrom",       name: "Carrom Board Game",       desc: "Digital carrom with realistic striker and piece physics",                     phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+      { id: "ludo-tourney", name: "Ludo Tournaments",        desc: "Bracket-based Ludo competitions with prize pools and live leaderboards",     phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "spin-wheel",   name: "Lucky Spin Wheel",        desc: "Daily spin for bonus coins and prizes (planned)",                            phase: "3", audience: "All Users",      status: "testing", enabled: false },
       { id: "quiz",         name: "Live Quiz Battles",       desc: "Real-time quiz competition with coin wagering (planned)",                    phase: "3", audience: "All Users",      status: "testing", enabled: false },
     ],

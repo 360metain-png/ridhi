@@ -37,9 +37,9 @@ const DAILY_TOURNAMENTS = [
   },
   {
     id: "dt2",
-    name: "Carrom Championship",
-    game: "carrom",
-    emoji: "🎯",
+    name: "Ludo Grand Prix 🏆",
+    game: "ludo",
+    emoji: "🎲",
     entry: 200,
     prizePool: 25000,
     players: 118,
@@ -66,7 +66,7 @@ const DAILY_TOURNAMENTS = [
   {
     id: "dt4",
     name: "Creator Match ⭐",
-    game: "carrom",
+    game: "ludo",
     emoji: "⭐",
     entry: 500,
     prizePool: 50000,
@@ -166,7 +166,7 @@ const FESTIVAL_TOURNAMENTS = [
 
 const MY_HISTORY = [
   { id: "h1", name: "Ludo Battle Arena", date: "Today", rank: 3, prize: 1200, game: "ludo", emoji: "🎲" },
-  { id: "h2", name: "Carrom Championship", date: "Yesterday", rank: 12, prize: 0, game: "carrom", emoji: "🎯" },
+  { id: "h2", name: "Ludo Grand Prix", date: "Yesterday", rank: 12, prize: 0, game: "ludo", emoji: "🎲" },
   { id: "h3", name: "Regional Battle", date: "2 days ago", rank: 1, prize: 2500, game: "ludo", emoji: "🎲" },
 ];
 

@@ -19,20 +19,20 @@ const ROOM_TYPES = [
 ];
 
 const LIVE_ROOMS = [
-  { id: "gr1", game: "Ludo", host: "Priya Sharma", tier: "Gold", players: "2/4", entry: 500, viewers: 34, duration: "12m", flagged: false },
-  { id: "gr2", game: "Carrom", host: "Rahul Verma", tier: "Platinum", players: "2/2", entry: 2000, viewers: 78, duration: "7m", flagged: false },
-  { id: "gr3", game: "Ludo", host: "Dev Kumar", tier: "Silver", players: "3/4", entry: 200, viewers: 12, duration: "24m", flagged: true },
-  { id: "gr4", game: "Carrom", host: "Kavya Reddy", tier: "VIP", players: "1/2", entry: 10000, viewers: 210, duration: "3m", flagged: false },
-  { id: "gr5", game: "Ludo", host: "Arjun K", tier: "Beginner", players: "4/4", entry: 50, viewers: 5, duration: "45m", flagged: false },
+  { id: "gr1", game: "Ludo", host: "Priya Sharma", tier: "Gold",     players: "2/4", entry: 500,   viewers: 34,  duration: "12m", flagged: false },
+  { id: "gr2", game: "Ludo", host: "Rahul Verma",  tier: "Platinum", players: "3/4", entry: 2000,  viewers: 78,  duration: "7m",  flagged: false },
+  { id: "gr3", game: "Ludo", host: "Dev Kumar",    tier: "Silver",   players: "3/4", entry: 200,   viewers: 12,  duration: "24m", flagged: true  },
+  { id: "gr4", game: "Ludo", host: "Kavya Reddy",  tier: "VIP",      players: "2/4", entry: 10000, viewers: 210, duration: "3m",  flagged: false },
+  { id: "gr5", game: "Ludo", host: "Arjun K",      tier: "Beginner", players: "4/4", entry: 50,    viewers: 5,   duration: "45m", flagged: false },
 ];
 
 const INIT_TOURNAMENTS = [
   { id: "t1", name: "Ludo Battle Arena",       game: "Ludo",   status: "live", players: "248/256",  prizePool: 10000,   entry: 100,  startTime: "2h 15m ago" },
-  { id: "t2", name: "Carrom Championship",     game: "Carrom", status: "live", players: "126/128",  prizePool: 25000,   entry: 200,  startTime: "30m ago"    },
+  { id: "t2", name: "Ludo Grand Prix 🏆",      game: "Ludo",   status: "live", players: "126/128",  prizePool: 25000,   entry: 200,  startTime: "30m ago"    },
   { id: "t3", name: "Diwali Coin Cup 🪔",      game: "Ludo",   status: "live", players: "498/512",  prizePool: 500000,  entry: 1000, startTime: "45m ago"    },
   { id: "t4", name: "Couple Tournament 💑",    game: "Ludo",   status: "live", players: "62/64",    prizePool: 15000,   entry: 150,  startTime: "20m ago"    },
   { id: "t5", name: "Regional Battle 🗺️",     game: "Ludo",   status: "live", players: "504/512",  prizePool: 5000,    entry: 50,   startTime: "1h ago"     },
-  { id: "t6", name: "Creator Match ⭐",        game: "Carrom", status: "live", players: "16/16",    prizePool: 50000,   entry: 500,  startTime: "15m ago"    },
+  { id: "t6", name: "Creator Match ⭐",        game: "Ludo",   status: "live", players: "16/16",    prizePool: 50000,   entry: 500,  startTime: "15m ago"    },
   { id: "t7", name: "New Year Mega Battle 🎆", game: "Ludo",   status: "live", players: "1018/1024",prizePool: 1000000, entry: 2000, startTime: "just now"   },
 ];
 
@@ -43,29 +43,29 @@ const FRAUD_FLAGS = [
 ];
 
 const coinBattleData = [
-  { day: "Mon", ludo: 420000, carrom: 180000 },
-  { day: "Tue", ludo: 380000, carrom: 220000 },
-  { day: "Wed", ludo: 510000, carrom: 240000 },
-  { day: "Thu", ludo: 470000, carrom: 200000 },
-  { day: "Fri", ludo: 620000, carrom: 310000 },
-  { day: "Sat", ludo: 740000, carrom: 380000 },
-  { day: "Sun", ludo: 810000, carrom: 420000 },
+  { day: "Mon", ludo: 420000 },
+  { day: "Tue", ludo: 380000 },
+  { day: "Wed", ludo: 510000 },
+  { day: "Thu", ludo: 470000 },
+  { day: "Fri", ludo: 620000 },
+  { day: "Sat", ludo: 740000 },
+  { day: "Sun", ludo: 810000 },
 ];
 
 const gameShareData = [
-  { name: "Ludo 1v1", value: 48 },
-  { name: "Carrom 1v1", value: 24 },
-  { name: "Couple Mode", value: 16 },
-  { name: "Team 2v2", value: 12 },
+  { name: "Ludo 1v1",    value: 52 },
+  { name: "Couple Mode", value: 26 },
+  { name: "Team 2v2",    value: 14 },
+  { name: "VIP Rooms",   value: 8  },
 ];
 const GAME_COLORS = ["#E91E8C", "#7B2FBE", "#FFB800", "#00BCD4"];
 
 const LEADERBOARD = [
   { rank: 1, name: "Priya Sharma", city: "Mumbai", game: "Ludo", wins: 284, coinEarned: 142000, badge: "💎 Diamond" },
-  { rank: 2, name: "Rahul Verma", city: "Delhi", game: "Carrom", wins: 198, coinEarned: 99000, badge: "🥇 Gold" },
+  { rank: 2, name: "Rahul Verma", city: "Delhi", game: "Ludo", wins: 198, coinEarned: 99000, badge: "🥇 Gold" },
   { rank: 3, name: "Kavya Reddy", city: "Hyderabad", game: "Ludo", wins: 167, coinEarned: 83500, badge: "🥈 Silver" },
   { rank: 4, name: "Arjun Kumar", city: "Bangalore", game: "Ludo", wins: 142, coinEarned: 71000, badge: "🥉 Bronze" },
-  { rank: 5, name: "Meera Pillai", city: "Kochi", game: "Carrom", wins: 119, coinEarned: 59500, badge: "⭐ Star" },
+  { rank: 5, name: "Meera Pillai", city: "Kochi", game: "Ludo", wins: 119, coinEarned: 59500, badge: "⭐ Star" },
 ];
 
 type TournamentEntry = typeof INIT_TOURNAMENTS[0];
@@ -115,7 +115,7 @@ export default function GamingManagement() {
             <Gamepad2 className="w-6 h-6 text-primary" />
             Gaming Management
           </h2>
-          <p className="text-muted-foreground text-sm mt-1">Ludo & Carrom rooms, tournaments, coin battles, anti-fraud</p>
+          <p className="text-muted-foreground text-sm mt-1">Ludo rooms, tournaments, coin battles, anti-fraud</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="gap-1 bg-green-600 hover:bg-green-600 text-sm px-3 py-1">
@@ -171,7 +171,6 @@ export default function GamingManagement() {
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
                   <Tooltip formatter={(v: number) => `🪙 ${v.toLocaleString()}`} />
                   <Bar dataKey="ludo" name="Ludo" fill="#E91E8C" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="carrom" name="Carrom" fill="#7B2FBE" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

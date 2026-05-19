@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { LudoGame } from "@/components/LudoGame";
-import { CarromGame } from "@/components/CarromGame";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -133,7 +132,7 @@ export default function GameRoomScreen() {
           <Feather name="arrow-left" size={22} color="#fff" />
         </Pressable>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>{game === "ludo" ? "🎲 Ludo" : "🎯 Carrom"} · {tier}</Text>
+          <Text style={styles.headerTitle}>🎲 Ludo · {tier}</Text>
           <View style={[styles.timerBadge, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
             <Feather name="clock" size={12} color="#fff" />
             <Text style={styles.timerText}>{formatTime(timer)}</Text>
@@ -191,11 +190,7 @@ export default function GameRoomScreen() {
         )}
 
         <View style={styles.boardArea}>
-          {game === "ludo" ? (
-            <LudoGame onWin={endGame} />
-          ) : (
-            <CarromGame onWin={endGame} />
-          )}
+          <LudoGame onWin={endGame} />
         </View>
 
         <View style={[styles.controlsRow, { backgroundColor: colors.card, borderColor: colors.border }]}>

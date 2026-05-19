@@ -26,13 +26,13 @@ const registrationsData = [
 ];
 
 const gamingData = [
-  { day: "Mon", ludo: 420, carrom: 180, battles: 64 },
-  { day: "Tue", ludo: 380, carrom: 220, battles: 72 },
-  { day: "Wed", ludo: 510, carrom: 240, battles: 88 },
-  { day: "Thu", ludo: 470, carrom: 200, battles: 76 },
-  { day: "Fri", ludo: 620, carrom: 310, battles: 110 },
-  { day: "Sat", ludo: 740, carrom: 380, battles: 132 },
-  { day: "Sun", ludo: 810, carrom: 420, battles: 148 },
+  { day: "Mon", ludo: 420, battles: 64  },
+  { day: "Tue", ludo: 380, battles: 72  },
+  { day: "Wed", ludo: 510, battles: 88  },
+  { day: "Thu", ludo: 470, battles: 76  },
+  { day: "Fri", ludo: 620, battles: 110 },
+  { day: "Sat", ludo: 740, battles: 132 },
+  { day: "Sun", ludo: 810, battles: 148 },
 ];
 
 const contentPieData = [
@@ -201,7 +201,6 @@ export default function Dashboard() {
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Line dataKey="ludo" name="Ludo" stroke="#E91E8C" strokeWidth={2} dot={false} />
-                  <Line dataKey="carrom" name="Carrom" stroke="#7B2FBE" strokeWidth={2} dot={false} />
                   <Line dataKey="battles" name="PK Battles" stroke="#FFB800" strokeWidth={2} dot={false} strokeDasharray="4 2" />
                 </LineChart>
               </ResponsiveContainer>

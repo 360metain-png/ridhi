@@ -21,7 +21,7 @@ const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
 const { width } = Dimensions.get("window");
 
-type GameType = "all" | "ludo" | "carrom";
+type GameType = "all" | "ludo";
 type BattleMode = "1v1" | "couple" | "team";
 
 const ROOM_TIERS = [
@@ -33,16 +33,12 @@ const ROOM_TIERS = [
 ];
 
 const ACTIVE_ROOMS = [
-  { id: "r1",  game: "ludo",   host: "Priya S",    entry: 50,    players: 3, maxPlayers: 4, tier: "Beginner", viewers: 142 },
-  { id: "r2",  game: "carrom", host: "Rahul M",    entry: 200,   players: 1, maxPlayers: 2, tier: "Silver",   viewers: 58  },
-  { id: "r3",  game: "ludo",   host: "Kavya R",    entry: 500,   players: 3, maxPlayers: 4, tier: "Gold",     viewers: 312 },
-  { id: "r4",  game: "carrom", host: "Arjun K",    entry: 2000,  players: 2, maxPlayers: 2, tier: "Platinum", viewers: 780 },
-  { id: "r5",  game: "ludo",   host: "Dev T",      entry: 10000, players: 2, maxPlayers: 4, tier: "VIP",      viewers: 2104 },
-  { id: "r6",  game: "ludo",   host: "Sneha P",    entry: 50,    players: 2, maxPlayers: 4, tier: "Beginner", viewers: 87  },
-  { id: "r7",  game: "carrom", host: "Vivek A",    entry: 500,   players: 1, maxPlayers: 2, tier: "Gold",     viewers: 203 },
-  { id: "r8",  game: "ludo",   host: "Meera J",    entry: 200,   players: 3, maxPlayers: 4, tier: "Silver",   viewers: 134 },
-  { id: "r9",  game: "carrom", host: "Rohan D",    entry: 10000, players: 1, maxPlayers: 2, tier: "VIP",      viewers: 1876 },
-  { id: "r10", game: "ludo",   host: "Ananya S",   entry: 2000,  players: 2, maxPlayers: 4, tier: "Platinum", viewers: 498 },
+  { id: "r1",  game: "ludo", host: "Priya S",    entry: 50,    players: 3, maxPlayers: 4, tier: "Beginner", viewers: 142  },
+  { id: "r3",  game: "ludo", host: "Kavya R",    entry: 500,   players: 3, maxPlayers: 4, tier: "Gold",     viewers: 312  },
+  { id: "r5",  game: "ludo", host: "Dev T",      entry: 10000, players: 2, maxPlayers: 4, tier: "VIP",      viewers: 2104 },
+  { id: "r6",  game: "ludo", host: "Sneha P",    entry: 50,    players: 2, maxPlayers: 4, tier: "Beginner", viewers: 87   },
+  { id: "r8",  game: "ludo", host: "Meera J",    entry: 200,   players: 3, maxPlayers: 4, tier: "Silver",   viewers: 134  },
+  { id: "r10", game: "ludo", host: "Ananya S",   entry: 2000,  players: 2, maxPlayers: 4, tier: "Platinum", viewers: 498  },
 ];
 
 const DAILY_MISSIONS = [
@@ -113,7 +109,7 @@ export default function GamesScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         <View style={styles.gameFilterRow}>
-          {(["all", "ludo", "carrom"] as GameType[]).map((g) => (
+          {(["all", "ludo"] as GameType[]).map((g) => (
             <Pressable
               key={g}
               onPress={() => setGameFilter(g)}
@@ -126,7 +122,7 @@ export default function GamesScreen() {
               ]}
             >
               <Text style={styles.gameFilterEmoji}>
-                {g === "all" ? "🎮" : g === "ludo" ? "🎲" : "🎯"}
+                {g === "all" ? "🎮" : "🎲"}
               </Text>
               <Text style={[styles.gameFilterText, { color: gameFilter === g ? "#fff" : colors.mutedForeground }]}>
                 {g.charAt(0).toUpperCase() + g.slice(1)}
