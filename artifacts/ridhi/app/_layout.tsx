@@ -67,6 +67,8 @@ function RootLayoutNav() {
       <Stack.Screen name="privacy-policy" options={{ presentation: "card" }} />
       <Stack.Screen name="lead-form-builder" options={{ presentation: "card" }} />
       <Stack.Screen name="lead-form-fill" options={{ presentation: "card" }} />
+      <Stack.Screen name="coin-store" options={{ presentation: "card" }} />
+      <Stack.Screen name="missions" options={{ presentation: "card" }} />
     </Stack>
   );
 }

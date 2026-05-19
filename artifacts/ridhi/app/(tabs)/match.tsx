@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Modal,
@@ -17,6 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { MATCH_PROFILES } from "@/data/mockData";
 
@@ -152,7 +154,7 @@ function AgeSlider({
 export default function MatchScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, addCoins } = useAuth();
   const userLanguage = user?.language ?? "Hindi";
 
   // Smart gender default: male users see women, female users see men
@@ -379,10 +381,27 @@ export default function MatchScreen() {
             <Feather name="x" size={28} color="#FF3B30" />
           </Pressable>
           <Pressable
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); swipe("right"); }}
+            onPress={() => {
+              const SUPER_LIKE_COST = 5;
+              if ((user?.coins ?? 0) < SUPER_LIKE_COST) {
+                Alert.alert(
+                  "Not enough coins",
+                  `Super Like costs ${SUPER_LIKE_COST} coins. Recharge your wallet!`,
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Recharge", onPress: () => router.push("/wallet") },
+                  ]
+                );
+                return;
+              }
+              addCoins(-SUPER_LIKE_COST);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+              swipe("right");
+            }}
             style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
           >
             <Feather name="star" size={22} color={colors.gold} />
+            <Text style={[styles.superCost, { color: colors.gold }]}>5</Text>
           </Pressable>
           <Pressable
             onPress={() => swipe("right")}
@@ -697,7 +716,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  superBtn: { width: 52, height: 52, borderRadius: 26 },
+  superBtn: { width: 52, height: 52, borderRadius: 26, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1 },
+  superCost: { fontSize: 9, fontFamily: "Inter_700Bold" },
   emptyState: { alignItems: "center", gap: 12, paddingHorizontal: 40 },
   emptyTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center" },

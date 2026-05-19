@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
+import { SPEND_CATEGORIES } from "@/data/coinEconomy";
 import { CoinFountainOverlay, AnimatedCoinBalance, useCoinToasts } from "@/components/CoinFountain";
 import { PaymentSheet } from "@/components/PaymentSheet";
 
@@ -278,6 +279,91 @@ export default function WalletScreen() {
           </Pressable>
         </View>
 
+        {/* ── Earn Coins ── */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Earn Coins</Text>
+          <View style={styles.earnRow}>
+            <Pressable
+              onPress={() => router.push("/missions")}
+              style={[styles.earnCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "35" }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: colors.primary + "22" }]}>
+                <Feather name="target" size={22} color={colors.primary} />
+              </View>
+              <Text style={[styles.earnTitle, { color: colors.foreground }]}>Missions</Text>
+              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>Up to 360 coins/day</Text>
+              <View style={[styles.earnBtn, { backgroundColor: colors.primary }]}>
+                <Text style={styles.earnBtnText}>Go →</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/referral")}
+              style={[styles.earnCard, { backgroundColor: colors.gold + "12", borderColor: colors.gold + "35" }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: colors.gold + "22" }]}>
+                <Feather name="user-plus" size={22} color={colors.gold} />
+              </View>
+              <Text style={[styles.earnTitle, { color: colors.foreground }]}>Refer Friends</Text>
+              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>100 coins per referral</Text>
+              <View style={[styles.earnBtn, { backgroundColor: colors.gold }]}>
+                <Text style={styles.earnBtnText}>Invite →</Text>
+              </View>
+            </Pressable>
+            <Pressable
+              onPress={() => router.push("/creator-dashboard")}
+              style={[styles.earnCard, { backgroundColor: "#22C55E12", borderColor: "#22C55E35" }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: "#22C55E22" }]}>
+                <Feather name="radio" size={22} color="#22C55E" />
+              </View>
+              <Text style={[styles.earnTitle, { color: colors.foreground }]}>Go Live</Text>
+              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>Earn gifts from fans</Text>
+              <View style={[styles.earnBtn, { backgroundColor: "#22C55E" }]}>
+                <Text style={styles.earnBtnText}>Stream →</Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* ── Spend Coins ── */}
+        <View style={styles.section}>
+          <View style={styles.spendHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Ways to Spend</Text>
+            <View style={[styles.rateChip, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "35" }]}>
+              <Image source={COIN_IMAGE} style={{ width: 13, height: 13 }} resizeMode="contain" />
+              <Text style={[styles.rateChipText, { color: colors.primary }]}>1 Coin = ₹1</Text>
+            </View>
+          </View>
+          <View style={styles.spendGrid}>
+            {SPEND_CATEGORIES.map((sc) => (
+              <Pressable
+                key={sc.id}
+                onPress={() => router.push(sc.route as any)}
+                style={[styles.spendCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
+                <View style={[styles.spendIcon, { backgroundColor: sc.color + "18" }]}>
+                  <Feather name={sc.icon as any} size={18} color={sc.color} />
+                </View>
+                <Text style={[styles.spendLabel, { color: colors.foreground }]}>{sc.label}</Text>
+                <Text style={[styles.spendCost, { color: sc.color }]}>{sc.cost}</Text>
+                <Text style={[styles.spendDesc, { color: colors.mutedForeground }]} numberOfLines={1}>{sc.desc}</Text>
+              </Pressable>
+            ))}
+          </View>
+          {/* Gift shop banner */}
+          <Pressable
+            onPress={() => router.push("/coin-store")}
+            style={[styles.giftBanner, { backgroundColor: colors.secondary + "12", borderColor: colors.secondary + "35" }]}
+          >
+            <Text style={{ fontSize: 28 }}>🎁</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.giftBannerTitle, { color: colors.foreground }]}>Gift Shop</Text>
+              <Text style={[styles.giftBannerSub, { color: colors.mutedForeground }]}>Send gifts to creators • 5–10,000 coins • 70% goes to creator</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color={colors.secondary} />
+          </Pressable>
+        </View>
+
         {/* ── Recharge Coins ── */}
         <View
           style={styles.section}
@@ -478,6 +564,25 @@ const styles = StyleSheet.create({
   vipBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1, marginTop: 4 },
   vipTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   vipSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 1 },
+  earnRow: { flexDirection: "row", gap: 10 },
+  earnCard: { flex: 1, padding: 12, borderRadius: 16, borderWidth: 1, alignItems: "center", gap: 6 },
+  earnIcon: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  earnTitle: { fontSize: 12, fontFamily: "Inter_700Bold", textAlign: "center" },
+  earnSub: { fontSize: 10, fontFamily: "Inter_400Regular", textAlign: "center" },
+  earnBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20, marginTop: 2 },
+  earnBtnText: { color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  spendHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 2 },
+  rateChip: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
+  rateChipText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  spendGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  spendCard: { width: (width - 52) / 2, padding: 13, borderRadius: 16, borderWidth: 1, gap: 5 },
+  spendIcon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  spendLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  spendCost: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  spendDesc: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  giftBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, marginTop: 4 },
+  giftBannerTitle: { fontSize: 14, fontFamily: "Inter_700Bold" },
+  giftBannerSub: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 2 },
   quickActions: { flexDirection: "row", gap: 10, marginTop: 20 },
   qaBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 11, borderRadius: 14 },
   qaBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },

@@ -553,6 +553,8 @@ export default function ProfileScreen() {
 
       <View style={styles.quickLinks}>
         {[
+          { icon: "gift",         label: "Gift Shop",        route: "/coin-store",       color: "#E91E8C" },
+          { icon: "target",       label: "Earn Coins",       route: "/missions",         color: "#FFB800" },
           { icon: "briefcase",    label: "Jobs Near Me",     route: "/jobs",             color: "#E91E8C" },
           { icon: "plus-circle",  label: "Post a Job",       route: "/jobs-post",        color: "#FF6B35" },
           { icon: "zap",          label: "Ridhi Ads",        route: "/ads-manager",      color: "#7B2FBE" },

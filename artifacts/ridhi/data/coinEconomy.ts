@@ -1,0 +1,111 @@
+export interface Gift {
+  id: string;
+  name: string;
+  emoji: string;
+  coins: number;
+  category: "basic" | "premium" | "luxury" | "special";
+  animated?: boolean;
+  popular?: boolean;
+}
+
+export interface Mission {
+  id: string;
+  title: string;
+  desc: string;
+  icon: string;
+  reward: number;
+  type: "daily" | "weekly" | "one_time";
+  progress: number;
+  total: number;
+  completed: boolean;
+  category: "social" | "content" | "engage" | "recharge";
+}
+
+export interface SpendCategory {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+  desc: string;
+  cost: string;
+  route: string;
+}
+
+export const GIFTS: Gift[] = [
+  { id: "g01", name: "Rose",         emoji: "🌹", coins: 5,      category: "basic",   popular: true },
+  { id: "g02", name: "Heart",        emoji: "💗", coins: 10,     category: "basic" },
+  { id: "g03", name: "Cake",         emoji: "🎂", coins: 20,     category: "basic" },
+  { id: "g04", name: "Teddy Bear",   emoji: "🧸", coins: 50,     category: "basic",   popular: true },
+  { id: "g05", name: "Bouquet",      emoji: "💐", coins: 80,     category: "premium" },
+  { id: "g06", name: "Ring",         emoji: "💍", coins: 100,    category: "premium", popular: true },
+  { id: "g07", name: "Crown",        emoji: "👑", coins: 200,    category: "premium" },
+  { id: "g08", name: "Fireworks",    emoji: "🎆", coins: 300,    category: "premium", animated: true },
+  { id: "g09", name: "Sports Car",   emoji: "🚗", coins: 500,    category: "luxury",  popular: true },
+  { id: "g10", name: "Yacht",        emoji: "🛥️", coins: 1000,   category: "luxury" },
+  { id: "g11", name: "Private Jet",  emoji: "✈️", coins: 2000,   category: "luxury" },
+  { id: "g12", name: "Rocket",       emoji: "🚀", coins: 3000,   category: "luxury",  animated: true },
+  { id: "g13", name: "Castle",       emoji: "🏰", coins: 5000,   category: "luxury",  popular: true },
+  { id: "g14", name: "Galaxy",       emoji: "🌌", coins: 10000,  category: "luxury",  animated: true },
+  { id: "g15", name: "Lucky Diya",   emoji: "🪔", coins: 15,     category: "special", popular: true },
+  { id: "g16", name: "Fireworks",    emoji: "🎇", coins: 25,     category: "special" },
+  { id: "g17", name: "Garland",      emoji: "💫", coins: 30,     category: "special" },
+  { id: "g18", name: "Peacock",      emoji: "🦚", coins: 150,    category: "special", popular: true },
+  { id: "g19", name: "Elephant",     emoji: "🐘", coins: 400,    category: "special" },
+  { id: "g20", name: "Om",           emoji: "🕉️", coins: 75,     category: "special" },
+];
+
+export const GIFT_CATEGORIES = [
+  { id: "all",     label: "All" },
+  { id: "basic",   label: "Basic" },
+  { id: "premium", label: "Premium" },
+  { id: "luxury",  label: "Luxury" },
+  { id: "special", label: "India Special" },
+];
+
+export const MISSIONS: Mission[] = [
+  { id: "m01", title: "Daily Login",        desc: "Log in to the app today",                    icon: "sun",        reward: 10,  type: "daily",    progress: 1, total: 1,  completed: true,  category: "engage" },
+  { id: "m02", title: "Watch 5 Reels",      desc: "Watch any 5 reels today",                    icon: "play",       reward: 15,  type: "daily",    progress: 3, total: 5,  completed: false, category: "engage" },
+  { id: "m03", title: "Like 10 Posts",      desc: "React to 10 posts in the feed",              icon: "heart",      reward: 10,  type: "daily",    progress: 7, total: 10, completed: false, category: "social" },
+  { id: "m04", title: "Send a Gift",        desc: "Send any gift to a creator or host",         icon: "gift",       reward: 20,  type: "daily",    progress: 0, total: 1,  completed: false, category: "social" },
+  { id: "m05", title: "Share a Post",       desc: "Share any post today",                       icon: "share-2",    reward: 10,  type: "daily",    progress: 0, total: 1,  completed: false, category: "content" },
+  { id: "m06", title: "Swipe 10 Profiles",  desc: "Swipe on 10 profiles in dating",             icon: "shuffle",    reward: 15,  type: "daily",    progress: 4, total: 10, completed: false, category: "engage" },
+  { id: "m07", title: "Visit 3 Livestreams",desc: "Join 3 different live streams",              icon: "video",      reward: 25,  type: "daily",    progress: 1, total: 3,  completed: false, category: "engage" },
+  { id: "m08", title: "Comment on 5 Posts", desc: "Leave a comment on 5 different posts",       icon: "message-circle", reward: 15, type: "daily", progress: 2, total: 5,  completed: false, category: "social" },
+
+  { id: "m09", title: "Create a Post",      desc: "Post original content this week",            icon: "edit-2",     reward: 50,  type: "weekly",   progress: 0, total: 1,  completed: false, category: "content" },
+  { id: "m10", title: "Host a Live",        desc: "Start a live stream this week",              icon: "radio",      reward: 100, type: "weekly",   progress: 0, total: 1,  completed: false, category: "content" },
+  { id: "m11", title: "Get 50 Likes",       desc: "Collect 50 likes on your posts this week",  icon: "thumbs-up",  reward: 75,  type: "weekly",   progress: 12, total: 50, completed: false, category: "social" },
+  { id: "m12", title: "Refer 1 Friend",     desc: "Invite a friend who joins Ridhi",            icon: "user-plus",  reward: 100, type: "weekly",   progress: 0, total: 1,  completed: false, category: "social" },
+  { id: "m13", title: "Join a Community",   desc: "Join any community this week",               icon: "users",      reward: 30,  type: "weekly",   progress: 0, total: 1,  completed: false, category: "engage" },
+  { id: "m14", title: "Listen to Podcast",  desc: "Listen to a full episode this week",         icon: "headphones", reward: 40,  type: "weekly",   progress: 0, total: 1,  completed: false, category: "engage" },
+
+  { id: "m15", title: "First Recharge",     desc: "Recharge coins for the first time",         icon: "zap",        reward: 200, type: "one_time", progress: 0, total: 1,  completed: false, category: "recharge" },
+  { id: "m16", title: "Complete KYC",       desc: "Verify your identity to unlock all features",icon: "shield",     reward: 500, type: "one_time", progress: 0, total: 1,  completed: false, category: "social" },
+  { id: "m17", title: "Profile Setup",      desc: "Add photo, bio, and 5 interests",            icon: "user",       reward: 50,  type: "one_time", progress: 1, total: 1,  completed: true,  category: "social" },
+  { id: "m18", title: "First Super Like",   desc: "Send your first Super Like",                icon: "star",       reward: 25,  type: "one_time", progress: 0, total: 1,  completed: false, category: "engage" },
+  { id: "m19", title: "First Gift Sent",    desc: "Send your very first gift to a creator",    icon: "gift",       reward: 50,  type: "one_time", progress: 0, total: 1,  completed: false, category: "social" },
+  { id: "m20", title: "VIP Upgrade",        desc: "Subscribe to any VIP plan",                 icon: "award",      reward: 1000, type: "one_time", progress: 0, total: 1, completed: false, category: "recharge" },
+];
+
+export const SPEND_CATEGORIES: SpendCategory[] = [
+  { id: "sc1", label: "Super Like",       icon: "star",         color: "#FFB800", desc: "Stand out in dating",        cost: "5 coins",            route: "/(tabs)/match" },
+  { id: "sc2", label: "Send Gift",        icon: "gift",         color: "#E91E8C", desc: "Gift hosts & creators",      cost: "From 5 coins",        route: "/coin-store" },
+  { id: "sc3", label: "Boost Post",       icon: "trending-up",  color: "#7B2FBE", desc: "Reach 10× more people",     cost: "50 coins/hr",         route: "/create-post" },
+  { id: "sc4", label: "VIP Badge",        icon: "award",        color: "#F59E0B", desc: "Stand out everywhere",       cost: "From 99/month",       route: "/subscription" },
+  { id: "sc5", label: "Audio Call",       icon: "phone",        color: "#3B82F6", desc: "Call any host live",         cost: "10 coins/min",        route: "/random-call" },
+  { id: "sc6", label: "Video Call",       icon: "video",        color: "#10B981", desc: "Face-to-face with hosts",    cost: "25 coins/min",        route: "/random-call" },
+  { id: "sc7", label: "Unlock Message",   icon: "lock",         color: "#8B5CF6", desc: "Read locked DMs",            cost: "50 coins",            route: "/(tabs)/chat" },
+  { id: "sc8", label: "AI Assistant",     icon: "zap",          color: "#06B6D4", desc: "AI-powered features",        cost: "5 coins/query",       route: "/ai-assistant" },
+];
+
+export const DAILY_REWARD_STREAK = [
+  { day: 1, reward: 10,  claimed: true },
+  { day: 2, reward: 15,  claimed: true },
+  { day: 3, reward: 20,  claimed: true },
+  { day: 4, reward: 25,  claimed: false },
+  { day: 5, reward: 30,  claimed: false },
+  { day: 6, reward: 50,  claimed: false },
+  { day: 7, reward: 100, claimed: false },
+];
+
+export const COIN_RATE_INR = 1;
