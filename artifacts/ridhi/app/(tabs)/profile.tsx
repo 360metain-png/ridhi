@@ -107,10 +107,9 @@ const MENU_SECTIONS = [
     ],
   },
   {
-    title: "Gaming",
+    title: "Vibe & Stars",
     items: [
-      { icon: "zap",         label: "Gaming Arena",  route: "/games",             color: "#4CAF50" },
-      { icon: "award",       label: "Tournaments",   route: "/tournaments",       color: "#FFB800" },
+      { icon: "star",        label: "Vibe & Stars",  route: "/vibe-stars",        color: "#9C27B0" },
       { icon: "award",       label: "Leaderboard",   route: "/leaderboard",       color: "#FF6B35" },
     ],
   },

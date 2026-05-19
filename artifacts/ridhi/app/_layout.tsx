@@ -48,9 +48,7 @@ function RootLayoutNav() {
       <Stack.Screen name="pk-battle" options={{ presentation: "card" }} />
       <Stack.Screen name="agent-dashboard" options={{ presentation: "card" }} />
       <Stack.Screen name="host-profile" options={{ presentation: "card" }} />
-      <Stack.Screen name="games" options={{ presentation: "card" }} />
-      <Stack.Screen name="game-room" options={{ presentation: "card" }} />
-      <Stack.Screen name="tournaments" options={{ presentation: "card" }} />
+      <Stack.Screen name="vibe-stars" options={{ presentation: "card" }} />
       <Stack.Screen name="ads-create" options={{ presentation: "card" }} />
       <Stack.Screen name="ads-manager" options={{ presentation: "card" }} />
       <Stack.Screen name="podcasts" options={{ presentation: "card" }} />
