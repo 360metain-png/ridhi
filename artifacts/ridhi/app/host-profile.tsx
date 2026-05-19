@@ -40,6 +40,18 @@ const HOST_LEVELS = [
 const CURRENT_LEVEL = 3;
 const CURRENT_COINS = 180000;
 
+// How coins are split between Host, Agent (if any) and Ridhi platform
+// Agent commission is ALWAYS paid from Ridhi's share — never from the host's cut
+const HOST_COIN_SPLIT = [
+  { level: 1, badge: "Bronze", emoji: "🥉", hostPct: 40, ridhiPct: 60, color: "#CD7F32" },
+  { level: 2, badge: "Silver", emoji: "🥈", hostPct: 45, ridhiPct: 55, color: "#C0C0C0" },
+  { level: 3, badge: "Gold",   emoji: "🥇", hostPct: 50, ridhiPct: 50, color: "#FFB800" },
+  { level: 4, badge: "Platinum", emoji: "💎", hostPct: 55, ridhiPct: 45, color: "#E5E4E2" },
+  { level: 5, badge: "Diamond", emoji: "💠", hostPct: 60, ridhiPct: 40, color: "#00BCD4" },
+  { level: 6, badge: "Crown",  emoji: "👑", hostPct: 65, ridhiPct: 35, color: "#E91E8C" },
+  { level: 7, badge: "Royal Crown", emoji: "🏆", hostPct: 70, ridhiPct: 30, color: "#FFB800" },
+];
+
 const EARNINGS_BREAKDOWN = [
   { source: "Video Calls", amount: "₹14,200", coins: 71000, icon: "video", color: "#7B2FBE" },
   { source: "Audio Calls", amount: "₹8,400", coins: 42000, icon: "phone", color: "#34C759" },
@@ -491,6 +503,107 @@ export default function HostProfileScreen() {
                 </LinearGradient>
               );
             })}
+
+            {/* ── COIN SPLIT BREAKDOWN ── */}
+            <View style={[styles.splitCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.splitHeader}>
+                <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.splitHeaderIcon}>
+                  <Feather name="pie-chart" size={16} color="#fff" />
+                </LinearGradient>
+                <Text style={[styles.splitTitle, { color: colors.foreground }]}>How Every 🪙100 Is Split</Text>
+              </View>
+              <Text style={[styles.splitSubtitle, { color: colors.mutedForeground }]}>
+                Your share grows with every level. Agent commission always comes from Ridhi's cut — not yours.
+              </Text>
+
+              {HOST_COIN_SPLIT.map((row) => {
+                const isCur = row.level === CURRENT_LEVEL;
+                return (
+                  <View key={row.level}
+                    style={[styles.splitRow, isCur && { backgroundColor: row.color + "12", borderRadius: 12, borderWidth: 1, borderColor: row.color + "40" }]}>
+                    <Text style={styles.splitEmoji}>{row.emoji}</Text>
+                    <Text style={[styles.splitBadge, { color: row.color, width: 76 }]}>{row.badge}</Text>
+
+                    {/* HOST bar */}
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <View style={styles.splitBarRow}>
+                        <View style={[styles.splitBarFill, { width: `${row.hostPct}%` as any, backgroundColor: "#34C759" }]} />
+                        <View style={[styles.splitBarFill, { width: `${row.ridhiPct}%` as any, backgroundColor: "#7B2FBE40" }]} />
+                      </View>
+                      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <Text style={[styles.splitPctLabel, { color: "#34C759" }]}>You {row.hostPct}%</Text>
+                        <Text style={[styles.splitPctLabel, { color: "#7B2FBE" }]}>Ridhi {row.ridhiPct}%</Text>
+                      </View>
+                    </View>
+
+                    {isCur && (
+                      <View style={[styles.splitCurBadge, { backgroundColor: row.color }]}>
+                        <Text style={styles.splitCurText}>YOU</Text>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+
+              {/* Agent note */}
+              <View style={[styles.splitAgentNote, { backgroundColor: "#00BCD415", borderColor: "#00BCD430" }]}>
+                <Feather name="info" size={13} color="#00BCD4" />
+                <Text style={[styles.splitAgentNoteText, { color: colors.mutedForeground }]}>
+                  If you have an <Text style={{ color: "#00BCD4", fontFamily: "Inter_600SemiBold" }}>Agent</Text>, their commission (2–10%) is deducted from Ridhi's share — your payout stays the same.
+                </Text>
+              </View>
+            </View>
+
+            {/* ── EXAMPLE CALCULATION ── */}
+            <View style={[styles.exampleCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80035" }]}>
+              <Text style={[styles.exampleTitle, { color: colors.foreground }]}>💡 Example — Gold Host (L3) with A3 Agent</Text>
+              <Text style={[styles.exampleSub, { color: colors.mutedForeground }]}>Fan sends 🪙1,000 as a gift during your live</Text>
+              <View style={{ gap: 8, marginTop: 10 }}>
+                {[
+                  { who: "You (Host)",        pct: "50%", amount: "🪙500 → ₹400", color: "#34C759",  icon: "mic" },
+                  { who: "Agent (A3 Pro)",    pct: "5%",  amount: "🪙50  → ₹40",  color: "#00BCD4",  icon: "user-check" },
+                  { who: "Ridhi Platform",    pct: "45%", amount: "🪙450 → ₹360",  color: "#7B2FBE",  icon: "shield" },
+                ].map(({ who, pct, amount, color, icon }) => (
+                  <View key={who} style={styles.exampleRow}>
+                    <View style={[styles.exampleIcon, { backgroundColor: color + "20" }]}>
+                      <Feather name={icon as any} size={13} color={color} />
+                    </View>
+                    <Text style={[styles.exampleWho, { color: colors.foreground }]}>{who}</Text>
+                    <Text style={[styles.examplePct, { color }]}>{pct}</Text>
+                    <Text style={[styles.exampleAmt, { color: colors.mutedForeground }]}>{amount}</Text>
+                  </View>
+                ))}
+              </View>
+              <Text style={[styles.exampleFooter, { color: colors.mutedForeground }]}>
+                🪙1 Ridhi Coin = ₹0.80 withdrawal value
+              </Text>
+            </View>
+
+            {/* ── RIDHI'S BENEFIT ── */}
+            <View style={[styles.ridhiBenefitCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.splitTitle, { color: colors.foreground }]}>📊 What Ridhi Earns</Text>
+              <Text style={[styles.splitSubtitle, { color: colors.mutedForeground, marginBottom: 10 }]}>
+                Ridhi's revenue keeps the platform free, funds technology, safety teams, and marketing that brings more fans to you.
+              </Text>
+              {[
+                { label: "Platform cut (coins)",    desc: "30–60% of every coin spent on hosts",             color: "#7B2FBE", icon: "percent"   },
+                { label: "Coin recharge margin",    desc: "₹0.20 per coin bought by users",                  color: "#E91E8C", icon: "credit-card" },
+                { label: "VIP subscriptions",       desc: "₹49–₹6,999/mo from fans upgrading for perks",     color: "#FFB800", icon: "star"      },
+                { label: "Creator Pass & Fan Clubs",desc: "Monthly plans from creators & fan club members",   color: "#34C759", icon: "users"     },
+                { label: "Brand partnerships",      desc: "Brands buy coins to gift viral/top hosts",         color: "#00BCD4", icon: "briefcase" },
+                { label: "Job & Ad products",       desc: "Coin-based job posting & ad placement fees",       color: "#FF6B35", icon: "trending-up" },
+              ].map(({ label, desc, color, icon }) => (
+                <View key={label} style={styles.ridhiBenefitRow}>
+                  <View style={[styles.ridhiBenefitIcon, { backgroundColor: color + "20" }]}>
+                    <Feather name={icon as any} size={14} color={color} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.ridhiBenefitLabel, { color: colors.foreground }]}>{label}</Text>
+                    <Text style={[styles.ridhiBenefitDesc, { color: colors.mutedForeground }]}>{desc}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           </>
         )}
       </ScrollView>
@@ -581,6 +694,38 @@ const styles = StyleSheet.create({
   earningAmount: { fontSize: 16, fontFamily: "Inter_700Bold" },
   levelsSubtitle: { fontSize: 13, fontFamily: "Inter_400Regular" },
   levelCard: { borderRadius: 16, borderWidth: 1, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 },
+  // Coin split section
+  splitCard:        { borderRadius: 18, borderWidth: 1, padding: 16, gap: 10 },
+  splitHeader:      { flexDirection: "row", alignItems: "center", gap: 10 },
+  splitHeaderIcon:  { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  splitTitle:       { fontSize: 15, fontFamily: "Inter_700Bold", flex: 1 },
+  splitSubtitle:    { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  splitRow:         { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 6 },
+  splitEmoji:       { fontSize: 18, width: 24, textAlign: "center" },
+  splitBadge:       { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  splitBarRow:      { flexDirection: "row", height: 10, borderRadius: 5, overflow: "hidden" },
+  splitBarFill:     { height: "100%" },
+  splitPctLabel:    { fontSize: 10, fontFamily: "Inter_600SemiBold" },
+  splitCurBadge:    { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
+  splitCurText:     { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold" },
+  splitAgentNote:   { flexDirection: "row", alignItems: "flex-start", gap: 7, borderRadius: 10, borderWidth: 1, padding: 10 },
+  splitAgentNoteText: { flex: 1, fontSize: 11, fontFamily: "Inter_400Regular", lineHeight: 16 },
+  // Example calculation
+  exampleCard:      { borderRadius: 16, borderWidth: 1, padding: 16 },
+  exampleTitle:     { fontSize: 14, fontFamily: "Inter_700Bold", marginBottom: 2 },
+  exampleSub:       { fontSize: 12, fontFamily: "Inter_400Regular" },
+  exampleRow:       { flexDirection: "row", alignItems: "center", gap: 8 },
+  exampleIcon:      { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  exampleWho:       { flex: 1, fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  examplePct:       { fontSize: 13, fontFamily: "Inter_700Bold", width: 36, textAlign: "right" },
+  exampleAmt:       { fontSize: 12, fontFamily: "Inter_400Regular", width: 110, textAlign: "right" },
+  exampleFooter:    { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 8, textAlign: "center" },
+  // Ridhi benefit section
+  ridhiBenefitCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 10 },
+  ridhiBenefitRow:  { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  ridhiBenefitIcon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  ridhiBenefitLabel:{ fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  ridhiBenefitDesc: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
   levelEmoji: { fontSize: 28 },
   levelCardHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" },
   levelCardTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },

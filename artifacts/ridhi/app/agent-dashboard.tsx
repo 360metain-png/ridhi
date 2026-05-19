@@ -473,7 +473,7 @@ export default function AgentDashboardScreen() {
         {tab === "levels" && (
           <>
             <Text style={[styles.levelsTitle, { color: colors.foreground }]}>Agent Level System</Text>
-            {AGENT_LEVELS.map((lvl, idx) => {
+            {AGENT_LEVELS.map((lvl) => {
               const isCurrent = lvl.level === AGENT.level;
               return (
                 <LinearGradient
@@ -496,12 +496,110 @@ export default function AgentDashboardScreen() {
                     <View style={styles.levelCardStats}>
                       <Text style={[styles.levelStat, { color: colors.mutedForeground }]}>👥 {lvl.hosts} hosts</Text>
                       <Text style={[styles.levelStat, { color: colors.mutedForeground }]}>📈 {lvl.volume}/mo</Text>
-                      <Text style={[styles.levelStat, { color: lvl.color }]}>💰 {lvl.bonus} bonus</Text>
+                      <Text style={[styles.levelStat, { color: lvl.color }]}>💰 {lvl.bonus} commission</Text>
                     </View>
                   </View>
                 </LinearGradient>
               );
             })}
+
+            {/* ── HOW AGENT COMMISSION WORKS ── */}
+            <View style={[styles.commCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.commHeader}>
+                <LinearGradient colors={["#00BCD4", "#7B2FBE"]} style={styles.commHeaderIcon}>
+                  <Feather name="percent" size={16} color="#fff" />
+                </LinearGradient>
+                <Text style={[styles.commTitle, { color: colors.foreground }]}>How Your Commission Works</Text>
+              </View>
+              <Text style={[styles.commSub, { color: colors.mutedForeground }]}>
+                You earn a % of every rupee your hosts make — from gifts, calls, and live streams. Ridhi pays your commission from its platform cut, so hosts keep their full share.
+              </Text>
+
+              {/* Commission flow per level */}
+              <View style={{ gap: 8, marginTop: 4 }}>
+                {AGENT_LEVELS.map((lvl) => {
+                  const isCur = lvl.level === AGENT.level;
+                  const pct = parseInt(lvl.bonus);
+                  return (
+                    <View key={lvl.level}
+                      style={[styles.commRow, isCur && { backgroundColor: lvl.color + "14", borderRadius: 12, borderWidth: 1, borderColor: lvl.color + "40" }]}>
+                      <View style={[styles.commLevelPill, { backgroundColor: lvl.color + "25" }]}>
+                        <Text style={[styles.commLevelText, { color: lvl.color }]}>{lvl.level}</Text>
+                      </View>
+                      <Text style={[styles.commLevelName, { color: colors.foreground, width: 90 }]}>{lvl.label.replace(" Agent", "")}</Text>
+                      <View style={{ flex: 1 }}>
+                        <View style={[styles.commBar, { backgroundColor: colors.muted }]}>
+                          <LinearGradient
+                            colors={["#00BCD4", "#7B2FBE"]}
+                            style={[styles.commBarFill, { width: `${pct * 10}%` as any }]}
+                            start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                          />
+                        </View>
+                      </View>
+                      <View style={[styles.commPctBadge, { backgroundColor: lvl.color + "20" }]}>
+                        <Text style={[styles.commPctText, { color: lvl.color }]}>{lvl.bonus}</Text>
+                      </View>
+                      {isCur && (
+                        <View style={[styles.commCurDot, { backgroundColor: lvl.color }]}>
+                          <Text style={styles.commCurText}>YOU</Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* ── EXAMPLE CALCULATION ── */}
+            <View style={[styles.exCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80035" }]}>
+              <Text style={[styles.commTitle, { color: colors.foreground }]}>💡 Example — A3 Pro Agent</Text>
+              <Text style={[styles.commSub, { color: colors.mutedForeground }]}>You manage a Gold Host who earns 🪙10,000/month</Text>
+              <View style={{ gap: 8, marginTop: 10 }}>
+                {[
+                  { who: "Gold Host",       share: "50% of coins",   amount: "🪙5,000 → ₹4,000",  color: "#FFB800", icon: "mic"        },
+                  { who: "You (A3 Agent)",  share: "5% of host earn",amount: "🪙250  → ₹200",      color: "#00BCD4", icon: "user-check" },
+                  { who: "Ridhi Platform",  share: "45% remainder",  amount: "🪙4,750 → ₹3,800",  color: "#7B2FBE", icon: "shield"     },
+                ].map(({ who, share, amount, color, icon }) => (
+                  <View key={who} style={styles.exRow}>
+                    <View style={[styles.exIcon, { backgroundColor: color + "20" }]}>
+                      <Feather name={icon as any} size={13} color={color} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.exWho, { color: colors.foreground }]}>{who}</Text>
+                      <Text style={[styles.exShare, { color: colors.mutedForeground }]}>{share}</Text>
+                    </View>
+                    <Text style={[styles.exAmt, { color }]}>{amount}</Text>
+                  </View>
+                ))}
+              </View>
+              <Text style={[styles.exFooter, { color: colors.mutedForeground }]}>
+                Manage 50 hosts → scale to ₹10,000+/month passively
+              </Text>
+            </View>
+
+            {/* ── RIDHI'S BENEFIT ── */}
+            <View style={[styles.commCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.commTitle, { color: colors.foreground }]}>📊 Why Ridhi Has This Model</Text>
+              <Text style={[styles.commSub, { color: colors.mutedForeground }]}>
+                Ridhi earns from its platform cut on every coin transaction. More hosts = more revenue for everyone.
+              </Text>
+              {[
+                { label: "More hosts onboarded",    desc: "Agents recruit & train — Ridhi saves acquisition cost", icon: "users",      color: "#00BCD4" },
+                { label: "Host quality improves",   desc: "Agents coach, so hosts go live regularly & earn more",  icon: "trending-up",color: "#34C759" },
+                { label: "Platform grows faster",   desc: "Every active host brings fans, coins, and growth",      icon: "zap",        color: "#FFB800" },
+                { label: "Agent earns passively",   desc: "Commission continues as long as your hosts are active", icon: "dollar-sign",color: "#E91E8C" },
+              ].map(({ label, desc, icon, color }) => (
+                <View key={label} style={styles.commRow}>
+                  <View style={[styles.exIcon, { backgroundColor: color + "20" }]}>
+                    <Feather name={icon as any} size={14} color={color} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.exWho, { color: colors.foreground }]}>{label}</Text>
+                    <Text style={[styles.exShare, { color: colors.mutedForeground }]}>{desc}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
           </>
         )}
       </ScrollView>
@@ -620,6 +718,30 @@ const styles = StyleSheet.create({
   currentBadgeText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
   levelCardStats: { flexDirection: "row", gap: 10, flexWrap: "wrap" },
   levelStat: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  // Commission section styles
+  commCard:       { borderRadius: 18, borderWidth: 1, padding: 16, gap: 10 },
+  commHeader:     { flexDirection: "row", alignItems: "center", gap: 10 },
+  commHeaderIcon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  commTitle:      { fontSize: 15, fontFamily: "Inter_700Bold", flex: 1 },
+  commSub:        { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  commRow:        { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 6, paddingHorizontal: 6 },
+  commLevelPill:  { width: 36, height: 24, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  commLevelText:  { fontSize: 11, fontFamily: "Inter_700Bold" },
+  commLevelName:  { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  commBar:        { height: 8, borderRadius: 4, overflow: "hidden" },
+  commBarFill:    { height: "100%", borderRadius: 4 },
+  commPctBadge:   { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  commPctText:    { fontSize: 12, fontFamily: "Inter_700Bold" },
+  commCurDot:     { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8 },
+  commCurText:    { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold" },
+  // Example card
+  exCard:   { borderRadius: 16, borderWidth: 1, padding: 16 },
+  exRow:    { flexDirection: "row", alignItems: "center", gap: 8 },
+  exIcon:   { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  exWho:    { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  exShare:  { fontSize: 11, fontFamily: "Inter_400Regular", color: "#888" },
+  exAmt:    { fontSize: 12, fontFamily: "Inter_700Bold", marginLeft: "auto" as any },
+  exFooter: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 8, textAlign: "center" as const },
 });
 
 const regStyles = StyleSheet.create({
