@@ -184,7 +184,7 @@ export default function ProfileSetupScreen() {
   const canProceed = [
     !!language,
     name.length >= 2,
-    !!gender && parseInt(age) >= 18,
+    !!gender && parseInt(age) >= 16,
     true, // avatar step — always valid (has auto-generated default)
     !!state,
     interests.length >= 3,
@@ -355,8 +355,16 @@ export default function ProfileSetupScreen() {
             keyboardType="number-pad"
             maxLength={2}
           />
+          {age.length > 0 && parseInt(age) < 16 && (
+            <View style={[styles.ageWarnBox, { backgroundColor: "#FF3B3015", borderColor: "#FF3B3050" }]}>
+              <Feather name="alert-circle" size={15} color="#FF3B30" />
+              <Text style={[styles.ageWarnText, { color: "#FF3B30" }]}>
+                You must be at least 16 years old to use Ridhi
+              </Text>
+            </View>
+          )}
           <View style={styles.genderRow}>
-            {(["male", "female", "other"] as const).map((g) => (
+            {(["male", "female"] as const).map((g) => (
               <Pressable
                 key={g}
                 onPress={() => setGender(g)}
@@ -369,12 +377,12 @@ export default function ProfileSetupScreen() {
                 ]}
               >
                 <Feather
-                  name={g === "male" ? "user" : g === "female" ? "user" : "users"}
+                  name="user"
                   size={18}
                   color={gender === g ? "#fff" : colors.mutedForeground}
                 />
                 <Text style={[styles.genderText, { color: gender === g ? "#fff" : colors.foreground }]}>
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
+                  {g === "male" ? "Male" : "Female"}
                 </Text>
               </Pressable>
             ))}
@@ -681,6 +689,8 @@ const styles = StyleSheet.create({
   inputLabel:    { fontSize: 12, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
   nicknameHint:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   bigInput:   { fontSize: 18, fontFamily: "Inter_500Medium", paddingVertical: 16, paddingHorizontal: 20, borderRadius: 16, borderWidth: 1.5, width: "100%" },
+  ageWarnBox:  { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
+  ageWarnText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", lineHeight: 18 },
   genderRow:  { flexDirection: "row", gap: 10 },
   genderBtn:  { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5 },
   genderText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
