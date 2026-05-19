@@ -184,7 +184,7 @@ export default function ProfileSetupScreen() {
   const canProceed = [
     !!language,
     name.length >= 2,
-    !!gender && parseInt(age) >= 16,
+    !!gender && parseInt(age) >= 18,
     true, // avatar step — always valid (has auto-generated default)
     !!state,
     interests.length >= 3,
@@ -355,11 +355,11 @@ export default function ProfileSetupScreen() {
             keyboardType="number-pad"
             maxLength={2}
           />
-          {age.length > 0 && parseInt(age) < 16 && (
+          {age.length > 0 && parseInt(age) < 18 && (
             <View style={[styles.ageWarnBox, { backgroundColor: "#FF3B3015", borderColor: "#FF3B3050" }]}>
               <Feather name="alert-circle" size={15} color="#FF3B30" />
               <Text style={[styles.ageWarnText, { color: "#FF3B30" }]}>
-                You must be at least 16 years old to use Ridhi
+                You must be at least 18 years old to use Ridhi
               </Text>
             </View>
           )}
