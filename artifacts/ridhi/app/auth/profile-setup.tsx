@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,6 +11,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -164,8 +167,44 @@ export default function ProfileSetupScreen() {
   // step 2 — age + gender
   const [age, setAge]       = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
-  // step 3 — avatar picker
-  const [avatarUri, setAvatarUri] = useState("");
+  // step 3 — photo or avatar
+  const [photoUri, setPhotoUri]   = useState("");   // real user photo
+  const [avatarUri, setAvatarUri] = useState("");   // chosen avatar
+
+  const pickFromGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow photo access to upload your picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+      setAvatarUri(""); // clear avatar if photo chosen
+    }
+  };
+
+  const pickFromCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow camera access to take your picture.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.9,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+      setAvatarUri(""); // clear avatar if photo chosen
+    }
+  };
   // step 4 — state + GPS
   const [state, setState]   = useState("");
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -185,7 +224,7 @@ export default function ProfileSetupScreen() {
     !!language,
     name.length >= 2,
     !!gender && parseInt(age) >= 18,
-    true, // avatar step — always valid (has auto-generated default)
+    !!(photoUri || avatarUri), // must choose photo or avatar
     !!state,
     interests.length >= 3,
   ][step];
@@ -193,7 +232,7 @@ export default function ProfileSetupScreen() {
   const handleNext = async () => {
     if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
     setLoading(true);
-    const resolvedAvatar = avatarUri || getAvatarUrl(name, gender);
+    const resolvedAvatar = photoUri || avatarUri || getAvatarUrl(name, gender);
     await login({
       name,
       nickname: nickname.trim() || name,
@@ -391,48 +430,89 @@ export default function ProfileSetupScreen() {
       ),
     },
 
-    // ── 3: avatar picker ──────────────────────────────────────────────────────
+    // ── 3: photo or avatar ────────────────────────────────────────────────────
     {
-      title: "Choose your avatar",
-      subtitle: "Pick a 3D avatar that represents you",
+      title: "Add your profile photo",
+      subtitle: "Upload a real photo or choose an avatar — required to continue",
       content: (
-        <View style={{ width: "100%", gap: 16, alignItems: "center" }}>
-          {/* Large preview of selected (or auto) avatar */}
+        <View style={{ width: "100%", gap: 20, alignItems: "center" }}>
+
+          {/* DP preview */}
           <View style={styles.avatarPreviewWrap}>
-            <Avatar
-              name={name || "You"}
-              uri={avatarUri || undefined}
-              gender={gender || undefined}
-              size={110}
-              hasStory
-            />
-            <View style={[styles.avatarPreviewBadge, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "30" }]}>
-              <Text style={[styles.avatarPreviewBadgeText, { color: colors.primary }]}>
-                {avatarUri ? "✨ Custom avatar" : "✨ Auto-generated for you"}
-              </Text>
-            </View>
+            {photoUri ? (
+              <View style={[styles.dpRing, { borderColor: colors.primary }]}>
+                <Image source={{ uri: photoUri }} style={styles.dpPhoto} />
+              </View>
+            ) : (
+              <Avatar
+                name={name || "You"}
+                uri={avatarUri || undefined}
+                gender={gender || undefined}
+                size={110}
+                hasStory={!!(photoUri || avatarUri)}
+              />
+            )}
+
+            {/* Status badge */}
+            {photoUri ? (
+              <View style={[styles.avatarPreviewBadge, { backgroundColor: "#00C85315", borderColor: "#00C85350" }]}>
+                <Feather name="check-circle" size={13} color="#00C853" />
+                <Text style={[styles.avatarPreviewBadgeText, { color: "#00C853" }]}>Real photo added ✓</Text>
+              </View>
+            ) : avatarUri ? (
+              <View style={[styles.avatarPreviewBadge, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "30" }]}>
+                <Feather name="check-circle" size={13} color={colors.primary} />
+                <Text style={[styles.avatarPreviewBadgeText, { color: colors.primary }]}>Avatar selected ✓</Text>
+              </View>
+            ) : (
+              <View style={[styles.avatarPreviewBadge, { backgroundColor: "#FF3B3012", borderColor: "#FF3B3040" }]}>
+                <Feather name="alert-circle" size={13} color="#FF3B30" />
+                <Text style={[styles.avatarPreviewBadgeText, { color: "#FF3B30" }]}>Choose a photo or avatar</Text>
+              </View>
+            )}
           </View>
 
-          <View style={{ width: "100%", gap: 10 }}>
-            <AvatarPicker
-              gender={gender || undefined}
-              selected={avatarUri}
-              onSelect={setAvatarUri}
-            />
+          {/* Upload buttons */}
+          <View style={styles.dpBtnRow}>
+            <Pressable
+              onPress={pickFromCamera}
+              style={[styles.dpBtn, { backgroundColor: colors.primary, borderColor: colors.primary }]}
+            >
+              <Feather name="camera" size={18} color="#fff" />
+              <Text style={[styles.dpBtnText, { color: "#fff" }]}>Camera</Text>
+            </Pressable>
+            <Pressable
+              onPress={pickFromGallery}
+              style={[styles.dpBtn, { backgroundColor: colors.card, borderColor: colors.primary }]}
+            >
+              <Feather name="image" size={18} color={colors.primary} />
+              <Text style={[styles.dpBtnText, { color: colors.primary }]}>Gallery</Text>
+            </Pressable>
           </View>
 
-          <Pressable
-            onPress={() => setAvatarUri("")}
-            style={[styles.resetAvatarBtn, { borderColor: colors.border }]}
-          >
-            <Feather name="refresh-cw" size={13} color={colors.mutedForeground} />
-            <Text style={[styles.resetAvatarText, { color: colors.mutedForeground }]}>
-              Reset to auto-generated
-            </Text>
-          </Pressable>
+          {photoUri ? (
+            <Pressable onPress={() => setPhotoUri("")} style={[styles.resetAvatarBtn, { borderColor: colors.border }]}>
+              <Feather name="x" size={13} color={colors.mutedForeground} />
+              <Text style={[styles.resetAvatarText, { color: colors.mutedForeground }]}>Remove photo</Text>
+            </Pressable>
+          ) : null}
+
+          {/* Divider */}
+          <View style={styles.orDividerRow}>
+            <View style={[styles.orLine, { backgroundColor: colors.border }]} />
+            <Text style={[styles.orDivider, { color: colors.mutedForeground }]}>or choose an avatar</Text>
+            <View style={[styles.orLine, { backgroundColor: colors.border }]} />
+          </View>
+
+          {/* Avatar picker grid */}
+          <AvatarPicker
+            gender={gender || undefined}
+            selected={avatarUri}
+            onSelect={(uri) => { setAvatarUri(uri); setPhotoUri(""); }}
+          />
 
           <Text style={[styles.avatarNote, { color: colors.mutedForeground }]}>
-            You can always change this later in your profile settings
+            You can update your photo anytime from profile settings
           </Text>
         </View>
       ),
@@ -715,13 +795,20 @@ const styles = StyleSheet.create({
   tag:      { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1.5 },
   tagText:  { fontSize: 14, fontFamily: "Inter_500Medium" },
 
-  // avatar picker step
+  // avatar / photo step
   avatarPreviewWrap:      { alignItems: "center", gap: 12 },
-  avatarPreviewBadge:     { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  avatarPreviewBadge:     { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   avatarPreviewBadgeText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  resetAvatarBtn:         { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
-  resetAvatarText:        { fontSize: 12, fontFamily: "Inter_400Regular" },
-  avatarNote:             { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 20 },
+  dpRing:   { width: 118, height: 118, borderRadius: 59, borderWidth: 3, padding: 3 },
+  dpPhoto:  { width: "100%", height: "100%", borderRadius: 56 },
+  dpBtnRow: { flexDirection: "row", gap: 12, width: "100%" },
+  dpBtn:    { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 14, borderRadius: 16, borderWidth: 2 },
+  dpBtnText:{ fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  orDividerRow: { flexDirection: "row", alignItems: "center", gap: 10, width: "100%" },
+  orLine:       { flex: 1, height: 1 },
+  resetAvatarBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
+  resetAvatarText:{ fontSize: 12, fontFamily: "Inter_400Regular" },
+  avatarNote:     { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 20 },
 
   footer: { paddingHorizontal: 24, paddingTop: 12 },
 });
