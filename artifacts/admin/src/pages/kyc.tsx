@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Shield, Clock, CheckCircle, XCircle, FileText, Star, Briefcase,
-  Eye, AlertTriangle, Search, Filter, Download, RefreshCw, UserCheck, UserX,
+  Eye, AlertTriangle, Search, Download, RefreshCw, UserCheck, UserX,
+  User, Calendar,
 } from "lucide-react";
 
 type KycStatus = "pending" | "approved" | "rejected" | "resubmit";
 type Role = "host" | "agent";
+
+type Gender = "Male" | "Female";
 
 interface KycEntry {
   id: string;
@@ -19,6 +22,8 @@ interface KycEntry {
   role: Role;
   level: string;
   city: string;
+  gender: Gender;
+  dob: string;
   submittedAt: string;
   idType: string;
   idNumber: string;
@@ -31,15 +36,15 @@ interface KycEntry {
 }
 
 const INITIAL_ENTRIES: KycEntry[] = [
-  { id: "k1", name: "Priya Sharma", email: "host.priya@ridhi.app", role: "host", level: "L5", city: "Mumbai", submittedAt: "2 hrs ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 3821", addrType: "Electricity Bill", status: "pending", selfie: true },
-  { id: "k2", name: "Meera Iyer", email: "agent.meera@ridhi.app", role: "agent", level: "A5", city: "Bangalore", submittedAt: "4 hrs ago", idType: "PAN Card", idNumber: "ABCME1234F", addrType: "Bank Statement", status: "pending", selfie: true },
-  { id: "k3", name: "Rahul Verma", email: "host.rahul@ridhi.app", role: "host", level: "L6", city: "Delhi", submittedAt: "6 hrs ago", idType: "Passport", idNumber: "P1234567", addrType: "Rent Agreement", status: "pending", selfie: true },
-  { id: "k4", name: "Vivek Sharma", email: "agent.vivek@ridhi.app", role: "agent", level: "A4", city: "Mumbai", submittedAt: "10 hrs ago", idType: "Voter ID", idNumber: "MH/12/003/445521", addrType: "Utility Bill", status: "approved", reviewedBy: "Arjun M (Super Admin)", reviewedAt: "8 hrs ago", selfie: true },
-  { id: "k5", name: "Ananya Krishnan", email: "host.ananya@ridhi.app", role: "host", level: "L7", city: "Bangalore", submittedAt: "1 day ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 7412", addrType: "Bank Statement", status: "approved", reviewedBy: "Sneha P (Content Admin)", reviewedAt: "22 hrs ago", selfie: true },
-  { id: "k6", name: "Ajay Patel", email: "agent.ajay@ridhi.app", role: "agent", level: "A3", city: "Ahmedabad", submittedAt: "1 day ago", idType: "Driving Licence", idNumber: "GJ02 20190012345", addrType: "Ration Card", status: "rejected", reviewedBy: "Arjun M (Super Admin)", reviewedAt: "20 hrs ago", rejectReason: "Blurry document image. Please re-upload a clear photo.", selfie: false },
-  { id: "k7", name: "Neha Gupta", email: "host.neha@ridhi.app", role: "host", level: "L5", city: "Chennai", submittedAt: "2 days ago", idType: "PAN Card", idNumber: "ABCNG5678H", addrType: "Property Tax", status: "resubmit", reviewedBy: "Rohit K (Finance Admin)", reviewedAt: "1 day ago", rejectReason: "Address on document does not match the entered address.", selfie: true },
-  { id: "k8", name: "Divya Pillai", email: "host.divya@ridhi.app", role: "host", level: "L6", city: "Kolkata", submittedAt: "3 hrs ago", idType: "Aadhaar Card", idNumber: "XXXX XXXX 9901", addrType: "Electricity Bill", status: "pending", selfie: true },
-  { id: "k9", name: "Pooja Nair", email: "agent.pooja@ridhi.app", role: "agent", level: "A2", city: "Kochi", submittedAt: "5 hrs ago", idType: "Voter ID", idNumber: "KL/01/004/112233", addrType: "Bank Statement", status: "pending", selfie: true },
+  { id: "k1", name: "Priya Sharma",    email: "host.priya@ridhi.app",   role: "host",  level: "L5", city: "Mumbai",    gender: "Female", dob: "12 Mar 1996", submittedAt: "2 hrs ago",  idType: "Aadhaar Card",    idNumber: "XXXX XXXX 3821",    addrType: "Electricity Bill", status: "pending",  selfie: true  },
+  { id: "k2", name: "Meera Iyer",      email: "agent.meera@ridhi.app",  role: "agent", level: "A5", city: "Bangalore", gender: "Female", dob: "08 Jul 1994", submittedAt: "4 hrs ago",  idType: "PAN Card",        idNumber: "ABCME1234F",        addrType: "Bank Statement",   status: "pending",  selfie: true  },
+  { id: "k3", name: "Rahul Verma",     email: "host.rahul@ridhi.app",   role: "host",  level: "L6", city: "Delhi",     gender: "Male",   dob: "22 Jan 1992", submittedAt: "6 hrs ago",  idType: "Passport",        idNumber: "P1234567",          addrType: "Rent Agreement",   status: "pending",  selfie: true  },
+  { id: "k4", name: "Vivek Sharma",    email: "agent.vivek@ridhi.app",  role: "agent", level: "A4", city: "Mumbai",    gender: "Male",   dob: "05 Nov 1990", submittedAt: "10 hrs ago", idType: "Voter ID",        idNumber: "MH/12/003/445521",  addrType: "Utility Bill",     status: "approved", reviewedBy: "Arjun M (Super Admin)",      reviewedAt: "8 hrs ago",  selfie: true  },
+  { id: "k5", name: "Ananya Krishnan", email: "host.ananya@ridhi.app",  role: "host",  level: "L7", city: "Bangalore", gender: "Female", dob: "30 Sep 1998", submittedAt: "1 day ago",  idType: "Aadhaar Card",    idNumber: "XXXX XXXX 7412",    addrType: "Bank Statement",   status: "approved", reviewedBy: "Sneha P (Content Admin)",    reviewedAt: "22 hrs ago", selfie: true  },
+  { id: "k6", name: "Ajay Patel",      email: "agent.ajay@ridhi.app",   role: "agent", level: "A3", city: "Ahmedabad", gender: "Male",   dob: "17 Apr 1993", submittedAt: "1 day ago",  idType: "Driving Licence", idNumber: "GJ02 20190012345",  addrType: "Ration Card",      status: "rejected", reviewedBy: "Arjun M (Super Admin)",      reviewedAt: "20 hrs ago", rejectReason: "Blurry document image. Please re-upload a clear photo.", selfie: false },
+  { id: "k7", name: "Neha Gupta",      email: "host.neha@ridhi.app",    role: "host",  level: "L5", city: "Chennai",   gender: "Female", dob: "14 Feb 1997", submittedAt: "2 days ago", idType: "PAN Card",        idNumber: "ABCNG5678H",        addrType: "Property Tax",     status: "resubmit", reviewedBy: "Rohit K (Finance Admin)",    reviewedAt: "1 day ago",  rejectReason: "Address on document does not match the entered address.", selfie: true  },
+  { id: "k8", name: "Divya Pillai",    email: "host.divya@ridhi.app",   role: "host",  level: "L6", city: "Kolkata",   gender: "Female", dob: "03 Aug 1995", submittedAt: "3 hrs ago",  idType: "Aadhaar Card",    idNumber: "XXXX XXXX 9901",    addrType: "Electricity Bill", status: "pending",  selfie: true  },
+  { id: "k9", name: "Pooja Nair",      email: "agent.pooja@ridhi.app",  role: "agent", level: "A2", city: "Kochi",     gender: "Female", dob: "25 Jun 1999", submittedAt: "5 hrs ago",  idType: "Voter ID",        idNumber: "KL/01/004/112233",  addrType: "Bank Statement",   status: "pending",  selfie: true  },
 ];
 
 const STATUS_META: Record<KycStatus, { label: string; color: string; bg: string; icon: typeof CheckCircle }> = {
@@ -371,6 +376,18 @@ export default function KYCPage() {
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Identity Document</p>
                       <DocPreviewRow label="Type" value={entry.idType} icon={FileText} />
                       <DocPreviewRow label="Number" value={entry.idNumber} icon={Shield} />
+                      <div className="flex items-center gap-2 py-1.5 border-b text-sm">
+                        <User className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground text-xs w-28 flex-shrink-0">Gender</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                          entry.gender === "Male"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-pink-50 text-pink-700 border-pink-200"
+                        }`}>
+                          {entry.gender === "Male" ? "♂ Male" : "♀ Female"}
+                        </span>
+                      </div>
+                      <DocPreviewRow label="Date of Birth" value={entry.dob} icon={Calendar} />
                       <div className="flex gap-2 mt-3">
                         <div className="flex-1 border-2 border-dashed rounded-lg p-3 text-center text-xs text-muted-foreground">
                           <FileText className="w-6 h-6 mx-auto mb-1 opacity-40" />
