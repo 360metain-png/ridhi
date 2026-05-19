@@ -452,14 +452,8 @@ export default function JobsScreen() {
               <Feather name="chevron-down" size={12} color="rgba(255,255,255,0.8)" />
             </Pressable>
           </View>
-          <View style={{ alignItems: "flex-end", gap: 4 }}>
-            <View style={styles.coinBalanceBadge}>
-              <Text style={styles.coinBalanceText}>🪙 {user?.coins ?? 0}</Text>
-            </View>
-            <Pressable onPress={() => router.push("/jobs-post" as any)} style={styles.postJobBtn}>
-              <Feather name="plus" size={15} color="#E91E8C" />
-              <Text style={styles.postJobBtnText}>Post Job</Text>
-            </Pressable>
+          <View style={styles.coinBalanceBadge}>
+            <Text style={styles.coinBalanceText}>🪙 {user?.coins ?? 0}</Text>
           </View>
         </View>
 
@@ -563,21 +557,6 @@ export default function JobsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      {/* FAB */}
-      <Pressable
-        onPress={() => router.push("/jobs-post" as any)}
-        style={[styles.fab, { bottom: insets.bottom + 20 }]}
-      >
-        <LinearGradient
-          colors={["#E91E8C", "#7B2FBE"]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-          style={styles.fabGradient}
-        >
-          <Feather name="plus" size={18} color="#fff" />
-          <Text style={styles.fabText}>Post a Job</Text>
-        </LinearGradient>
-      </Pressable>
 
       {/* ── Coin Confirm Modal ─────────────────────────────────────────────── */}
       <Modal visible={!!coinConfirmJob} transparent animationType="fade" onRequestClose={() => setCoinConfirmJob(null)}>
@@ -761,9 +740,6 @@ const styles = StyleSheet.create({
   headerTitle:      { fontSize: 20, fontFamily: "Inter_700Bold", color: "#fff" },
   locationRow:      { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   locationText:     { fontSize: 12, color: "rgba(255,255,255,0.85)", fontFamily: "Inter_500Medium" },
-  postJobBtn:       { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#fff", borderRadius: 20, paddingVertical: 6, paddingHorizontal: 12 },
-  postJobBtnText:   { fontSize: 13, fontFamily: "Inter_700Bold", color: "#E91E8C" },
-
   searchBar:        { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   searchInput:      { flex: 1, fontSize: 14, fontFamily: "Inter_400Regular", color: "#111" },
 
@@ -822,10 +798,6 @@ const styles = StyleSheet.create({
   emptyTitle:       { fontSize: 18, fontFamily: "Inter_700Bold", marginTop: 8 },
   emptySub:         { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
   clearBtn:         { marginTop: 12, paddingHorizontal: 24, paddingVertical: 10, borderRadius: 20 },
-
-  fab:              { position: "absolute", right: 20, alignSelf: "flex-end" },
-  fabGradient:      { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 13, borderRadius: 30, elevation: 6, shadowColor: "#E91E8C", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 8 },
-  fabText:          { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
 
   modalOverlay:     { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
 
