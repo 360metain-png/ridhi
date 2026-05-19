@@ -124,6 +124,9 @@ export default function PodcastsScreen() {
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Floating header on scroll */}
       <Animated.View style={[styles.floatingHeader, { opacity: headerOpacity, backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Feather name="arrow-left" size={22} color={colors.text} />
+        </Pressable>
         <Text style={[styles.floatingTitle, { color: colors.text }]}>Podcasts</Text>
       </Animated.View>
 
@@ -136,8 +139,12 @@ export default function PodcastsScreen() {
         {/* Hero */}
         <LinearGradient
           colors={["#1A0533", "#0A0A0F"]}
-          style={[styles.hero, { paddingTop: insets.top + 16 }]}
+          style={[styles.hero, { paddingTop: insets.top + 10 }]}
         >
+          {/* Back button */}
+          <Pressable onPress={() => router.back()} style={styles.heroBackBtn}>
+            <Feather name="arrow-left" size={22} color="rgba(255,255,255,0.9)" />
+          </Pressable>
           <View style={styles.heroContent}>
             <View style={styles.heroLeft}>
               <View style={styles.heroBadge}>
@@ -285,12 +292,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  floatingTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
+  floatingTitle: { fontSize: 17, fontFamily: "Inter_700Bold", flex: 1 },
+  backBtn: { padding: 6, borderRadius: 20 },
   hero: { paddingHorizontal: 20, paddingBottom: 28 },
+  heroBackBtn: { padding: 4, alignSelf: "flex-start", marginBottom: 6 },
   heroContent: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginTop: 12 },
   heroLeft: { flex: 1 },
   heroBadge: { flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 10 },
