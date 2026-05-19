@@ -298,7 +298,7 @@ const UNLOCK_CATEGORIES = [
   },
   {
     title: "Coins & Boosts",
-    icon: "dollar-sign",
+    icon: "trending-up",
     color: "#FFB800",
     items: [
       { label: "150 bonus coins/month",          plan: "silver",   icon: "gift"       },
@@ -1131,7 +1131,7 @@ export default function SubscriptionScreen() {
                   { icon: "gift",        color: "#E91E8C", text: "Gifts from live streams → 70–92% goes to you" },
                   { icon: "users",       color: "#7B2FBE", text: "Fan Club coins → 70–92% revenue share"       },
                   { icon: "mic",         color: "#2196F3", text: "Paid podcast episodes → 70–92% revenue share" },
-                  { icon: "dollar-sign", color: "#FFB800", text: "Minimum withdrawal: 1,000 coins (≈₹800)"      },
+                  { icon: "credit-card", color: "#FFB800", text: "Minimum withdrawal: 1,000 coins (≈₹800)"      },
                 ].map(({ icon, color, text }) => (
                   <View key={text} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
                     <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: color + "20", alignItems: "center", justifyContent: "center" }}>
@@ -1205,7 +1205,7 @@ export default function SubscriptionScreen() {
               </Text>
               <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
                 {[
-                  { icon: "dollar-sign", label: "1 Coin ≈ ₹0.80",    color: "#FFB800" },
+                  { icon: "credit-card", label: "1 Coin ≈ ₹0.80",    color: "#FFB800" },
                   { icon: "users",       label: "Creator gets 70%+",  color: "#34C759" },
                   { icon: "refresh-cw",  label: "Cancel anytime",     color: "#7B2FBE" },
                 ].map(({ icon, label, color }) => (

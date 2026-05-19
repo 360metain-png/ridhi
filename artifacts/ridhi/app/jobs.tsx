@@ -200,7 +200,7 @@ const CATEGORIES: JobCategory[] = [
 
 const CATEGORY_ICONS: Record<string, string> = {
   "All": "grid", "IT & Tech": "monitor", "Healthcare": "activity", "Education": "book",
-  "Finance": "dollar-sign", "Retail": "shopping-bag", "Construction": "tool",
+  "Finance": "briefcase", "Retail": "shopping-bag", "Construction": "tool",
   "Hospitality": "coffee", "Transport": "truck", "Marketing": "trending-up",
   "Design": "pen-tool", "Sales": "users", "Manufacturing": "settings",
   "Security": "shield", "Domestic": "home",
@@ -363,7 +363,7 @@ export default function JobsScreen() {
           </Text>
         </View>
         <View style={styles.detailItem}>
-          <Feather name="dollar-sign" size={12} color="#34C759" />
+          <Feather name="trending-up" size={12} color="#34C759" />
           <Text style={[styles.detailText, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
             {formatSalary(j.salaryMin, j.salaryMax, j.salaryUnit)}
           </Text>

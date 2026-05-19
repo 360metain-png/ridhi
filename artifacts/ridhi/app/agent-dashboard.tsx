@@ -374,7 +374,7 @@ export default function AgentDashboardScreen() {
               {[
                 { label: "Active Hosts", value: AGENT.activeHosts.toString(), icon: "users", color: colors.success },
                 { label: "Monthly Volume", value: AGENT.monthVolume, icon: "trending-up", color: colors.gold },
-                { label: "Commission Earned", value: AGENT.commission, icon: "dollar-sign", color: colors.primary },
+                { label: "Commission Earned", value: AGENT.commission, icon: "trending-up", color: colors.primary },
                 { label: "Avg Host Level", value: "L3.2", icon: "award", color: colors.secondary },
               ].map((s) => (
                 <View key={s.label} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -587,7 +587,7 @@ export default function AgentDashboardScreen() {
                 { label: "More hosts onboarded",    desc: "Agents recruit & train — Ridhi saves acquisition cost", icon: "users",      color: "#00BCD4" },
                 { label: "Host quality improves",   desc: "Agents coach, so hosts go live regularly & earn more",  icon: "trending-up",color: "#34C759" },
                 { label: "Platform grows faster",   desc: "Every active host brings fans, coins, and growth",      icon: "zap",        color: "#FFB800" },
-                { label: "Agent earns passively",   desc: "Commission continues as long as your hosts are active", icon: "dollar-sign",color: "#E91E8C" },
+                { label: "Agent earns passively",   desc: "Commission continues as long as your hosts are active", icon: "trending-up",color: "#E91E8C" },
               ].map(({ label, desc, icon, color }) => (
                 <View key={label} style={styles.commRow}>
                   <View style={[styles.exIcon, { backgroundColor: color + "20" }]}>

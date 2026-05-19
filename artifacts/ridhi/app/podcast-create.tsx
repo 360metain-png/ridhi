@@ -57,7 +57,7 @@ const EPISODE_TYPES: { id: EpisodeType; label: string; desc: string; limit: stri
 const MONETIZATION_OPTIONS: { id: Monetization; icon: string; label: string; desc: string }[] = [
   { id: "free", icon: "unlock", label: "Free for All", desc: "Everyone can listen" },
   { id: "subscribers", icon: "users", label: "Subscribers Only", desc: "Your paid subscribers get access" },
-  { id: "paid", icon: "dollar-sign", label: "Paid Episode", desc: "Set a one-time price in coins" },
+  { id: "paid", icon: "lock", label: "Paid Episode", desc: "Set a one-time price in coins" },
 ];
 
 const AI_FEATURES = [
@@ -574,7 +574,7 @@ export default function PodcastCreateScreen() {
             )}
 
             {/* Monetization */}
-            <SectionLabel icon="dollar-sign" title="Monetization" colors={colors} />
+            <SectionLabel icon="credit-card" title="Monetization" colors={colors} />
             {MONETIZATION_OPTIONS.map((opt) => {
               const active = monetization === opt.id;
               return (

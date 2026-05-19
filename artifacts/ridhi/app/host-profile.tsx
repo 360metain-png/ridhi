@@ -179,7 +179,7 @@ export default function HostProfileScreen() {
           <View style={[regStyles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[regStyles.sectionTitle, { color: colors.foreground }]}>Why become a Host?</Text>
             {[
-              { icon: "dollar-sign", text: "Earn from Video & Audio calls, Live streams, Gifts", color: "#22C55E" },
+              { icon: "trending-up", text: "Earn from Video & Audio calls, Live streams, Gifts", color: "#22C55E" },
               { icon: "trending-up", text: "Level up from Bronze to Crown — unlock higher payouts", color: "#FFB800" },
               { icon: "users", text: "Build your own fan base and fan clubs", color: "#7B2FBE" },
               { icon: "shield", text: "Dedicated agent support and weekly payouts", color: "#E91E8C" },

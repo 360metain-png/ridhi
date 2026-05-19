@@ -193,7 +193,7 @@ export default function MyPodcastChannelScreen() {
 
             {/* Earnings */}
             <View style={[styles.earningsRow, { backgroundColor: "#FFB80018", borderColor: "#FFB80040" }]}>
-              <Feather name="dollar-sign" size={14} color="#FFB800" />
+              <Feather name="credit-card" size={14} color="#FFB800" />
               <Text style={[styles.earningsLabel, { color: colors.foreground }]}>Total Earnings</Text>
               <Text style={[styles.earningsVal, { color: "#FFB800" }]}>🪙 {totalEarnings.toLocaleString("en-IN")}</Text>
               <Text style={[{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>≈₹{(totalEarnings * 0.8).toLocaleString("en-IN")}</Text>
@@ -357,7 +357,7 @@ export default function MyPodcastChannelScreen() {
                 { label: "Total Plays",    value: formatPlays(totalPlays),  icon: "headphones", color: "#7B2FBE" },
                 { label: "Total Likes",    value: formatPlays(totalLikes),  icon: "heart",      color: "#E91E8C" },
                 { label: "Subscribers",    value: "1,247",                  icon: "users",      color: "#2196F3" },
-                { label: "Coins Earned",   value: `🪙${totalEarnings}`,     icon: "dollar-sign",color: "#FFB800" },
+                { label: "Coins Earned",   value: `🪙${totalEarnings}`,     icon: "credit-card",color: "#FFB800" },
               ].map(({ label, value, icon, color }) => (
                 <View key={label} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border, width: "47%" }]}>
                   <View style={[styles.statCardIcon, { backgroundColor: color + "20" }]}>
