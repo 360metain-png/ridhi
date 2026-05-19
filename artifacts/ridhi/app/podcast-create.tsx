@@ -29,16 +29,29 @@ type RecordMode = "audio" | "video" | "live";
 type EpisodeType = "full" | "short" | "trailer";
 type Monetization = "free" | "subscribers" | "paid";
 
+// Duration limits in seconds (applies to audio + video; not live)
+const DURATION_LIMITS: Record<EpisodeType, number> = {
+  full:    30 * 60,   // 30 minutes
+  short:   3  * 60,   // 3 minutes
+  trailer: 1  * 60,   // 1 minute
+};
+
+const DURATION_LABELS: Record<EpisodeType, string> = {
+  full:    "Max 30 min",
+  short:   "Max 3 min",
+  trailer: "Max 1 min",
+};
+
 const RECORD_MODES: { id: RecordMode; icon: string; label: string; desc: string; color: string }[] = [
-  { id: "audio", icon: "mic", label: "Audio Podcast", desc: "Record audio-only episode", color: "#7B2FBE" },
-  { id: "video", icon: "video", label: "Video Podcast", desc: "Record with front camera", color: "#E91E8C" },
-  { id: "live", icon: "radio", label: "Go Live", desc: "Broadcast live to followers", color: "#FF3B30" },
+  { id: "audio", icon: "mic",   label: "Audio Podcast", desc: "Record audio-only episode",      color: "#7B2FBE" },
+  { id: "video", icon: "video", label: "Video Podcast", desc: "Record with front camera",       color: "#E91E8C" },
+  { id: "live",  icon: "radio", label: "Go Live",       desc: "Broadcast live to followers",    color: "#FF3B30" },
 ];
 
-const EPISODE_TYPES: { id: EpisodeType; label: string; desc: string }[] = [
-  { id: "full", label: "Full Episode", desc: "No time limit" },
-  { id: "short", label: "Short Clip", desc: "Under 3 minutes — shareable as Reel" },
-  { id: "trailer", label: "Trailer", desc: "Tease your upcoming podcast" },
+const EPISODE_TYPES: { id: EpisodeType; label: string; desc: string; limit: string; color: string }[] = [
+  { id: "full",    label: "Full Episode", desc: "Audio or Video · under 30 mins",          limit: "30:00", color: "#7B2FBE" },
+  { id: "short",   label: "Short Clip",   desc: "Shareable as Reel · under 3 mins",        limit: "3:00",  color: "#E91E8C" },
+  { id: "trailer", label: "Trailer",      desc: "Tease your upcoming podcast · max 1 min", limit: "1:00",  color: "#FF6B35" },
 ];
 
 const MONETIZATION_OPTIONS: { id: Monetization; icon: string; label: string; desc: string }[] = [
@@ -99,7 +112,13 @@ export default function PodcastCreateScreen() {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Recording pulse animation
+  // Reset timer whenever episode type changes
+  useEffect(() => {
+    setIsRecording(false);
+    setRecordSeconds(0);
+  }, [episodeType]);
+
+  // Recording pulse animation + auto-stop at limit
   useEffect(() => {
     if (isRecording) {
       Animated.loop(
@@ -108,19 +127,38 @@ export default function PodcastCreateScreen() {
           Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
         ])
       ).start();
-      timerRef.current = setInterval(() => setRecordSeconds((s) => s + 1), 1000);
+      timerRef.current = setInterval(() => {
+        setRecordSeconds((s) => {
+          const limit = DURATION_LIMITS[episodeType];
+          if (s + 1 >= limit) {
+            setIsRecording(false);
+            Alert.alert(
+              "Time Limit Reached",
+              `${EPISODE_TYPES.find((e) => e.id === episodeType)?.label} is limited to ${DURATION_LABELS[episodeType]}. Recording stopped automatically.`,
+              [{ text: "OK" }]
+            );
+            return limit;
+          }
+          return s + 1;
+        });
+      }, 1000);
     } else {
       pulseAnim.setValue(1);
       if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [isRecording]);
+  }, [isRecording, episodeType]);
 
   const formatTime = (s: number) => {
     const mm = String(Math.floor(s / 60)).padStart(2, "0");
     const ss = String(s % 60).padStart(2, "0");
     return `${mm}:${ss}`;
   };
+
+  // Progress toward limit (0–1)
+  const limitProgress = recordSeconds / DURATION_LIMITS[episodeType];
+  const limitColor = limitProgress < 0.75 ? "#7B2FBE" : limitProgress < 0.9 ? "#FF9800" : "#FF3B30";
+  const remainingSeconds = Math.max(0, DURATION_LIMITS[episodeType] - recordSeconds);
 
   const pickCoverArt = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -221,14 +259,19 @@ export default function PodcastCreateScreen() {
                 <Pressable
                   key={et.id}
                   onPress={() => setEpisodeType(et.id)}
-                  style={[styles.typeRow, { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary + "10" : colors.card }]}
+                  style={[styles.typeRow, { borderColor: active ? et.color : colors.border, backgroundColor: active ? et.color + "12" : colors.card }]}
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.typeLabel, { color: colors.text }]}>{et.label}</Text>
                     <Text style={[styles.typeDesc, { color: colors.mutedForeground }]}>{et.desc}</Text>
                   </View>
-                  <View style={[styles.radio, { borderColor: active ? colors.primary : colors.border }]}>
-                    {active && <View style={[styles.radioFill, { backgroundColor: colors.primary }]} />}
+                  {/* Duration limit pill */}
+                  <View style={[styles.limitPill, { backgroundColor: active ? et.color : colors.muted }]}>
+                    <Feather name="clock" size={10} color={active ? "#fff" : colors.mutedForeground} />
+                    <Text style={[styles.limitPillText, { color: active ? "#fff" : colors.mutedForeground }]}>{et.limit}</Text>
+                  </View>
+                  <View style={[styles.radio, { borderColor: active ? et.color : colors.border, marginLeft: 8 }]}>
+                    {active && <View style={[styles.radioFill, { backgroundColor: et.color }]} />}
                   </View>
                 </Pressable>
               );
@@ -236,8 +279,30 @@ export default function PodcastCreateScreen() {
 
             {/* Simulated recorder */}
             {recordMode !== "live" && (
-              <View style={[styles.recorderBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <Text style={[styles.recorderTimer, { color: isRecording ? colors.primary : colors.mutedForeground }]}>
+              <View style={[styles.recorderBox, { backgroundColor: colors.card, borderColor: limitProgress > 0.9 && isRecording ? "#FF3B30" : colors.border }]}>
+
+                {/* Duration limit banner */}
+                <View style={[styles.limitBanner, { backgroundColor: limitColor + "18" }]}>
+                  <Feather name="clock" size={13} color={limitColor} />
+                  <Text style={[styles.limitBannerLabel, { color: limitColor }]}>
+                    {DURATION_LABELS[episodeType]}
+                  </Text>
+                  <Text style={[styles.limitBannerRemaining, { color: limitColor }]}>
+                    {isRecording || recordSeconds > 0
+                      ? `${formatTime(remainingSeconds)} remaining`
+                      : `Up to ${formatTime(DURATION_LIMITS[episodeType])}`}
+                  </Text>
+                </View>
+
+                {/* Limit progress bar */}
+                <View style={[styles.limitTrack, { backgroundColor: colors.muted }]}>
+                  <View style={[styles.limitFill, {
+                    width: `${Math.min(limitProgress * 100, 100)}%` as any,
+                    backgroundColor: limitColor,
+                  }]} />
+                </View>
+
+                <Text style={[styles.recorderTimer, { color: isRecording ? limitColor : colors.mutedForeground }]}>
                   {formatTime(recordSeconds)}
                 </Text>
                 <View style={styles.recorderWave}>
@@ -245,7 +310,7 @@ export default function PodcastCreateScreen() {
                     <Animated.View
                       key={i}
                       style={[styles.recorderBar, {
-                        backgroundColor: isRecording ? colors.primary : colors.border,
+                        backgroundColor: isRecording ? limitColor : colors.border,
                         height: isRecording ? Math.random() * 28 + 6 : 6,
                         transform: [{ scale: isRecording ? pulseAnim : new Animated.Value(1) }],
                       }]}
@@ -259,7 +324,11 @@ export default function PodcastCreateScreen() {
                   <Feather name={isRecording ? "square" : "mic"} size={26} color="#fff" />
                 </Pressable>
                 <Text style={[styles.recorderHint, { color: colors.mutedForeground }]}>
-                  {isRecording ? "Tap to stop recording" : "Tap to start recording"}
+                  {isRecording
+                    ? `Tap to stop · ${formatTime(remainingSeconds)} left`
+                    : recordSeconds > 0
+                      ? `${formatTime(recordSeconds)} recorded · Tap mic to continue`
+                      : "Tap to start recording"}
                 </Text>
               </View>
             )}
@@ -617,12 +686,19 @@ const styles = StyleSheet.create({
   typeDesc: { fontFamily: "Inter_400Regular", fontSize: 12 },
   radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, alignItems: "center", justifyContent: "center" },
   radioFill: { width: 10, height: 10, borderRadius: 5 },
-  recorderBox: { marginTop: 22, borderRadius: 18, borderWidth: 1, padding: 24, alignItems: "center", gap: 14 },
+  limitPill: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20 },
+  limitPillText: { fontFamily: "Inter_600SemiBold", fontSize: 11 },
+  recorderBox: { marginTop: 22, borderRadius: 18, borderWidth: 1.5, padding: 24, alignItems: "center", gap: 14 },
+  limitBanner: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "stretch", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 },
+  limitBannerLabel: { fontFamily: "Inter_700Bold", fontSize: 12 },
+  limitBannerRemaining: { fontFamily: "Inter_400Regular", fontSize: 12, marginLeft: "auto" },
+  limitTrack: { height: 4, borderRadius: 2, alignSelf: "stretch", overflow: "hidden" },
+  limitFill: { height: 4, borderRadius: 2 },
   recorderTimer: { fontFamily: "Inter_700Bold", fontSize: 36, letterSpacing: 2 },
   recorderWave: { flexDirection: "row", alignItems: "center", height: 40, gap: 3 },
   recorderBar: { width: 3, borderRadius: 2 },
   recorderBtn: { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center" },
-  recorderHint: { fontFamily: "Inter_400Regular", fontSize: 13 },
+  recorderHint: { fontFamily: "Inter_400Regular", fontSize: 13, textAlign: "center" },
   liveBox: { marginTop: 22, borderRadius: 18, padding: 28, alignItems: "center", gap: 12 },
   liveBoxTitle: { fontFamily: "Inter_700Bold", fontSize: 20 },
   liveBoxSub: { fontFamily: "Inter_400Regular", fontSize: 14, textAlign: "center", lineHeight: 20 },
