@@ -1,5 +1,7 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Easing,
   FlatList,
   Platform,
   Pressable,
@@ -84,22 +86,135 @@ const REELS = [
 
 const ICON_HITSLOP = { top: 12, bottom: 12, left: 12, right: 12 };
 
+// ── Animated chevrons shown when the first reel is visible ───────────────────
+function SwipeChevrons({ visible }: { visible: boolean }) {
+  const anim1 = useRef(new Animated.Value(0)).current;
+  const anim2 = useRef(new Animated.Value(0)).current;
+  const anim3 = useRef(new Animated.Value(0)).current;
+  const wrapOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!visible) {
+      Animated.timing(wrapOpacity, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+      return;
+    }
+
+    // Fade in container
+    Animated.timing(wrapOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+
+    // Staggered cascading chevrons — each shifts up and fades out, looping
+    const makeChevronLoop = (val: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.parallel([
+            Animated.timing(val, {
+              toValue: 1,
+              duration: 700,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.timing(val, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+    const l1 = makeChevronLoop(anim1, 0);
+    const l2 = makeChevronLoop(anim2, 220);
+    const l3 = makeChevronLoop(anim3, 440);
+    l1.start(); l2.start(); l3.start();
+    return () => { l1.stop(); l2.stop(); l3.stop(); };
+  }, [visible]);
+
+  const chevronStyle = (anim: Animated.Value) => ({
+    opacity: anim.interpolate({ inputRange: [0, 0.3, 0.7, 1], outputRange: [0, 1, 0.6, 0] }),
+    transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [0, -22] }) }],
+  });
+
+  return (
+    <Animated.View pointerEvents="none" style={[styles.chevronsWrap, { opacity: wrapOpacity }]}>
+      <Animated.View style={chevronStyle(anim1)}>
+        <Feather name="chevron-up" size={22} color="rgba(255,255,255,0.55)" />
+      </Animated.View>
+      <Animated.View style={chevronStyle(anim2)}>
+        <Feather name="chevron-up" size={22} color="rgba(255,255,255,0.75)" />
+      </Animated.View>
+      <Animated.View style={chevronStyle(anim3)}>
+        <Feather name="chevron-up" size={22} color="rgba(255,255,255,0.95)" />
+      </Animated.View>
+      <Text style={styles.chevronLabel}>Swipe up</Text>
+    </Animated.View>
+  );
+}
+
+// ── Individual reel item ──────────────────────────────────────────────────────
 function ReelItem({
   reel,
   isActive,
   screenHeight,
   screenWidth,
+  isFirst,
 }: {
   reel: (typeof REELS)[0];
   isActive: boolean;
   screenHeight: number;
   screenWidth: number;
+  isFirst: boolean;
 }) {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
-  const [liked, setLiked] = useState(reel.isLiked);
-  const [likeCount, setLikeCount] = useState(reel.likes);
+  const colors  = useColors();
+  const insets  = useSafeAreaInsets();
+  const [liked, setLiked]           = useState(reel.isLiked);
+  const [likeCount, setLikeCount]   = useState(reel.likes);
   const { saveWithWatermark, saving, saved } = useWatermark();
+
+  // ── Content entry animations ─────────────────────────────────────────────
+  const infoY       = useRef(new Animated.Value(36)).current;
+  const infoOpacity = useRef(new Animated.Value(0)).current;
+  const actX        = useRef(new Animated.Value(28)).current;
+  const actOpacity  = useRef(new Animated.Value(0)).current;
+  const emojiScale  = useRef(new Animated.Value(isFirst ? 0.7 : 0.85)).current;
+  const emojiOpacity = useRef(new Animated.Value(isFirst ? 0 : 1)).current;
+
+  useEffect(() => {
+    if (isActive) {
+      // Stagger: emoji pops, then info slides up, then actions slide in
+      Animated.sequence([
+        Animated.delay(isFirst ? 180 : 60),
+        Animated.parallel([
+          Animated.spring(emojiScale, { toValue: 1, tension: 70, friction: 8, useNativeDriver: true }),
+          Animated.timing(emojiOpacity, { toValue: 1, duration: 280, useNativeDriver: true }),
+        ]),
+      ]).start();
+
+      Animated.sequence([
+        Animated.delay(isFirst ? 320 : 120),
+        Animated.parallel([
+          Animated.spring(infoY, { toValue: 0, tension: 65, friction: 10, useNativeDriver: true }),
+          Animated.timing(infoOpacity, { toValue: 1, duration: 320, useNativeDriver: true }),
+        ]),
+      ]).start();
+
+      Animated.sequence([
+        Animated.delay(isFirst ? 440 : 180),
+        Animated.parallel([
+          Animated.spring(actX, { toValue: 0, tension: 65, friction: 10, useNativeDriver: true }),
+          Animated.timing(actOpacity, { toValue: 1, duration: 320, useNativeDriver: true }),
+        ]),
+      ]).start();
+    } else {
+      // Reset for re-entry when scrolling back
+      infoY.setValue(36);
+      infoOpacity.setValue(0);
+      actX.setValue(28);
+      actOpacity.setValue(0);
+      emojiScale.setValue(0.85);
+      emojiOpacity.setValue(1);
+    }
+  }, [isActive]);
 
   const handleLike = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -127,9 +242,13 @@ function ReelItem({
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
+
+      {/* Centre emoji — pops in when reel becomes active */}
       <View style={styles.reelOverlay}>
         <View style={styles.reelCenter}>
-          <Text style={styles.reelEmoji}>{reel.emoji}</Text>
+          <Animated.Text style={[styles.reelEmoji, { opacity: emojiOpacity, transform: [{ scale: emojiScale }] }]}>
+            {reel.emoji}
+          </Animated.Text>
           <Text style={styles.reelPlayHint}>Reel Preview</Text>
         </View>
       </View>
@@ -137,10 +256,16 @@ function ReelItem({
       <WatermarkBadge position="top-right" size="sm" opacity={0.5} />
 
       <LinearGradient
-        colors={["transparent", "rgba(0,0,0,0.75)"]}
+        colors={["transparent", "rgba(0,0,0,0.78)"]}
         style={[styles.reelBottom, { paddingBottom: bottomPad }]}
       >
-        <View style={styles.reelInfo}>
+        {/* Info slides up from below */}
+        <Animated.View
+          style={[
+            styles.reelInfo,
+            { opacity: infoOpacity, transform: [{ translateY: infoY }] },
+          ]}
+        >
           <View style={styles.reelUserRow}>
             <Avatar name={reel.userName} size={36} />
             <View style={{ flex: 1 }}>
@@ -161,9 +286,15 @@ function ReelItem({
           <Text style={styles.reelCaption} numberOfLines={2}>
             {reel.caption}
           </Text>
-        </View>
+        </Animated.View>
 
-        <View style={styles.reelActions}>
+        {/* Actions slide in from the right */}
+        <Animated.View
+          style={[
+            styles.reelActions,
+            { opacity: actOpacity, transform: [{ translateX: actX }] },
+          ]}
+        >
           <Pressable
             style={styles.reelAction}
             onPress={handleLike}
@@ -208,18 +339,43 @@ function ReelItem({
           <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="More options">
             <Feather name="more-vertical" size={28} color="#fff" />
           </Pressable>
-        </View>
+        </Animated.View>
       </LinearGradient>
+
+      {/* Stacked swipe-up chevrons — only on first reel */}
+      {isFirst && isActive && <SwipeChevrons visible={isActive} />}
     </View>
   );
 }
 
+// ── Screen ────────────────────────────────────────────────────────────────────
 export default function ReelsScreen() {
-  const colors = useColors();
-  const insets = useSafeAreaInsets();
+  const colors  = useColors();
+  const insets  = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  // ── Screen entry — entire screen slides up from below ─────────────────────
+  const screenEntryY       = useRef(new Animated.Value(screenHeight * 0.18)).current;
+  const screenEntryOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(screenEntryY, {
+        toValue: 0,
+        tension: 55,
+        friction: 12,
+        useNativeDriver: true,
+      }),
+      Animated.timing(screenEntryOpacity, {
+        toValue: 1,
+        duration: 450,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const onViewRef = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -234,6 +390,7 @@ export default function ReelsScreen() {
         isActive={index === activeIndex}
         screenHeight={screenHeight}
         screenWidth={screenWidth}
+        isFirst={index === 0}
       />
     ),
     [activeIndex, screenHeight, screenWidth]
@@ -249,7 +406,15 @@ export default function ReelsScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          opacity: screenEntryOpacity,
+          transform: [{ translateY: screenEntryY }],
+        },
+      ]}
+    >
       <SwipeUpHint label="Swipe up for next reel" bottomOffset={100} delay={1000} />
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>
@@ -278,7 +443,7 @@ export default function ReelsScreen() {
         windowSize={5}
         initialNumToRender={2}
       />
-    </View>
+    </Animated.View>
   );
 }
 
@@ -295,6 +460,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   topTitle: { color: "#fff", fontSize: 20, fontFamily: "Inter_700Bold" },
+
   reelOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: "center",
@@ -307,6 +473,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter_500Medium",
   },
+
   reelBottom: {
     position: "absolute",
     bottom: 0,
@@ -343,10 +510,34 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   reelActions: { gap: 22, alignItems: "center" },
-  reelAction: { alignItems: "center", gap: 4, minWidth: 44, minHeight: 44, justifyContent: "center" },
+  reelAction: {
+    alignItems: "center",
+    gap: 4,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: "center",
+  },
   reelActionCount: {
     color: "#fff",
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
+  },
+
+  // Stacked swipe chevrons
+  chevronsWrap: {
+    position: "absolute",
+    bottom: 170,
+    alignSelf: "center",
+    alignItems: "center",
+    gap: 0,
+    zIndex: 20,
+  },
+  chevronLabel: {
+    color: "rgba(255,255,255,0.75)",
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1.2,
+    marginTop: 4,
+    textTransform: "uppercase",
   },
 });

@@ -224,13 +224,36 @@ export default function FeedScreen() {
   );
   const localTags = LOCAL_TRENDING_TAGS[userCity] ?? DEFAULT_TAGS;
 
-  const headerAnim = useRef(new Animated.Value(0)).current;
+  const headerAnim    = useRef(new Animated.Value(0)).current;
   const liveIndicator = useRef(new Animated.Value(0.4)).current;
-  const recsFadeAnim = useRef(new Animated.Value(0)).current;
-  const recsShown = useRef(false);
+  const recsFadeAnim  = useRef(new Animated.Value(0)).current;
+  const recsShown     = useRef(false);
+
+  // ── Page entry: tab bar + feed slide up from below ──────────────────────────
+  const feedEntryY       = useRef(new Animated.Value(72)).current;
+  const feedEntryOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.timing(headerAnim, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+
+    // Feed content swipes up from below — staggered after header
+    Animated.sequence([
+      Animated.delay(120),
+      Animated.parallel([
+        Animated.spring(feedEntryY, {
+          toValue: 0,
+          tension: 60,
+          friction: 11,
+          useNativeDriver: true,
+        }),
+        Animated.timing(feedEntryOpacity, {
+          toValue: 1,
+          duration: 340,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+
     Animated.loop(
       Animated.sequence([
         Animated.timing(liveIndicator, { toValue: 1, duration: 700, useNativeDriver: true }),
@@ -722,6 +745,7 @@ export default function FeedScreen() {
         </View>
       </Animated.View>
 
+      <Animated.View style={{ opacity: feedEntryOpacity, transform: [{ translateY: feedEntryY }] }}>
       <View style={[styles.feedTabBar, { backgroundColor: colors.surface + "F0", borderBottomColor: colors.border }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.feedTabScroll}>
           {FEED_TABS.map((tab) => {
@@ -805,6 +829,7 @@ export default function FeedScreen() {
         initialNumToRender={5}
         updateCellsBatchingPeriod={50}
       />
+      </Animated.View>
 
       {/* ── Special Client Popup Ad ── */}
       {showPopup && !popupDismissed && activePopup && (
