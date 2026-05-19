@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { MONTHS, getZodiacSignId, getZodiacFromBirthday, getAgeFromBirthday, ZODIAC_LIST } from "@/utils/zodiac";
 import { GradientButton } from "@/components/GradientButton";
 import { Avatar, AvatarPicker, getAvatarUrl, getAvatarOptions } from "@/components/Avatar";
 import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
@@ -164,9 +165,17 @@ export default function ProfileSetupScreen() {
   // step 1 — name + nickname
   const [name, setName]         = useState("");
   const [nickname, setNickname] = useState("");
-  // step 2 — age + gender
-  const [age, setAge]       = useState("");
+  // step 2 — date of birth + gender
+  const [dobDay,   setDobDay]   = useState("");
+  const [dobMonth, setDobMonth] = useState(0);   // 1-12
+  const [dobYear,  setDobYear]  = useState("");
   const [gender, setGender] = useState<"male" | "female" | "other" | "">("");
+
+  const dobBirthday = dobDay && dobMonth && dobYear.length === 4
+    ? `${dobYear}-${String(dobMonth).padStart(2, "0")}-${String(parseInt(dobDay)).padStart(2, "0")}`
+    : "";
+  const computedAge  = dobBirthday ? getAgeFromBirthday(dobBirthday) : 0;
+  const dobZodiac    = dobBirthday && computedAge >= 18 ? getZodiacFromBirthday(dobBirthday) : null;
   // step 3 — photo or avatar
   const [photoUri, setPhotoUri]   = useState("");   // real user photo
   const [avatarUri, setAvatarUri] = useState("");   // chosen avatar
@@ -223,7 +232,7 @@ export default function ProfileSetupScreen() {
   const canProceed = [
     !!language,
     name.length >= 2,
-    !!gender && parseInt(age) >= 18,
+    !!gender && computedAge >= 18,
     !!(photoUri || avatarUri), // must choose photo or avatar
     !!state,
     interests.length >= 3,
@@ -236,7 +245,9 @@ export default function ProfileSetupScreen() {
     await login({
       name,
       nickname: nickname.trim() || name,
-      age: parseInt(age),
+      age: computedAge,
+      birthday: dobBirthday || undefined,
+      zodiacSign: dobZodiac?.id || undefined,
       gender: gender as "male" | "female" | "other",
       city: state,
       state,
@@ -379,29 +390,93 @@ export default function ProfileSetupScreen() {
       ),
     },
 
-    // ── 2: age + gender ───────────────────────────────────────────────────────
+    // ── 2: date of birth + gender ─────────────────────────────────────────────
     {
       title: "A little about you",
-      subtitle: "Age & gender for better matches",
+      subtitle: "Date of birth & gender — we'll figure out your zodiac ✨",
       content: (
         <View style={{ gap: 16, width: "100%" }}>
-          <TextInput
-            style={[styles.bigInput, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
-            placeholder="Your age"
-            placeholderTextColor={colors.mutedForeground}
-            value={age}
-            onChangeText={setAge}
-            keyboardType="number-pad"
-            maxLength={2}
-          />
-          {age.length > 0 && parseInt(age) < 18 && (
+
+          {/* Section label */}
+          <View style={styles.inputLabelRow}>
+            <Feather name="calendar" size={13} color={colors.primary} />
+            <Text style={[styles.inputLabel, { color: colors.primary }]}>Date of Birth</Text>
+          </View>
+
+          {/* Month pills */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, paddingHorizontal: 0 }}
+          >
+            {MONTHS.map((m, i) => {
+              const active = dobMonth === i + 1;
+              return (
+                <Pressable
+                  key={m}
+                  onPress={() => setDobMonth(i + 1)}
+                  style={[
+                    styles.monthPill,
+                    {
+                      backgroundColor: active ? colors.primary : colors.card,
+                      borderColor: active ? colors.primary : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.monthPillText, { color: active ? "#fff" : colors.mutedForeground }]}>
+                    {m.slice(0, 3)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+
+          {/* Day + Year */}
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <TextInput
+              style={[styles.bigInput, { flex: 1, color: colors.foreground, borderColor: dobDay ? colors.primary : colors.border, backgroundColor: colors.card }]}
+              placeholder="Day (1–31)"
+              placeholderTextColor={colors.mutedForeground}
+              value={dobDay}
+              onChangeText={(t) => setDobDay(t.replace(/[^0-9]/g, ""))}
+              keyboardType="number-pad"
+              maxLength={2}
+            />
+            <TextInput
+              style={[styles.bigInput, { flex: 2, color: colors.foreground, borderColor: dobYear.length === 4 ? colors.primary : colors.border, backgroundColor: colors.card }]}
+              placeholder="Year (e.g. 2000)"
+              placeholderTextColor={colors.mutedForeground}
+              value={dobYear}
+              onChangeText={(t) => setDobYear(t.replace(/[^0-9]/g, ""))}
+              keyboardType="number-pad"
+              maxLength={4}
+            />
+          </View>
+
+          {/* Zodiac reveal card */}
+          {dobZodiac ? (
+            <View style={[styles.zodiacReveal, { backgroundColor: colors.card, borderColor: colors.primary + "50" }]}>
+              <Text style={styles.zodiacRevealEmoji}>{dobZodiac.emoji}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.zodiacRevealName, { color: colors.foreground }]}>
+                  You're a {dobZodiac.name}!
+                </Text>
+                <Text style={[styles.zodiacRevealDates, { color: colors.mutedForeground }]}>
+                  {dobZodiac.dates} · {dobZodiac.element} sign
+                </Text>
+              </View>
+              <Feather name="check-circle" size={18} color={colors.primary} />
+            </View>
+          ) : dobBirthday && computedAge < 18 ? (
             <View style={[styles.ageWarnBox, { backgroundColor: "#FF3B3015", borderColor: "#FF3B3050" }]}>
               <Feather name="alert-circle" size={15} color="#FF3B30" />
               <Text style={[styles.ageWarnText, { color: "#FF3B30" }]}>
                 You must be at least 18 years old to use Ridhi
               </Text>
             </View>
-          )}
+          ) : null}
+
+          {/* Gender */}
           <View style={styles.genderRow}>
             {(["male", "female"] as const).map((g) => (
               <Pressable
@@ -769,6 +844,12 @@ const styles = StyleSheet.create({
   inputLabel:    { fontSize: 12, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
   nicknameHint:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   bigInput:   { fontSize: 18, fontFamily: "Inter_500Medium", paddingVertical: 16, paddingHorizontal: 20, borderRadius: 16, borderWidth: 1.5, width: "100%" },
+  monthPill:       { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5 },
+  monthPillText:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  zodiacReveal:    { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 14, borderWidth: 1.5, padding: 14 },
+  zodiacRevealEmoji:  { fontSize: 30 },
+  zodiacRevealName:   { fontSize: 15, fontFamily: "Inter_700Bold" },
+  zodiacRevealDates:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
   ageWarnBox:  { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
   ageWarnText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium", lineHeight: 18 },
   genderRow:  { flexDirection: "row", gap: 10 },

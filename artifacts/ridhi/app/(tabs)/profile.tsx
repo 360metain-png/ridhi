@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { getZodiacFromBirthday, ZODIAC_LIST } from "@/utils/zodiac";
 import { Avatar, AvatarPicker } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
@@ -408,6 +409,21 @@ export default function ProfileScreen() {
             <Text style={[styles.location, { color: colors.mutedForeground }]}>{user.city}</Text>
           </View>
 
+          {(() => {
+            const zodiac = user.zodiacSign
+              ? ZODIAC_LIST.find((z) => z.id === user.zodiacSign)
+              : user.birthday
+              ? getZodiacFromBirthday(user.birthday)
+              : null;
+            return zodiac ? (
+              <View style={styles.zodiacRow}>
+                <Text style={styles.zodiacEmoji}>{zodiac.emoji}</Text>
+                <Text style={[styles.zodiacLabel, { color: colors.mutedForeground }]}>{zodiac.name}</Text>
+                <Text style={[styles.zodiacDates, { color: colors.mutedForeground }]}>· {zodiac.dates}</Text>
+              </View>
+            ) : null;
+          })()}
+
           {user.bio ? (
             <Text style={[styles.bio, { color: colors.mutedForeground }]}>{user.bio}</Text>
           ) : null}
@@ -595,6 +611,10 @@ const styles = StyleSheet.create({
   name: { fontSize: 22, fontFamily: "Inter_700Bold" },
   locationRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   location: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  zodiacRow:  { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
+  zodiacEmoji: { fontSize: 14 },
+  zodiacLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  zodiacDates: { fontSize: 12, fontFamily: "Inter_400Regular" },
   bio: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 19, paddingHorizontal: 16 },
 
   statsRow: { flexDirection: "row", marginTop: 18, marginHorizontal: -20, borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth },

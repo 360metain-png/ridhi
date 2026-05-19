@@ -8,6 +8,8 @@ export interface UserProfile {
   phone?: string;
   email?: string;
   age: number;
+  birthday?: string;
+  zodiacSign?: string;
   gender: "male" | "female" | "other";
   bio: string;
   city: string;
@@ -48,6 +50,8 @@ const DEFAULT_USER: UserProfile = {
   name: "Priya Sharma",
   phone: "+91 98765 43210",
   age: 24,
+  birthday: "2000-08-15",
+  zodiacSign: "leo",
   gender: "female",
   bio: "Love music, travel and good conversations 🌸",
   city: "Mumbai",

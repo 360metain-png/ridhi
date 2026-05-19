@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 
 const { width } = Dimensions.get("window");
@@ -115,11 +116,14 @@ export default function VibeStarsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const { user } = useAuth();
+
+  const mySign = user?.zodiacSign ?? "leo";
 
   const [tab, setTab]           = useState<TabType>("horoscope");
-  const [selectedSign, setSelectedSign] = useState("leo");
+  const [selectedSign, setSelectedSign] = useState(mySign);
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
-  const [compatA, setCompatA]   = useState("leo");
+  const [compatA, setCompatA]   = useState(mySign);
   const [compatB, setCompatB]   = useState("scorpio");
 
   // ── Live horoscope state ─────────────────────────────────────────────────
