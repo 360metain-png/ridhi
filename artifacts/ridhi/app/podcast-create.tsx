@@ -91,6 +91,10 @@ export default function PodcastCreateScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [publishing, setPublishing] = useState(false);
+  const [isVipRoom, setIsVipRoom] = useState(false);
+  const [vipEntryFee, setVipEntryFee] = useState("99");
+  const [replayAccessEnabled, setReplayAccessEnabled] = useState(false);
+  const [maxListeners, setMaxListeners] = useState("1000");
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -429,6 +433,76 @@ export default function PodcastCreateScreen() {
                 </View>
               </View>
             </LinearGradient>
+
+            {/* Room Setup — Live only */}
+            {recordMode === "live" && (
+              <View>
+                <SectionLabel icon="radio" title="Room Setup" colors={colors} />
+
+                {/* Public / VIP */}
+                <View style={[styles.scheduleRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.scheduleLabel, { color: colors.text }]}>VIP Room</Text>
+                    <Text style={[styles.monoDesc, { color: colors.mutedForeground }]}>
+                      Charge coins for entry (30–999)
+                    </Text>
+                  </View>
+                  <Switch
+                    value={isVipRoom}
+                    onValueChange={setIsVipRoom}
+                    trackColor={{ false: colors.border, true: colors.primary + "66" }}
+                    thumbColor={isVipRoom ? colors.primary : colors.mutedForeground}
+                  />
+                </View>
+
+                {isVipRoom && (
+                  <View style={[styles.priceRow, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 10 }]}>
+                    <Feather name="star" size={16} color="#FFB800" />
+                    <Text style={[styles.scheduleLabel, { color: colors.text, flex: 1 }]}>Entry Fee</Text>
+                    <TextInput
+                      style={[styles.priceInput, { color: colors.text, width: 70 }]}
+                      keyboardType="number-pad"
+                      value={vipEntryFee}
+                      onChangeText={setVipEntryFee}
+                      placeholder="99"
+                      placeholderTextColor={colors.mutedForeground}
+                    />
+                    <Text style={[styles.priceUnit, { color: colors.mutedForeground }]}>coins</Text>
+                  </View>
+                )}
+
+                {/* Replay Access */}
+                <View style={[styles.scheduleRow, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 10 }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.scheduleLabel, { color: colors.text }]}>Replay Access</Text>
+                    <Text style={[styles.monoDesc, { color: colors.mutedForeground }]}>
+                      Listeners pay 49 🪙 to replay after show
+                    </Text>
+                  </View>
+                  <Switch
+                    value={replayAccessEnabled}
+                    onValueChange={setReplayAccessEnabled}
+                    trackColor={{ false: colors.border, true: colors.primary + "66" }}
+                    thumbColor={replayAccessEnabled ? colors.primary : colors.mutedForeground}
+                  />
+                </View>
+
+                {/* Max Listeners */}
+                <View style={[styles.priceRow, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 10 }]}>
+                  <Feather name="users" size={16} color={colors.mutedForeground} />
+                  <Text style={[styles.scheduleLabel, { color: colors.text, flex: 1 }]}>Max Listeners</Text>
+                  <TextInput
+                    style={[styles.priceInput, { color: colors.text, width: 80 }]}
+                    keyboardType="number-pad"
+                    value={maxListeners}
+                    onChangeText={setMaxListeners}
+                    placeholder="1000"
+                    placeholderTextColor={colors.mutedForeground}
+                  />
+                  <Text style={[styles.priceUnit, { color: colors.mutedForeground }]}>people</Text>
+                </View>
+              </View>
+            )}
 
             {/* Monetization */}
             <SectionLabel icon="dollar-sign" title="Monetization" colors={colors} />

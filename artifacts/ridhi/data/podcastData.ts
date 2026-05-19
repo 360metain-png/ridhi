@@ -240,3 +240,70 @@ export function formatDuration(minutes: number): string {
   if (h > 0) return `${h}h ${m}m`;
   return `${m} min`;
 }
+
+// ─── Podcast Room ──────────────────────────────────────────────────────────────
+
+export type PodcastRoomCategory =
+  | "Entertainment" | "Relationships" | "Gaming" | "Music"
+  | "Motivation" | "College Talks" | "Regional" | "Business";
+
+export const PODCAST_ROOM_CATEGORIES: PodcastRoomCategory[] = [
+  "Entertainment", "Relationships", "Gaming", "Music",
+  "Motivation", "College Talks", "Regional", "Business",
+];
+
+export interface PodcastSpeaker {
+  id: string;
+  name: string;
+  isHost: boolean;
+  isMuted: boolean;
+  isSpeaking: boolean;
+  followersCount: string;
+  isVerified: boolean;
+}
+
+export interface PodcastChatMsg {
+  id: string;
+  user: string;
+  text: string;
+  coins?: number;
+  type: "chat" | "question" | "priority" | "join" | "pin";
+  time: string;
+}
+
+export const PODCAST_ROOM_SPEAKERS: PodcastSpeaker[] = [
+  { id: "sp1", name: "Maya Iyer",    isHost: true,  isMuted: false, isSpeaking: true,  followersCount: "124K", isVerified: true  },
+  { id: "sp2", name: "Rohan Joshi",  isHost: false, isMuted: false, isSpeaking: false, followersCount: "18.4K",isVerified: true  },
+  { id: "sp3", name: "Priya K",      isHost: false, isMuted: true,  isSpeaking: false, followersCount: "8.2K", isVerified: false },
+  { id: "sp4", name: "Amit Bhardwaj",isHost: false, isMuted: false, isSpeaking: true,  followersCount: "31K",  isVerified: false },
+];
+
+export const PODCAST_ROOM_CHAT: PodcastChatMsg[] = [
+  { id: "c1", user: "Rahul S",    text: "This is such a great discussion! 🙌",                                          type: "chat",     time: "5m"  },
+  { id: "c2", user: "Sneha M",    text: "Maya your voice is so calming ❤️",                                             type: "chat",     time: "4m"  },
+  { id: "c3", user: "Vikram T",   text: "Can you talk about work-life balance in Indian families?",     coins: 10,       type: "question", time: "3m"  },
+  { id: "c4", user: "Anjali D",   text: "⚡ PRIORITY: Relationship between career and mental health?",  coins: 49,       type: "priority", time: "2m"  },
+  { id: "c5", user: "Devraj K",   text: "Just joined from Chennai! 🙏",                                                 type: "join",     time: "90s" },
+  { id: "c6", user: "Pooja R",    text: "This podcast changed my perspective on relationships",                          type: "chat",     time: "1m"  },
+  { id: "c7", user: "Arjun S",    text: "Are you also streaming on YouTube?",                           coins: 10,       type: "question", time: "30s" },
+  { id: "c8", user: "Meera N",    text: "📌 PINNED: Share your biggest relationship lesson below!",     coins: 15,       type: "pin",      time: "10s" },
+];
+
+export const COIN_ACTIONS = [
+  { id: "ask",      icon: "help-circle",  label: "Ask Question",      desc: "Send your question to the host",         coins: 10,  color: "#7B2FBE" },
+  { id: "priority", icon: "zap",          label: "Priority Question",  desc: "Jump to top of the queue",              coins: 49,  color: "#E91E8C" },
+  { id: "pin",      icon: "bookmark",     label: "Pin Comment",        desc: "Pin your comment for 5 minutes",        coins: 15,  color: "#FFB800" },
+  { id: "replay",   icon: "repeat",       label: "Replay Access",      desc: "Unlock full recording after the show",  coins: 49,  color: "#00BCD4" },
+  { id: "boost",    icon: "trending-up",  label: "Podcast Boost",      desc: "Push this room to the Explore feed",    coins: 99,  color: "#FF3B30" },
+] as const;
+
+export type CoinActionId = typeof COIN_ACTIONS[number]["id"];
+
+export const FOLLOWING_CREATORS = [
+  { id: "fc1", name: "Maya Iyer",    category: "Relationships", isLive: true  },
+  { id: "fc2", name: "Rohan Joshi",  category: "Comedy",        isLive: false },
+  { id: "fc3", name: "Priya Kapoor", category: "Business",      isLive: true  },
+  { id: "fc4", name: "Swami V",      category: "Spirituality",  isLive: false },
+  { id: "fc5", name: "Amit B",       category: "Technology",    isLive: false },
+  { id: "fc6", name: "Neha Sharma",  category: "Bollywood",     isLive: false },
+];

@@ -20,6 +20,7 @@ import {
   PODCAST_CATEGORIES,
   TRENDING_EPISODES,
   LIVE_NOW,
+  FOLLOWING_CREATORS,
   PodcastEpisode,
   PodcastCategory,
   formatPlays,
@@ -166,10 +167,40 @@ export default function PodcastsScreen() {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Live Now</Text>
             </View>
             {LIVE_NOW.map((ep) => (
-              <EpisodeCard key={ep.id} ep={ep} onPress={() => {}} />
+              <EpisodeCard key={ep.id} ep={ep} onPress={() => router.push("/podcast-room")} />
             ))}
           </View>
         )}
+
+        {/* Following Creators */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Feather name="users" size={15} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Following</Text>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}>
+            {FOLLOWING_CREATORS.map((creator) => (
+              <Pressable key={creator.id} onPress={() => router.push("/podcast-room")} style={{ alignItems: "center", gap: 6, width: 68 }}>
+                <View style={{ position: "relative" }}>
+                  {creator.isLive && (
+                    <View style={styles.followingLiveRing} />
+                  )}
+                  <View style={[styles.followingAvatar, creator.isLive && { borderColor: "#E91E8C", borderWidth: 2.5 }]}>
+                    <Text style={styles.followingAvatarText}>{creator.name.charAt(0)}</Text>
+                  </View>
+                  {creator.isLive && (
+                    <View style={styles.followingLiveBadge}>
+                      <Text style={styles.followingLiveBadgeText}>LIVE</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={[styles.followingName, { color: colors.text }]} numberOfLines={1}>
+                  {creator.name.split(" ")[0]}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
 
         {/* Category Filters */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
@@ -206,7 +237,7 @@ export default function PodcastsScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
             renderItem={({ item }) => (
-              <EpisodeCard ep={item} onPress={() => {}} wide />
+              <EpisodeCard ep={item} onPress={() => router.push("/podcast-room")} wide />
             )}
           />
         </View>
@@ -219,7 +250,7 @@ export default function PodcastsScreen() {
           </View>
           {filtered.map((ep) => (
             <View key={ep.id} style={{ paddingHorizontal: 16, marginBottom: 14 }}>
-              <EpisodeCard ep={ep} onPress={() => {}} />
+              <EpisodeCard ep={ep} onPress={() => router.push("/podcast-room")} />
             </View>
           ))}
         </View>
@@ -298,4 +329,23 @@ const styles = StyleSheet.create({
   startCtaIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   startCtaTitle: { fontFamily: "Inter_700Bold", fontSize: 15, marginBottom: 2 },
   startCtaSub: { fontFamily: "Inter_400Regular", fontSize: 12 },
+  // Following section
+  followingAvatar: {
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: "#7B2FBE40",
+    alignItems: "center", justifyContent: "center",
+    borderWidth: 0, borderColor: "transparent",
+  },
+  followingAvatarText: { color: "#C9A0F5", fontFamily: "Inter_700Bold", fontSize: 20 },
+  followingLiveRing: {
+    position: "absolute", top: -3, left: -3, right: -3, bottom: -3,
+    borderRadius: 34, borderWidth: 2, borderColor: "#E91E8C",
+  },
+  followingLiveBadge: {
+    position: "absolute", bottom: -4, left: "50%", transform: [{ translateX: -16 }],
+    backgroundColor: "#E91E8C", borderRadius: 6,
+    paddingHorizontal: 5, paddingVertical: 1,
+  },
+  followingLiveBadgeText: { color: "#fff", fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 0.3 },
+  followingName: { fontFamily: "Inter_500Medium", fontSize: 11, textAlign: "center" },
 });
