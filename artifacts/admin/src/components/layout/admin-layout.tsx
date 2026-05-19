@@ -5,6 +5,7 @@ import {
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
+  LayoutTemplate,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -57,8 +58,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Commerce",
     items: [
-      { name: "Business Ads",      href: "/business-ads",  icon: Zap,         badge: "3", allowedRoles: SA_A },
-      { name: "Special Client Ads", href: "/special-ads",  icon: Crown,                   allowedRoles: SA_A },
+      { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA_A },
+      { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA_A },
+      { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA_A },
     ],
   },
   {

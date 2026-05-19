@@ -19,6 +19,8 @@ import {
   Percent, GitMerge, CheckSquare, Settings2, Save, TestTube,
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
   Banknote, ArrowRightLeft, Sliders,
+  LayoutTemplate, TrendingUp, MousePointer, Pause, Play, Target,
+  Monitor, Palette, ArrowRight, Sparkles,
 } from "lucide-react";
 
 const ADMIN_ROLES = [
@@ -521,6 +523,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="apikeys" className="text-xs gap-1.5">
             <Key className="w-3.5 h-3.5" /> API Keys & Config
+          </TabsTrigger>
+          <TabsTrigger value="commercial-ads" className="text-xs gap-1.5">
+            <LayoutTemplate className="w-3.5 h-3.5" /> Commercial ADs
           </TabsTrigger>
         </TabsList>
 
@@ -1960,6 +1965,275 @@ export default function SuperAdminPage() {
           })()}
 
         </TabsContent>
+
+        {/* ─── COMMERCIAL ADS TAB ─── */}
+        <TabsContent value="commercial-ads" className="mt-4 space-y-6">
+          {(() => {
+            const SA_BANNERS = [
+              { id: "cb1", title: "Ridhi Premium Launch",  style: "gradient", from: "#7B2FBE", to: "#E91E8C", status: "active",    placements: 2, impressions: 124000, clicks: 9840,  ctr: "7.9%", anim: "Fade",     spend: "₹0",      priority: 1 },
+              { id: "cb3", title: "Night Mode Live Launch",style: "neon_glow",from: "#0F0F1A", to: "#1A0A2E", status: "active",    placements: 2, impressions:  58200, clicks: 6140,  ctr: "10.5%",anim: "Pulse",    spend: "₹0",      priority: 2 },
+              { id: "cb5", title: "New User Welcome",      style: "frosted",  from: "#C9D6FF", to: "#E2E2E2", status: "active",    placements: 1, impressions: 310000, clicks: 87400, ctr: "28.2%",anim: "Slide In", spend: "₹0",      priority: 3 },
+              { id: "cb4", title: "IPL Prediction Contest",style: "sports",   from: "#FF0844", to: "#FFB199", status: "paused",    placements: 3, impressions:  34500, clicks: 4200,  ctr: "12.2%",anim: "Shimmer",  spend: "₹48,000", priority: 4 },
+              { id: "cb2", title: "Diwali Coin Bonanza",   style: "festive",  from: "#FF6B00", to: "#FFD700", status: "scheduled", placements: 3, impressions:       0, clicks:    0,  ctr: "—",    anim: "Bounce",   spend: "₹0",      priority: 5 },
+            ];
+
+            const SA_PLACEMENTS = [
+              { label: "Feed (In-line)",      active: 3, total: 8  },
+              { label: "Top Bar",             active: 2, total: 4  },
+              { label: "Bottom Sticky",       active: 1, total: 3  },
+              { label: "Between Stories",     active: 1, total: 5  },
+              { label: "Explore Page",        active: 2, total: 6  },
+              { label: "Chat Header",         active: 1, total: 3  },
+            ];
+
+            const globalBannerToggles = [
+              { key: "feed_banners",     label: "Feed Banners",          desc: "Commercial banners in the main feed scroll" },
+              { key: "top_banners",      label: "Top Bar Banners",       desc: "Sticky banners pinned to top of screen" },
+              { key: "story_banners",    label: "Story Banners",         desc: "Banners displayed between user stories" },
+              { key: "explore_banners",  label: "Explore Banners",       desc: "Banners in the Explore / Discover page" },
+              { key: "chat_banners",     label: "Chat Header Banners",   desc: "Lightweight banners in chat list header" },
+              { key: "anim_effects",     label: "Animation Effects",     desc: "Allow shimmer, bounce & neon glow effects" },
+            ];
+
+            const [saToggles, setSaToggles] = useState<Record<string, boolean>>({
+              feed_banners: true, top_banners: true, story_banners: true,
+              explore_banners: true, chat_banners: false, anim_effects: true,
+            });
+            const [maxBanners, setMaxBanners]       = useState("3");
+            const [refreshRate, setRefreshRate]     = useState("30");
+            const [fallbackBanner, setFallbackBanner] = useState(true);
+            const [freqCap, setFreqCap]             = useState("5");
+
+            const totalImpr  = SA_BANNERS.reduce((s, b) => s + b.impressions, 0);
+            const totalClick = SA_BANNERS.reduce((s, b) => s + b.clicks, 0);
+            const avgCTR     = totalImpr ? ((totalClick / totalImpr) * 100).toFixed(1) + "%" : "—";
+            const activeCnt  = SA_BANNERS.filter(b => b.status === "active").length;
+
+            const statusCls: Record<string, string> = {
+              active:    "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+              paused:    "bg-amber-500/15 text-amber-400 border-amber-500/20",
+              scheduled: "bg-blue-500/15 text-blue-400 border-blue-500/20",
+            };
+
+            const fmtN = (n: number) => n >= 1_000_000 ? (n/1e6).toFixed(1)+"M" : n >= 1000 ? (n/1000).toFixed(1)+"K" : String(n);
+
+            return (
+              <div className="space-y-6">
+
+                {/* KPI Row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "Total Banners",    value: SA_BANNERS.length, sub: `${activeCnt} live`,           icon: LayoutTemplate, color: "text-violet-500", bg: "bg-violet-500/10" },
+                    { label: "Total Impressions",value: fmtN(totalImpr),   sub: "across all banners",          icon: Eye,            color: "text-blue-500",   bg: "bg-blue-500/10"   },
+                    { label: "Total Clicks",     value: fmtN(totalClick),  sub: "all placements",              icon: MousePointer,   color: "text-emerald-500",bg: "bg-emerald-500/10"},
+                    { label: "Avg CTR",          value: avgCTR,            sub: "vs 4.2% industry avg",        icon: TrendingUp,     color: "text-pink-500",   bg: "bg-pink-500/10"   },
+                  ].map(m => (
+                    <Card key={m.label}>
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl ${m.bg} flex items-center justify-center flex-shrink-0`}>
+                          <m.icon className={`w-4 h-4 ${m.color}`} />
+                        </div>
+                        <div>
+                          <p className="text-base font-bold">{m.value}</p>
+                          <p className="text-xs text-muted-foreground">{m.label}</p>
+                          <p className="text-[10px] text-muted-foreground/60">{m.sub}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+
+                  {/* ── Banner Monitor ── */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Monitor className="w-4 h-4 text-violet-500" />
+                        Live Banner Monitor
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2.5">
+                      {SA_BANNERS.map(b => (
+                        <div key={b.id} className="flex items-center gap-3 rounded-xl border border-border/60 p-3">
+                          {/* Style swatch */}
+                          <div className="w-10 h-10 rounded-lg flex-shrink-0 relative overflow-hidden"
+                            style={{ background: `linear-gradient(135deg, ${b.from}, ${b.to})` }}>
+                            <span className="absolute inset-0 flex items-center justify-center">
+                              <LayoutTemplate className="w-4 h-4 text-white/80" />
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs font-semibold truncate">{b.title}</span>
+                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full border font-medium ${statusCls[b.status] ?? ""}`}>
+                                {b.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                              <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" />{fmtN(b.impressions)}</span>
+                              <span className="flex items-center gap-0.5"><MousePointer className="w-2.5 h-2.5" />{fmtN(b.clicks)}</span>
+                              <span className="flex items-center gap-0.5"><TrendingUp className="w-2.5 h-2.5" />{b.ctr}</span>
+                              <span className="flex items-center gap-0.5"><Zap className="w-2.5 h-2.5" />{b.anim}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <span className="text-[10px] text-muted-foreground">P{b.priority}</span>
+                            {b.status === "active"
+                              ? <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              : b.status === "scheduled"
+                              ? <div className="w-2 h-2 rounded-full bg-blue-500" />
+                              : <div className="w-2 h-2 rounded-full bg-amber-500" />
+                            }
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* ── Placement Health ── */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Target className="w-4 h-4 text-blue-500" />
+                        Placement Health
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {SA_PLACEMENTS.map(p => (
+                        <div key={p.label} className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">{p.label}</span>
+                            <span className="font-medium">{p.active}/{p.total} filled</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full transition-all"
+                              style={{ width: `${(p.active / p.total) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                </div>
+
+                {/* ── Style Distribution ── */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Palette className="w-4 h-4 text-pink-500" />
+                      Dynamic Style Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {[
+                        { label: "Classic Gradient", from: "#7B2FBE", to: "#E91E8C", count: 1, anim: "Fade",     ctr: "7.9%"  },
+                        { label: "Neon Glow",         from: "#0F0F1A", to: "#1A0A2E", count: 1, anim: "Pulse",   ctr: "10.5%" },
+                        { label: "Frosted Glass",     from: "#C9D6FF", to: "#E2E2E2", count: 1, anim: "Slide",   ctr: "28.2%" },
+                        { label: "Sports Energy",     from: "#FF0844", to: "#FFB199", count: 1, anim: "Shimmer", ctr: "12.2%" },
+                        { label: "Festive India",     from: "#FF6B00", to: "#FFD700", count: 1, anim: "Bounce",  ctr: "—"     },
+                      ].map(s => (
+                        <div key={s.label} className="rounded-xl border border-border/60 overflow-hidden">
+                          <div className="h-12 relative" style={{ background: `linear-gradient(135deg, ${s.from}, ${s.to})` }}>
+                            <span className="absolute bottom-1.5 left-2 text-[8px] font-bold text-white/90 leading-none">{s.label}</span>
+                          </div>
+                          <div className="p-2 space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">Anim: <span className="text-foreground">{s.anim}</span></p>
+                            <p className="text-[10px] text-muted-foreground">CTR: <span className="text-emerald-500 font-semibold">{s.ctr}</span></p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ── Global Config ── */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Settings2 className="w-4 h-4 text-violet-500" />
+                      Global Banner Config
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    {/* Placement toggles */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {globalBannerToggles.map(t => (
+                        <div key={t.key} className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+                          <div>
+                            <p className="text-xs font-medium">{t.label}</p>
+                            <p className="text-[10px] text-muted-foreground">{t.desc}</p>
+                          </div>
+                          <Switch
+                            checked={saToggles[t.key]}
+                            onCheckedChange={v => setSaToggles(prev => ({ ...prev, [t.key]: v }))}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <Separator />
+
+                    {/* Numeric config */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Max Banners Per Session</Label>
+                        <Input type="number" value={maxBanners} onChange={e => setMaxBanners(e.target.value)}
+                          className="h-8 text-xs" min={1} max={10} />
+                        <p className="text-[10px] text-muted-foreground">Total ads shown per app session</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Refresh Rate (sec)</Label>
+                        <Input type="number" value={refreshRate} onChange={e => setRefreshRate(e.target.value)}
+                          className="h-8 text-xs" min={10} max={300} />
+                        <p className="text-[10px] text-muted-foreground">Banner rotation frequency in feed</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Frequency Cap (per user/day)</Label>
+                        <Input type="number" value={freqCap} onChange={e => setFreqCap(e.target.value)}
+                          className="h-8 text-xs" min={1} max={50} />
+                        <p className="text-[10px] text-muted-foreground">Max times a user sees one banner daily</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Fallback Banner</Label>
+                        <div className="flex items-center gap-2 h-8">
+                          <Switch checked={fallbackBanner} onCheckedChange={setFallbackBanner} />
+                          <span className="text-xs text-muted-foreground">{fallbackBanner ? "Ridhi promo shown when no client ad" : "Empty slot"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button size="sm" className="gap-1.5 bg-gradient-to-r from-violet-600 to-pink-500 text-white hover:opacity-90">
+                        <Save className="w-3.5 h-3.5" /> Save Config
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Link */}
+                <div className="rounded-xl border border-violet-500/30 bg-violet-500/5 p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
+                      <LayoutTemplate className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">Commercial Banners Manager</p>
+                      <p className="text-xs text-muted-foreground">Create, design and deploy dynamic banners with live preview & animation controls</p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="gap-1.5 border-violet-500/40 text-violet-600 hover:bg-violet-500/10"
+                    onClick={() => window.location.href = "/admin/commercial-banners"}>
+                    Open Manager <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+
+              </div>
+            );
+          })()}
+        </TabsContent>
+
       </Tabs>
     </div>
   );
