@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
 
-const CONTACT_COST = 10; // coins to reveal poster contact details
+const APPLY_COST = 10; // coins to submit a job application
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type JobType = "All" | "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
@@ -239,29 +239,48 @@ export default function JobsScreen() {
   const [locSearch,   setLocSearch]   = useState("");
   const [savedIds,    setSavedIds]    = useState<Set<string>>(new Set());
 
-  // ── Coin gate state ────────────────────────────────────────────────────────
-  const [revealedIds,    setRevealedIds]    = useState<Set<string>>(new Set());
-  const [coinConfirmJob, setCoinConfirmJob] = useState<Job | null>(null);
-  const [coinError,      setCoinError]      = useState(false);
-  const [coinPending,    setCoinPending]    = useState(false);
+  // ── Apply flow state ───────────────────────────────────────────────────────
+  const [appliedIds,   setAppliedIds]   = useState<Set<string>>(new Set());
+  const [applyJob,     setApplyJob]     = useState<Job | null>(null);
+  const [applyStep,    setApplyStep]    = useState<"confirm" | "form" | "success">("confirm");
+  const [applyPending, setApplyPending] = useState(false);
+  // Application form fields
+  const [appName,      setAppName]      = useState("");
+  const [appPhone,     setAppPhone]     = useState("");
+  const [appRole,      setAppRole]      = useState("");
+  const [appExp,       setAppExp]       = useState("");
+  const [appNote,      setAppNote]      = useState("");
+  const [appResume,    setAppResume]    = useState(false);
 
-  const handleContactPress = (job: Job) => {
-    if (revealedIds.has(job.id)) return; // already unlocked — button should open directly
-    setCoinConfirmJob(job);
+  const handleApplyPress = (job: Job) => {
+    if (appliedIds.has(job.id)) return;
+    setApplyJob(job);
+    setApplyStep("confirm");
+    setAppName(user?.name ?? "");
+    setAppPhone("");
+    setAppRole("");
+    setAppExp("");
+    setAppNote("");
+    setAppResume(false);
   };
 
-  const handleConfirmContact = async () => {
-    if (!coinConfirmJob || coinPending) return;
-    setCoinPending(true);
-    const ok = await deductCoins(CONTACT_COST);
-    setCoinPending(false);
+  const handleConfirmPay = async () => {
+    if (!applyJob || applyPending) return;
+    setApplyPending(true);
+    const ok = await deductCoins(APPLY_COST);
+    setApplyPending(false);
     if (ok) {
-      setRevealedIds((prev) => { const n = new Set(prev); n.add(coinConfirmJob.id); return n; });
-      setCoinConfirmJob(null);
+      setApplyStep("form");
     } else {
-      setCoinConfirmJob(null);
-      setCoinError(true);
+      setApplyJob(null);
     }
+  };
+
+  const handleSubmitApplication = () => {
+    if (!applyJob) return;
+    setAppliedIds(prev => { const s = new Set(prev); s.add(applyJob.id); return s; });
+    setApplyStep("success");
+    setTimeout(() => setApplyJob(null), 2200);
   };
 
   const filtered = useMemo(() => {
@@ -366,37 +385,22 @@ export default function JobsScreen() {
         ))}
       </View>
 
-      {/* Verified contact row — locked until coins paid */}
-      {revealedIds.has(j.id) ? (
-        <View style={[styles.contactStrip, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-          <View style={styles.contactItem}>
-            <Feather name="phone" size={11} color="#25D366" />
-            <Text style={[styles.contactVal, { color: colors.foreground }]}>{j.posterPhone}</Text>
-            <View style={styles.vBadge}>
-              <Feather name="check-circle" size={9} color="#34C759" />
-              <Text style={styles.vBadgeText}>Verified</Text>
-            </View>
-          </View>
-          {j.posterEmail && (
-            <View style={styles.contactItem}>
-              <Feather name="mail" size={11} color="#2196F3" />
-              <Text style={[styles.contactVal, { color: colors.foreground }]} numberOfLines={1}>{j.posterEmail}</Text>
-              <View style={styles.vBadge}>
-                <Feather name="check-circle" size={9} color="#34C759" />
-                <Text style={styles.vBadgeText}>Verified</Text>
-              </View>
-            </View>
-          )}
-        </View>
-      ) : (
-        <View style={[styles.contactStrip, { backgroundColor: "#7B2FBE12", borderColor: "#7B2FBE30" }]}>
-          <Feather name="lock" size={13} color="#7B2FBE" />
-          <Text style={[styles.contactVal, { color: "#7B2FBE", flex: 1 }]}>
-            Pay {CONTACT_COST} coins to reveal contact details
+      {/* Apply prompt strip */}
+      {!appliedIds.has(j.id) && (
+        <View style={[styles.contactStrip, { backgroundColor: "#E91E8C12", borderColor: "#E91E8C30" }]}>
+          <Feather name="send" size={13} color="#E91E8C" />
+          <Text style={[styles.contactVal, { color: "#E91E8C", flex: 1 }]}>
+            Pay {APPLY_COST} coins to apply — share your details &amp; resume
           </Text>
-          <View style={[styles.coinCostBadge, { backgroundColor: "#7B2FBE22" }]}>
-            <Text style={[styles.coinCostText, { color: "#7B2FBE" }]}>🪙 {CONTACT_COST}</Text>
+          <View style={[styles.coinCostBadge, { backgroundColor: "#E91E8C22" }]}>
+            <Text style={[styles.coinCostText, { color: "#E91E8C" }]}>🪙 {APPLY_COST}</Text>
           </View>
+        </View>
+      )}
+      {appliedIds.has(j.id) && (
+        <View style={[styles.contactStrip, { backgroundColor: "#34C75918", borderColor: "#34C75930" }]}>
+          <Feather name="check-circle" size={13} color="#34C759" />
+          <Text style={[styles.contactVal, { color: "#34C759", flex: 1 }]}>Application submitted — recruiter will contact you</Text>
         </View>
       )}
 
@@ -406,24 +410,16 @@ export default function JobsScreen() {
           {timeAgo(j.postedHoursAgo)}
         </Text>
         <Pressable
-          onPress={() => handleContactPress(j)}
+          onPress={() => handleApplyPress(j)}
+          disabled={appliedIds.has(j.id)}
           style={[styles.applyBtn, {
-            backgroundColor: revealedIds.has(j.id)
-              ? (j.contactType === "apply" ? "#E91E8C" : j.contactType === "whatsapp" ? "#25D366" : "#2196F3")
-              : "#7B2FBE",
+            backgroundColor: appliedIds.has(j.id) ? "#34C759" : "#E91E8C",
+            opacity: appliedIds.has(j.id) ? 0.85 : 1,
           }]}
         >
-          <Feather
-            name={revealedIds.has(j.id)
-              ? (j.contactType === "apply" ? "send" : j.contactType === "whatsapp" ? "message-circle" : "phone")
-              : "unlock"}
-            size={12}
-            color="#fff"
-          />
+          <Feather name={appliedIds.has(j.id) ? "check" : "send"} size={12} color="#fff" />
           <Text style={styles.applyBtnText}>
-            {revealedIds.has(j.id)
-              ? (j.contactType === "apply" ? "Apply Now" : j.contactType === "whatsapp" ? "WhatsApp" : "Call Now")
-              : `Unlock · 🪙${CONTACT_COST}`}
+            {appliedIds.has(j.id) ? "Applied ✓" : `Apply · 🪙${APPLY_COST}`}
           </Text>
         </Pressable>
       </View>
@@ -558,82 +554,153 @@ export default function JobsScreen() {
         />
       )}
 
-      {/* ── Coin Confirm Modal ─────────────────────────────────────────────── */}
-      <Modal visible={!!coinConfirmJob} transparent animationType="fade" onRequestClose={() => setCoinConfirmJob(null)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setCoinConfirmJob(null)} />
+      {/* ── Job Application Modal (3 steps: confirm → form → success) ───────── */}
+      <Modal visible={!!applyJob} transparent animationType="fade" onRequestClose={() => applyStep !== "form" && setApplyJob(null)}>
+        <Pressable style={styles.modalOverlay} onPress={() => applyStep === "confirm" && setApplyJob(null)} />
         <View style={styles.coinModalWrap}>
           <View style={[styles.coinModal, { backgroundColor: colors.card }]}>
-            <LinearGradient colors={["#7B2FBE22", "#E91E8C11"]} style={StyleSheet.absoluteFill} />
-            <View style={[styles.coinModalIcon, { backgroundColor: "#7B2FBE22" }]}>
-              <Text style={{ fontSize: 32 }}>🪙</Text>
-            </View>
-            <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Unlock Contact Details</Text>
-            <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
-              {coinConfirmJob?.title}{"\n"}at {coinConfirmJob?.company}
-            </Text>
-            <View style={[styles.coinModalRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-              <View style={styles.coinModalStat}>
-                <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Cost</Text>
-                <Text style={[styles.coinModalStatVal, { color: "#E91E8C" }]}>🪙 {CONTACT_COST}</Text>
-              </View>
-              <View style={[styles.coinModalDivider, { backgroundColor: colors.border }]} />
-              <View style={styles.coinModalStat}>
-                <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
-                <Text style={[styles.coinModalStatVal, { color: (user?.coins ?? 0) >= CONTACT_COST ? "#34C759" : "#FF3B30" }]}>
-                  🪙 {user?.coins ?? 0}
-                </Text>
-              </View>
-            </View>
-            {(user?.coins ?? 0) < CONTACT_COST ? (
+            <LinearGradient colors={["#E91E8C18", "#7B2FBE11"]} style={StyleSheet.absoluteFill} />
+
+            {/* ── Step 1: Coin confirm ── */}
+            {applyStep === "confirm" && (
               <>
-                <Text style={[styles.coinModalWarn, { color: "#FF3B30" }]}>
-                  Not enough coins. Recharge your wallet to continue.
+                <View style={[styles.coinModalIcon, { backgroundColor: "#E91E8C22" }]}>
+                  <Text style={{ fontSize: 30 }}>📋</Text>
+                </View>
+                <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Apply for this Job</Text>
+                <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
+                  {applyJob?.title}{"\n"}at {applyJob?.company}
                 </Text>
-                <Pressable onPress={() => { setCoinConfirmJob(null); router.push("/wallet" as any); }}
-                  style={[styles.coinModalBtn, { backgroundColor: "#E91E8C" }]}>
-                  <Feather name="zap" size={15} color="#fff" />
-                  <Text style={styles.coinModalBtnText}>Recharge Wallet</Text>
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <Text style={[styles.coinModalNote, { color: colors.mutedForeground }]}>
-                  Phone number, email &amp; contact button will be revealed permanently for this listing.
-                </Text>
-                <Pressable onPress={handleConfirmContact} disabled={coinPending}
-                  style={[styles.coinModalBtn, { backgroundColor: "#7B2FBE", opacity: coinPending ? 0.6 : 1 }]}>
-                  <Feather name="unlock" size={15} color="#fff" />
-                  <Text style={styles.coinModalBtnText}>{coinPending ? "Processing…" : `Confirm — Pay 🪙${CONTACT_COST}`}</Text>
+                <View style={[styles.coinModalRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                  <View style={styles.coinModalStat}>
+                    <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Application Fee</Text>
+                    <Text style={[styles.coinModalStatVal, { color: "#E91E8C" }]}>🪙 {APPLY_COST}</Text>
+                  </View>
+                  <View style={[styles.coinModalDivider, { backgroundColor: colors.border }]} />
+                  <View style={styles.coinModalStat}>
+                    <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
+                    <Text style={[styles.coinModalStatVal, { color: (user?.coins ?? 0) >= APPLY_COST ? "#34C759" : "#FF3B30" }]}>
+                      🪙 {user?.coins ?? 0}
+                    </Text>
+                  </View>
+                </View>
+                {(user?.coins ?? 0) < APPLY_COST ? (
+                  <>
+                    <Text style={[styles.coinModalWarn, { color: "#FF3B30" }]}>
+                      Not enough coins. Recharge your wallet to apply.
+                    </Text>
+                    <Pressable onPress={() => { setApplyJob(null); router.push("/wallet" as any); }}
+                      style={[styles.coinModalBtn, { backgroundColor: "#E91E8C" }]}>
+                      <Feather name="zap" size={15} color="#fff" />
+                      <Text style={styles.coinModalBtnText}>Recharge Wallet</Text>
+                    </Pressable>
+                  </>
+                ) : (
+                  <>
+                    <Text style={[styles.coinModalNote, { color: colors.mutedForeground }]}>
+                      You'll fill in your details and optionally attach your resume on the next step. The recruiter receives your application directly.
+                    </Text>
+                    <Pressable onPress={handleConfirmPay} disabled={applyPending}
+                      style={[styles.coinModalBtn, { backgroundColor: "#E91E8C", opacity: applyPending ? 0.6 : 1 }]}>
+                      <Feather name="arrow-right" size={15} color="#fff" />
+                      <Text style={styles.coinModalBtnText}>{applyPending ? "Processing…" : `Continue — Pay 🪙${APPLY_COST}`}</Text>
+                    </Pressable>
+                  </>
+                )}
+                <Pressable onPress={() => setApplyJob(null)} style={{ marginTop: 10 }}>
+                  <Text style={[styles.coinModalCancel, { color: colors.mutedForeground }]}>Cancel</Text>
                 </Pressable>
               </>
             )}
-            <Pressable onPress={() => setCoinConfirmJob(null)} style={{ marginTop: 10 }}>
-              <Text style={[styles.coinModalCancel, { color: colors.mutedForeground }]}>Cancel</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
 
-      {/* ── Insufficient Coins Error Modal ─────────────────────────────────── */}
-      <Modal visible={coinError} transparent animationType="fade" onRequestClose={() => setCoinError(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setCoinError(false)} />
-        <View style={styles.coinModalWrap}>
-          <View style={[styles.coinModal, { backgroundColor: colors.card }]}>
-            <View style={[styles.coinModalIcon, { backgroundColor: "#FF3B3022" }]}>
-              <Feather name="alert-circle" size={36} color="#FF3B30" />
-            </View>
-            <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Not Enough Coins</Text>
-            <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
-              You need at least {CONTACT_COST} coins to reach a job poster.{"\n"}Recharge your Ridhi Wallet to continue.
-            </Text>
-            <Pressable onPress={() => { setCoinError(false); router.push("/wallet" as any); }}
-              style={[styles.coinModalBtn, { backgroundColor: "#E91E8C" }]}>
-              <Feather name="zap" size={15} color="#fff" />
-              <Text style={styles.coinModalBtnText}>Go to Wallet</Text>
-            </Pressable>
-            <Pressable onPress={() => setCoinError(false)} style={{ marginTop: 10 }}>
-              <Text style={[styles.coinModalCancel, { color: colors.mutedForeground }]}>Maybe later</Text>
-            </Pressable>
+            {/* ── Step 2: Application form ── */}
+            {applyStep === "form" && (
+              <ScrollView style={{ width: "100%" }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                <Text style={[styles.coinModalTitle, { color: colors.foreground, marginBottom: 2 }]}>Your Application</Text>
+                <Text style={[styles.coinModalSub, { color: colors.mutedForeground, marginBottom: 14 }]}>
+                  {applyJob?.title} · {applyJob?.company}
+                </Text>
+
+                {[
+                  { label: "Full Name *",          value: appName,  onChange: setAppName,  placeholder: "As on your ID", keyboard: "default" as const },
+                  { label: "Mobile Number *",       value: appPhone, onChange: setAppPhone, placeholder: "+91 XXXXX XXXXX", keyboard: "phone-pad" as const },
+                  { label: "Current / Last Role",   value: appRole,  onChange: setAppRole,  placeholder: "e.g. Sales Executive, Fresher", keyboard: "default" as const },
+                  { label: "Years of Experience",   value: appExp,   onChange: setAppExp,   placeholder: "e.g. 2 years, Fresher", keyboard: "default" as const },
+                ].map(({ label, value, onChange, placeholder, keyboard }) => (
+                  <View key={label} style={{ marginBottom: 12 }}>
+                    <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground, marginBottom: 4, textAlign: "left" }]}>{label}</Text>
+                    <View style={[styles.appInput, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                      <TextInput
+                        value={value}
+                        onChangeText={onChange}
+                        placeholder={placeholder}
+                        placeholderTextColor={colors.mutedForeground}
+                        keyboardType={keyboard}
+                        style={[{ flex: 1, fontSize: 14, fontFamily: "Inter_400Regular" }, { color: colors.foreground }]}
+                      />
+                    </View>
+                  </View>
+                ))}
+
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground, marginBottom: 4, textAlign: "left" }]}>Cover Note (optional)</Text>
+                  <View style={[styles.appInput, { backgroundColor: colors.muted, borderColor: colors.border, alignItems: "flex-start", minHeight: 72 }]}>
+                    <TextInput
+                      value={appNote}
+                      onChangeText={setAppNote}
+                      placeholder="Why are you a good fit? Any message for the recruiter…"
+                      placeholderTextColor={colors.mutedForeground}
+                      multiline
+                      numberOfLines={3}
+                      style={[{ flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", paddingTop: 2, textAlignVertical: "top" }, { color: colors.foreground }]}
+                    />
+                  </View>
+                </View>
+
+                {/* Resume upload */}
+                <Pressable onPress={() => setAppResume(r => !r)}
+                  style={[styles.appInput, {
+                    backgroundColor: appResume ? "#34C75918" : colors.muted,
+                    borderColor: appResume ? "#34C75960" : colors.border,
+                    justifyContent: "space-between",
+                    marginBottom: 16,
+                  }]}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Feather name={appResume ? "file-text" : "upload"} size={16} color={appResume ? "#34C759" : colors.mutedForeground} />
+                    <Text style={[{ fontSize: 13, fontFamily: "Inter_500Medium" }, { color: appResume ? "#34C759" : colors.foreground }]}>
+                      {appResume ? "resume.pdf attached ✓" : "Attach Resume (PDF / DOC)"}
+                    </Text>
+                  </View>
+                  <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular" }}>Optional</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleSubmitApplication}
+                  disabled={!appName.trim() || !appPhone.trim()}
+                  style={[styles.coinModalBtn, {
+                    backgroundColor: (!appName.trim() || !appPhone.trim()) ? colors.muted : "#E91E8C",
+                    marginBottom: 8,
+                  }]}>
+                  <Feather name="send" size={15} color={(!appName.trim() || !appPhone.trim()) ? colors.mutedForeground : "#fff"} />
+                  <Text style={[styles.coinModalBtnText, { color: (!appName.trim() || !appPhone.trim()) ? colors.mutedForeground : "#fff" }]}>
+                    Submit Application
+                  </Text>
+                </Pressable>
+              </ScrollView>
+            )}
+
+            {/* ── Step 3: Success ── */}
+            {applyStep === "success" && (
+              <>
+                <LinearGradient colors={["#34C759", "#22A348"]} style={styles.coinModalIcon}>
+                  <Feather name="check" size={36} color="#fff" />
+                </LinearGradient>
+                <Text style={[styles.coinModalTitle, { color: colors.foreground }]}>Application Sent! 🎉</Text>
+                <Text style={[styles.coinModalSub, { color: colors.mutedForeground }]}>
+                  Your application for{"\n"}{applyJob?.title} at {applyJob?.company}{"\n"}has been submitted. The recruiter will contact you directly.
+                </Text>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -816,6 +883,7 @@ const styles = StyleSheet.create({
   coinModalBtn:     { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 16, width: "100%", justifyContent: "center", marginTop: 4 },
   coinModalBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
   coinModalCancel:  { fontSize: 13, fontFamily: "Inter_400Regular" },
+  appInput:         { flexDirection: "row", alignItems: "center", gap: 8, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 11 },
   locSheet:         { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "78%", flex: 1 },
   sheetHandle:      { width: 40, height: 4, borderRadius: 2, alignSelf: "center", marginBottom: 14 },
   locSheetHeader:   { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
