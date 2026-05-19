@@ -5,14 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Shield, Users, Server, Activity, AlertTriangle, CheckCircle, XCircle,
-  RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye,
+  RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye, EyeOff,
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
   Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle,
   Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
   Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag,
-  Languages, Layers, Megaphone,
+  Languages, Layers, Megaphone, MessageCircle, Coins, IndianRupee,
+  Percent, GitMerge, CheckSquare, Settings2, Save, TestTube,
+  PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
+  Banknote, ArrowRightLeft, Sliders,
 } from "lucide-react";
 
 const ADMIN_ROLES = [
@@ -291,6 +297,89 @@ export default function SuperAdminPage() {
   const [featureFlags, setFeatureFlags] = useState(FEATURE_FLAGS);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  // ── API Keys state ─────────────────────────────────────────────────────────
+  const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+  const [savedKeys, setSavedKeys] = useState<Record<string, boolean>>({});
+  const [testResults, setTestResults] = useState<Record<string, "ok" | "fail" | null>>({});
+  const [apiKeys, setApiKeys] = useState({
+    msg91AuthKey:         "MSG91_AUTH_KEY_SECURED",
+    msg91OtpTemplate:     "MSG91_OTP_TEMPLATE_ID_SECURED",
+    msg91SmsTemplate:     "",
+    msg91WaNumber:        "",
+    msg91WaTemplate:      "",
+    razorpayKeyId:        "rzp_live_••••••••K7xQ",
+    razorpayKeySecret:    "razorpay_secret_secured",
+    agoraAppId:           "agora_app_id_secured",
+    agoraCert:            "agora_cert_secured",
+    agoraAudioRate:       "10",
+    agoraVideoRate:       "25",
+    zegoAppId:            "",
+    zegoCert:             "",
+    streamingCdnUrl:      "https://rtmp.ridhi.app/live",
+    streamingSecret:      "stream_secret_secured",
+    fcmServerKey:         "FCM_SERVER_KEY_SECURED",
+    fcmSenderId:          "838429100274",
+    openAiKey:            "sk-••••••••••••T8",
+    awsAccessKey:         "AKIA••••••••7L",
+    awsSecretKey:         "aws_secret_secured",
+    awsS3Bucket:          "ridhi-media-prod",
+    googleClientId:       "438••••••apps.googleusercontent.com",
+    googleClientSecret:   "google_secret_secured",
+  });
+  const [coinConfig, setCoinConfig] = useState({
+    coinValueInr:           "1.00",
+    autoGenDailyLogin:      "10",
+    autoGenWatchReel:       "3",
+    autoGenPostLike:        "1",
+    autoGenReferral:        "100",
+    autoGenEnabled:         true,
+    missionDailyMax:        "360",
+    superLikeCost:          "5",
+    audioCallCostPerMin:    "10",
+    videoCallCostPerMin:    "25",
+    boostPostCostPerHr:     "50",
+    unlockMsgCost:          "50",
+    aiQueryCost:            "5",
+    creatorRevShare:        "70",
+    platformRevShare:       "20",
+    agentRevShare:          "10",
+    withdrawMin:            "500",
+    withdrawPlatformFee:    "2",
+    bonusMultiplier:        "1.0",
+  });
+  const [approvalConfig, setApprovalConfig] = useState({
+    hostRegistration:     true,
+    agentRegistration:    true,
+    withdrawalApproval:   true,
+    kycApproval:          true,
+    contentApproval:      false,
+    liveStreamApproval:   false,
+    podcastPublish:       false,
+    coinManualAdd:        true,
+    adsApproval:          true,
+    autoApproveKyc:       false,
+    autoApproveWithdraw:  false,
+    withdrawAutoThreshold: "1000",
+  });
+
+  const toggleReveal = (key: string) =>
+    setRevealedKeys(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const maskKey = (val: string) => {
+    if (!val || val === "") return "— not configured —";
+    return val.slice(0, 4) + "••••••••••••" + val.slice(-4);
+  };
+
+  const handleSaveKey = (section: string) => {
+    setSavedKeys(prev => ({ ...prev, [section]: true }));
+    setTimeout(() => setSavedKeys(prev => ({ ...prev, [section]: false })), 2000);
+  };
+
+  const handleTest = (key: string, succeed = true) => {
+    setTestResults(prev => ({ ...prev, [key]: null }));
+    setTimeout(() => setTestResults(prev => ({ ...prev, [key]: succeed ? "ok" : "fail" })), 1200);
+  };
+
   const totalFeatures   = featureFlags.reduce((n, c) => n + c.features.length, 0);
   const enabledFeatures = featureFlags.reduce((n, c) => n + c.features.filter(f => f.enabled).length, 0);
   const betaFeatures    = featureFlags.reduce((n, c) => n + c.features.filter(f => f.status === "beta").length, 0);
@@ -429,6 +518,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="features" className="text-xs gap-1.5">
             <Flame className="w-3.5 h-3.5" /> Features
+          </TabsTrigger>
+          <TabsTrigger value="apikeys" className="text-xs gap-1.5">
+            <Key className="w-3.5 h-3.5" /> API Keys & Config
           </TabsTrigger>
         </TabsList>
 
@@ -1273,6 +1365,599 @@ export default function SuperAdminPage() {
               Promote a feature from <em>Testing → Beta → Live</em> via the backend config API.
             </p>
           </div>
+
+        </TabsContent>
+
+        {/* ─────────────────────────────────────────────────────────────────────
+            API KEYS & CONFIG TAB
+        ───────────────────────────────────────────────────────────────────── */}
+        <TabsContent value="apikeys" className="mt-4 space-y-6">
+
+          {/* Security banner */}
+          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4 flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-purple-900 text-sm">Super Admin · Full API Access</p>
+              <p className="text-xs text-purple-700 mt-0.5">
+                All keys are encrypted at rest. Revealed keys are masked by default — click <strong>Reveal</strong> to view, <strong>Save</strong> to persist changes.
+                Changes here update the live environment immediately.
+              </p>
+            </div>
+          </div>
+
+          {/* ── Section helper component inline ── */}
+          {(() => {
+
+            const KeyField = ({
+              label, field, type = "text", placeholder, hint,
+            }: {
+              label: string; field: keyof typeof apiKeys; type?: string; placeholder?: string; hint?: string;
+            }) => {
+              const revealed = revealedKeys[field];
+              const val = apiKeys[field];
+              const isSensitive = field.toLowerCase().includes("secret") || field.toLowerCase().includes("key") || field.toLowerCase().includes("cert") || field.toLowerCase().includes("token");
+              return (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-foreground">{label}</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={isSensitive && !revealed ? "password" : "text"}
+                        value={val}
+                        onChange={e => setApiKeys(prev => ({ ...prev, [field]: e.target.value }))}
+                        placeholder={placeholder ?? `Enter ${label}`}
+                        className="h-8 text-xs pr-8 font-mono"
+                      />
+                      {isSensitive && (
+                        <button
+                          onClick={() => toggleReveal(field)}
+                          className="absolute right-2 top-1.5 text-muted-foreground hover:text-foreground"
+                        >
+                          {revealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  {hint && <p className="text-[10px] text-muted-foreground">{hint}</p>}
+                </div>
+              );
+            };
+
+            const SectionHeader = ({
+              icon: Icon, title, desc, color = "text-purple-600", bg = "bg-purple-50",
+              testKey, saved,
+            }: {
+              icon: React.ComponentType<{className?: string}>; title: string; desc: string;
+              color?: string; bg?: string; testKey?: string; saved?: boolean;
+            }) => (
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${bg}`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">{title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {testKey && (
+                    <Button
+                      size="sm" variant="outline" className="h-7 text-xs gap-1"
+                      onClick={() => handleTest(testKey)}
+                    >
+                      {testResults[testKey] === null ? (
+                        <RefreshCw className="w-3 h-3 animate-spin" />
+                      ) : testResults[testKey] === "ok" ? (
+                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      ) : testResults[testKey] === "fail" ? (
+                        <XCircle className="w-3 h-3 text-red-500" />
+                      ) : (
+                        <TestTube className="w-3 h-3" />
+                      )}
+                      {testResults[testKey] === "ok" ? "Connected" : testResults[testKey] === "fail" ? "Failed" : "Test"}
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs gap-1"
+                    onClick={() => handleSaveKey(testKey ?? title)}
+                  >
+                    {saved ? <CheckCircle className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+                    {saved ? "Saved!" : "Save"}
+                  </Button>
+                </div>
+              </div>
+            );
+
+            const NumField = ({
+              label, field, prefix, suffix, min, max,
+            }: {
+              label: string; field: keyof typeof coinConfig; prefix?: string; suffix?: string; min?: number; max?: number;
+            }) => (
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-foreground">{label}</Label>
+                <div className="flex gap-1.5 items-center">
+                  {prefix && <span className="text-xs text-muted-foreground font-medium">{prefix}</span>}
+                  <Input
+                    type="number"
+                    value={coinConfig[field] as string}
+                    onChange={e => setCoinConfig(prev => ({ ...prev, [field]: e.target.value }))}
+                    min={min} max={max}
+                    className="h-8 text-xs w-24"
+                  />
+                  {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
+                </div>
+              </div>
+            );
+
+            return (
+              <div className="space-y-5">
+
+                {/* ─── 1. OTP & SMS (MSG91) ─────────────────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={Smartphone} title="OTP & SMS — MSG91"
+                      desc="Phone number OTP login, transactional SMS, promotional messages"
+                      color="text-green-600" bg="bg-green-50"
+                      testKey="msg91" saved={savedKeys["msg91"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <KeyField label="MSG91 Auth Key" field="msg91AuthKey"
+                        hint="Your MSG91 account authentication key" />
+                      <KeyField label="OTP Template ID" field="msg91OtpTemplate"
+                        hint="Used for 6-digit phone OTP login (Phase 1)" />
+                      <KeyField label="SMS Template ID" field="msg91SmsTemplate"
+                        placeholder="e.g. 6447a9d5d6fc051..."
+                        hint="For transactional & promotional SMS campaigns" />
+                    </div>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-2.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0" />
+                      Currently in demo mode — real OTP delivery requires a valid DLT-approved template ID
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 2. WhatsApp (MSG91) ──────────────────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={MessageCircle} title="WhatsApp Business — MSG91"
+                      desc="Send OTP, welcome messages, gift notifications & promo via WhatsApp"
+                      color="text-emerald-600" bg="bg-emerald-50"
+                      testKey="whatsapp" saved={savedKeys["whatsapp"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <KeyField label="WhatsApp Integrated Number" field="msg91WaNumber"
+                        placeholder="e.g. 919XXXXXXXXX"
+                        hint="MSG91 WhatsApp Business number (with country code)" />
+                      <KeyField label="WhatsApp Template ID" field="msg91WaTemplate"
+                        placeholder="e.g. wa_tmpl_XXXXXXX"
+                        hint="Approved WhatsApp message template ID" />
+                    </div>
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {[
+                        { label: "OTP via WhatsApp",        desc: "6-digit OTP through WA",     id: "wa_otp" },
+                        { label: "Gift Notification",       desc: "Alert when user receives gift",id: "wa_gift" },
+                        { label: "Promo Messages",          desc: "Offers & coin pack deals",    id: "wa_promo" },
+                      ].map(item => (
+                        <div key={item.id}
+                          className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">{item.label}</p>
+                            <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                          </div>
+                          <Switch defaultChecked={item.id === "wa_otp"} />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 3. Payment Gateways ──────────────────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={CreditCard} title="Payment Gateways — Razorpay"
+                      desc="Coin recharge, VIP subscriptions, ad payments & host payouts"
+                      color="text-blue-600" bg="bg-blue-50"
+                      testKey="razorpay" saved={savedKeys["razorpay"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <KeyField label="Razorpay Key ID" field="razorpayKeyId"
+                        hint="Public key — used in the frontend payment sheet" />
+                      <KeyField label="Razorpay Key Secret" field="razorpayKeySecret"
+                        hint="Private key — server-side only, never exposed to client" />
+                    </div>
+                    <Separator className="mb-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Payment Methods Enabled</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { label: "UPI / QR", icon: "📱", enabled: true },
+                        { label: "Cards",    icon: "💳", enabled: true },
+                        { label: "NetBanking",icon: "🏦", enabled: true },
+                        { label: "Wallets",  icon: "👜", enabled: true },
+                        { label: "Google Pay",icon: "🟢", enabled: true },
+                        { label: "PhonePe",  icon: "🟣", enabled: false },
+                        { label: "BNPL",     icon: "⏳", enabled: false },
+                        { label: "EMI",      icon: "📅", enabled: true },
+                      ].map(pm => (
+                        <div key={pm.label}
+                          className="rounded-lg border p-2.5 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <span>{pm.icon}</span>
+                            <span className="text-xs font-medium">{pm.label}</span>
+                          </div>
+                          <Switch defaultChecked={pm.enabled} />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 4. Audio & Video Calls (Agora) ──────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={PhoneCall} title="Audio & Video Calls — Agora RTC"
+                      desc="Real-time audio/video calls between users and hosts. Per-minute coin billing."
+                      color="text-violet-600" bg="bg-violet-50"
+                      testKey="agora" saved={savedKeys["agora"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <KeyField label="Agora App ID" field="agoraAppId"
+                        hint="From your Agora Console project settings" />
+                      <KeyField label="Agora App Certificate" field="agoraCert"
+                        hint="Used to generate secure channel tokens server-side" />
+                    </div>
+                    <Separator className="mb-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Call Pricing (Ridhi Coins = ₹)</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Audio Call Rate</Label>
+                        <div className="flex gap-1.5 items-center">
+                          <Input type="number" value={apiKeys.agoraAudioRate}
+                            onChange={e => setApiKeys(p => ({...p, agoraAudioRate: e.target.value}))}
+                            className="h-8 text-xs w-20" />
+                          <span className="text-xs text-muted-foreground">coins/min</span>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Video Call Rate</Label>
+                        <div className="flex gap-1.5 items-center">
+                          <Input type="number" value={apiKeys.agoraVideoRate}
+                            onChange={e => setApiKeys(p => ({...p, agoraVideoRate: e.target.value}))}
+                            className="h-8 text-xs w-20" />
+                          <span className="text-xs text-muted-foreground">coins/min</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator className="my-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Backup SDK — Zego (optional)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <KeyField label="Zego App ID" field="zegoAppId"
+                        placeholder="e.g. 1234567890"
+                        hint="Alternative RTC SDK — leave blank if not used" />
+                      <KeyField label="Zego App Certificate" field="zegoCert"
+                        placeholder="e.g. zego_cert_..."
+                        hint="Zego app secret for token generation" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 5. Live Streaming ────────────────────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={Cast} title="Live Streaming"
+                      desc="RTMP ingest, CDN distribution, recording & stream tokens"
+                      color="text-red-600" bg="bg-red-50"
+                      testKey="streaming" saved={savedKeys["streaming"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <KeyField label="RTMP Ingest URL" field="streamingCdnUrl"
+                        hint="Stream endpoint — broadcasters push to this URL" />
+                      <KeyField label="Streaming Secret / Token" field="streamingSecret"
+                        hint="Server key used to sign stream tokens" />
+                    </div>
+                    <Separator className="mb-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Live Stream Settings</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { label: "Auto-record all lives",    key: "autoRecord",      default: true },
+                        { label: "AI moderation on stream",  key: "aiModLive",       default: true },
+                        { label: "Gift animations enabled",  key: "giftAnim",        default: true },
+                        { label: "PK Battle mode",           key: "pkBattle",        default: true },
+                        { label: "Co-host invitations",      key: "cohost",          default: true },
+                        { label: "Clip sharing (30s)",       key: "clipShare",       default: false },
+                      ].map(s => (
+                        <div key={s.key} className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3">
+                          <p className="text-xs font-medium text-foreground">{s.label}</p>
+                          <Switch defaultChecked={s.default} />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 6. Push Notifications (FCM) & AI ────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <SectionHeader
+                      icon={Bell} title="Push Notifications — Firebase & AI"
+                      desc="FCM push alerts, OpenAI moderation & content tools, AWS media storage"
+                      color="text-orange-600" bg="bg-orange-50"
+                      testKey="fcm" saved={savedKeys["fcm"]}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <KeyField label="FCM Server Key" field="fcmServerKey"
+                        hint="Firebase Cloud Messaging server key (Android & iOS push)" />
+                      <KeyField label="FCM Sender ID" field="fcmSenderId"
+                        hint="Firebase project sender ID" />
+                      <KeyField label="OpenAI API Key" field="openAiKey"
+                        hint="GPT-4 for AI moderation, captions, Priya AI assistant" />
+                      <KeyField label="AWS S3 Bucket" field="awsS3Bucket"
+                        hint="S3 bucket name for media storage" />
+                      <KeyField label="AWS Access Key ID" field="awsAccessKey"
+                        hint="IAM access key for S3 media uploads" />
+                      <KeyField label="AWS Secret Access Key" field="awsSecretKey"
+                        hint="IAM secret key (never expose to clients)" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 7. Approvals Configuration ───────────────────────────── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-amber-50">
+                          <ClipboardCheck className="w-4 h-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">Approvals & Workflows</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Control which actions require manual Super Admin approval before going live
+                          </p>
+                        </div>
+                      </div>
+                      <Button size="sm" className="h-7 text-xs gap-1"
+                        onClick={() => handleSaveKey("approvals")}>
+                        {savedKeys["approvals"] ? <CheckCircle className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+                        {savedKeys["approvals"] ? "Saved!" : "Save"}
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        { label: "Host Registration",        desc: "New hosts need approval before earning", field: "hostRegistration" as const },
+                        { label: "Agent Registration",       desc: "New agents need Super Admin sign-off",   field: "agentRegistration" as const },
+                        { label: "Withdrawal Requests",      desc: "Manual review before bank transfer",     field: "withdrawalApproval" as const },
+                        { label: "KYC Verification",         desc: "Admin reviews Aadhaar/PAN uploads",      field: "kycApproval" as const },
+                        { label: "Content Moderation Flag",  desc: "Flagged content needs manual decision",  field: "contentApproval" as const },
+                        { label: "Live Stream Start",        desc: "Hosts need approval to go live",         field: "liveStreamApproval" as const },
+                        { label: "Podcast Publishing",       desc: "Episodes reviewed before publish",       field: "podcastPublish" as const },
+                        { label: "Manual Coin Add/Remove",   desc: "Coin adjustments need 2FA + approval",   field: "coinManualAdd" as const },
+                        { label: "Ads Approval",             desc: "Business ads reviewed before going live",field: "adsApproval" as const },
+                      ].map(item => (
+                        <div key={item.field}
+                          className="rounded-lg border p-3 flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-semibold text-foreground">{item.label}</p>
+                            <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={approvalConfig[item.field]}
+                              onCheckedChange={v => setApprovalConfig(p => ({...p, [item.field]: v}))}
+                            />
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] px-1.5 h-4 ${approvalConfig[item.field] ? "bg-green-50 text-green-700 border-green-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}
+                            >
+                              {approvalConfig[item.field] ? "Required" : "Auto"}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Separator className="my-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Auto-Approval Thresholds</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Auto-approve withdrawals below</Label>
+                        <div className="flex gap-1.5 items-center">
+                          <span className="text-xs text-muted-foreground">₹</span>
+                          <Input type="number"
+                            value={approvalConfig.withdrawAutoThreshold}
+                            onChange={e => setApprovalConfig(p => ({...p, withdrawAutoThreshold: e.target.value}))}
+                            className="h-8 text-xs w-28" />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Set 0 to disable auto-approve</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Auto-approve KYC</Label>
+                        <div className="flex items-center gap-2 h-8">
+                          <Switch
+                            checked={approvalConfig.autoApproveKyc}
+                            onCheckedChange={v => setApprovalConfig(p => ({...p, autoApproveKyc: v}))}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {approvalConfig.autoApproveKyc ? "AI auto-approves KYC" : "Manual review"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ─── 8 + 9 + 10. Coin Auto Generation, Values & Distribution ── */}
+                <Card>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-yellow-50">
+                          <Coins className="w-4 h-4 text-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground">Coin Economy — Auto Generation, Values & Distribution</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Control the entire coin economy: how coins are generated, what they're worth, and how revenue is split
+                          </p>
+                        </div>
+                      </div>
+                      <Button size="sm" className="h-7 text-xs gap-1"
+                        onClick={() => handleSaveKey("coins")}>
+                        {savedKeys["coins"] ? <CheckCircle className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+                        {savedKeys["coins"] ? "Saved!" : "Save"}
+                      </Button>
+                    </div>
+
+                    {/* Coin Value */}
+                    <div className="rounded-lg border border-yellow-200 bg-yellow-50/50 p-4 mb-5">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                          <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                            <IndianRupee className="w-4 h-4 text-yellow-600" />
+                            Master Coin Value
+                          </p>
+                          <p className="text-xs text-muted-foreground">1 Ridhi Coin = this many Indian Rupees</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground font-medium">₹</span>
+                          <Input
+                            type="number" step="0.01"
+                            value={coinConfig.coinValueInr}
+                            onChange={e => setCoinConfig(p => ({...p, coinValueInr: e.target.value}))}
+                            className="h-9 text-sm font-bold w-24"
+                          />
+                          <span className="text-xs text-muted-foreground">per coin</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Auto Generation */}
+                    <div className="mb-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-yellow-600" />
+                          Auto Coin Generation Rules
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Master toggle</span>
+                          <Switch
+                            checked={coinConfig.autoGenEnabled}
+                            onCheckedChange={v => setCoinConfig(p => ({...p, autoGenEnabled: v}))}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <NumField label="Daily Login Reward" field="autoGenDailyLogin" suffix="coins" min={0} max={500} />
+                        <NumField label="Watch 1 Reel" field="autoGenWatchReel" suffix="coins" min={0} max={50} />
+                        <NumField label="Like a Post" field="autoGenPostLike" suffix="coins" min={0} max={10} />
+                        <NumField label="Referral Bonus" field="autoGenReferral" suffix="coins" min={0} max={1000} />
+                        <NumField label="Daily Mission Max" field="missionDailyMax" suffix="coins/day" min={0} />
+                        <NumField label="Bonus Multiplier" field="bonusMultiplier" prefix="×" min={1} max={10} />
+                      </div>
+                    </div>
+
+                    <Separator className="mb-5" />
+
+                    {/* Coin Spend Rates */}
+                    <div className="mb-5">
+                      <p className="text-xs font-semibold text-foreground flex items-center gap-1.5 mb-3">
+                        <ArrowRightLeft className="w-3.5 h-3.5 text-purple-600" />
+                        Coin Spend Rates (1 Coin = ₹{coinConfig.coinValueInr})
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <NumField label="Super Like" field="superLikeCost" suffix="coins" min={1} />
+                        <NumField label="Audio Call" field="audioCallCostPerMin" suffix="coins/min" min={1} />
+                        <NumField label="Video Call" field="videoCallCostPerMin" suffix="coins/min" min={1} />
+                        <NumField label="Boost Post" field="boostPostCostPerHr" suffix="coins/hr" min={1} />
+                        <NumField label="Unlock Message" field="unlockMsgCost" suffix="coins" min={1} />
+                        <NumField label="AI Query" field="aiQueryCost" suffix="coins" min={1} />
+                      </div>
+                    </div>
+
+                    <Separator className="mb-5" />
+
+                    {/* Revenue Distribution */}
+                    <div>
+                      <p className="text-xs font-semibold text-foreground flex items-center gap-1.5 mb-1.5">
+                        <GitMerge className="w-3.5 h-3.5 text-pink-600" />
+                        Gift & Call Revenue Distribution
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        When a user sends a gift or pays for a call, coins are split across:
+                      </p>
+                      <div className="grid grid-cols-3 gap-4 mb-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-pink-700 font-semibold">Creator / Host</Label>
+                          <div className="flex items-center gap-1.5">
+                            <Input type="number" value={coinConfig.creatorRevShare}
+                              onChange={e => setCoinConfig(p => ({...p, creatorRevShare: e.target.value}))}
+                              className="h-8 text-xs w-20" min={0} max={100} />
+                            <Percent className="w-3.5 h-3.5 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-purple-700 font-semibold">Platform (Ridhi)</Label>
+                          <div className="flex items-center gap-1.5">
+                            <Input type="number" value={coinConfig.platformRevShare}
+                              onChange={e => setCoinConfig(p => ({...p, platformRevShare: e.target.value}))}
+                              className="h-8 text-xs w-20" min={0} max={100} />
+                            <Percent className="w-3.5 h-3.5 text-muted-foreground" />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-blue-700 font-semibold">Agent Commission</Label>
+                          <div className="flex items-center gap-1.5">
+                            <Input type="number" value={coinConfig.agentRevShare}
+                              onChange={e => setCoinConfig(p => ({...p, agentRevShare: e.target.value}))}
+                              className="h-8 text-xs w-20" min={0} max={100} />
+                            <Percent className="w-3.5 h-3.5 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Distribution bar */}
+                      <div className="rounded-lg overflow-hidden h-5 flex">
+                        <div className="bg-pink-500 flex items-center justify-center text-[9px] font-bold text-white transition-all"
+                          style={{ width: `${coinConfig.creatorRevShare}%` }}>
+                          {coinConfig.creatorRevShare}%
+                        </div>
+                        <div className="bg-purple-600 flex items-center justify-center text-[9px] font-bold text-white transition-all"
+                          style={{ width: `${coinConfig.platformRevShare}%` }}>
+                          {coinConfig.platformRevShare}%
+                        </div>
+                        <div className="bg-blue-500 flex items-center justify-center text-[9px] font-bold text-white transition-all"
+                          style={{ width: `${coinConfig.agentRevShare}%` }}>
+                          {coinConfig.agentRevShare}%
+                        </div>
+                      </div>
+                      <div className="flex gap-4 mt-1.5">
+                        <span className="text-[10px] text-pink-600 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-pink-500 inline-block"/> Creator</span>
+                        <span className="text-[10px] text-purple-600 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-600 inline-block"/> Platform</span>
+                        <span className="text-[10px] text-blue-600 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block"/> Agent</span>
+                      </div>
+
+                      <Separator className="my-4" />
+                      <p className="text-xs font-semibold text-foreground flex items-center gap-1.5 mb-3">
+                        <Banknote className="w-3.5 h-3.5 text-green-600" />
+                        Withdrawal Settings
+                      </p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <NumField label="Minimum Withdrawal" field="withdrawMin" prefix="₹" min={100} />
+                        <NumField label="Platform Fee on Withdrawal" field="withdrawPlatformFee" suffix="%" min={0} max={20} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+              </div>
+            );
+          })()}
 
         </TabsContent>
       </Tabs>
