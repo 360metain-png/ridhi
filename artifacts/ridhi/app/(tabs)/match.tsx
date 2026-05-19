@@ -21,6 +21,7 @@ import { useColors } from "@/hooks/useColors";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { MATCH_PROFILES } from "@/data/mockData";
+import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -349,6 +350,9 @@ export default function MatchScreen() {
                       <Text style={styles.matchPct}>{current.matchPercent}%</Text>
                     </View>
                   </View>
+                  {current.vipTier && (
+                    <SubscriptionBadge tier={current.vipTier} size="sm" style={{ marginBottom: 6, alignSelf: "flex-start" }} />
+                  )}
                   <View style={styles.cardMetaRow}>
                     <Feather name="map-pin" size={13} color="rgba(255,255,255,0.8)" />
                     <Text style={styles.cardMeta}>{current.distance} · {current.city}</Text>

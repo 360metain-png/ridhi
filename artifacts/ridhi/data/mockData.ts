@@ -18,6 +18,7 @@ export const INITIAL_POSTS: Post[] = [
     userCity: "Delhi",
     language: "Hindi",
     isVerified: true,
+    vipTier: "diamond" as const,
     content: "Amazing street food at Chandni Chowk today! The paranthas were absolutely divine 😍",
     imageUri: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600",
     likes: 284,
@@ -48,6 +49,7 @@ export const INITIAL_POSTS: Post[] = [
     userCity: "Hyderabad",
     language: "Telugu",
     isVerified: true,
+    vipTier: "platinum" as const,
     content: "Just finished reading 'The Alchemist' for the third time. Still gives me chills. What books are you all reading?",
     likes: 167,
     comments: 95,
@@ -62,6 +64,7 @@ export const INITIAL_POSTS: Post[] = [
     userCity: "Bangalore",
     language: "Kannada",
     isVerified: false,
+    vipTier: "creator_basic" as const,
     content: "Morning run at Cubbon Park — 10km done! Starting the week right 💪",
     imageUri: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600",
     likes: 98,
@@ -77,6 +80,7 @@ export const INITIAL_POSTS: Post[] = [
     userCity: "Ahmedabad",
     language: "Gujarati",
     isVerified: true,
+    vipTier: "gold" as const,
     content: "Navratri celebrations begin! Garba night was absolutely magical ✨",
     imageUri: "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=600",
     likes: 743,
@@ -450,6 +454,7 @@ export const MATCH_PROFILES = [
     distance: "3 km away",
     imageUri: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop",
     matchPercent: 89,
+    vipTier: "diamond" as const,
   },
   {
     id: "m2",
@@ -463,6 +468,7 @@ export const MATCH_PROFILES = [
     distance: "12 km away",
     imageUri: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop",
     matchPercent: 76,
+    vipTier: "silver" as const,
   },
   {
     id: "m3",
@@ -476,6 +482,7 @@ export const MATCH_PROFILES = [
     distance: "5 km away",
     imageUri: "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=600&h=800&fit=crop",
     matchPercent: 93,
+    vipTier: "creator_pro" as const,
   },
   {
     id: "m4",
@@ -489,6 +496,7 @@ export const MATCH_PROFILES = [
     distance: "8 km away",
     imageUri: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop",
     matchPercent: 81,
+    vipTier: "gold" as const,
   },
   {
     id: "m5",
@@ -502,6 +510,7 @@ export const MATCH_PROFILES = [
     distance: "6 km away",
     imageUri: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=800&fit=crop",
     matchPercent: 87,
+    vipTier: "creator_basic" as const,
   },
   {
     id: "m6",
@@ -515,6 +524,7 @@ export const MATCH_PROFILES = [
     distance: "9 km away",
     imageUri: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop",
     matchPercent: 78,
+    vipTier: "platinum" as const,
   },
   {
     id: "m7",
@@ -528,6 +538,7 @@ export const MATCH_PROFILES = [
     distance: "15 km away",
     imageUri: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=600&h=800&fit=crop",
     matchPercent: 82,
+    vipTier: "silver" as const,
   },
   {
     id: "m8",
@@ -541,6 +552,7 @@ export const MATCH_PROFILES = [
     distance: "4 km away",
     imageUri: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=600&h=800&fit=crop",
     matchPercent: 91,
+    vipTier: "gold" as const,
   },
 
   // ── Male profiles (shown to female users) ────────────────────────────────
@@ -556,6 +568,7 @@ export const MATCH_PROFILES = [
     distance: "4 km away",
     imageUri: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop",
     matchPercent: 88,
+    vipTier: "gold" as const,
   },
   {
     id: "m10",
@@ -569,6 +582,7 @@ export const MATCH_PROFILES = [
     distance: "7 km away",
     imageUri: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop",
     matchPercent: 79,
+    vipTier: "silver" as const,
   },
   {
     id: "m11",
@@ -582,6 +596,7 @@ export const MATCH_PROFILES = [
     distance: "2 km away",
     imageUri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
     matchPercent: 92,
+    vipTier: "creator_elite" as const,
   },
   {
     id: "m12",
@@ -595,6 +610,7 @@ export const MATCH_PROFILES = [
     distance: "10 km away",
     imageUri: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop",
     matchPercent: 84,
+    vipTier: "gold" as const,
   },
   {
     id: "m13",
@@ -608,6 +624,7 @@ export const MATCH_PROFILES = [
     distance: "5 km away",
     imageUri: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&h=800&fit=crop",
     matchPercent: 86,
+    vipTier: "platinum" as const,
   },
   {
     id: "m14",
@@ -634,6 +651,7 @@ export const MATCH_PROFILES = [
     distance: "11 km away",
     imageUri: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=800&fit=crop",
     matchPercent: 83,
+    vipTier: "silver" as const,
   },
   {
     id: "m16",
@@ -659,6 +677,7 @@ export const CHATS: ChatPreview[] = [
     timeAgo: "2m",
     unread: 2,
     isOnline: true,
+    vipTier: "creator_pro" as const,
   },
   {
     id: "c2",
@@ -668,6 +687,7 @@ export const CHATS: ChatPreview[] = [
     timeAgo: "1h",
     unread: 0,
     isOnline: false,
+    vipTier: "diamond" as const,
   },
   {
     id: "c3",
@@ -678,6 +698,7 @@ export const CHATS: ChatPreview[] = [
     unread: 1,
     isOnline: true,
     isLocked: true,
+    vipTier: "platinum" as const,
   },
   {
     id: "c4",
@@ -687,6 +708,7 @@ export const CHATS: ChatPreview[] = [
     timeAgo: "5h",
     unread: 0,
     isOnline: false,
+    vipTier: "gold" as const,
   },
   {
     id: "c5",
@@ -696,6 +718,7 @@ export const CHATS: ChatPreview[] = [
     timeAgo: "1d",
     unread: 0,
     isOnline: false,
+    vipTier: "silver" as const,
   },
 ];
 

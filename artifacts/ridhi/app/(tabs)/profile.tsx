@@ -23,6 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarPicker, getAvatarOptions, getAvatarUrl } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
+import { SubscriptionBadge, VipTier } from "@/components/SubscriptionBadge";
 
 const { width } = Dimensions.get("window");
 
@@ -438,6 +439,10 @@ export default function ProfileScreen() {
 
           {/* Nickname (public display name) */}
           <Text style={[styles.name, { color: colors.foreground }]}>{displayName}</Text>
+          {/* Subscription badge */}
+          {user.plan && user.plan !== "free" && (
+            <SubscriptionBadge tier={user.plan as VipTier} size="md" style={{ marginTop: 6, marginBottom: 2 }} />
+          )}
           {/* Show real name as a private note if a nickname was set */}
           {user.nickname && user.nickname !== user.name && (
             <View style={[styles.realNameRow, { backgroundColor: colors.muted }]}>

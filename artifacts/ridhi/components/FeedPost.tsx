@@ -7,6 +7,7 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "./Avatar";
 import { WatermarkBadge } from "./WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
+import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
 
 export interface Post {
   id: string;
@@ -17,6 +18,7 @@ export interface Post {
   userAvatar?: string;
   isVerified?: boolean;
   isOwn?: boolean;
+  vipTier?: VipTier;
   privacy?: "public" | "followers" | "private";
   content?: string;
   imageUri?: string;
@@ -162,6 +164,9 @@ export const FeedPost = React.memo(function FeedPost({
                 <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.verifiedBadge}>
                   <Feather name="check" size={9} color="#fff" />
                 </LinearGradient>
+              )}
+              {post.vipTier && post.vipTier !== "free" && (
+                <SubscriptionBadge tier={post.vipTier} size="sm" />
               )}
               {post.isOwn && (
                 <View style={[styles.ownBadge, { backgroundColor: colors.primary + "18" }]}>

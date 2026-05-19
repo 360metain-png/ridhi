@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "./Avatar";
+import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
 
 export interface ChatPreview {
   id: string;
@@ -13,6 +14,7 @@ export interface ChatPreview {
   unread: number;
   isOnline: boolean;
   isLocked?: boolean;
+  vipTier?: VipTier;
 }
 
 interface ChatItemProps {
@@ -40,6 +42,9 @@ export function ChatItem({ chat, onPress }: ChatItemProps) {
           <Text style={[styles.name, { color: colors.foreground }]} numberOfLines={1}>
             {chat.userName}
           </Text>
+          {chat.vipTier && chat.vipTier !== "free" && (
+            <SubscriptionBadge tier={chat.vipTier} size="sm" style={{ marginRight: "auto", marginLeft: 4 }} />
+          )}
           <Text style={[styles.time, { color: colors.mutedForeground }]}>{chat.timeAgo}</Text>
         </View>
         <View style={styles.row}>
