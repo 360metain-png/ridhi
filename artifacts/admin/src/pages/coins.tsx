@@ -250,6 +250,106 @@ function CoinValuesTab() {
         </CardContent>
       </Card>
 
+      {/* Revenue Split Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Ridhi Platform",  pct: "50%", color: "text-violet-400",  bg: "bg-violet-500/10",  border: "border-violet-500/20" },
+          { label: "Host Earnings",   pct: "45%", color: "text-pink-400",    bg: "bg-pink-500/10",    border: "border-pink-500/20"   },
+          { label: "Agent Commission",pct: "5%",  color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20"},
+        ].map((s) => (
+          <div key={s.label} className={`rounded-xl border ${s.border} ${s.bg} p-4 flex items-center gap-4`}>
+            <div className={`text-3xl font-black ${s.color}`}>{s.pct}</div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{s.label}</p>
+              <p className="text-xs text-muted-foreground">of every coin transaction</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Feature Pricing Reference */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <IndianRupee className="w-4 h-4 text-primary" />
+            Feature Pricing Reference
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Live coin rates across all platform features · 1 Ridhi Coin = ₹0.80</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {[
+              {
+                title: "Random Audio Call", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20",
+                rows: [
+                  ["Connect Fee", "6 coins"], ["Per Minute", "12 coins/min"],
+                  ["Random Audio Match", "15 coins/min"], ["Gender Filter", "+10 coins"],
+                  ["Language Filter", "+5 coins"], ["VIP Audio Host", "30 coins/min"],
+                  ["Reconnect Same User", "15 coins"],
+                ],
+              },
+              {
+                title: "Random Video Call", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20",
+                rows: [
+                  ["Connect Fee", "15 coins"], ["Per Minute", "30 coins/min"],
+                  ["Random Video Match", "35 coins/min"], ["HD Video Match", "40 coins/min"],
+                  ["VIP Creator", "60–120 coins/min"], ["Beauty Filter", "10 coins"],
+                  ["Country Match", "25 coins"], ["Reconnect Same User", "30 coins"],
+                ],
+              },
+              {
+                title: "Live Streaming", color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20",
+                rows: [
+                  ["Enter Public Room", "Free"], ["VIP Room Entry", "50 coins"],
+                  ["Multi Guest Join", "20 coins"], ["Comment Highlight", "5 coins"],
+                  ["Pin Comment", "10 coins"], ["Live Room Boost", "99 coins"],
+                  ["Stream Promotion", "299 coins"],
+                ],
+              },
+              {
+                title: "PK Battle", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20",
+                rows: [
+                  ["PK Battle Entry", "99 coins"], ["PK Support Gift", "10–50,000 coins"],
+                  ["PK Revenge Match", "49 coins"], ["Battle Boost", "199 coins"],
+                  ["VIP Battle Room", "499 coins"],
+                ],
+              },
+              {
+                title: "Gift Shop — Basic", color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/20",
+                rows: [
+                  ["Hello 👋", "5 coins"], ["Rose 🌹", "10 coins"],
+                  ["Heart ❤️", "20 coins"], ["Coffee ☕", "30 coins"],
+                  ["Chocolate 🍫", "50 coins"],
+                ],
+              },
+              {
+                title: "Recharge Value", color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20",
+                rows: [
+                  ["₹49", "60 coins (₹0.82/coin)"], ["₹99", "130 coins (₹0.76/coin)"],
+                  ["₹199", "280 coins (₹0.71/coin)"], ["₹499", "750 coins (₹0.67/coin)"],
+                  ["₹999 ★", "1,600 coins (₹0.62/coin)"], ["₹1,999", "3,500 coins (₹0.57/coin)"],
+                  ["₹4,999", "10,000 coins (₹0.50/coin)"],
+                ],
+              },
+            ].map((cat) => (
+              <div key={cat.title} className={`rounded-xl border ${cat.border} overflow-hidden`}>
+                <div className={`px-3 py-2 ${cat.bg}`}>
+                  <p className={`text-xs font-bold ${cat.color} uppercase tracking-wider`}>{cat.title}</p>
+                </div>
+                <div className="divide-y divide-border">
+                  {cat.rows.map(([feature, cost]) => (
+                    <div key={feature} className="flex items-center justify-between px-3 py-1.5">
+                      <span className="text-xs text-muted-foreground">{feature}</span>
+                      <span className="text-xs font-semibold text-foreground">{cost}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="bg-card border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">

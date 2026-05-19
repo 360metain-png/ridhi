@@ -32,10 +32,11 @@ export interface SpendCategory {
 }
 
 export const GIFTS: Gift[] = [
-  { id: "g01", name: "Rose",         emoji: "🌹", coins: 5,      category: "basic",   popular: true },
-  { id: "g02", name: "Heart",        emoji: "💗", coins: 10,     category: "basic" },
-  { id: "g03", name: "Cake",         emoji: "🎂", coins: 20,     category: "basic" },
-  { id: "g04", name: "Teddy Bear",   emoji: "🧸", coins: 50,     category: "basic",   popular: true },
+  { id: "g01", name: "Hello",        emoji: "👋", coins: 5,      category: "basic",   popular: true },
+  { id: "g02", name: "Rose",         emoji: "🌹", coins: 10,     category: "basic" },
+  { id: "g03", name: "Heart",        emoji: "❤️", coins: 20,     category: "basic",   popular: true },
+  { id: "g04", name: "Coffee",       emoji: "☕", coins: 30,     category: "basic" },
+  { id: "g04b",name: "Chocolate",    emoji: "🍫", coins: 50,     category: "basic" },
   { id: "g05", name: "Bouquet",      emoji: "💐", coins: 80,     category: "premium" },
   { id: "g06", name: "Ring",         emoji: "💍", coins: 100,    category: "premium", popular: true },
   { id: "g07", name: "Crown",        emoji: "👑", coins: 200,    category: "premium" },
@@ -92,8 +93,8 @@ export const SPEND_CATEGORIES: SpendCategory[] = [
   { id: "sc2", label: "Send Gift",        icon: "gift",         color: "#E91E8C", desc: "Gift hosts & creators",      cost: "From 5 coins",        route: "/coin-store" },
   { id: "sc3", label: "Boost Post",       icon: "trending-up",  color: "#7B2FBE", desc: "Reach 10× more people",     cost: "50 coins/hr",         route: "/create-post" },
   { id: "sc4", label: "VIP Badge",        icon: "award",        color: "#F59E0B", desc: "Stand out everywhere",       cost: "From 99/month",       route: "/subscription" },
-  { id: "sc5", label: "Audio Call",       icon: "phone",        color: "#3B82F6", desc: "Call any host live",         cost: "10 coins/min",        route: "/random-call" },
-  { id: "sc6", label: "Video Call",       icon: "video",        color: "#10B981", desc: "Face-to-face with hosts",    cost: "25 coins/min",        route: "/random-call" },
+  { id: "sc5", label: "Audio Call",       icon: "phone",        color: "#3B82F6", desc: "Call any host live",         cost: "12 coins/min",        route: "/random-call" },
+  { id: "sc6", label: "Video Call",       icon: "video",        color: "#10B981", desc: "Face-to-face with hosts",    cost: "30 coins/min",        route: "/random-call" },
   { id: "sc7", label: "Unlock Message",   icon: "lock",         color: "#8B5CF6", desc: "Read locked DMs",            cost: "50 coins",            route: "/(tabs)/chat" },
   { id: "sc8", label: "AI Assistant",     icon: "zap",          color: "#06B6D4", desc: "AI-powered features",        cost: "5 coins/query",       route: "/ai-assistant" },
 ];
@@ -108,4 +109,4 @@ export const DAILY_REWARD_STREAK = [
   { day: 7, reward: 100, claimed: false },
 ];
 
-export const COIN_RATE_INR = 1;
+export const COIN_RATE_INR = 0.80;

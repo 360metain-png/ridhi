@@ -72,7 +72,7 @@ Ridhi is an India-first social networking and dating mobile app — think ShareC
 - Settings screen (theme, 13 languages, notifications, privacy, security, account, support)
 - Creator Dashboard (analytics, views chart, top content, earnings breakdown, withdrawal)
 - Create Post (6 content types: text/photo/video/reel/story/poll, hashtag suggestions)
-- Coin Wallet (balance, daily reward, recharge packs ₹49–₹499, transaction history)
+- Coin Wallet (balance, daily reward, recharge packs ₹49–₹4999, transaction history)
 - Notifications screen
 - Dark/Light/System theme switching
 - Multi-language selection (English + 12 Indian languages)
