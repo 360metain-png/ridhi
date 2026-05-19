@@ -168,7 +168,7 @@ export default function KYCScreen() {
   const [dob, setDob]             = useState("");
   const [dobAge, setDobAge]       = useState<number | null>(null);
   const [dobError, setDobError]   = useState("");
-  const [gender, setGender]       = useState<"male" | "female" | "other" | "">("");
+  const [gender, setGender]       = useState<"male" | "female" | "">("");
 
   // Auto-format and calculate age from DOB
   const handleDob = (raw: string) => {
@@ -449,7 +449,7 @@ export default function KYCScreen() {
             <View style={styles.fieldGroup}>
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>Gender *</Text>
               <View style={styles.genderRow}>
-                {(["male", "female", "other"] as const).map((g) => (
+                {(["male", "female"] as const).map((g) => (
                   <Pressable
                     key={g}
                     onPress={() => setGender(g)}
@@ -459,7 +459,7 @@ export default function KYCScreen() {
                     ]}
                   >
                     <Text style={[styles.genderChipText, { color: gender === g ? colors.primary : colors.foreground }]}>
-                      {g === "male" ? "👨 Male" : g === "female" ? "👩 Female" : "⚧ Other"}
+                      {g === "male" ? "👨 Male" : "👩 Female"}
                     </Text>
                   </Pressable>
                 ))}
