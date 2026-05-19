@@ -275,15 +275,17 @@ export default function ProfileSetupScreen() {
                 ]}
               >
                 <Text style={styles.langEmoji}>{lang.emoji}</Text>
-                <Text style={[styles.langLabel, { color: selected ? colors.primary : colors.foreground }]}>
-                  {lang.label}
-                </Text>
-                <Text style={[styles.langSublabel, { color: colors.mutedForeground }]}>
-                  {lang.sublabel}
-                </Text>
+                <View style={styles.langTextCol}>
+                  <Text style={[styles.langLabel, { color: selected ? colors.primary : colors.foreground }]}>
+                    {lang.label}
+                  </Text>
+                  <Text style={[styles.langSublabel, { color: colors.mutedForeground }]}>
+                    {lang.sublabel}
+                  </Text>
+                </View>
                 {selected && (
                   <View style={[styles.langCheck, { backgroundColor: colors.primary }]}>
-                    <Feather name="check" size={10} color="#fff" />
+                    <Feather name="check" size={12} color="#fff" />
                   </View>
                 )}
               </Pressable>
@@ -659,11 +661,21 @@ const styles = StyleSheet.create({
   langHintText: { flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
 
   langGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  langCard: { width: (width - 60) / 3, alignItems: "center", paddingVertical: 14, paddingHorizontal: 6, borderRadius: 16, gap: 5, position: "relative" },
-  langEmoji:    { fontSize: 26 },
-  langLabel:    { fontSize: 13, fontFamily: "Inter_700Bold", textAlign: "center" },
-  langSublabel: { fontSize: 10, fontFamily: "Inter_400Regular", textAlign: "center" },
-  langCheck:    { position: "absolute", top: 6, right: 6, width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center" },
+  langCard: {
+    width: (width - 50) / 2,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    gap: 12,
+    position: "relative",
+  },
+  langTextCol:  { flex: 1 },
+  langEmoji:    { fontSize: 24 },
+  langLabel:    { fontSize: 14, fontFamily: "Inter_700Bold" },
+  langSublabel: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
+  langCheck:    { width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
 
   inputLabelRow: { flexDirection: "row", alignItems: "center", gap: 5 },
   inputLabel:    { fontSize: 12, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 },
