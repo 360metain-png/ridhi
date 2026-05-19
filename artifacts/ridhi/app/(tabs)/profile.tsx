@@ -98,12 +98,10 @@ const MENU_SECTIONS = [
     ],
   },
   {
-    title: "Jobs & Ads",
+    title: "Creator Marketplace",
     items: [
-      { icon: "briefcase",   label: "Jobs Near Me",  route: "/jobs",              color: "#E91E8C" },
-      { icon: "plus-circle", label: "Post a Job",    route: "/jobs-post",         color: "#FF6B35" },
-      { icon: "zap",         label: "Ridhi Ads",     route: "/ads-manager",       color: "#7B2FBE" },
-      { icon: "trending-up", label: "Create Ad",     route: "/ads-create",        color: "#2196F3" },
+      { icon: "target",      label: "Brand Deals",        route: "/creator-marketplace", color: "#E91E8C" },
+      { icon: "trending-up", label: "Top Creators",       route: "/creator-marketplace", color: "#7B2FBE" },
     ],
   },
   {

@@ -49,16 +49,13 @@ function RootLayoutNav() {
       <Stack.Screen name="agent-dashboard" options={{ presentation: "card" }} />
       <Stack.Screen name="host-profile" options={{ presentation: "card" }} />
       <Stack.Screen name="vibe-stars" options={{ presentation: "card" }} />
-      <Stack.Screen name="ads-create" options={{ presentation: "card" }} />
-      <Stack.Screen name="ads-manager" options={{ presentation: "card" }} />
+      <Stack.Screen name="creator-marketplace" options={{ presentation: "card" }} />
       <Stack.Screen name="podcasts" options={{ presentation: "card" }} />
       <Stack.Screen name="podcast-create" options={{ presentation: "modal" }} />
       <Stack.Screen name="ai-assistant" options={{ presentation: "card" }} />
       <Stack.Screen name="chatrooms" options={{ presentation: "card" }} />
       <Stack.Screen name="kyc" options={{ presentation: "card" }} />
       <Stack.Screen name="withdraw" options={{ presentation: "card" }} />
-      <Stack.Screen name="jobs" options={{ presentation: "card" }} />
-      <Stack.Screen name="jobs-post" options={{ presentation: "card" }} />
       <Stack.Screen name="help-support" options={{ presentation: "card" }} />
       <Stack.Screen name="about" options={{ presentation: "card" }} />
       <Stack.Screen name="terms" options={{ presentation: "card" }} />
