@@ -72,9 +72,10 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Finance",
     items: [
-      { name: "Coins",         href: "/coins",   icon: Coins,       allowedRoles: SA_A },
-      { name: "Payouts",       href: "/payouts", icon: IndianRupee, allowedRoles: SA_A },
-      { name: "Revenue & Ads", href: "/revenue", icon: BarChart3,   allowedRoles: SA_A },
+      { name: "Subscriptions", href: "/subscriptions", icon: Crown,       allowedRoles: SA_A },
+      { name: "Coins",         href: "/coins",         icon: Coins,       allowedRoles: SA_A },
+      { name: "Payouts",       href: "/payouts",       icon: IndianRupee, allowedRoles: SA_A },
+      { name: "Revenue & Ads", href: "/revenue",       icon: BarChart3,   allowedRoles: SA_A },
     ],
   },
   {
@@ -169,7 +170,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/ai-hub":        "AI Hub",
     "/kyc":          "E-KYC Verification",
     "/handbook":     "Platform Handbook",
-    "/jobs":         "Ridhi Jobs Management",
+    "/jobs":          "Ridhi Jobs Management",
+    "/subscriptions": "Subscription Plans",
   };
 
   return (

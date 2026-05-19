@@ -12,36 +12,79 @@ import { PaymentSheet } from "@/components/PaymentSheet";
 
 const { width } = Dimensions.get("window");
 
+// ── Billing period ─────────────────────────────────────────────────────────────
+type BillingPeriod = "weekly" | "monthly" | "yearly";
+
 // ── Plan definitions ───────────────────────────────────────────────────────────
 const PLANS = [
   {
-    id: "free", name: "Free", badge: "FREE", price: "₹0", period: "forever",
+    id: "free", name: "Free", badge: "FREE",
+    prices: { weekly: null as null, monthly: 0, yearly: null as null },
+    bonusCoins: 0,
     color: "#888888", gradient: ["#555", "#333"] as [string, string],
     coinsDay: 20, calls: "None", badge2: "—",
-    features: ["Basic profile", "20 coins/day", "Standard feed", "5 stories/day", "5 communities"],
+    features: ["Basic profile", "20 coins/day", "Standard feed", "5 stories/day", "5 communities", "Job search access", "Resume upload"],
     locked: ["Audio / Video calls", "VIP badge", "Creator fund", "Exclusive content", "Boost & Ads", "AI recommendations"],
   },
   {
-    id: "silver", name: "Silver", badge: "SILVER", price: "₹99", period: "/month",
+    id: "silver", name: "Silver VIP", badge: "SILVER",
+    prices: { weekly: 99, monthly: 199, yearly: 1999 },
+    bonusCoins: 100,
     color: "#A0A0A0", gradient: ["#9E9E9E", "#616161"] as [string, string],
     coinsDay: 50, calls: "5/day", badge2: "Silver badge",
-    features: ["50 coins/day", "5 random calls/day", "Silver VIP badge", "Priority feed", "Unlimited stories", "20 communities", "Chat translations"],
-    locked: ["Video calls", "Creator fund", "Featured creator", "Custom effects"],
+    features: ["100 bonus coins/month", "Ad-free experience", "Silver VIP badge", "5 daily super likes", "Basic match filters", "HD profile upload", "Priority chat delivery", "VIP communities access", "Basic profile boost"],
+    locked: ["HD video calls", "Ghost mode", "Premium gifts", "AI match suggestions"],
   },
   {
-    id: "gold", name: "Gold", badge: "GOLD", price: "₹249", period: "/month",
+    id: "gold", name: "Gold VIP", badge: "GOLD",
+    prices: { weekly: 199, monthly: 499, yearly: 4999 },
+    bonusCoins: 350,
     color: "#FFB800", gradient: ["#FFB800", "#FF8F00"] as [string, string],
     popular: true,
     coinsDay: 150, calls: "Unlimited", badge2: "Gold badge",
-    features: ["150 coins/day", "Unlimited calls", "Gold VIP badge", "AI feed + captions", "Creator fund access", "Unlimited communities", "Run Ad promotions", "Priority support", "Early features"],
-    locked: ["Diamond badge", "Featured creator status", "Dedicated manager"],
+    features: ["350 bonus coins/month", "Everything in Silver", "HD video calls", "Priority random match", "Weekly profile boost", "Unlimited filters", "Ghost mode", "Premium gifts access", "Exclusive gaming rooms", "Premium podcast rooms", "Creator priority match"],
+    locked: ["Incognito browsing", "AI match suggestions", "Dedicated relationship manager"],
   },
   {
-    id: "vip", name: "VIP Diamond", badge: "DIAMOND", price: "₹599", period: "/month",
+    id: "platinum", name: "Platinum VIP", badge: "PLATINUM",
+    prices: { weekly: 399, monthly: 999, yearly: 9999 },
+    bonusCoins: 1000,
+    color: "#7B2FBE", gradient: ["#9C27B0", "#7B2FBE"] as [string, string],
+    coinsDay: 200, calls: "Unlimited", badge2: "Platinum badge",
+    features: ["1000 bonus coins/month", "Everything in Gold", "Unlimited match priority", "Creator priority access", "Incognito browsing", "Exclusive VIP rooms", "AI match suggestions", "Unlimited reconnects", "Advanced analytics", "Faster withdrawals for hosts", "Higher match visibility"],
+    locked: ["Global match access", "Dedicated relationship manager"],
+  },
+  {
+    id: "diamond", name: "Diamond Elite", badge: "DIAMOND",
+    prices: { weekly: null as null, monthly: 2499, yearly: 24999 },
+    bonusCoins: 3000,
     color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
-    coinsDay: 200, calls: "Unlimited", badge2: "Diamond badge",
-    features: ["200 coins/day", "Unlimited everything", "Diamond VIP badge", "Featured creator status", "VIP exclusive content", "Advanced analytics", "Custom profile effects", "Dedicated account manager", "Priority ad placement", "Ad-free experience", "Early feature access"],
+    coinsDay: 300, calls: "Unlimited", badge2: "Ultra VIP badge",
+    features: ["3000 bonus coins/month", "Everything in Platinum", "Global match access", "Ultra VIP badge", "Dedicated support", "Top profile visibility", "Homepage profile promotion", "VIP gaming tournaments", "Exclusive creator events", "Early access features", "Dedicated relationship manager"],
     locked: [],
+  },
+];
+
+// ── Creator subscription plans ─────────────────────────────────────────────────
+const CREATOR_PLANS = [
+  {
+    id: "creator_basic", name: "Creator Basic", price: 499,
+    color: "#2196F3", gradient: ["#2196F3", "#0D47A1"] as [string, string],
+    icon: "video" as const,
+    features: ["Creator badge", "Live streaming access", "Basic analytics", "Gift tracking", "Basic creator dashboard"],
+  },
+  {
+    id: "creator_pro", name: "Creator Pro", price: 1499,
+    color: "#7B2FBE", gradient: ["#9C27B0", "#7B2FBE"] as [string, string],
+    popular: true,
+    icon: "trending-up" as const,
+    features: ["HD streaming", "PK battle access", "Advanced analytics", "Revenue insights", "Stream promotions", "Fan engagement tools", "Priority creator support"],
+  },
+  {
+    id: "creator_elite", name: "Creator Elite", price: 4999,
+    color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
+    icon: "star" as const,
+    features: ["Homepage promotions", "Verified creator badge", "Dedicated manager", "VIP creator rooms", "Exclusive events", "Creator sponsorship access", "Featured placement"],
   },
 ];
 
@@ -100,13 +143,14 @@ const UNLOCK_CATEGORIES = [
 ];
 
 const PLAN_COLOR: Record<string, string> = {
-  silver: "#A0A0A0",
-  gold:   "#FFB800",
-  vip:    "#E91E8C",
+  silver:   "#A0A0A0",
+  gold:     "#FFB800",
+  platinum: "#7B2FBE",
+  diamond:  "#E91E8C",
 };
 
 const PLAN_RANK: Record<string, number> = {
-  free: 0, silver: 1, gold: 2, vip: 3,
+  free: 0, silver: 1, gold: 2, platinum: 3, diamond: 4,
 };
 
 // ── Fan tiers ──────────────────────────────────────────────────────────────────
@@ -425,29 +469,30 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
 // ── Plan comparison matrix ─────────────────────────────────────────────────────
 const COMPARE_ROWS = [
-  { label: "Daily Coins",         free: "20",           silver: "50",            gold: "150",             vip: "200"             },
-  { label: "Random Calls",        free: "✗",            silver: "5/day",         gold: "Unlimited",       vip: "Unlimited"       },
-  { label: "Stories",             free: "5/day",        silver: "Unlimited",     gold: "Unlimited",       vip: "Unlimited"       },
-  { label: "Communities",         free: "5",            silver: "20",            gold: "Unlimited",       vip: "Unlimited"       },
-  { label: "VIP Badge",           free: "✗",            silver: "Silver",        gold: "Gold",            vip: "Diamond"         },
-  { label: "AI Feed",             free: "✗",            silver: "✗",             gold: "✓",               vip: "✓"               },
-  { label: "Creator Fund",        free: "✗",            silver: "✗",             gold: "✓",               vip: "✓"               },
-  { label: "Boost & Ads",         free: "✗",            silver: "✗",             gold: "✓",               vip: "Priority"        },
-  { label: "Chat Translation",    free: "✗",            silver: "✓",             gold: "✓",               vip: "✓"               },
-  { label: "Featured Creator",    free: "✗",            silver: "✗",             gold: "✗",               vip: "✓"               },
-  { label: "Custom Effects",      free: "✗",            silver: "✗",             gold: "✗",               vip: "✓"               },
-  { label: "Dedicated Manager",   free: "✗",            silver: "✗",             gold: "✗",               vip: "✓"               },
-  { label: "Ad-Free",             free: "✗",            silver: "✗",             gold: "✗",               vip: "✓"               },
+  { label: "Price/month",       free: "Free",   silver: "₹199",       gold: "₹499",       platinum: "₹999",      diamond: "₹2499"      },
+  { label: "Bonus Coins/mo",    free: "—",      silver: "100",         gold: "350",         platinum: "1,000",     diamond: "3,000"       },
+  { label: "Random Calls",      free: "✗",      silver: "5/day",       gold: "Unlimited",   platinum: "Unlimited", diamond: "Unlimited"   },
+  { label: "Super Likes",       free: "✗",      silver: "5/day",       gold: "✓",           platinum: "✓",         diamond: "✓"           },
+  { label: "VIP Badge",         free: "✗",      silver: "Silver",      gold: "Gold",        platinum: "Platinum",  diamond: "Ultra VIP"   },
+  { label: "HD Video Calls",    free: "✗",      silver: "✗",           gold: "✓",           platinum: "✓",         diamond: "✓"           },
+  { label: "Ghost Mode",        free: "✗",      silver: "✗",           gold: "✓",           platinum: "✓",         diamond: "✓"           },
+  { label: "Unlimited Filters", free: "✗",      silver: "Basic",       gold: "✓",           platinum: "✓",         diamond: "✓"           },
+  { label: "AI Match",          free: "✗",      silver: "✗",           gold: "✗",           platinum: "✓",         diamond: "✓"           },
+  { label: "Incognito",         free: "✗",      silver: "✗",           gold: "✗",           platinum: "✓",         diamond: "✓"           },
+  { label: "Global Match",      free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
+  { label: "Homepage Promo",    free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
+  { label: "Dedicated Manager", free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
 ];
 
 function CompareTable({ colors }: { colors: ReturnType<typeof useColors> }) {
-  const colW = (width - 32) / 5;
+  const colW = (width - 32) / 6;
   const cols = [
-    { key: "label",  head: "Feature",  color: colors.foreground,  bg: "transparent" },
-    { key: "free",   head: "Free",     color: "#888",             bg: "#88888818"   },
-    { key: "silver", head: "Silver",   color: "#A0A0A0",          bg: "#A0A0A018"   },
-    { key: "gold",   head: "Gold",     color: "#FFB800",          bg: "#FFB80018"   },
-    { key: "vip",    head: "Diamond",  color: "#E91E8C",          bg: "#E91E8C18"   },
+    { key: "label",    head: "Feature",   color: colors.foreground, bg: "transparent" },
+    { key: "free",     head: "Free",      color: "#888",            bg: "#88888818"   },
+    { key: "silver",   head: "Silver",    color: "#A0A0A0",         bg: "#A0A0A018"   },
+    { key: "gold",     head: "Gold",      color: "#FFB800",         bg: "#FFB80018"   },
+    { key: "platinum", head: "Platinum",  color: "#7B2FBE",         bg: "#7B2FBE18"   },
+    { key: "diamond",  head: "Diamond",   color: "#E91E8C",         bg: "#E91E8C18"   },
   ] as const;
 
   return (
@@ -482,13 +527,29 @@ function CompareTable({ colors }: { colors: ReturnType<typeof useColors> }) {
 }
 
 // ── Main screen ────────────────────────────────────────────────────────────────
-type Section = "plans" | "boost" | "fan";
+type Section = "plans" | "creator" | "boost" | "fan";
+
+function getPlanPrice(plan: typeof PLANS[0], billing: BillingPeriod): number | null {
+  return plan.prices[billing] ?? null;
+}
+
+function formatPlanPrice(plan: typeof PLANS[0], billing: BillingPeriod): string {
+  const p = getPlanPrice(plan, billing);
+  if (p === null) return "N/A";
+  if (p === 0) return "Free";
+  return `₹${p.toLocaleString("en-IN")}`;
+}
+
+function billingLabel(billing: BillingPeriod): string {
+  return billing === "weekly" ? "/week" : billing === "monthly" ? "/month" : "/year";
+}
 
 export default function SubscriptionScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const topPad  = Platform.OS === "web" ? 67 : insets.top;
   const [section,      setSection]      = useState<Section>("plans");
+  const [billing,      setBilling]      = useState<BillingPeriod>("monthly");
   const [selectedPlan, setSelectedPlan] = useState("gold");
   const [showCompare,  setShowCompare]  = useState(false);
   const [unlockCat,    setUnlockCat]    = useState(0);
@@ -539,9 +600,10 @@ export default function SubscriptionScreen() {
         {/* Tab bar */}
         <View style={[styles.tabBar, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
           {([
-            { key: "plans" as Section, label: "VIP Plans",  icon: "award"       },
-            { key: "boost" as Section, label: "Boost Ads",  icon: "trending-up" },
-            { key: "fan"   as Section, label: "Fan Clubs",  icon: "heart"       },
+            { key: "plans"   as Section, label: "VIP",      icon: "award"       },
+            { key: "creator" as Section, label: "Creator",  icon: "video"       },
+            { key: "boost"   as Section, label: "Boost",    icon: "trending-up" },
+            { key: "fan"     as Section, label: "Fan Club", icon: "heart"       },
           ]).map(({ key, label, icon }) => (
             <Pressable key={key} onPress={() => setSection(key)}
               style={[styles.tabBtn, section === key && styles.tabBtnActive]}>
@@ -594,12 +656,29 @@ export default function SubscriptionScreen() {
               </View>
             </View>
 
+            {/* Billing period toggle */}
+            <View style={[styles.billingRow, { backgroundColor: colors.muted }]}>
+              {(["weekly", "monthly", "yearly"] as BillingPeriod[]).map((b) => (
+                <Pressable key={b} onPress={() => setBilling(b)}
+                  style={[styles.billingBtn, billing === b && { backgroundColor: colors.primary }]}>
+                  {b === "yearly" && <Text style={[styles.billingBadge]}>Save 15%</Text>}
+                  <Text style={[styles.billingTxt, { color: billing === b ? "#fff" : colors.mutedForeground }]}>
+                    {b.charAt(0).toUpperCase() + b.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
             {/* Plan cards */}
             {PLANS.map((plan) => {
-              const sel = selectedPlan === plan.id;
+              const sel       = selectedPlan === plan.id;
+              const priceNum  = getPlanPrice(plan, billing);
+              const priceStr  = formatPlanPrice(plan, billing);
+              const periodStr = plan.id === "free" ? "" : billingLabel(billing);
+              const unavail   = priceNum === null;
               return (
-                <Pressable key={plan.id} onPress={() => setSelectedPlan(plan.id)}
-                  style={[styles.planCard, { backgroundColor: colors.card, borderColor: sel ? plan.color : colors.border, borderWidth: sel ? 2 : 1 }]}>
+                <Pressable key={plan.id} onPress={() => !unavail && setSelectedPlan(plan.id)}
+                  style={[styles.planCard, { backgroundColor: colors.card, borderColor: sel ? plan.color : colors.border, borderWidth: sel ? 2 : 1, opacity: unavail ? 0.5 : 1 }]}>
 
                   {plan.popular && (
                     <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.popularBanner}>
@@ -610,16 +689,23 @@ export default function SubscriptionScreen() {
 
                   <View style={styles.planTop}>
                     <LinearGradient colors={plan.gradient} style={styles.planIconWrap}>
-                      <Feather name={plan.id === "free" ? "user" : plan.id === "silver" ? "shield" : plan.id === "gold" ? "award" : "zap"} size={22} color="#fff" />
+                      <Feather name={plan.id === "free" ? "user" : plan.id === "silver" ? "shield" : plan.id === "gold" ? "award" : plan.id === "platinum" ? "layers" : "zap"} size={22} color="#fff" />
                     </LinearGradient>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.planName, { color: colors.foreground }]}>{plan.name}</Text>
                       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                        <Text style={[styles.planPrice, { color: plan.color }]}>{plan.price}</Text>
-                        <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>{plan.period}</Text>
+                        <Text style={[styles.planPrice, { color: plan.color }]}>
+                          {unavail ? "—" : priceStr}
+                        </Text>
+                        <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>{periodStr}</Text>
                       </View>
-                      {plan.price !== "₹0" && (
-                        <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>+18% GST applicable</Text>
+                      {plan.bonusCoins > 0 && (
+                        <Text style={{ fontSize: 10, color: "#34C759", fontFamily: "Inter_600SemiBold", marginTop: 2 }}>
+                          +{plan.bonusCoins.toLocaleString("en-IN")} bonus coins/month
+                        </Text>
+                      )}
+                      {unavail && (
+                        <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>Not available on {billing} billing</Text>
                       )}
                     </View>
                     {sel && (
@@ -632,7 +718,7 @@ export default function SubscriptionScreen() {
                   {/* Highlights row */}
                   <View style={[styles.planHighlights, { backgroundColor: plan.color + "10", borderColor: plan.color + "25" }]}>
                     {[
-                      { icon: "gift", val: `${plan.coinsDay} coins/day` },
+                      { icon: "gift",  val: plan.bonusCoins > 0 ? `${plan.bonusCoins.toLocaleString("en-IN")} coins/mo` : "20 coins/day" },
                       { icon: "phone", val: plan.calls + " calls" },
                       { icon: "award", val: plan.badge2 },
                     ].map(({ icon, val }) => (
@@ -662,11 +748,11 @@ export default function SubscriptionScreen() {
                     )}
                   </View>
 
-                  {plan.id !== "free" && (
-                    <Pressable onPress={() => { setPayAmount(parseInt(plan.price.replace(/[^0-9]/g, ""))); setPayLabel(`${plan.name} Plan`); setShowPayment(true); }}>
+                  {plan.id !== "free" && !unavail && (
+                    <Pressable onPress={() => { setPayAmount(priceNum!); setPayLabel(`${plan.name} — ${priceStr}${periodStr}`); setShowPayment(true); }}>
                       <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
                         <Text style={styles.subBtnTxt}>
-                          {sel ? `Upgrade to ${plan.name} — ${plan.price}${plan.period}` : `Subscribe — ${plan.price}${plan.period}`}
+                          {sel ? `Upgrade to ${plan.name} — ${priceStr}${periodStr}` : `Subscribe — ${priceStr}${periodStr}`}
                         </Text>
                       </LinearGradient>
                     </Pressable>
@@ -714,6 +800,67 @@ export default function SubscriptionScreen() {
               <Text style={[styles.payNote, { color: colors.mutedForeground }]}>
                 Auto-renews monthly. Cancel anytime. GST included.
               </Text>
+            </View>
+          </View>
+        )}
+
+        {/* ══════════════ CREATOR PLANS ══════════════ */}
+        {section === "creator" && (
+          <View style={styles.sectionWrap}>
+            <View style={[styles.unlockCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={{ borderRadius: 12, padding: 14, marginBottom: 4 }}>
+                <Text style={{ color: "#fff", fontSize: 17, fontFamily: "Inter_700Bold" }}>Creator Subscriptions</Text>
+                <Text style={{ color: "rgba(255,255,255,0.82)", fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 4, lineHeight: 17 }}>
+                  For hosts, streamers, influencers, performers and podcast creators. Grow your audience and earn more.
+                </Text>
+              </LinearGradient>
+            </View>
+
+            {CREATOR_PLANS.map((plan) => (
+              <View key={plan.id} style={[styles.planCard, { backgroundColor: colors.card, borderColor: plan.color + "40", borderWidth: 1 }]}>
+                {plan.popular && (
+                  <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.popularBanner}>
+                    <Feather name="star" size={11} color="#fff" />
+                    <Text style={styles.popularText}>Most Popular</Text>
+                  </LinearGradient>
+                )}
+                <View style={styles.planTop}>
+                  <LinearGradient colors={plan.gradient} style={styles.planIconWrap}>
+                    <Feather name={plan.icon} size={22} color="#fff" />
+                  </LinearGradient>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.planName, { color: colors.foreground }]}>{plan.name}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
+                      <Text style={[styles.planPrice, { color: plan.color }]}>₹{plan.price.toLocaleString("en-IN")}</Text>
+                      <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>/month</Text>
+                    </View>
+                    <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>+18% GST applicable</Text>
+                  </View>
+                </View>
+                <View style={styles.featList}>
+                  {plan.features.map(f => (
+                    <View key={f} style={styles.featRow}>
+                      <Feather name="check-circle" size={14} color="#34C759" />
+                      <Text style={[styles.featTxt, { color: colors.foreground }]}>{f}</Text>
+                    </View>
+                  ))}
+                </View>
+                <Pressable onPress={() => { setPayAmount(plan.price); setPayLabel(`${plan.name}`); setShowPayment(true); }}>
+                  <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                    <Text style={styles.subBtnTxt}>Subscribe — ₹{plan.price.toLocaleString("en-IN")}/month</Text>
+                  </LinearGradient>
+                </Pressable>
+              </View>
+            ))}
+
+            <View style={[styles.payCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.payTitle, { color: colors.foreground }]}>Already a Creator?</Text>
+              <Text style={[{ fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 6, lineHeight: 19 }, { color: colors.mutedForeground }]}>
+                Check your creator analytics, earnings, and manage your fan memberships from your creator dashboard.
+              </Text>
+              <Pressable onPress={() => router.push("/creator-dashboard")} style={[styles.subBtn, { backgroundColor: colors.primary, margin: 0, marginTop: 12 }]}>
+                <Text style={styles.subBtnTxt}>Go to Creator Dashboard</Text>
+              </Pressable>
             </View>
           </View>
         )}
@@ -940,6 +1087,12 @@ const styles = StyleSheet.create({
   tableHead:        { fontSize: 10, fontFamily: "Inter_700Bold", textAlign: "center" },
   tableTxt:         { fontSize: 10, fontFamily: "Inter_500Medium", textAlign: "center" },
   tableCross:       { fontSize: 12, fontFamily: "Inter_400Regular" },
+
+  // Billing toggle
+  billingRow:   { flexDirection: "row", borderRadius: 14, padding: 4, gap: 2 },
+  billingBtn:   { flex: 1, alignItems: "center", paddingVertical: 9, borderRadius: 10, position: "relative" as const },
+  billingTxt:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  billingBadge: { fontSize: 8, fontFamily: "Inter_700Bold", color: "#34C759", position: "absolute" as const, top: 2, right: 4 },
 
   // Payment
   payCard:      { borderRadius: 16, borderWidth: 1, padding: 16 },
