@@ -603,12 +603,12 @@ export default function BrandPostDealScreen() {
 
             <Text style={[styles.modalTitle, { color: colors.foreground }]}>Post Deal for 1,000 Coins</Text>
             <Text style={[styles.modalDesc, { color: colors.mutedForeground }]}>
-              "{title || "Your campaign"}" will go live instantly and creators can start pitching within minutes.
+              "{title || "Your campaign"}" will go live instantly. This fee is paid to Ridhi and covers unlimited creator applications until your deadline.
             </Text>
 
             {/* Cost row */}
             <View style={[styles.modalCostRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              <Text style={[styles.modalCostLabel, { color: colors.mutedForeground }]}>Deal posting fee</Text>
+              <Text style={[styles.modalCostLabel, { color: colors.mutedForeground }]}>Ridhi platform fee</Text>
               <View style={styles.modalCostRight}>
                 <RidhiCoin size={18} />
                 <Text style={[styles.modalCostVal, { color: "#FFB800" }]}>1,000</Text>

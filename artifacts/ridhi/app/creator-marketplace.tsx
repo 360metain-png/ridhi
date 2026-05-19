@@ -228,7 +228,7 @@ export default function CreatorMarketplaceScreen() {
     setCoinModal({
       visible: true,
       title: `Pitch to ${deal.brand}`,
-      desc: `Pitching sends your profile to the brand and uses ${PITCH_COST} Ridhi Coins. The brand reviews all pitches and shortlists the best fit.`,
+      desc: `Pitching sends your profile to the brand. ${PITCH_COST} Ridhi Coins are paid to Ridhi as a platform fee. The brand reviews all pitches and shortlists the best fit.`,
       cost: PITCH_COST,
       onConfirm: async () => {
         closeCoinModal();
@@ -254,7 +254,7 @@ export default function CreatorMarketplaceScreen() {
     setCoinModal({
       visible: true,
       title: `Connect with ${brandName}`,
-      desc: `Unlocking contact details costs ${CONNECT_COST} Ridhi Coins. Once connected, the brand's contact person details will be revealed so you can coordinate directly.`,
+      desc: `Unlocking contact details costs ${CONNECT_COST} Ridhi Coins — paid to Ridhi as a platform fee. Once connected, the brand's direct contact will be revealed so you can coordinate.`,
       cost: CONNECT_COST,
       onConfirm: async () => {
         closeCoinModal();
