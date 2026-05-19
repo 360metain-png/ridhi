@@ -147,15 +147,19 @@ export default function PodcastsScreen() {
               <Text style={styles.heroTitle}>India's{"\n"}Top Voices</Text>
               <Text style={styles.heroSub}>Audio · Video · Live · AI Notes</Text>
             </View>
-            <Pressable
-              onPress={() => router.push("/podcast-create")}
-              style={styles.heroCreateBtn}
-            >
-              <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.heroCreateGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-                <Feather name="mic" size={22} color="#fff" />
-                <Text style={styles.heroCreateText}>Record</Text>
-              </LinearGradient>
-            </Pressable>
+            <View style={{ gap: 10, alignItems: "center" }}>
+              <Pressable onPress={() => router.push("/podcast-create")} style={styles.heroCreateBtn}>
+                <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.heroCreateGrad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                  <Feather name="mic" size={22} color="#fff" />
+                  <Text style={styles.heroCreateText}>Record</Text>
+                </LinearGradient>
+              </Pressable>
+              <Pressable onPress={() => router.push("/my-podcast-channel" as any)}
+                style={[styles.myChannelBtn, { backgroundColor: "rgba(255,255,255,0.12)", borderColor: "rgba(255,255,255,0.25)" }]}>
+                <Feather name="user" size={12} color="#fff" />
+                <Text style={styles.myChannelTxt}>My Channel</Text>
+              </Pressable>
+            </View>
           </View>
         </LinearGradient>
 
@@ -348,4 +352,6 @@ const styles = StyleSheet.create({
   },
   followingLiveBadgeText: { color: "#fff", fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 0.3 },
   followingName: { fontFamily: "Inter_500Medium", fontSize: 11, textAlign: "center" },
+  myChannelBtn: { flexDirection: "row", alignItems: "center", gap: 4, borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5 },
+  myChannelTxt: { color: "#fff", fontFamily: "Inter_600SemiBold", fontSize: 11 },
 });
