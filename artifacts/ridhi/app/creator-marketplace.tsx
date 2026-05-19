@@ -420,7 +420,7 @@ export default function CreatorMarketplaceScreen() {
             </View>
 
             {/* Become a brand CTA */}
-            <Pressable style={[styles.brandCta, { borderColor: "#7B2FBE40", backgroundColor: "#7B2FBE0D", marginHorizontal: 16, marginTop: 20 }]}>
+            <Pressable onPress={() => router.push("/brand-register")} style={[styles.brandCta, { borderColor: "#7B2FBE40", backgroundColor: "#7B2FBE0D", marginHorizontal: 16, marginTop: 20 }]}>
               <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.brandCtaIcon} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                 <Feather name="briefcase" size={18} color="#fff" />
               </LinearGradient>

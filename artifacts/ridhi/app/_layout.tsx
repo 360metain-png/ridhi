@@ -50,6 +50,8 @@ function RootLayoutNav() {
       <Stack.Screen name="host-profile" options={{ presentation: "card" }} />
       <Stack.Screen name="vibe-stars" options={{ presentation: "card" }} />
       <Stack.Screen name="creator-marketplace" options={{ presentation: "card" }} />
+      <Stack.Screen name="brand-register" options={{ presentation: "card" }} />
+      <Stack.Screen name="brand-post-deal" options={{ presentation: "card" }} />
       <Stack.Screen name="podcasts" options={{ presentation: "card" }} />
       <Stack.Screen name="podcast-create" options={{ presentation: "modal" }} />
       <Stack.Screen name="ai-assistant" options={{ presentation: "card" }} />
