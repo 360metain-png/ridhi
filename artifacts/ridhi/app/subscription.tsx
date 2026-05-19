@@ -16,128 +16,253 @@ const { width } = Dimensions.get("window");
 type BillingPeriod = "weekly" | "monthly" | "yearly";
 
 // ── Plan definitions ───────────────────────────────────────────────────────────
+// Pricing strategy: weekly = try-before-buy (impulse), monthly = baseline,
+// yearly = flagship (saves ~44% vs monthly × 12, i.e. pay for ~6.7 months, get 12)
+// India ARPU comps: Tinder Gold ₹1,200/mo · Bumble ₹999/mo · OTT ₹149–649/mo
 const PLANS = [
   {
     id: "free", name: "Free", badge: "FREE",
-    prices: { weekly: null as null, monthly: 0, yearly: null as null },
+    prices: { weekly: 0, monthly: 0, yearly: 0 },
     bonusCoins: 0,
+    yearlySaving: 0,
     color: "#888888", gradient: ["#555", "#333"] as [string, string],
-    coinsDay: 20, calls: "None", badge2: "—",
-    features: ["Basic profile", "20 coins/day", "Standard feed", "5 stories/day", "5 communities", "Job search access", "Resume upload"],
-    locked: ["Audio / Video calls", "VIP badge", "Creator fund", "Exclusive content", "Boost & Ads", "AI recommendations"],
+    superLikes: "None", calls: "None", badge2: "No badge",
+    highlights: ["20 free coins/day", "Basic feed & reels", "5 stories/day"],
+    features: [
+      "Standard Home Feed & Reels",
+      "20 coins/day (free daily reward)",
+      "5 stories/day",
+      "Up to 5 Communities",
+      "Basic match filters",
+      "Job search & resume upload",
+      "Chat with matches",
+    ],
+    locked: ["Ad-free experience", "VIP badge", "Super Likes", "HD video calls", "Ghost Mode", "Coin bonuses", "Profile boost", "Podcast VIP rooms"],
   },
   {
     id: "silver", name: "Silver VIP", badge: "SILVER",
-    prices: { weekly: 99, monthly: 199, yearly: 1999 },
-    bonusCoins: 100,
+    prices: { weekly: 49, monthly: 149, yearly: 999 },
+    bonusCoins: 150,
+    yearlySaving: 44,
     color: "#A0A0A0", gradient: ["#9E9E9E", "#616161"] as [string, string],
-    coinsDay: 50, calls: "5/day", badge2: "Silver badge",
-    features: ["100 bonus coins/month", "Ad-free experience", "Silver VIP badge", "5 daily super likes", "Basic match filters", "HD profile upload", "Priority chat delivery", "VIP communities access", "Basic profile boost"],
-    locked: ["HD video calls", "Ghost mode", "Premium gifts", "AI match suggestions"],
+    superLikes: "5/day", calls: "3/day (audio)", badge2: "Silver badge",
+    highlights: ["150 coins/month bonus", "5 Super Likes/day", "Ad-free feed"],
+    features: [
+      "Ad-free Feed, Reels & Explore",
+      "Silver VIP badge (profile, chat, swipes)",
+      "150 bonus coins/month (≈₹120 value)",
+      "5 Super Likes/day on Match screen",
+      "Unlimited Stories & Communities",
+      "3 audio calls/day",
+      "HD photo profile upload",
+      "Priority chat message delivery",
+      "Weekly profile boost (once/week)",
+      "Job application priority badge",
+    ],
+    locked: ["HD video calls", "Ghost Mode", "AI match suggestions", "Incognito mode", "Podcast VIP rooms"],
   },
   {
     id: "gold", name: "Gold VIP", badge: "GOLD",
-    prices: { weekly: 199, monthly: 499, yearly: 4999 },
-    bonusCoins: 350,
+    prices: { weekly: 99, monthly: 299, yearly: 1999 },
+    bonusCoins: 400,
+    yearlySaving: 44,
     color: "#FFB800", gradient: ["#FFB800", "#FF8F00"] as [string, string],
     popular: true,
-    coinsDay: 150, calls: "Unlimited", badge2: "Gold badge",
-    features: ["350 bonus coins/month", "Everything in Silver", "HD video calls", "Priority random match", "Weekly profile boost", "Unlimited filters", "Ghost mode", "Premium gifts access", "Exclusive gaming rooms", "Premium podcast rooms", "Creator priority match"],
-    locked: ["Incognito browsing", "AI match suggestions", "Dedicated relationship manager"],
+    superLikes: "10/day", calls: "Unlimited HD", badge2: "Gold badge",
+    highlights: ["400 coins/month bonus", "Unlimited HD video calls", "Ghost Mode"],
+    features: [
+      "Everything in Silver VIP, plus:",
+      "Gold VIP badge (animated glow)",
+      "400 bonus coins/month (≈₹320 value)",
+      "HD video & audio calls (unlimited)",
+      "10 Super Likes/day",
+      "Ghost Mode — browse without being seen",
+      "Unlimited match filters (age, city, interest)",
+      "Priority position in Match queue",
+      "Weekly auto profile boost",
+      "VIP Podcast room access",
+      "Premium live stream gifts",
+      "Early access to new features",
+    ],
+    locked: ["AI match suggestions", "Incognito mode", "Global match", "Dedicated manager"],
   },
   {
     id: "platinum", name: "Platinum VIP", badge: "PLATINUM",
-    prices: { weekly: 399, monthly: 999, yearly: 9999 },
+    prices: { weekly: 199, monthly: 599, yearly: 3999 },
     bonusCoins: 1000,
+    yearlySaving: 44,
     color: "#7B2FBE", gradient: ["#9C27B0", "#7B2FBE"] as [string, string],
-    coinsDay: 200, calls: "Unlimited", badge2: "Platinum badge",
-    features: ["1000 bonus coins/month", "Everything in Gold", "Unlimited match priority", "Creator priority access", "Incognito browsing", "Exclusive VIP rooms", "AI match suggestions", "Unlimited reconnects", "Advanced analytics", "Faster withdrawals for hosts", "Higher match visibility"],
-    locked: ["Global match access", "Dedicated relationship manager"],
+    superLikes: "15/day", calls: "Unlimited HD", badge2: "Platinum badge",
+    highlights: ["1,000 coins/month bonus", "AI match suggestions", "Incognito mode"],
+    features: [
+      "Everything in Gold VIP, plus:",
+      "Platinum VIP badge (shimmer effect)",
+      "1,000 bonus coins/month (≈₹800 value)",
+      "AI-powered match suggestions",
+      "Incognito browsing (invisible profile visits)",
+      "15 Super Likes/day",
+      "Unlimited profile boosts",
+      "Creator Fund priority access",
+      "Advanced creator analytics",
+      "VIP exclusive Ludo & Podcast rooms",
+      "Faster coin withdrawals (48hr vs 7 days)",
+      "PK Battle hosting access",
+    ],
+    locked: ["Global match access", "Homepage featured placement", "Dedicated account manager"],
   },
   {
     id: "diamond", name: "Diamond Elite", badge: "DIAMOND",
-    prices: { weekly: null as null, monthly: 2499, yearly: 24999 },
+    prices: { weekly: 349, monthly: 999, yearly: 6999 },
     bonusCoins: 3000,
+    yearlySaving: 42,
     color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
-    coinsDay: 300, calls: "Unlimited", badge2: "Ultra VIP badge",
-    features: ["3000 bonus coins/month", "Everything in Platinum", "Global match access", "Ultra VIP badge", "Dedicated support", "Top profile visibility", "Homepage profile promotion", "VIP gaming tournaments", "Exclusive creator events", "Early access features", "Dedicated relationship manager"],
+    superLikes: "Unlimited", calls: "Unlimited HD", badge2: "Diamond badge",
+    highlights: ["3,000 coins/month bonus", "Homepage featured", "Dedicated manager"],
+    features: [
+      "Everything in Platinum VIP, plus:",
+      "Diamond Elite badge (animated + glow ring)",
+      "3,000 bonus coins/month (≈₹2,400 value)",
+      "Unlimited Super Likes",
+      "Global match access (beyond India)",
+      "Homepage profile featured placement",
+      "Top 1% search & Explore visibility",
+      "Dedicated account manager (WhatsApp)",
+      "Custom profile frame & effects",
+      "VIP gaming tournament access (Ludo)",
+      "Exclusive creator events & meetups",
+      "Sponsor deal opportunities (Elite creators)",
+    ],
     locked: [],
   },
 ];
 
 // ── Creator subscription plans ─────────────────────────────────────────────────
+// Creator Pass is separate from VIP — focused on EARNING, not social perks.
+// Commission reduction stacks: Ridhi normally takes 30% of coin earnings.
+// Starter saves 10pp → 20%; Pro saves 7pp more → 13%; Elite saves 5pp more → 8%.
 const CREATOR_PLANS = [
   {
-    id: "creator_basic", name: "Creator Basic", price: 499,
+    id: "creator_starter", name: "Creator Starter", monthlyPrice: 199, yearlyPrice: 1999,
+    yearlySaving: 16,
     color: "#2196F3", gradient: ["#2196F3", "#0D47A1"] as [string, string],
     icon: "video" as const,
-    features: ["Creator badge", "Live streaming access", "Basic analytics", "Gift tracking", "Basic creator dashboard"],
+    tagline: "Go live & start earning",
+    highlights: ["Creator badge", "Live up to 2hr/day", "10% commission cut"],
+    features: [
+      "Creator badge on your profile",
+      "Live streaming (up to 2 hrs/day)",
+      "Audio podcast hosting (up to 10 episodes)",
+      "Basic creator analytics dashboard",
+      "Gift & coin earnings tracker",
+      "1 Fan Club tier setup",
+      "10% commission reduction on withdrawals",
+      "Creator support (email, 48hr SLA)",
+    ],
+    locked: ["HD streaming", "PK Battles", "Revenue insights", "Podcast monetization", "Stream promotions"],
   },
   {
-    id: "creator_pro", name: "Creator Pro", price: 1499,
+    id: "creator_pro", name: "Creator Pro", monthlyPrice: 499, yearlyPrice: 4999,
+    yearlySaving: 17,
     color: "#7B2FBE", gradient: ["#9C27B0", "#7B2FBE"] as [string, string],
     popular: true,
     icon: "trending-up" as const,
-    features: ["HD streaming", "PK battle access", "Advanced analytics", "Revenue insights", "Stream promotions", "Fan engagement tools", "Priority creator support"],
+    tagline: "Scale your creator business",
+    highlights: ["HD streaming (unlimited)", "PK Battle hosting", "17% commission cut"],
+    features: [
+      "Everything in Creator Starter, plus:",
+      "HD/4K live streaming (unlimited hours)",
+      "PK Battle hosting access",
+      "Advanced analytics (retention, demographics)",
+      "Revenue insights & projections",
+      "Podcast monetization (paid episodes + VIP rooms)",
+      "Stream promotions — featured in Explore",
+      "Fan polls & live Q&A tools",
+      "3 Fan Club tiers (Supporter / Super Fan / VIP)",
+      "17% commission reduction on withdrawals",
+      "Priority creator support (chat, 12hr SLA)",
+    ],
+    locked: ["Homepage featured", "Verified badge", "Brand deals", "Dedicated manager"],
   },
   {
-    id: "creator_elite", name: "Creator Elite", price: 4999,
+    id: "creator_elite", name: "Creator Elite", monthlyPrice: 999, yearlyPrice: 9999,
+    yearlySaving: 17,
     color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
     icon: "star" as const,
-    features: ["Homepage promotions", "Verified creator badge", "Dedicated manager", "VIP creator rooms", "Exclusive events", "Creator sponsorship access", "Featured placement"],
+    tagline: "India's top creator tier",
+    highlights: ["Homepage featured", "Verified blue badge", "22% commission cut"],
+    features: [
+      "Everything in Creator Pro, plus:",
+      "Homepage featured placement (rotational)",
+      "Verified creator badge (blue tick)",
+      "Dedicated creator account manager",
+      "Brand deal & sponsorship opportunities",
+      "Ridhi Radio — your podcast in featured playlist",
+      "Exclusive creator meetups & events",
+      "Custom branded creator room",
+      "Featured in 'Top Creators' section",
+      "22% commission reduction on withdrawals",
+      "Priority support (WhatsApp, 2hr SLA)",
+    ],
+    locked: [],
   },
 ];
 
 // ── Unlock features showcase ───────────────────────────────────────────────────
 const UNLOCK_CATEGORIES = [
   {
-    title: "Profile & Discovery",
-    icon: "user",
+    title: "Dating & Match",
+    icon: "heart",
     color: "#E91E8C",
     items: [
-      { label: "VIP Badge",             plan: "silver", icon: "award"       },
-      { label: "Priority in Search",    plan: "silver", icon: "search"      },
-      { label: "AI-Powered Feed",       plan: "gold",   icon: "zap"         },
-      { label: "Featured Creator",      plan: "vip",    icon: "star"        },
-      { label: "Custom Profile Effects",plan: "vip",    icon: "sliders"     },
-      { label: "Ad-Free Experience",    plan: "vip",    icon: "shield"      },
+      { label: "5 Super Likes/day",      plan: "silver",   icon: "star"        },
+      { label: "10 Super Likes/day",     plan: "gold",     icon: "star"        },
+      { label: "Ghost Mode",             plan: "gold",     icon: "eye-off"     },
+      { label: "Unlimited Filters",      plan: "gold",     icon: "sliders"     },
+      { label: "AI Match Suggestions",   plan: "platinum", icon: "zap"         },
+      { label: "Incognito Browsing",     plan: "platinum", icon: "shield"      },
+      { label: "Global Match Access",    plan: "diamond",  icon: "globe"       },
+      { label: "Unlimited Super Likes",  plan: "diamond",  icon: "award"       },
     ],
   },
   {
-    title: "Creator Tools",
+    title: "Feed & Social",
     icon: "trending-up",
     color: "#7B2FBE",
     items: [
-      { label: "Unlimited Stories",     plan: "silver", icon: "circle"      },
-      { label: "Chat Translations",     plan: "silver", icon: "globe"       },
-      { label: "Creator Fund Access",   plan: "gold",   icon: "dollar-sign" },
-      { label: "Boost & Ad Campaigns",  plan: "gold",   icon: "bar-chart-2" },
-      { label: "Advanced Analytics",    plan: "vip",    icon: "pie-chart"   },
-      { label: "Dedicated Manager",     plan: "vip",    icon: "headphones"  },
+      { label: "Ad-Free Experience",     plan: "silver",   icon: "shield"      },
+      { label: "Unlimited Stories",      plan: "silver",   icon: "circle"      },
+      { label: "Unlimited Communities",  plan: "silver",   icon: "users"       },
+      { label: "Early Feature Access",   plan: "gold",     icon: "clock"       },
+      { label: "VIP Podcast Rooms",      plan: "gold",     icon: "mic"         },
+      { label: "Custom Profile Frame",   plan: "diamond",  icon: "sliders"     },
+      { label: "Homepage Featured",      plan: "diamond",  icon: "home"        },
     ],
   },
   {
-    title: "Social & Chat",
+    title: "Calls & Chat",
     icon: "message-circle",
     color: "#2196F3",
     items: [
-      { label: "5 Random Calls/Day",    plan: "silver", icon: "phone"       },
-      { label: "Unlimited Communities", plan: "gold",   icon: "users"       },
-      { label: "Unlimited Calls",       plan: "gold",   icon: "video"       },
-      { label: "VIP Exclusive Content", plan: "vip",    icon: "lock"        },
-      { label: "Early Feature Access",  plan: "gold",   icon: "clock"       },
-      { label: "Priority Support",      plan: "gold",   icon: "life-buoy"   },
+      { label: "3 Audio Calls/day",      plan: "silver",   icon: "phone"       },
+      { label: "Unlimited HD Calls",     plan: "gold",     icon: "video"       },
+      { label: "Priority Chat Delivery", plan: "silver",   icon: "send"        },
+      { label: "VIP Live Stream Gifts",  plan: "gold",     icon: "gift"        },
+      { label: "PK Battle Hosting",      plan: "platinum", icon: "zap"         },
+      { label: "Dedicated Manager",      plan: "diamond",  icon: "headphones"  },
     ],
   },
   {
-    title: "Coins & Rewards",
+    title: "Coins & Boosts",
     icon: "dollar-sign",
     color: "#FFB800",
     items: [
-      { label: "50 Coins / Day",        plan: "silver", icon: "gift"        },
-      { label: "150 Coins / Day",       plan: "gold",   icon: "gift"        },
-      { label: "200 Coins / Day",       plan: "vip",    icon: "gift"        },
-      { label: "Priority Ad Placement", plan: "vip",    icon: "target"      },
+      { label: "150 Bonus Coins/mo",     plan: "silver",   icon: "gift"        },
+      { label: "400 Bonus Coins/mo",     plan: "gold",     icon: "gift"        },
+      { label: "1,000 Bonus Coins/mo",   plan: "platinum", icon: "gift"        },
+      { label: "3,000 Bonus Coins/mo",   plan: "diamond",  icon: "gift"        },
+      { label: "Weekly Profile Boost",   plan: "silver",   icon: "trending-up" },
+      { label: "Unlimited Boosts",       plan: "platinum", icon: "trending-up" },
+      { label: "Fast Coin Withdrawal",   plan: "platinum", icon: "zap"         },
     ],
   },
 ];
@@ -154,18 +279,45 @@ const PLAN_RANK: Record<string, number> = {
 };
 
 // ── Fan tiers ──────────────────────────────────────────────────────────────────
+// Fan Club subscriptions are paid in Ridhi Coins (1 coin ≈ ₹0.80).
+// Creator keeps 70% of fan revenue; Ridhi retains 30% (20% on Creator Pro+).
+// Prices shown per creator — users may join multiple creators' fan clubs.
 const FAN_TIERS = [
   {
-    id: "supporter", name: "Supporter", price: "₹49/month", color: "#34C759", icon: "heart",
-    perks: ["Exclusive badge on your profile", "Access to creator-only posts", "Monthly creator shoutout"],
+    id: "supporter", name: "Supporter",
+    coinPrice: 49, rupeesApprox: "≈₹39", period: "/month",
+    color: "#34C759", icon: "heart",
+    perks: [
+      "Supporter badge on your profile & chat",
+      "Access to creator-only posts & stories",
+      "Supporter-exclusive live chat colour",
+      "Monthly shoutout in creator's live stream",
+    ],
   },
   {
-    id: "superfan", name: "Super Fan", price: "₹149/month", color: "#FF9500", icon: "star",
-    perks: ["All Supporter perks", "Direct message the creator", "Exclusive live access", "Monthly coin rewards"],
+    id: "superfan", name: "Super Fan",
+    coinPrice: 149, rupeesApprox: "≈₹119", period: "/month",
+    color: "#FF9500", icon: "star",
+    perks: [
+      "All Supporter perks, plus:",
+      "Direct message priority reply from creator",
+      "Exclusive Super Fan live room access",
+      "Monthly 50 bonus coins reward",
+      "Super Fan badge (animated)",
+    ],
   },
   {
-    id: "vipfan", name: "VIP Fan", price: "₹399/month", color: "#E91E8C", icon: "award",
-    perks: ["All Super Fan perks", "1:1 video call per month", "Custom fan badge", "Featured in creator posts"],
+    id: "vipfan", name: "VIP Fan",
+    coinPrice: 499, rupeesApprox: "≈₹399", period: "/month",
+    color: "#E91E8C", icon: "award",
+    perks: [
+      "All Super Fan perks, plus:",
+      "5-min 1:1 video call with creator (monthly)",
+      "Custom VIP Fan badge + profile frame",
+      "Featured in creator's posts & stories",
+      "Early access to creator content (24hr ahead)",
+      "Monthly 150 bonus coins reward",
+    ],
   },
 ];
 
@@ -469,19 +621,20 @@ function BoostSection({ colors }: { colors: ReturnType<typeof useColors> }) {
 
 // ── Plan comparison matrix ─────────────────────────────────────────────────────
 const COMPARE_ROWS = [
-  { label: "Price/month",       free: "Free",   silver: "₹199",       gold: "₹499",       platinum: "₹999",      diamond: "₹2499"      },
-  { label: "Bonus Coins/mo",    free: "—",      silver: "100",         gold: "350",         platinum: "1,000",     diamond: "3,000"       },
-  { label: "Random Calls",      free: "✗",      silver: "5/day",       gold: "Unlimited",   platinum: "Unlimited", diamond: "Unlimited"   },
-  { label: "Super Likes",       free: "✗",      silver: "5/day",       gold: "✓",           platinum: "✓",         diamond: "✓"           },
-  { label: "VIP Badge",         free: "✗",      silver: "Silver",      gold: "Gold",        platinum: "Platinum",  diamond: "Ultra VIP"   },
-  { label: "HD Video Calls",    free: "✗",      silver: "✗",           gold: "✓",           platinum: "✓",         diamond: "✓"           },
-  { label: "Ghost Mode",        free: "✗",      silver: "✗",           gold: "✓",           platinum: "✓",         diamond: "✓"           },
-  { label: "Unlimited Filters", free: "✗",      silver: "Basic",       gold: "✓",           platinum: "✓",         diamond: "✓"           },
-  { label: "AI Match",          free: "✗",      silver: "✗",           gold: "✗",           platinum: "✓",         diamond: "✓"           },
-  { label: "Incognito",         free: "✗",      silver: "✗",           gold: "✗",           platinum: "✓",         diamond: "✓"           },
-  { label: "Global Match",      free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
-  { label: "Homepage Promo",    free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
-  { label: "Dedicated Manager", free: "✗",      silver: "✗",           gold: "✗",           platinum: "✗",         diamond: "✓"           },
+  { label: "Price/month",        free: "Free",    silver: "₹149",   gold: "₹299",       platinum: "₹599",      diamond: "₹999"        },
+  { label: "Bonus Coins/mo",     free: "—",       silver: "150",    gold: "400",        platinum: "1,000",     diamond: "3,000"       },
+  { label: "Super Likes",        free: "✗",       silver: "5/day",  gold: "10/day",     platinum: "15/day",    diamond: "Unlimited"   },
+  { label: "Calls",              free: "✗",       silver: "3 audio",gold: "HD Unlim.",  platinum: "HD Unlim.", diamond: "HD Unlim."   },
+  { label: "VIP Badge",          free: "✗",       silver: "Silver", gold: "Gold",       platinum: "Platinum",  diamond: "Diamond"     },
+  { label: "Ad-Free",            free: "✗",       silver: "✓",      gold: "✓",          platinum: "✓",         diamond: "✓"           },
+  { label: "Ghost Mode",         free: "✗",       silver: "✗",      gold: "✓",          platinum: "✓",         diamond: "✓"           },
+  { label: "Podcast VIP Rooms",  free: "✗",       silver: "✗",      gold: "✓",          platinum: "✓",         diamond: "✓"           },
+  { label: "AI Match",           free: "✗",       silver: "✗",      gold: "✗",          platinum: "✓",         diamond: "✓"           },
+  { label: "Incognito",          free: "✗",       silver: "✗",      gold: "✗",          platinum: "✓",         diamond: "✓"           },
+  { label: "Profile Boost",      free: "✗",       silver: "1/week", gold: "Auto/week",  platinum: "Unlimited", diamond: "Featured"    },
+  { label: "Global Match",       free: "✗",       silver: "✗",      gold: "✗",          platinum: "✗",         diamond: "✓"           },
+  { label: "Homepage Featured",  free: "✗",       silver: "✗",      gold: "✗",          platinum: "✗",         diamond: "✓"           },
+  { label: "Yearly Saving",      free: "—",       silver: "44%",    gold: "44%",        platinum: "44%",       diamond: "42%"         },
 ];
 
 function CompareTable({ colors }: { colors: ReturnType<typeof useColors> }) {
@@ -587,8 +740,8 @@ export default function SubscriptionScreen() {
         <View style={styles.statsStrip}>
           {[
             { val: "1.4Cr+", label: "Active Users"      },
-            { val: "4",      label: "Premium Plans"     },
-            { val: "₹99",    label: "Starts From/Month" },
+            { val: "Save 44%", label: "On Yearly Plans"  },
+            { val: "₹149",   label: "Starts From/Month" },
           ].map(({ val, label }) => (
             <View key={label} style={styles.statItem}>
               <Text style={styles.statVal}>{val}</Text>
@@ -658,12 +811,20 @@ export default function SubscriptionScreen() {
 
             {/* Billing period toggle */}
             <View style={[styles.billingRow, { backgroundColor: colors.muted }]}>
-              {(["weekly", "monthly", "yearly"] as BillingPeriod[]).map((b) => (
-                <Pressable key={b} onPress={() => setBilling(b)}
-                  style={[styles.billingBtn, billing === b && { backgroundColor: colors.primary }]}>
-                  {b === "yearly" && <Text style={[styles.billingBadge]}>Save 15%</Text>}
-                  <Text style={[styles.billingTxt, { color: billing === b ? "#fff" : colors.mutedForeground }]}>
-                    {b.charAt(0).toUpperCase() + b.slice(1)}
+              {([
+                { key: "weekly",  label: "Weekly",  badge: null        },
+                { key: "monthly", label: "Monthly", badge: "Popular"   },
+                { key: "yearly",  label: "Yearly",  badge: "Save 44%"  },
+              ] as { key: BillingPeriod; label: string; badge: string | null }[]).map(({ key, label, badge }) => (
+                <Pressable key={key} onPress={() => setBilling(key)}
+                  style={[styles.billingBtn, billing === key && { backgroundColor: colors.primary }]}>
+                  {badge && (
+                    <Text style={[styles.billingBadge, { color: key === "yearly" ? "#34C759" : "rgba(255,255,255,0.9)" }]}>
+                      {badge}
+                    </Text>
+                  )}
+                  <Text style={[styles.billingTxt, { color: billing === key ? "#fff" : colors.mutedForeground }]}>
+                    {label}
                   </Text>
                 </Pressable>
               ))}
@@ -717,14 +878,10 @@ export default function SubscriptionScreen() {
 
                   {/* Highlights row */}
                   <View style={[styles.planHighlights, { backgroundColor: plan.color + "10", borderColor: plan.color + "25" }]}>
-                    {[
-                      { icon: "gift",  val: plan.bonusCoins > 0 ? `${plan.bonusCoins.toLocaleString("en-IN")} coins/mo` : "20 coins/day" },
-                      { icon: "phone", val: plan.calls + " calls" },
-                      { icon: "award", val: plan.badge2 },
-                    ].map(({ icon, val }) => (
-                      <View key={val} style={styles.planHL}>
-                        <Feather name={icon as any} size={12} color={plan.color} />
-                        <Text style={[styles.planHLTxt, { color: plan.color }]}>{val}</Text>
+                    {plan.highlights.map((h) => (
+                      <View key={h} style={styles.planHL}>
+                        <Feather name="check" size={11} color={plan.color} />
+                        <Text style={[styles.planHLTxt, { color: plan.color }]} numberOfLines={1}>{h}</Text>
                       </View>
                     ))}
                   </View>
@@ -807,58 +964,126 @@ export default function SubscriptionScreen() {
         {/* ══════════════ CREATOR PLANS ══════════════ */}
         {section === "creator" && (
           <View style={styles.sectionWrap}>
-            <View style={[styles.unlockCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={{ borderRadius: 12, padding: 14, marginBottom: 4 }}>
-                <Text style={{ color: "#fff", fontSize: 17, fontFamily: "Inter_700Bold" }}>Creator Subscriptions</Text>
-                <Text style={{ color: "rgba(255,255,255,0.82)", fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 4, lineHeight: 17 }}>
-                  For hosts, streamers, influencers, performers and podcast creators. Grow your audience and earn more.
-                </Text>
-              </LinearGradient>
+
+            {/* Hero banner */}
+            <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={{ borderRadius: 18, padding: 18 }}>
+              <Text style={{ color: "#fff", fontSize: 19, fontFamily: "Inter_700Bold" }}>Creator Pass</Text>
+              <Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 6, lineHeight: 19 }}>
+                For streamers, podcasters, influencers & performers.{"\n"}Grow your audience and keep more of what you earn.
+              </Text>
+              {/* Commission callout */}
+              <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
+                {[
+                  { tier: "Starter", pct: "10%", color: "#2196F3" },
+                  { tier: "Pro",     pct: "17%", color: "#9C27B0" },
+                  { tier: "Elite",   pct: "22%", color: "#E91E8C" },
+                ].map(c => (
+                  <View key={c.tier} style={{ flex: 1, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, padding: 8, alignItems: "center" }}>
+                    <Text style={{ color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" }}>{c.pct}</Text>
+                    <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 10, fontFamily: "Inter_400Regular" }}>commission</Text>
+                    <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 9, fontFamily: "Inter_500Medium", marginTop: 2 }}>saved on {c.tier}</Text>
+                  </View>
+                ))}
+              </View>
+            </LinearGradient>
+
+            {/* Billing toggle — monthly / yearly */}
+            <View style={[styles.billingRow, { backgroundColor: colors.muted }]}>
+              {([
+                { key: "monthly" as BillingPeriod, label: "Monthly",  badge: null       },
+                { key: "yearly"  as BillingPeriod, label: "Yearly",   badge: "Save 17%" },
+              ]).map(({ key, label, badge }) => (
+                <Pressable key={key} onPress={() => setBilling(key)}
+                  style={[styles.billingBtn, billing === key && { backgroundColor: colors.primary }]}>
+                  {badge && <Text style={[styles.billingBadge, { color: "#34C759" }]}>{badge}</Text>}
+                  <Text style={[styles.billingTxt, { color: billing === key ? "#fff" : colors.mutedForeground }]}>{label}</Text>
+                </Pressable>
+              ))}
             </View>
 
-            {CREATOR_PLANS.map((plan) => (
-              <View key={plan.id} style={[styles.planCard, { backgroundColor: colors.card, borderColor: plan.color + "40", borderWidth: 1 }]}>
-                {plan.popular && (
-                  <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.popularBanner}>
-                    <Feather name="star" size={11} color="#fff" />
-                    <Text style={styles.popularText}>Most Popular</Text>
-                  </LinearGradient>
-                )}
-                <View style={styles.planTop}>
-                  <LinearGradient colors={plan.gradient} style={styles.planIconWrap}>
-                    <Feather name={plan.icon} size={22} color="#fff" />
-                  </LinearGradient>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.planName, { color: colors.foreground }]}>{plan.name}</Text>
-                    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 2 }}>
-                      <Text style={[styles.planPrice, { color: plan.color }]}>₹{plan.price.toLocaleString("en-IN")}</Text>
-                      <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>/month</Text>
+            {CREATOR_PLANS.map((plan) => {
+              const price  = billing === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
+              const period = billing === "yearly" ? "/year" : "/month";
+              return (
+                <View key={plan.id} style={[styles.planCard, { backgroundColor: colors.card, borderColor: plan.color + "50", borderWidth: 1.5 }]}>
+                  {plan.popular && (
+                    <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.popularBanner}>
+                      <Feather name="trending-up" size={11} color="#fff" />
+                      <Text style={styles.popularText}>Most Popular for Creators</Text>
+                    </LinearGradient>
+                  )}
+                  <View style={styles.planTop}>
+                    <LinearGradient colors={plan.gradient} style={styles.planIconWrap}>
+                      <Feather name={plan.icon} size={22} color="#fff" />
+                    </LinearGradient>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.planName, { color: colors.foreground }]}>{plan.name}</Text>
+                      <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular" }}>{plan.tagline}</Text>
+                      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4, marginTop: 4 }}>
+                        <Text style={[styles.planPrice, { color: plan.color }]}>₹{price.toLocaleString("en-IN")}</Text>
+                        <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>{period}</Text>
+                        {billing === "yearly" && (
+                          <View style={{ backgroundColor: "#34C75922", borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 }}>
+                            <Text style={{ color: "#34C759", fontSize: 9, fontFamily: "Inter_700Bold" }}>SAVE {plan.yearlySaving}%</Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
-                    <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>+18% GST applicable</Text>
                   </View>
-                </View>
-                <View style={styles.featList}>
-                  {plan.features.map(f => (
-                    <View key={f} style={styles.featRow}>
-                      <Feather name="check-circle" size={14} color="#34C759" />
-                      <Text style={[styles.featTxt, { color: colors.foreground }]}>{f}</Text>
-                    </View>
-                  ))}
-                </View>
-                <Pressable onPress={() => { setPayAmount(plan.price); setPayLabel(`${plan.name}`); setShowPayment(true); }}>
-                  <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
-                    <Text style={styles.subBtnTxt}>Subscribe — ₹{plan.price.toLocaleString("en-IN")}/month</Text>
-                  </LinearGradient>
-                </Pressable>
-              </View>
-            ))}
 
+                  {/* Highlights */}
+                  <View style={[styles.planHighlights, { backgroundColor: plan.color + "10", borderColor: plan.color + "25" }]}>
+                    {plan.highlights.map((h) => (
+                      <View key={h} style={styles.planHL}>
+                        <Feather name="check" size={11} color={plan.color} />
+                        <Text style={[styles.planHLTxt, { color: plan.color }]} numberOfLines={1}>{h}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <View style={styles.featList}>
+                    {plan.features.map(f => (
+                      <View key={f} style={styles.featRow}>
+                        <Feather name="check-circle" size={14} color="#34C759" />
+                        <Text style={[styles.featTxt, { color: colors.foreground }]}>{f}</Text>
+                      </View>
+                    ))}
+                    {plan.locked.length > 0 && plan.locked.map(f => (
+                      <View key={f} style={styles.featRow}>
+                        <Feather name="lock" size={13} color={colors.mutedForeground} />
+                        <Text style={[styles.featTxt, { color: colors.mutedForeground }]}>{f}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  <Pressable onPress={() => { setPayAmount(price); setPayLabel(`${plan.name} — ₹${price.toLocaleString("en-IN")}${period}`); setShowPayment(true); }}>
+                    <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                      <Text style={styles.subBtnTxt}>Start {plan.name} — ₹{price.toLocaleString("en-IN")}{period}</Text>
+                    </LinearGradient>
+                  </Pressable>
+                </View>
+              );
+            })}
+
+            {/* Revenue model note */}
             <View style={[styles.payCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.payTitle, { color: colors.foreground }]}>Already a Creator?</Text>
-              <Text style={[{ fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 6, lineHeight: 19 }, { color: colors.mutedForeground }]}>
-                Check your creator analytics, earnings, and manage your fan memberships from your creator dashboard.
-              </Text>
-              <Pressable onPress={() => router.push("/creator-dashboard")} style={[styles.subBtn, { backgroundColor: colors.primary, margin: 0, marginTop: 12 }]}>
+              <Text style={[styles.payTitle, { color: colors.foreground }]}>How Creator Earnings Work</Text>
+              <View style={{ gap: 10, marginTop: 10 }}>
+                {[
+                  { icon: "gift",        color: "#E91E8C", text: "Gifts from live streams → 70–92% goes to you" },
+                  { icon: "users",       color: "#7B2FBE", text: "Fan Club coins → 70–92% revenue share"       },
+                  { icon: "mic",         color: "#2196F3", text: "Paid podcast episodes → 70–92% revenue share" },
+                  { icon: "dollar-sign", color: "#FFB800", text: "Minimum withdrawal: 1,000 coins (≈₹800)"      },
+                ].map(({ icon, color, text }) => (
+                  <View key={text} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+                    <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: color + "20", alignItems: "center", justifyContent: "center" }}>
+                      <Feather name={icon as any} size={14} color={color} />
+                    </View>
+                    <Text style={{ flex: 1, fontSize: 13, fontFamily: "Inter_400Regular", color: colors.foreground, lineHeight: 19 }}>{text}</Text>
+                  </View>
+                ))}
+              </View>
+              <Pressable onPress={() => router.push("/creator-dashboard")} style={[styles.subBtn, { backgroundColor: colors.primary, margin: 0, marginTop: 14 }]}>
                 <Text style={styles.subBtnTxt}>Go to Creator Dashboard</Text>
               </Pressable>
             </View>
@@ -913,9 +1138,26 @@ export default function SubscriptionScreen() {
         {/* ══════════════ FAN CLUBS ══════════════ */}
         {section === "fan" && (
           <View style={styles.sectionWrap}>
-            <Text style={[styles.fanDesc, { color: colors.mutedForeground }]}>
-              Support your favourite creators and unlock exclusive content, perks and direct access — or set up your own fan membership as a creator.
-            </Text>
+
+            {/* Explainer */}
+            <LinearGradient colors={["#E91E8C22", "#7B2FBE11"]} style={{ borderRadius: 16, padding: 16, gap: 6 }}>
+              <Text style={{ color: colors.foreground, fontSize: 16, fontFamily: "Inter_700Bold" }}>Fan Club Memberships</Text>
+              <Text style={[styles.fanDesc, { color: colors.mutedForeground, marginTop: 0 }]}>
+                Support your favourite Ridhi creators using coins. Prices shown are per creator — join as many as you like!
+              </Text>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
+                {[
+                  { icon: "dollar-sign", label: "1 Coin ≈ ₹0.80",    color: "#FFB800" },
+                  { icon: "users",       label: "Creator gets 70%+",  color: "#34C759" },
+                  { icon: "refresh-cw",  label: "Cancel anytime",     color: "#7B2FBE" },
+                ].map(({ icon, label, color }) => (
+                  <View key={label} style={{ flex: 1, backgroundColor: color + "15", borderRadius: 10, padding: 8, alignItems: "center", gap: 4 }}>
+                    <Feather name={icon as any} size={14} color={color} />
+                    <Text style={{ color: colors.foreground, fontSize: 9, fontFamily: "Inter_600SemiBold", textAlign: "center" }}>{label}</Text>
+                  </View>
+                ))}
+              </View>
+            </LinearGradient>
 
             {FAN_TIERS.map((tier) => (
               <View key={tier.id} style={[styles.fanCard, { backgroundColor: colors.card, borderColor: tier.color + "50" }]}>
@@ -926,9 +1168,23 @@ export default function SubscriptionScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.fanName, { color: colors.foreground }]}>{tier.name}</Text>
-                    <Text style={[styles.fanPrice, { color: tier.color }]}>{tier.price}</Text>
+                    {/* Coin price + rupee approx */}
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                        <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: tier.color }}>
+                          {tier.coinPrice}🪙
+                        </Text>
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>{tier.period}</Text>
+                      </View>
+                      <View style={{ backgroundColor: tier.color + "20", borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 }}>
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_500Medium", color: tier.color }}>{tier.rupeesApprox}</Text>
+                      </View>
+                    </View>
                   </View>
-                  <Pressable style={[styles.joinBtn, { backgroundColor: tier.color }]} onPress={() => { setPayAmount(parseInt(tier.price.replace(/[^0-9]/g, ""))); setPayLabel(`${tier.name} Fan Club`); setShowPayment(true); }}>
+                  <Pressable
+                    style={[styles.joinBtn, { backgroundColor: tier.color }]}
+                    onPress={() => { setPayAmount(tier.coinPrice); setPayLabel(`${tier.name} Fan Club · ${tier.coinPrice} coins/month`); setShowPayment(true); }}
+                  >
                     <Text style={styles.joinTxt}>Join</Text>
                   </Pressable>
                 </View>
@@ -944,19 +1200,21 @@ export default function SubscriptionScreen() {
             ))}
 
             {/* Creator CTA */}
-            <View style={[styles.creatorCTA, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" }]}>
-              <Feather name="zap" size={20} color={colors.primary} />
+            <LinearGradient colors={["#7B2FBE15", "#E91E8C10"]} style={[styles.creatorCTA, { borderColor: "#7B2FBE30" }]}>
+              <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}>
+                <Feather name="star" size={18} color="#fff" />
+              </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.creatorTitle, { color: colors.foreground }]}>Are you a Creator?</Text>
                 <Text style={[styles.creatorSub, { color: colors.mutedForeground }]}>
-                  Set up your own fan membership tiers and earn monthly from your followers
+                  Set up Fan Club tiers and earn coins from your followers every month
                 </Text>
               </View>
-              <Pressable onPress={() => router.push("/creator-dashboard")}
+              <Pressable onPress={() => setSection("creator")}
                 style={[styles.creatorBtn, { backgroundColor: colors.primary }]}>
-                <Text style={styles.creatorBtnTxt}>Set Up</Text>
+                <Text style={styles.creatorBtnTxt}>Creator Pass</Text>
               </Pressable>
-            </View>
+            </LinearGradient>
           </View>
         )}
       </ScrollView>
