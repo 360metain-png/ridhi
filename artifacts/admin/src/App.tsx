@@ -32,6 +32,7 @@ import KYC           from "@/pages/kyc";
 import Handbook      from "@/pages/handbook";
 import SpecialAds          from "@/pages/special-ads";
 import CommercialBanners   from "@/pages/commercial-banners";
+import Jobs                from "@/pages/jobs";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/business-ads":  ["super_admin", "admin"],
   "/special-ads":         ["super_admin", "admin"],
   "/commercial-banners":  ["super_admin", "admin"],
+  "/jobs":           ["super_admin", "admin"],
   "/gaming":         ["super_admin", "admin"],
   "/live-streams": ["super_admin", "admin", "agent", "host"],
   "/ai-hub":       ["super_admin", "admin"],
@@ -143,6 +145,7 @@ function Router() {
       <Route path="/handbook"     component={() => <RoleRoute component={Handbook}     path="/handbook" />} />
       <Route path="/special-ads"        component={() => <RoleRoute component={SpecialAds}        path="/special-ads" />} />
       <Route path="/commercial-banners" component={() => <RoleRoute component={CommercialBanners} path="/commercial-banners" />} />
+      <Route path="/jobs"               component={() => <RoleRoute component={Jobs}               path="/jobs" />} />
       <Route component={NotFound} />
     </Switch>
   );
