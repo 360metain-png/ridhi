@@ -18,6 +18,8 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { RidhiCoin } from "@/components/RidhiCoin";
+import { CoinAmount } from "@/components/CoinAmount";
 import { Avatar } from "@/components/Avatar";
 import {
   PODCAST_ROOM_SPEAKERS,
@@ -133,7 +135,7 @@ function ChatBubble({ msg }: { msg: PodcastChatMsg }) {
           <Text style={styles.chatUser}>{msg.user}</Text>
           {msg.coins != null && (
             <View style={[styles.coinTag, { backgroundColor: accentColor + "30" }]}>
-              <Text style={[styles.coinTagText, { color: accentColor }]}>🪙 {msg.coins}</Text>
+              <CoinAmount amount={msg.coins} size={12} color={accentColor} fontSize={11} />
             </View>
           )}
           <Text style={styles.chatTime}>{msg.time}</Text>
@@ -275,7 +277,9 @@ export default function PodcastRoomScreen() {
         {IS_VIP && (
           <LinearGradient colors={["#FFB80030", "#FFB80008"]} style={styles.vipBanner}>
             <Feather name="star" size={14} color="#FFB800" />
-            <Text style={styles.vipBannerText}>VIP Room · 99 🪙 entry</Text>
+            <Text style={styles.vipBannerText}>VIP Room · 99 </Text>
+            <RidhiCoin size={14} />
+            <Text style={styles.vipBannerText}> entry</Text>
           </LinearGradient>
         )}
 
@@ -345,15 +349,15 @@ export default function PodcastRoomScreen() {
           <View style={styles.fanPromoPlans}>
             <View style={[styles.fanPlanChip, { borderColor: "#9E9E9E" }]}>
               <Text style={styles.fanPlanText}>Basic</Text>
-              <Text style={styles.fanPlanCoins}>🪙99</Text>
+              <CoinAmount amount={99} size={13} fontSize={12} fontFamily="Inter_700Bold" />
             </View>
             <View style={[styles.fanPlanChip, { borderColor: "#FFB800" }]}>
               <Text style={styles.fanPlanText}>Premium</Text>
-              <Text style={styles.fanPlanCoins}>🪙299</Text>
+              <CoinAmount amount={299} size={13} fontSize={12} fontFamily="Inter_700Bold" />
             </View>
             <View style={[styles.fanPlanChip, { borderColor: "#E91E8C" }]}>
               <Text style={styles.fanPlanText}>VIP Fan</Text>
-              <Text style={styles.fanPlanCoins}>🪙999</Text>
+              <CoinAmount amount={999} size={13} fontSize={12} fontFamily="Inter_700Bold" />
             </View>
           </View>
         </LinearGradient>
@@ -447,7 +451,7 @@ export default function PodcastRoomScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Text style={{ fontSize: 22 }}>🪙</Text>
+            <RidhiCoin size={22} />
           </LinearGradient>
           <Text style={styles.barLabel}>{coinBalance}</Text>
         </Pressable>
@@ -484,7 +488,7 @@ export default function PodcastRoomScreen() {
 
             {/* Balance row */}
             <LinearGradient colors={["#7B2FBE22", "#E91E8C11"]} style={styles.balanceCard}>
-              <Text style={{ fontSize: 30 }}>🪙</Text>
+              <RidhiCoin size={30} />
               <View style={{ flex: 1 }}>
                 <Text style={[styles.balLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
                 <Text style={[styles.balValue, { color: colors.text }]}>{coinBalance} Coins</Text>
@@ -525,7 +529,7 @@ export default function PodcastRoomScreen() {
                       <Text style={[styles.actionDesc, { color: colors.mutedForeground }]}>{action.desc}</Text>
                     </View>
                     <View style={[styles.actionCostBadge, { backgroundColor: action.color + "20", borderColor: action.color + "40" }]}>
-                      <Text style={[styles.actionCostText, { color: action.color }]}>🪙 {action.coins}</Text>
+                      <CoinAmount amount={action.coins} size={14} color={action.color} fontSize={13} />
                     </View>
                   </Pressable>
                 );

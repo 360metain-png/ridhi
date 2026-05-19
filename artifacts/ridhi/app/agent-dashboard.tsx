@@ -21,6 +21,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { RidhiCoin } from "@/components/RidhiCoin";
 
 const { width } = Dimensions.get("window");
 
@@ -553,12 +554,16 @@ export default function AgentDashboardScreen() {
             {/* ── EXAMPLE CALCULATION ── */}
             <View style={[styles.exCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80035" }]}>
               <Text style={[styles.commTitle, { color: colors.foreground }]}>💡 Example — A3 Pro Agent</Text>
-              <Text style={[styles.commSub, { color: colors.mutedForeground }]}>You manage a Gold Host who earns 🪙10,000/month</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                <Text style={[styles.commSub, { color: colors.mutedForeground }]}>You manage a Gold Host who earns</Text>
+                <RidhiCoin size={13} />
+                <Text style={[styles.commSub, { color: colors.mutedForeground }]}>10,000/month</Text>
+              </View>
               <View style={{ gap: 8, marginTop: 10 }}>
                 {[
-                  { who: "Gold Host",       share: "50% of coins",   amount: "🪙5,000 → ₹4,000",  color: "#FFB800", icon: "mic"        },
-                  { who: "You (A3 Agent)",  share: "5% of host earn",amount: "🪙250  → ₹200",      color: "#00BCD4", icon: "user-check" },
-                  { who: "Ridhi Platform",  share: "45% remainder",  amount: "🪙4,750 → ₹3,800",  color: "#7B2FBE", icon: "shield"     },
+                  { who: "Gold Host",       share: "50% of coins",   amount: "5,000 → ₹4,000", color: "#FFB800", icon: "mic"        },
+                  { who: "You (A3 Agent)",  share: "5% of host earn",amount: "250 → ₹200",     color: "#00BCD4", icon: "user-check" },
+                  { who: "Ridhi Platform",  share: "45% remainder",  amount: "4,750 → ₹3,800", color: "#7B2FBE", icon: "shield"     },
                 ].map(({ who, share, amount, color, icon }) => (
                   <View key={who} style={styles.exRow}>
                     <View style={[styles.exIcon, { backgroundColor: color + "20" }]}>
@@ -568,7 +573,10 @@ export default function AgentDashboardScreen() {
                       <Text style={[styles.exWho, { color: colors.foreground }]}>{who}</Text>
                       <Text style={[styles.exShare, { color: colors.mutedForeground }]}>{share}</Text>
                     </View>
-                    <Text style={[styles.exAmt, { color }]}>{amount}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <RidhiCoin size={12} />
+                      <Text style={[styles.exAmt, { color }]}>{amount}</Text>
+                    </View>
                   </View>
                 ))}
               </View>

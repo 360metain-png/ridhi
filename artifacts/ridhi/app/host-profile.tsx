@@ -21,6 +21,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { RidhiCoin } from "@/components/RidhiCoin";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -510,7 +511,11 @@ export default function HostProfileScreen() {
                 <LinearGradient colors={["#E91E8C", "#7B2FBE"]} style={styles.splitHeaderIcon}>
                   <Feather name="pie-chart" size={16} color="#fff" />
                 </LinearGradient>
-                <Text style={[styles.splitTitle, { color: colors.foreground }]}>How Every 🪙100 Is Split</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                  <Text style={[styles.splitTitle, { color: colors.foreground }]}>How Every</Text>
+                  <RidhiCoin size={16} />
+                  <Text style={[styles.splitTitle, { color: colors.foreground }]}>100 Is Split</Text>
+                </View>
               </View>
               <Text style={[styles.splitSubtitle, { color: colors.mutedForeground }]}>
                 Your share grows with every level. Agent commission always comes from Ridhi's cut — not yours.
@@ -557,12 +562,16 @@ export default function HostProfileScreen() {
             {/* ── EXAMPLE CALCULATION ── */}
             <View style={[styles.exampleCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80035" }]}>
               <Text style={[styles.exampleTitle, { color: colors.foreground }]}>💡 Example — Gold Host (L3) with A3 Agent</Text>
-              <Text style={[styles.exampleSub, { color: colors.mutedForeground }]}>Fan sends 🪙1,000 as a gift during your live</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                <Text style={[styles.exampleSub, { color: colors.mutedForeground }]}>Fan sends</Text>
+                <RidhiCoin size={13} />
+                <Text style={[styles.exampleSub, { color: colors.mutedForeground }]}>1,000 as a gift during your live</Text>
+              </View>
               <View style={{ gap: 8, marginTop: 10 }}>
                 {[
-                  { who: "You (Host)",        pct: "50%", amount: "🪙500 → ₹400", color: "#34C759",  icon: "mic" },
-                  { who: "Agent (A3 Pro)",    pct: "5%",  amount: "🪙50  → ₹40",  color: "#00BCD4",  icon: "user-check" },
-                  { who: "Ridhi Platform",    pct: "45%", amount: "🪙450 → ₹360",  color: "#7B2FBE",  icon: "shield" },
+                  { who: "You (Host)",        pct: "50%", amount: "500 → ₹400", color: "#34C759",  icon: "mic" },
+                  { who: "Agent (A3 Pro)",    pct: "5%",  amount: "50 → ₹40",   color: "#00BCD4",  icon: "user-check" },
+                  { who: "Ridhi Platform",    pct: "45%", amount: "450 → ₹360", color: "#7B2FBE",  icon: "shield" },
                 ].map(({ who, pct, amount, color, icon }) => (
                   <View key={who} style={styles.exampleRow}>
                     <View style={[styles.exampleIcon, { backgroundColor: color + "20" }]}>
@@ -570,13 +579,19 @@ export default function HostProfileScreen() {
                     </View>
                     <Text style={[styles.exampleWho, { color: colors.foreground }]}>{who}</Text>
                     <Text style={[styles.examplePct, { color }]}>{pct}</Text>
-                    <Text style={[styles.exampleAmt, { color: colors.mutedForeground }]}>{amount}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <RidhiCoin size={12} />
+                      <Text style={[styles.exampleAmt, { color: colors.mutedForeground }]}>{amount}</Text>
+                    </View>
                   </View>
                 ))}
               </View>
-              <Text style={[styles.exampleFooter, { color: colors.mutedForeground }]}>
-                🪙1 Ridhi Coin = ₹0.80 withdrawal value
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                <RidhiCoin size={13} />
+                <Text style={[styles.exampleFooter, { color: colors.mutedForeground }]}>
+                  1 Ridhi Coin = ₹0.80 withdrawal value
+                </Text>
+              </View>
             </View>
 
             {/* ── RIDHI'S BENEFIT ── */}

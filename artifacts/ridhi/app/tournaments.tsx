@@ -32,7 +32,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 256,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "5,000 🪙 + VIP Badge",
+    topPrize: "5,000 Coins + VIP Badge",
     color: "#E91E8C",
   },
   {
@@ -46,7 +46,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 128,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "12,500 🪙 + Crown",
+    topPrize: "12,500 Coins + Crown",
     color: "#FFB800",
   },
   {
@@ -60,7 +60,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 64,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "7,500 🪙 each + Couple Crown",
+    topPrize: "7,500 Coins each + Couple Crown",
     color: "#FF6B35",
   },
   {
@@ -74,7 +74,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 16,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "25,000 🪙 + Creator Badge",
+    topPrize: "25,000 Coins + Creator Badge",
     color: "#7B2FBE",
   },
   {
@@ -88,7 +88,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 512,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "2,500 🪙 + Visibility Boost",
+    topPrize: "2,500 Coins + Visibility Boost",
     color: "#00BCD4",
   },
   {
@@ -102,7 +102,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 512,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "2,50,000 🪙 + Diwali Crown",
+    topPrize: "2,50,000 Coins + Diwali Crown",
     color: "#FF8C00",
   },
   {
@@ -116,7 +116,7 @@ const DAILY_TOURNAMENTS = [
     maxPlayers: 1024,
     startsIn: "Live Now",
     status: "live",
-    topPrize: "5,00,000 🪙 + Mega Crown",
+    topPrize: "5,00,000 Coins + Mega Crown",
     color: "#4CAF50",
   },
 ];

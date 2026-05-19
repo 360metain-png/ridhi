@@ -7,6 +7,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { GIFTS } from "@/data/coinEconomy";
+import { RidhiCoin } from "@/components/RidhiCoin";
 
 type Tab = "received" | "sent";
 
@@ -79,14 +80,21 @@ export default function MyGiftsScreen() {
       {/* Stats strip */}
       <View style={[styles.statsStrip, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         {[
-          { label: "Received",     value: RECEIVED.length,          icon: "inbox",       color: "#34C759" },
-          { label: "Sent",         value: SENT.length,              icon: "send",        color: "#E91E8C" },
-          { label: "Coins Earned", value: `+${totalCoins(RECEIVED)}🪙`, icon: "trending-up", color: "#FFB800" },
-          { label: "Coins Spent",  value: `${totalCoins(SENT)}🪙`,  icon: "gift",        color: "#7B2FBE" },
-        ].map(({ label, value, icon, color }) => (
+          { label: "Received",     value: RECEIVED.length,            coinVal: false, icon: "inbox",       color: "#34C759" },
+          { label: "Sent",         value: SENT.length,                coinVal: false, icon: "send",        color: "#E91E8C" },
+          { label: "Coins Earned", value: `+${totalCoins(RECEIVED)}`, coinVal: true,  icon: "trending-up", color: "#FFB800" },
+          { label: "Coins Spent",  value: `${totalCoins(SENT)}`,      coinVal: true,  icon: "gift",        color: "#7B2FBE" },
+        ].map(({ label, value, icon, color, coinVal }) => (
           <View key={label} style={styles.stat}>
             <Feather name={icon as any} size={15} color={color} />
-            <Text style={[styles.statVal, { color: colors.foreground }]}>{value}</Text>
+            {coinVal ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                <Text style={[styles.statVal, { color: colors.foreground }]}>{value}</Text>
+                <RidhiCoin size={13} />
+              </View>
+            ) : (
+              <Text style={[styles.statVal, { color: colors.foreground }]}>{value}</Text>
+            )}
             <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{label}</Text>
           </View>
         ))}
@@ -148,10 +156,11 @@ export default function MyGiftsScreen() {
                 {/* Gift name + coins */}
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <Text style={[styles.giftName, { color: colors.foreground }]}>{gift.name}</Text>
-                  <View style={[styles.coinPill, { backgroundColor: catColor + "20" }]}>
+                  <View style={[styles.coinPill, { backgroundColor: catColor + "20", flexDirection: "row", alignItems: "center", gap: 3 }]}>
                     <Text style={[styles.coinPillTxt, { color: catColor }]}>
-                      {tab === "received" ? "+" : "−"}{gift.coins}🪙
+                      {tab === "received" ? "+" : "−"}{gift.coins}
                     </Text>
+                    <RidhiCoin size={12} />
                   </View>
                   {gift.animated && (
                     <View style={[styles.animPill, { backgroundColor: "#FFB80020" }]}>

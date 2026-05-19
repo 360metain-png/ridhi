@@ -17,6 +17,8 @@ import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
+import { RidhiCoin } from "@/components/RidhiCoin";
+import { CoinAmount } from "@/components/CoinAmount";
 
 const APPLY_COST = 10; // coins to submit a job application
 
@@ -393,7 +395,7 @@ export default function JobsScreen() {
             Pay {APPLY_COST} coins to apply — share your details &amp; resume
           </Text>
           <View style={[styles.coinCostBadge, { backgroundColor: "#E91E8C22" }]}>
-            <Text style={[styles.coinCostText, { color: "#E91E8C" }]}>🪙 {APPLY_COST}</Text>
+            <CoinAmount amount={APPLY_COST} size={14} color="#E91E8C" fontSize={13} fontFamily="Inter_600SemiBold" />
           </View>
         </View>
       )}
@@ -418,9 +420,15 @@ export default function JobsScreen() {
           }]}
         >
           <Feather name={appliedIds.has(j.id) ? "check" : "send"} size={12} color="#fff" />
-          <Text style={styles.applyBtnText}>
-            {appliedIds.has(j.id) ? "Applied ✓" : `Apply · 🪙${APPLY_COST}`}
-          </Text>
+          {appliedIds.has(j.id) ? (
+            <Text style={styles.applyBtnText}>Applied ✓</Text>
+          ) : (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+              <Text style={styles.applyBtnText}>Apply · </Text>
+              <RidhiCoin size={12} />
+              <Text style={styles.applyBtnText}>{APPLY_COST}</Text>
+            </View>
+          )}
         </Pressable>
       </View>
     </Pressable>
@@ -449,7 +457,7 @@ export default function JobsScreen() {
             </Pressable>
           </View>
           <View style={styles.coinBalanceBadge}>
-            <Text style={styles.coinBalanceText}>🪙 {user?.coins ?? 0}</Text>
+            <CoinAmount amount={user?.coins ?? 0} size={14} fontSize={13} fontFamily="Inter_600SemiBold" />
           </View>
         </View>
 
@@ -574,14 +582,12 @@ export default function JobsScreen() {
                 <View style={[styles.coinModalRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
                   <View style={styles.coinModalStat}>
                     <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Application Fee</Text>
-                    <Text style={[styles.coinModalStatVal, { color: "#E91E8C" }]}>🪙 {APPLY_COST}</Text>
+                    <CoinAmount amount={APPLY_COST} size={16} color="#E91E8C" fontSize={16} />
                   </View>
                   <View style={[styles.coinModalDivider, { backgroundColor: colors.border }]} />
                   <View style={styles.coinModalStat}>
                     <Text style={[styles.coinModalStatLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
-                    <Text style={[styles.coinModalStatVal, { color: (user?.coins ?? 0) >= APPLY_COST ? "#34C759" : "#FF3B30" }]}>
-                      🪙 {user?.coins ?? 0}
-                    </Text>
+                    <CoinAmount amount={user?.coins ?? 0} size={16} color={(user?.coins ?? 0) >= APPLY_COST ? "#34C759" : "#FF3B30"} fontSize={16} />
                   </View>
                 </View>
                 {(user?.coins ?? 0) < APPLY_COST ? (
@@ -603,7 +609,15 @@ export default function JobsScreen() {
                     <Pressable onPress={handleConfirmPay} disabled={applyPending}
                       style={[styles.coinModalBtn, { backgroundColor: "#E91E8C", opacity: applyPending ? 0.6 : 1 }]}>
                       <Feather name="arrow-right" size={15} color="#fff" />
-                      <Text style={styles.coinModalBtnText}>{applyPending ? "Processing…" : `Continue — Pay 🪙${APPLY_COST}`}</Text>
+                      {applyPending ? (
+                        <Text style={styles.coinModalBtnText}>Processing…</Text>
+                      ) : (
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Text style={styles.coinModalBtnText}>Continue — Pay </Text>
+                          <RidhiCoin size={14} />
+                          <Text style={styles.coinModalBtnText}>{APPLY_COST}</Text>
+                        </View>
+                      )}
                     </Pressable>
                   </>
                 )}

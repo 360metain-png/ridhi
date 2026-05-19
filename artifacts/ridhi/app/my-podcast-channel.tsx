@@ -9,6 +9,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPlays, formatDuration } from "@/data/podcastData";
+import { RidhiCoin } from "@/components/RidhiCoin";
+import { CoinAmount } from "@/components/CoinAmount";
 
 type Tab = "published" | "drafts" | "analytics";
 
@@ -195,7 +197,7 @@ export default function MyPodcastChannelScreen() {
             <View style={[styles.earningsRow, { backgroundColor: "#FFB80018", borderColor: "#FFB80040" }]}>
               <Feather name="credit-card" size={14} color="#FFB800" />
               <Text style={[styles.earningsLabel, { color: colors.foreground }]}>Total Earnings</Text>
-              <Text style={[styles.earningsVal, { color: "#FFB800" }]}>🪙 {totalEarnings.toLocaleString("en-IN")}</Text>
+              <CoinAmount amount={totalEarnings.toLocaleString("en-IN")} size={16} color="#FFB800" fontSize={13} />
               <Text style={[{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>≈₹{(totalEarnings * 0.8).toLocaleString("en-IN")}</Text>
               <Pressable onPress={() => router.push("/withdraw")}
                 style={{ backgroundColor: "#FFB800", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, marginLeft: "auto" }}>
@@ -301,9 +303,10 @@ export default function MyPodcastChannelScreen() {
                         ))}
                       </View>
                       {ep.earnings > 0 && (
-                        <View style={[styles.epEarnings, { backgroundColor: "#FFB80015" }]}>
+                        <View style={[styles.epEarnings, { backgroundColor: "#FFB80015", flexDirection: "row", alignItems: "center", gap: 4 }]}>
+                          <RidhiCoin size={12} />
                           <Text style={{ fontSize: 10, color: "#FFB800", fontFamily: "Inter_600SemiBold" }}>
-                            🪙 {ep.earnings} earned
+                            {ep.earnings} earned
                           </Text>
                         </View>
                       )}
@@ -357,13 +360,20 @@ export default function MyPodcastChannelScreen() {
                 { label: "Total Plays",    value: formatPlays(totalPlays),  icon: "headphones", color: "#7B2FBE" },
                 { label: "Total Likes",    value: formatPlays(totalLikes),  icon: "heart",      color: "#E91E8C" },
                 { label: "Subscribers",    value: "1,247",                  icon: "users",      color: "#2196F3" },
-                { label: "Coins Earned",   value: `🪙${totalEarnings}`,     icon: "credit-card",color: "#FFB800" },
-              ].map(({ label, value, icon, color }) => (
+                { label: "Coins Earned",   value: totalEarnings,            icon: "credit-card",color: "#FFB800", isCoin: true },
+              ].map(({ label, value, icon, color, isCoin }: any) => (
                 <View key={label} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border, width: "47%" }]}>
                   <View style={[styles.statCardIcon, { backgroundColor: color + "20" }]}>
                     <Feather name={icon as any} size={18} color={color} />
                   </View>
-                  <Text style={[styles.statCardVal, { color: colors.foreground }]}>{value}</Text>
+                  {isCoin ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                      <RidhiCoin size={16} />
+                      <Text style={[styles.statCardVal, { color: colors.foreground }]}>{value}</Text>
+                    </View>
+                  ) : (
+                    <Text style={[styles.statCardVal, { color: colors.foreground }]}>{value}</Text>
+                  )}
                   <Text style={[styles.statCardLabel, { color: colors.mutedForeground }]}>{label}</Text>
                 </View>
               ))}

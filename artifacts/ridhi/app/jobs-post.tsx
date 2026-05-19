@@ -17,6 +17,8 @@ import { useColors } from "@/hooks/useColors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/contexts/AuthContext";
 import { STATE_NAMES, getDistricts } from "@/data/indiaLocations";
+import { RidhiCoin } from "@/components/RidhiCoin";
+import { CoinAmount } from "@/components/CoinAmount";
 
 type JobType = "Full-time" | "Part-time" | "Freelance" | "Internship" | "Gig";
 type SalaryUnit = "Month" | "Day" | "Hour" | "Project";
@@ -191,12 +193,17 @@ export default function JobsPostScreen() {
             <Feather name="alert-circle" size={52} color="#FF3B30" />
           </View>
           <Text style={[fpStyles.successTitle, { color: colors.foreground }]}>Not Enough Coins</Text>
-          <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>
-            Posting a job costs{" "}
-            <Text style={{ color: "#E91E8C", fontFamily: "Inter_700Bold" }}>🪙 {JOB_POST_COST} coins</Text>.
-            {"\n"}Your balance: <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {userCoins}</Text>
-            {"\n\n"}Recharge your Ridhi Wallet to continue.
-          </Text>
+          <View style={{ alignItems: "center", gap: 6 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>Posting a job costs </Text>
+              <CoinAmount amount={`${JOB_POST_COST} coins`} size={14} color="#E91E8C" fontFamily="Inter_700Bold" fontSize={14} />
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>Your balance: </Text>
+              <CoinAmount amount={userCoins} size={14} fontFamily="Inter_700Bold" fontSize={14} />
+            </View>
+            <Text style={[fpStyles.successSub, { color: colors.mutedForeground }]}>Recharge your Ridhi Wallet to continue.</Text>
+          </View>
           <Pressable onPress={() => router.push("/wallet" as any)} style={fpStyles.successBtn}>
             <LinearGradient colors={["#E91E8C", "#7B2FBE"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={fpStyles.successBtnGrad}>
               <Feather name="zap" size={16} color="#fff" />
@@ -223,7 +230,7 @@ export default function JobsPostScreen() {
           </LinearGradient>
           <Text style={[fpStyles.successTitle, { color: colors.foreground }]}>Job Posted!</Text>
           <View style={[fpStyles.coinDeductedBadge, { backgroundColor: "#7B2FBE18", borderColor: "#7B2FBE30" }]}>
-            <Text style={{ fontSize: 14 }}>🪙</Text>
+            <RidhiCoin size={16} />
             <Text style={[fpStyles.coinDeductedText, { color: "#7B2FBE" }]}>
               {JOB_POST_COST} coins deducted · Balance: {(user?.coins ?? 0)} coins
             </Text>
@@ -277,7 +284,7 @@ export default function JobsPostScreen() {
           <Text style={fpStyles.headerSub}>Reach candidates near you</Text>
         </View>
         <View style={fpStyles.freeBadge}>
-          <Text style={fpStyles.freeBadgeText}>🪙 {JOB_POST_COST} coins</Text>
+          <CoinAmount amount={`${JOB_POST_COST} coins`} size={13} fontSize={12} fontFamily="Inter_600SemiBold" />
         </View>
       </LinearGradient>
 
@@ -506,15 +513,15 @@ export default function JobsPostScreen() {
         <View style={[fpStyles.coinSummary, { backgroundColor: "#7B2FBE14", borderColor: "#7B2FBE30" }]}>
           <View style={fpStyles.coinSummaryRow}>
             <Feather name="zap" size={14} color="#7B2FBE" />
-            <Text style={[fpStyles.coinSummaryText, { color: "#7B2FBE" }]}>
-              Posting costs <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {JOB_POST_COST} coins</Text>
-            </Text>
+            <Text style={[fpStyles.coinSummaryText, { color: "#7B2FBE" }]}>Posting costs </Text>
+            <CoinAmount amount={`${JOB_POST_COST} coins`} size={14} color="#7B2FBE" fontFamily="Inter_700Bold" fontSize={13} />
           </View>
           <View style={fpStyles.coinSummaryRow}>
             <Feather name="pocket" size={14} color={userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30"} />
+            <Text style={[fpStyles.coinSummaryText, { color: userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30" }]}>Your balance: </Text>
+            <CoinAmount amount={userCoins} size={14} color={userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30"} fontFamily="Inter_700Bold" fontSize={13} />
             <Text style={[fpStyles.coinSummaryText, { color: userCoins >= JOB_POST_COST ? "#34C759" : "#FF3B30" }]}>
-              Your balance: <Text style={{ fontFamily: "Inter_700Bold" }}>🪙 {userCoins}</Text>
-              {userCoins < JOB_POST_COST ? "  · Insufficient — recharge wallet" : "  · Ready to post!"}
+              {userCoins < JOB_POST_COST ? "  · Insufficient" : "  · Ready!"}
             </Text>
           </View>
         </View>
@@ -531,9 +538,17 @@ export default function JobsPostScreen() {
             style={fpStyles.submitBtn}
           >
             <Feather name={posting ? "loader" : "send"} size={18} color="#fff" />
-            <Text style={fpStyles.submitText}>
-              {posting ? "Posting…" : userCoins < JOB_POST_COST ? "Insufficient Coins" : `Post Job — 🪙${JOB_POST_COST}`}
-            </Text>
+            {posting ? (
+              <Text style={fpStyles.submitText}>Posting…</Text>
+            ) : userCoins < JOB_POST_COST ? (
+              <Text style={fpStyles.submitText}>Insufficient Coins</Text>
+            ) : (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Text style={fpStyles.submitText}>Post Job — </Text>
+                <RidhiCoin size={15} />
+                <Text style={fpStyles.submitText}>{JOB_POST_COST}</Text>
+              </View>
+            )}
           </LinearGradient>
         </Pressable>
         {userCoins < JOB_POST_COST && (

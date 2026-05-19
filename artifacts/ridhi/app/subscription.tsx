@@ -9,6 +9,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { PaymentSheet } from "@/components/PaymentSheet";
+import { RidhiCoin } from "@/components/RidhiCoin";
 
 const { width } = Dimensions.get("window");
 
@@ -1230,8 +1231,9 @@ export default function SubscriptionScreen() {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 }}>
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
                         <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: tier.color }}>
-                          {tier.coinPrice}🪙
+                          {tier.coinPrice}
                         </Text>
+                        <RidhiCoin size={15} />
                         <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>{tier.period}</Text>
                       </View>
                       <View style={{ backgroundColor: tier.color + "20", borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2 }}>

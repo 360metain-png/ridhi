@@ -20,6 +20,7 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+import { RidhiCoin } from "@/components/RidhiCoin";
 import { PODCAST_CATEGORIES, PODCAST_LANGUAGES, PodcastCategory } from "@/data/podcastData";
 
 const { width } = Dimensions.get("window");
@@ -544,9 +545,15 @@ export default function PodcastCreateScreen() {
                 <View style={[styles.scheduleRow, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 10 }]}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.scheduleLabel, { color: colors.text }]}>Replay Access</Text>
-                    <Text style={[styles.monoDesc, { color: colors.mutedForeground }]}>
-                      Listeners pay 49 🪙 to replay after show
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                      <Text style={[styles.monoDesc, { color: colors.mutedForeground }]}>
+                        Listeners pay 49
+                      </Text>
+                      <RidhiCoin size={13} />
+                      <Text style={[styles.monoDesc, { color: colors.mutedForeground }]}>
+                        to replay after show
+                      </Text>
+                    </View>
                   </View>
                   <Switch
                     value={replayAccessEnabled}
