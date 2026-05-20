@@ -107,7 +107,7 @@ export default function LeaderboardScreen() {
         <View style={{ width: 40 }} />
       </LinearGradient>
 
-      <View style={styles.periodRow}>
+      <View style={[styles.periodRow, { borderBottomColor: colors.border }]}>
         {(["daily", "weekly", "monthly"] as Period[]).map((p) => (
           <Pressable
             key={p}
@@ -124,7 +124,12 @@ export default function LeaderboardScreen() {
         ))}
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryScroll}
+        contentContainerStyle={styles.categoryRow}
+      >
         {(Object.keys(CATEGORY_LABELS) as Category[]).map((c) => (
           <Pressable
             key={c}
@@ -195,18 +200,19 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingBottom: 16 },
   backBtn: { padding: 4 },
   title: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  periodRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
-  periodBtn: { flex: 1, alignItems: "center", paddingVertical: 8, borderRadius: 10, borderWidth: 1 },
+  periodRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth },
+  periodBtn: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 9, borderRadius: 10, borderWidth: 1 },
   periodText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  categoryRow: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
+  categoryScroll: { flexGrow: 0 },
+  categoryRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
   categoryBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   categoryText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  podium: { flexDirection: "row", alignItems: "flex-end", justifyContent: "center", paddingHorizontal: 16, paddingVertical: 20, gap: 8 },
-  podiumItem: { alignItems: "center", flex: 1, gap: 6 },
-  podiumName: { fontSize: 13, fontFamily: "Inter_600SemiBold", textAlign: "center" },
-  podiumBlock: { width: "100%", borderRadius: 12, alignItems: "center", justifyContent: "flex-end", paddingBottom: 8, gap: 4 },
-  podiumRank: { color: "rgba(255,255,255,0.8)", fontSize: 12, fontFamily: "Inter_700Bold" },
-  podiumValue: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
+  podium: { flexDirection: "row", alignItems: "flex-end", justifyContent: "center", paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20, gap: 10 },
+  podiumItem: { alignItems: "center", flex: 1, gap: 4 },
+  podiumName: { fontSize: 12, fontFamily: "Inter_600SemiBold", textAlign: "center" },
+  podiumBlock: { width: "100%", borderRadius: 14, alignItems: "center", justifyContent: "flex-end", paddingBottom: 10, gap: 4 },
+  podiumRank: { color: "rgba(255,255,255,0.75)", fontSize: 12, fontFamily: "Inter_700Bold" },
+  podiumValue: { color: "#fff", fontSize: 15, fontFamily: "Inter_700Bold" },
   listSection: { paddingHorizontal: 16, gap: 8 },
   listItem: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, borderWidth: 1 },
   listRank: { fontSize: 13, fontFamily: "Inter_700Bold", width: 28 },
