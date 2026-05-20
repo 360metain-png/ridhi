@@ -124,30 +124,31 @@ export default function LeaderboardScreen() {
         ))}
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryScroll}
-        contentContainerStyle={styles.categoryRow}
-      >
-        {(Object.keys(CATEGORY_LABELS) as Category[]).map((c) => (
-          <Pressable
-            key={c}
-            onPress={() => setCategory(c)}
-            style={[
-              styles.categoryBtn,
-              { backgroundColor: category === c ? colors.secondary + "20" : "transparent", borderColor: category === c ? colors.secondary : colors.border },
-            ]}
-          >
-            <Feather name={CATEGORY_LABELS[c].icon as any} size={14} color={category === c ? colors.secondary : colors.mutedForeground} />
-            <Text style={[styles.categoryText, { color: category === c ? colors.secondary : colors.mutedForeground }]}>
-              {CATEGORY_LABELS[c].label}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+      <View style={styles.categoryWrap}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryRow}
+        >
+          {(Object.keys(CATEGORY_LABELS) as Category[]).map((c) => (
+            <Pressable
+              key={c}
+              onPress={() => setCategory(c)}
+              style={[
+                styles.categoryBtn,
+                { backgroundColor: category === c ? colors.secondary + "20" : "transparent", borderColor: category === c ? colors.secondary : colors.border },
+              ]}
+            >
+              <Feather name={CATEGORY_LABELS[c].icon as any} size={14} color={category === c ? colors.secondary : colors.mutedForeground} />
+              <Text style={[styles.categoryText, { color: category === c ? colors.secondary : colors.mutedForeground }]}>
+                {CATEGORY_LABELS[c].label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         <View style={styles.podium}>
           {[top3[1], top3[0], top3[2]].map((entry, i) => {
             const podiumOrder = [2, 1, 3];
@@ -203,7 +204,7 @@ const styles = StyleSheet.create({
   periodRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   periodBtn: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 9, borderRadius: 10, borderWidth: 1 },
   periodText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  categoryScroll: { flexGrow: 0 },
+  categoryWrap: { height: 52, justifyContent: "center" },
   categoryRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
   categoryBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   categoryText: { fontSize: 13, fontFamily: "Inter_500Medium" },
