@@ -71,7 +71,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/live-streams": ["super_admin", "admin", "agent", "host"],
   "/ai-hub":       ["super_admin", "admin"],
   "/marketing":    ["super_admin", "admin"],
-  "/settings":     ["super_admin", "admin"],
+  "/settings":     ["super_admin"],
   "/super-admin":  ["super_admin"],
   "/promo-codes":  ["super_admin"],
   "/referral":          ["super_admin", "admin"],

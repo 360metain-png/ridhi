@@ -90,7 +90,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     items: [
       { name: "Referral Program", href: "/referral", icon: Share2,   allowedRoles: SA_A },
       { name: "Marketing",   href: "/marketing",   icon: Megaphone,  allowedRoles: SA_A },
-      { name: "Settings",    href: "/settings",    icon: Settings,   allowedRoles: SA_A },
+      { name: "Settings",    href: "/settings",    icon: Settings,   allowedRoles: SA   },
       { name: "Super Admin",         href: "/super-admin",       icon: ShieldCheck,   allowedRoles: SA   },
       { name: "Admin Management",   href: "/admin-management",  icon: UserPlus,      allowedRoles: SA   },
       { name: "Admin Activity",     href: "/admin-activity",    icon: Activity,      allowedRoles: SA   },
