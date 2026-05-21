@@ -23,6 +23,9 @@ import SuperAdmin    from "@/pages/super-admin";
 import PromoCodes    from "@/pages/promo-codes";
 import ReferralProgram    from "@/pages/referral-program";
 import ApiIntegrations   from "@/pages/api-integrations";
+import AdminManagement  from "@/pages/admin-management";
+import MyReport         from "@/pages/my-report";
+import AdminActivity    from "@/pages/admin-activity";
 import Gaming        from "@/pages/gaming";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
@@ -73,6 +76,9 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/promo-codes":  ["super_admin"],
   "/referral":          ["super_admin", "admin"],
   "/api-integrations":  ["super_admin"],
+  "/admin-management":  ["super_admin"],
+  "/admin-activity":    ["super_admin"],
+  "/my-report":         ["super_admin", "admin"],
   "/handbook":     ["super_admin", "admin", "agent", "host"],
 };
 
@@ -153,7 +159,10 @@ function Router() {
       <Route path="/super-admin"  component={() => <RoleRoute component={SuperAdmin}   path="/super-admin" />} />
       <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}      path="/promo-codes" />} />
       <Route path="/referral"          component={() => <RoleRoute component={ReferralProgram}  path="/referral" />} />
-      <Route path="/api-integrations"  component={() => <RoleRoute component={ApiIntegrations} path="/api-integrations" />} />
+      <Route path="/api-integrations"  component={() => <RoleRoute component={ApiIntegrations}  path="/api-integrations"  />} />
+      <Route path="/admin-management"  component={() => <RoleRoute component={AdminManagement}  path="/admin-management"  />} />
+      <Route path="/admin-activity"    component={() => <RoleRoute component={AdminActivity}    path="/admin-activity"    />} />
+      <Route path="/my-report"         component={() => <RoleRoute component={MyReport}         path="/my-report"         />} />
       <Route path="/gaming"       component={() => <RoleRoute component={Gaming}       path="/gaming" />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />

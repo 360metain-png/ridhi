@@ -5,7 +5,7 @@ import {
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
-  LayoutTemplate, Ticket, Share2, Plug,
+  LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -90,10 +90,13 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Referral Program", href: "/referral", icon: Share2,   allowedRoles: SA_A },
       { name: "Marketing",   href: "/marketing",   icon: Megaphone,  allowedRoles: SA_A },
       { name: "Settings",    href: "/settings",    icon: Settings,   allowedRoles: SA_A },
-      { name: "Super Admin",         href: "/super-admin",       icon: ShieldCheck, allowedRoles: SA  },
-      { name: "API Integrations",    href: "/api-integrations",  icon: Plug,        allowedRoles: SA  },
-      { name: "Promo & Offer Codes", href: "/promo-codes",       icon: Ticket,      allowedRoles: SA  },
-      { name: "Handbook",         href: "/handbook",    icon: BookOpen,    allowedRoles: ALL },
+      { name: "Super Admin",         href: "/super-admin",       icon: ShieldCheck,   allowedRoles: SA   },
+      { name: "Admin Management",   href: "/admin-management",  icon: UserPlus,      allowedRoles: SA   },
+      { name: "Admin Activity",     href: "/admin-activity",    icon: Activity,      allowedRoles: SA   },
+      { name: "My Work Report",     href: "/my-report",         icon: ClipboardList, allowedRoles: SA_A },
+      { name: "API Integrations",   href: "/api-integrations",  icon: Plug,          allowedRoles: SA   },
+      { name: "Promo & Offer Codes",href: "/promo-codes",       icon: Ticket,        allowedRoles: SA   },
+      { name: "Handbook",           href: "/handbook",          icon: BookOpen,      allowedRoles: ALL  },
     ],
   },
 ];
@@ -178,6 +181,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/promo-codes":   "Promo & Offer Codes",
     "/referral":          "Referral Program",
     "/api-integrations":  "3rd Party API Integrations",
+    "/admin-management":  "Admin Role Management",
+    "/admin-activity":    "Admin Activity Monitor",
+    "/my-report":         "My Work Report",
   };
 
   return (
