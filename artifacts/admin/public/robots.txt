@@ -38,4 +38,4 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
-Sitemap: https://ridhi.app/admin/sitemap.xml
+Sitemap: https://ridhi.app/admin/sitemap-index.xml
