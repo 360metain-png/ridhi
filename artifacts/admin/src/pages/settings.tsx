@@ -1,14 +1,17 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings2, Shield, Bell, CreditCard, Sliders, Globe, Server,
   Lock, Mail, MessageSquare, AlertTriangle, CheckCircle, Smartphone,
-  Users, ToggleLeft, Zap, Database, Eye, FileText, Save, RefreshCw,
+  Users, ToggleLeft, Zap, Database, Eye, EyeOff, FileText, Save, RefreshCw, KeyRound,
 } from "lucide-react";
+import { getCredentials, saveCredentials } from "@/config/credentials";
 
 // ── Toggle row helper ─────────────────────────────────────────────────────────
 function ToggleRow({ label, desc, defaultOn = true, badge }: { label: string; desc: string; defaultOn?: boolean; badge?: string }) {
@@ -37,6 +40,123 @@ function InputRow({ label, desc, value, type = "text" }: { label: string; desc: 
   );
 }
 
+// ── Change Credentials Panel ──────────────────────────────────────────────────
+type CredRole = "super_admin" | "admin";
+
+function ChangeCredentials({ role, label, color }: { role: CredRole; label: string; color: string }) {
+  const [form, setForm]       = useState({ email: "", newPass: "", confirmPass: "", currentPass: "" });
+  const [showNew, setShowNew] = useState(false);
+  const [showCur, setShowCur] = useState(false);
+  const [status, setStatus]   = useState<"idle" | "success" | "error">("idle");
+  const [msg,    setMsg]      = useState("");
+
+  const save = () => {
+    setStatus("idle"); setMsg("");
+    const creds = getCredentials();
+
+    if (!form.currentPass) { setStatus("error"); setMsg("Enter the current password to confirm changes."); return; }
+    if (form.currentPass !== creds[role].password) { setStatus("error"); setMsg("Current password is incorrect."); return; }
+    if (form.newPass && form.newPass.length < 8) { setStatus("error"); setMsg("New password must be at least 8 characters."); return; }
+    if (form.newPass && form.newPass !== form.confirmPass) { setStatus("error"); setMsg("New passwords do not match."); return; }
+
+    const updated = { ...creds };
+    if (form.email.trim())  updated[role] = { ...updated[role], email: form.email.trim().toLowerCase() };
+    if (form.newPass)       updated[role] = { ...updated[role], password: form.newPass };
+    saveCredentials(updated);
+
+    setStatus("success");
+    setMsg(`${label} credentials updated successfully.`);
+    setForm({ email: "", newPass: "", confirmPass: "", currentPass: "" });
+  };
+
+  const current = getCredentials()[role];
+
+  return (
+    <Card>
+      <CardHeader className="py-4">
+        <CardTitle className={`text-sm flex items-center gap-2 ${color}`}>
+          <KeyRound className="w-4 h-4" />{label} Credentials
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="rounded-lg bg-gray-50 border px-4 py-3 space-y-1">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Current Login</p>
+          <p className="text-sm font-semibold">{current.email}</p>
+          <p className="text-xs text-muted-foreground">Password: {'•'.repeat(current.password.length)}</p>
+        </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">New Email <span className="text-gray-400 normal-case font-normal">(leave blank to keep current)</span></Label>
+            <Input
+              type="email"
+              placeholder={current.email}
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              className="h-9 text-sm"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">New Password <span className="text-gray-400 normal-case font-normal">(leave blank to keep current)</span></Label>
+            <div className="relative">
+              <Input
+                type={showNew ? "text" : "password"}
+                placeholder="Min 8 characters"
+                value={form.newPass}
+                onChange={(e) => setForm((f) => ({ ...f, newPass: e.target.value }))}
+                className="h-9 text-sm pr-10"
+              />
+              <button type="button" onClick={() => setShowNew((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showNew ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Confirm New Password</Label>
+            <Input
+              type="password"
+              placeholder="Repeat new password"
+              value={form.confirmPass}
+              onChange={(e) => setForm((f) => ({ ...f, confirmPass: e.target.value }))}
+              className="h-9 text-sm"
+            />
+          </div>
+
+          <div className="space-y-1.5 pt-1 border-t">
+            <Label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Current Password <span className="text-red-400">*</span> (required to confirm)</Label>
+            <div className="relative">
+              <Input
+                type={showCur ? "text" : "password"}
+                placeholder="Your current password"
+                value={form.currentPass}
+                onChange={(e) => setForm((f) => ({ ...f, currentPass: e.target.value }))}
+                className="h-9 text-sm pr-10"
+              />
+              <button type="button" onClick={() => setShowCur((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showCur ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {status !== "idle" && (
+          <div className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs font-medium ${status === "success" ? "bg-green-50 border border-green-200 text-green-700" : "bg-red-50 border border-red-200 text-red-600"}`}>
+            {status === "success" ? <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" /> : <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />}
+            {msg}
+          </div>
+        )}
+
+        <Button onClick={save} size="sm" className="w-full gap-2 bg-purple-600 hover:bg-purple-700">
+          <Save className="w-3.5 h-3.5" /> Save {label} Credentials
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Main Settings page ────────────────────────────────────────────────────────
 export default function Settings() {
   return (
     <div className="space-y-6 p-6">
@@ -65,13 +185,14 @@ export default function Settings() {
 
       <Tabs defaultValue="general">
         <TabsList className="h-9 flex flex-wrap gap-0.5">
-          <TabsTrigger value="general"    className="text-xs gap-1.5"><Globe        className="w-3.5 h-3.5" />General</TabsTrigger>
-          <TabsTrigger value="features"   className="text-xs gap-1.5"><ToggleLeft   className="w-3.5 h-3.5" />Feature Flags</TabsTrigger>
-          <TabsTrigger value="security"   className="text-xs gap-1.5"><Shield       className="w-3.5 h-3.5" />Security</TabsTrigger>
-          <TabsTrigger value="notifs"     className="text-xs gap-1.5"><Bell         className="w-3.5 h-3.5" />Notifications</TabsTrigger>
-          <TabsTrigger value="finance"    className="text-xs gap-1.5"><CreditCard   className="w-3.5 h-3.5" />Finance & Payouts</TabsTrigger>
-          <TabsTrigger value="content"    className="text-xs gap-1.5"><Eye          className="w-3.5 h-3.5" />Content Moderation</TabsTrigger>
-          <TabsTrigger value="limits"     className="text-xs gap-1.5"><Zap          className="w-3.5 h-3.5" />Limits & Quotas</TabsTrigger>
+          <TabsTrigger value="general"     className="text-xs gap-1.5"><Globe        className="w-3.5 h-3.5" />General</TabsTrigger>
+          <TabsTrigger value="features"    className="text-xs gap-1.5"><ToggleLeft   className="w-3.5 h-3.5" />Feature Flags</TabsTrigger>
+          <TabsTrigger value="security"    className="text-xs gap-1.5"><Shield       className="w-3.5 h-3.5" />Security</TabsTrigger>
+          <TabsTrigger value="notifs"      className="text-xs gap-1.5"><Bell         className="w-3.5 h-3.5" />Notifications</TabsTrigger>
+          <TabsTrigger value="finance"     className="text-xs gap-1.5"><CreditCard   className="w-3.5 h-3.5" />Finance & Payouts</TabsTrigger>
+          <TabsTrigger value="content"     className="text-xs gap-1.5"><Eye          className="w-3.5 h-3.5" />Content Moderation</TabsTrigger>
+          <TabsTrigger value="limits"      className="text-xs gap-1.5"><Zap          className="w-3.5 h-3.5" />Limits & Quotas</TabsTrigger>
+          <TabsTrigger value="credentials" className="text-xs gap-1.5"><KeyRound     className="w-3.5 h-3.5" />Credentials</TabsTrigger>
         </TabsList>
 
         {/* ═══════ GENERAL ═══════ */}
@@ -315,6 +436,38 @@ export default function Settings() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* ═══════ CREDENTIALS ═══════ */}
+        <TabsContent value="credentials" className="space-y-5 mt-4">
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
+            <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Admin Panel Login Credentials</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                These are the email addresses and passwords used to log in to this admin panel. Changes take effect immediately — you will need the new credentials on your next login. Only Super Admin can access this tab.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            <ChangeCredentials role="super_admin" label="Super Admin" color="text-purple-600" />
+            <ChangeCredentials role="admin"       label="Admin"       color="text-indigo-600" />
+          </div>
+
+          <Card className="border-dashed">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <Mail className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold">Forgot your current password?</p>
+                  <p className="text-xs text-muted-foreground">
+                    If you are locked out, credentials can be reset by clearing your browser's localStorage for this domain, which will restore the original default passwords (<code className="bg-gray-100 px-1 rounded">Ridhi@SA2024</code> for Super Admin, <code className="bg-gray-100 px-1 rounded">Ridhi@Admin2024</code> for Admin).
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
       </Tabs>
