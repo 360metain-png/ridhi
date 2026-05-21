@@ -57,12 +57,17 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    cssCodeSplit: true,
+    cssMinify: true,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {
-          "vendor-react": ["react", "react-dom"],
-          "vendor-charts": ["recharts"],
-          "vendor-motion": ["framer-motion"],
+          "vendor-react":   ["react", "react-dom"],
+          "vendor-router":  ["wouter"],
+          "vendor-charts":  ["recharts"],
+          "vendor-motion":  ["framer-motion"],
           "vendor-radix": [
             "@radix-ui/react-dialog",
             "@radix-ui/react-dropdown-menu",
@@ -80,6 +85,7 @@ export default defineConfig({
           ],
           "vendor-icons": ["lucide-react"],
         },
+        compact: true,
       },
     },
   },
