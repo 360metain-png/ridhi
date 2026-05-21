@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
 import { SPEND_CATEGORIES } from "@/data/coinEconomy";
@@ -174,6 +175,7 @@ export default function WalletScreen() {
 
   return (
     <View style={[styles.outerWrap, { backgroundColor: colors.background }]}>
+      <PrivateHead />
       <ScrollView ref={scrollRef} style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
         {/* ── Wallet Card ── */}
         <LinearGradient colors={[colors.primary, colors.secondary]} style={[styles.walletCard, { paddingTop: topPad + 16 }]}>

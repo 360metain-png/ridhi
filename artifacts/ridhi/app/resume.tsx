@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 
 type ExpLevel = "fresher" | "1-2" | "3-5" | "5-10" | "10+";
 type JobType   = "full-time" | "part-time" | "freelance" | "internship";
@@ -103,6 +104,7 @@ export default function ResumeScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <PrivateHead />
       {/* Header */}
       <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>

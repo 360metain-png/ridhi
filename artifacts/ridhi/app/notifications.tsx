@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { Avatar } from "@/components/Avatar";
 import { NOTIFICATIONS, MARKETING_NOTIFICATIONS, type MarketingNotification } from "@/data/mockData";
 
@@ -246,6 +247,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PrivateHead />
       <View style={[styles.header, { paddingTop: topPad + 8, backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={24} color={colors.foreground} />

@@ -18,6 +18,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
@@ -166,6 +167,7 @@ export default function WithdrawScreen() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <PrivateHead />
       <View style={[st.screen, { backgroundColor: colors.background }]}>
         {/* Header */}
         <LinearGradient colors={[colors.primary, colors.secondary]} style={[st.header, { paddingTop: topPad + 10 }]}>

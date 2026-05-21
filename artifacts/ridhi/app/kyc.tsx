@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -363,6 +364,7 @@ export default function KYCScreen() {
   // ── Main flow ─────────────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PrivateHead />
       <LinearGradient colors={[colors.secondary + "20", colors.primary + "10", "transparent"]} style={[styles.headerGlow, { height: topPad + 140, pointerEvents: "none" }]} />
 
       {/* Header */}

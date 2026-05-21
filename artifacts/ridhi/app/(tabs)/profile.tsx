@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { getZodiacFromBirthday, ZODIAC_LIST } from "@/utils/zodiac";
 import { Avatar, AvatarPicker } from "@/components/Avatar";
@@ -235,6 +236,7 @@ export default function ProfileScreen() {
 
   return (
     <>
+    <PrivateHead />
     {/* ── Edit Profile Modal ─────────────────────────────────────────────── */}
     <Modal visible={editOpen} transparent animationType="slide" onRequestClose={() => setEditOpen(false)}>
       <TouchableWithoutFeedback onPress={() => setEditOpen(false)}>

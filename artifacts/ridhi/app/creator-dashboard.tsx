@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 
 const { width } = Dimensions.get("window");
@@ -58,6 +59,7 @@ export default function CreatorDashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <PrivateHead />
       <LinearGradient
         colors={[colors.primary, colors.secondary]}
         style={[styles.topGrad, { paddingTop: topPad + 10 }]}
