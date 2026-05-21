@@ -188,9 +188,9 @@ export default function AboutScreen() {
           <Text style={[s.cardBody, { color: colors.mutedForeground, marginBottom: 14 }]}>
             For support, partnerships, business inquiries, or feedback:
           </Text>
-          <Pressable onPress={() => Linking.openURL("mailto:support@ridhi.app")} style={[s.contactBtn, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <Pressable onPress={() => Linking.openURL("mailto:hello@ridhi.app")} style={[s.contactBtn, { backgroundColor: colors.background, borderColor: colors.border }]}>
             <Feather name="mail" size={16} color={colors.primary} />
-            <Text style={[s.contactBtnText, { color: colors.foreground }]}>support@ridhi.app</Text>
+            <Text style={[s.contactBtnText, { color: colors.foreground }]}>hello@ridhi.app</Text>
             <Feather name="external-link" size={13} color={colors.mutedForeground} />
           </Pressable>
           <Pressable onPress={() => Linking.openURL("https://ridhi.app/")} style={[s.contactBtn, { backgroundColor: colors.background, borderColor: colors.border }]}>

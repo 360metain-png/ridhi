@@ -132,7 +132,7 @@ const ORG_SCHEMA = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer support",
-    email: "support@ridhi.app",
+    email: "hello@ridhi.app",
     availableLanguage: [
       "English", "Hindi", "Tamil", "Telugu", "Bengali",
       "Marathi", "Gujarati", "Kannada", "Punjabi",

@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: "I did not receive the OTP. What should I do?",
-    a: "Please try the following:\n\n• Check your mobile network connection\n• Wait 30–60 seconds and request OTP again\n• Ensure your number is entered correctly\n\nIf the issue continues, contact: support@ridhi.app",
+    a: "Please try the following:\n\n• Check your mobile network connection\n• Wait 30–60 seconds and request OTP again\n• Ensure your number is entered correctly\n\nIf the issue continues, contact: hello@ridhi.app",
   },
   {
     q: "How can I reset my password?",
@@ -42,15 +42,15 @@ const FAQS = [
   },
   {
     q: "How do I report abusive users or inappropriate content?",
-    a: "You can:\n\n• Use the \"Report\" button inside the app\n• Block the user directly\n• Contact support at support@ridhi.app\n\nOur moderation team reviews all reports to maintain community safety.",
+    a: "You can:\n\n• Use the \"Report\" button inside the app\n• Block the user directly\n• Contact support at hello@ridhi.app\n\nOur moderation team reviews all reports to maintain community safety.",
   },
   {
     q: "How do I delete my Ridhi account?",
-    a: "Go to Settings → Account → Delete Account\n\nOr contact: support@ridhi.app\n\nNote: Account deletion may be permanent. Certain records may be retained for legal or security purposes.",
+    a: "Go to Settings → Account → Delete Account\n\nOr contact: hello@ridhi.app\n\nNote: Account deletion may be permanent. Certain records may be retained for legal or security purposes.",
   },
   {
     q: "Why was my account suspended?",
-    a: "Accounts may be suspended for:\n\n• Violating community guidelines\n• Fake activity or impersonation\n• Harassment or abusive behavior\n• Spam or illegal activities\n• Multiple policy violations\n\nTo appeal: support@ridhi.app",
+    a: "Accounts may be suspended for:\n\n• Violating community guidelines\n• Fake activity or impersonation\n• Harassment or abusive behavior\n• Spam or illegal activities\n• Multiple policy violations\n\nTo appeal: hello@ridhi.app",
   },
   {
     q: "Is my personal information secure?",
@@ -190,8 +190,8 @@ export default function HelpSupportScreen() {
         {/* Quick contact */}
         <View style={s.sectionWrap}>
           <Text style={[s.sectionTitle, { color: colors.foreground }]}>Contact Support</Text>
-          <ContactBtn icon="mail" label="Customer Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
-          <ContactBtn icon="briefcase" label="Business Inquiries" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
+          <ContactBtn icon="mail" label="Customer Support" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
+          <ContactBtn icon="briefcase" label="Business Inquiries" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
           <ContactBtn icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
         </View>
 

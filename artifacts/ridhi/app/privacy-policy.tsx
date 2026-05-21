@@ -49,8 +49,8 @@ const SECTIONS: Section[] = [
         <InfoRow label="Platform Name" value="Ridhi" />
         <InfoRow label="Company" value="Krilo Digitech Pvt Ltd" />
         <InfoRow label="Website" value="https://ridhi.app/" link />
-        <InfoRow label="Support Email" value="support@ridhi.app" link />
-        <InfoRow label="Business Email" value="hey@ridhi.app" link />
+        <InfoRow label="Support Email" value="hello@ridhi.app" link />
+        <InfoRow label="Business Email" value="hello@ridhi.app" link />
       </>
     ),
   },
@@ -213,7 +213,7 @@ const SECTIONS: Section[] = [
       <>
         <PP>Depending on your location and applicable laws, you may have rights to:</PP>
         {["Access your data", "Correct inaccurate information", "Delete your account", "Withdraw consent", "Restrict data processing", "Request a copy of your data"].map((i) => <Bullet key={i} text={i} />)}
-        <PP>Requests can be submitted to: <LinkText href="mailto:support@ridhi.app">support@ridhi.app</LinkText></PP>
+        <PP>Requests can be submitted to: <LinkText href="mailto:hello@ridhi.app">hello@ridhi.app</LinkText></PP>
       </>
     ),
   },
@@ -261,8 +261,8 @@ const SECTIONS: Section[] = [
     color: "#E91E8C",
     content: (
       <>
-        <ContactRow icon="mail" label="Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
-        <ContactRow icon="briefcase" label="Business" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
+        <ContactRow icon="mail" label="Support" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
+        <ContactRow icon="briefcase" label="Business" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
         <ContactRow icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
       </>
     ),

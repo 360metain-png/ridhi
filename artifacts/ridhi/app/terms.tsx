@@ -164,7 +164,7 @@ const SECTIONS: SectionDef[] = [
       <>
         <PP>Unless otherwise required under applicable law:</PP>
         {["All digital purchases are final.", "Coin purchases, virtual gifts, subscriptions, and premium features are non-refundable.", "Refund requests may only be considered in cases of duplicate transactions or technical failures verified by the Company."].map(t => <Bullet key={t} text={t} />)}
-        <PP>For billing concerns, contact: <Text style={{ color: "#E91E8C" }} onPress={() => Linking.openURL("mailto:support@ridhi.app")}>support@ridhi.app</Text></PP>
+        <PP>For billing concerns, contact: <Text style={{ color: "#E91E8C" }} onPress={() => Linking.openURL("mailto:hello@ridhi.app")}>hello@ridhi.app</Text></PP>
       </>
     ),
   },
@@ -312,8 +312,8 @@ const SECTIONS: SectionDef[] = [
     body: () => (
       <>
         <ContactRow icon="globe" label="Website" value="ridhi.app" href="https://ridhi.app/" />
-        <ContactRow icon="mail" label="Support" value="support@ridhi.app" href="mailto:support@ridhi.app" />
-        <ContactRow icon="briefcase" label="Business" value="hey@ridhi.app" href="mailto:hey@ridhi.app" />
+        <ContactRow icon="mail" label="Support" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
+        <ContactRow icon="briefcase" label="Business" value="hello@ridhi.app" href="mailto:hello@ridhi.app" />
       </>
     ),
   },
@@ -408,9 +408,9 @@ export default function TermsScreen() {
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
           <InfoRow label="Website" value="https://ridhi.app/" link />
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
-          <InfoRow label="Support" value="support@ridhi.app" link />
+          <InfoRow label="Support" value="hello@ridhi.app" link />
           <View style={[s.rowDivider, { backgroundColor: colors.border }]} />
-          <InfoRow label="Business" value="hey@ridhi.app" link />
+          <InfoRow label="Business" value="hello@ridhi.app" link />
         </View>
 
         {/* Notice banner */}
