@@ -4,8 +4,9 @@ import { Button }    from "@/components/ui/button";
 import { Input }     from "@/components/ui/input";
 import { Label }     from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, UserCog, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X } from "lucide-react";
+import { Shield, UserCog, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X, AlertCircle } from "lucide-react";
 import type { AdminRole } from "@/App";
+import { validateLogin, getDefaultEmail } from "@/config/credentials";
 
 type PortalConfig = {
   role:         AdminRole;
@@ -16,8 +17,6 @@ type PortalConfig = {
   gradientFrom: string;
   gradientTo:   string;
   ringColor:    string;
-  email:        string;
-  password:     string;
   badge:        string;
   permissions:  { label: string; allowed: boolean }[];
 };
@@ -29,7 +28,7 @@ const CONFIGS: Record<AdminRole, PortalConfig> = {
     gradient: "from-purple-600 to-purple-800",
     gradientFrom: "from-purple-600", gradientTo: "to-pink-600",
     ringColor: "ring-purple-300",
-    email: "arjun@ridhi.app", password: "admin123", badge: "Super Admin",
+    badge: "Super Admin",
     permissions: [
       { label: "Dashboard & Analytics",      allowed: true  },
       { label: "User & Content Management",   allowed: true  },
@@ -45,12 +44,12 @@ const CONFIGS: Record<AdminRole, PortalConfig> = {
     gradient: "from-indigo-500 to-indigo-700",
     gradientFrom: "from-indigo-500", gradientTo: "to-blue-600",
     ringColor: "ring-indigo-300",
-    email: "admin.sneha@ridhi.app", password: "admin123", badge: "Admin",
+    badge: "Admin",
     permissions: [
       { label: "Dashboard & Analytics",      allowed: true  },
-      { label: "User & Content Management",   allowed: true  },
       { label: "Approve & Manage Agents",     allowed: true  },
       { label: "Finance & Revenue Overview",  allowed: true  },
+      { label: "User & Content Management",   allowed: false },
       { label: "System Settings",             allowed: false },
       { label: "Super Admin Panel",           allowed: false },
     ],
@@ -60,7 +59,7 @@ const CONFIGS: Record<AdminRole, PortalConfig> = {
 interface PortalLoginProps { role: AdminRole }
 
 export default function PortalLogin({ role }: PortalLoginProps) {
-  const cfg = CONFIGS[role];
+  const cfg  = CONFIGS[role];
   const Icon = cfg.icon;
 
   const [email,    setEmail]    = useState("");
@@ -69,14 +68,16 @@ export default function PortalLogin({ role }: PortalLoginProps) {
   const [error,    setError]    = useState("");
   const [, setLocation]         = useLocation();
 
-  const fillDemo = () => { setEmail(cfg.email); setPassword(cfg.password); setError(""); };
-
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { setError("Please enter email and password."); return; }
+    if (!validateLogin(role, email, password)) {
+      setError("Incorrect email or password. Please try again.");
+      return;
+    }
     localStorage.setItem("ridhi_admin_logged_in", "true");
     localStorage.setItem("ridhi_admin_role",      role);
-    localStorage.setItem("ridhi_admin_email",     email);
+    localStorage.setItem("ridhi_admin_email",     email.trim().toLowerCase());
     setLocation("/");
   };
 
@@ -131,7 +132,7 @@ export default function PortalLogin({ role }: PortalLoginProps) {
                 <Input
                   id="email"
                   type="email"
-                  placeholder={cfg.email}
+                  placeholder={getDefaultEmail(role)}
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError(""); }}
                   className="h-10"
@@ -162,7 +163,12 @@ export default function PortalLogin({ role }: PortalLoginProps) {
                 </div>
               </div>
 
-              {error && <p className="text-xs text-destructive font-medium">{error}</p>}
+              {error && (
+                <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                  <p className="text-xs text-red-600 font-medium">{error}</p>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -171,14 +177,6 @@ export default function PortalLogin({ role }: PortalLoginProps) {
                 Sign in as {cfg.badge}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
-
-              <button
-                type="button"
-                onClick={fillDemo}
-                className="w-full text-xs text-center text-gray-400 hover:text-gray-600 transition-colors py-0.5"
-              >
-                Use demo credentials
-              </button>
             </form>
           </CardContent>
         </Card>
