@@ -207,10 +207,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {/* Default: block all admin routes from indexing; /support overrides this */}
+        {/* Default: block ALL admin routes from indexing, archiving, and image indexing.
+            Only /support overrides this via its own Helmet. */}
         <Helmet>
-          <meta name="robots" content="noindex, nofollow" />
-          <meta name="title" content="Ridhi Admin – Control Panel" />
+          <meta name="robots" content="noindex, nofollow, noarchive, noimageindex, nosnippet" />
+          <meta name="title" content="Ridhi" />
         </Helmet>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
