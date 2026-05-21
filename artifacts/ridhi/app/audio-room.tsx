@@ -491,7 +491,7 @@ export default function AudioRoomScreen() {
         >
           {/* quick reactions */}
           <View style={styles.reactRow}>
-            {["❤️", "🔥", "👏", "😂", "🎵"].map((e) => (
+            {["❤️", "🔥", "👏", "😂", "🤩", "💯", "😍", "🎵"].map((e) => (
               <Pressable key={e} onPress={() => sendReaction(e)} style={styles.reactBtn}>
                 <Text style={{ fontSize: 22 }}>{e}</Text>
               </Pressable>

@@ -20,9 +20,16 @@ import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, getDefaultMessages, type RoomMessage } from "@/data/chatrooms";
 import { Avatar } from "@/components/Avatar";
 
-const STICKERS = ["😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎", "🤯", "👑"];
+const STICKERS = [
+  "😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎", "🤯", "👑",
+  "🥰", "💀", "😱", "🤩", "💪", "🫶", "🌹", "✨", "🎶", "🏆", "🤣", "😘",
+];
 const QUICK_REPLIES = ["👍", "🔥 Facts!", "Agree!", "😂", "❤️", "🙏 Thanks"];
-const REACTION_EMOJIS = ["❤️", "😂", "😯", "👏", "🔥", "💯"];
+const REACTION_EMOJIS = [
+  "❤️", "😂", "😯", "👏", "🔥", "💯",
+  "😍", "🥰", "😭", "🤯", "🎉", "💪",
+  "👑", "🙏", "🤩", "💀", "😱", "🫶",
+];
 
 function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
@@ -486,18 +493,20 @@ const styles = StyleSheet.create({
   bubbleTimeMe: { fontSize: 9, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", alignSelf: "flex-end" },
   reactPicker: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     gap: 2,
     marginTop: 2,
+    maxWidth: 240,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
+    elevation: 5,
   },
   reactPickerBtn: { padding: 4 },
   reactPickerEmoji: { fontSize: 18 },

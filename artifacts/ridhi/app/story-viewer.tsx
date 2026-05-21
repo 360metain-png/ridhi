@@ -23,25 +23,25 @@ const STORIES = [
     id: "s1", user: "Ananya Singh", city: "Delhi", timeAgo: "2h",
     bgColors: ["#E91E8C", "#7B2FBE"] as [string, string],
     text: "Amazing evening at India Gate! ✨",
-    reactions: ["❤️", "🔥", "😍"],
+    reactions: ["❤️", "🔥", "😍", "🥰", "👏", "💯"],
   },
   {
     id: "s2", user: "Rahul Mehta", city: "Mumbai", timeAgo: "4h",
     bgColors: ["#FF6B35", "#E91E8C"] as [string, string],
     text: "Marine Drive vibes forever 🌊",
-    reactions: ["😮", "❤️", "👏"],
+    reactions: ["😮", "❤️", "👏", "😍", "🤩", "🙏"],
   },
   {
     id: "s3", user: "Kavya Reddy", city: "Hyderabad", timeAgo: "6h",
     bgColors: ["#7B2FBE", "#4A90E2"] as [string, string],
     text: "Biryani day! 🍛 Nothing beats Hyderabadi Biryani",
-    reactions: ["😍", "🔥", "❤️"],
+    reactions: ["😍", "🔥", "❤️", "😋", "💯", "🤤"],
   },
   {
     id: "s4", user: "Arjun Kumar", city: "Bangalore", timeAgo: "1h",
     bgColors: ["#34C759", "#4A90E2"] as [string, string],
     text: "Cubbon Park morning run 🏃‍♂️",
-    reactions: ["💪", "❤️", "🔥"],
+    reactions: ["💪", "❤️", "🔥", "🏃", "✨", "👑"],
   },
 ];
 
