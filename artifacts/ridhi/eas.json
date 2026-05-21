@@ -36,8 +36,7 @@
     "production": {
       "ios": {
         "language": "en-IN",
-        "ascAppId": "6770531782",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "ascAppId": "6770531782"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
