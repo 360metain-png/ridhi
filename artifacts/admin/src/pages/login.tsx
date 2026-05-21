@@ -51,7 +51,7 @@ export default function Login() {
         />
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3 select-none cursor-pointer" onClick={handleLogoClick}>
+        <div className="relative z-10 flex items-center gap-3 select-none cursor-pointer pl-2" onClick={handleLogoClick}>
           <div className="relative">
             <img
               src={`${import.meta.env.BASE_URL}ridhi_logo.png`}
@@ -67,7 +67,7 @@ export default function Login() {
         </div>
 
         {/* Hero text */}
-        <div className="relative z-10 space-y-6">
+        <div className="relative z-10 space-y-6 pl-2">
           <div>
             <h1 className="text-5xl font-black text-white leading-[1.1] tracking-tight">
               India's #1<br />
@@ -106,7 +106,7 @@ export default function Login() {
 
         {/* Platform stats strip */}
         <div
-          className="relative z-10 flex items-center gap-6 rounded-2xl px-5 py-3"
+          className="relative z-10 flex items-center gap-6 rounded-2xl px-5 py-3 ml-2"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
         >
           {[
@@ -161,11 +161,11 @@ export default function Login() {
           {/* Admin card */}
           <button
             onClick={() => setLocation("/login/admin")}
-            className="group w-full text-left rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(123,47,190,0.35)] focus:outline-none"
+            className="group w-full text-left rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(123,47,190,0.4)] focus:outline-none"
             style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              backdropFilter: "blur(20px)",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.06) 100%)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              backdropFilter: "blur(24px)",
             }}
           >
             {/* gradient top bar */}
