@@ -299,7 +299,7 @@ const HOST_SECTIONS: Section[] = [
       "This commission does NOT come from your earnings — it is a separate payment from the platform to the agent",
       "Your agent can help you with: Host promotion requests, KYC issues, payout follow-ups, stream strategy",
       "If you were not recruited by an agent, the Agent Info card shows 'Unassigned' — the Admin team may assign you one",
-      "You cannot change your assigned agent yourself — contact support@ridhi.app if there is a dispute",
+      "You cannot change your assigned agent yourself — contact hello@ridhi.app if there is a dispute",
     ],
     note: "Your Agent's commission does not reduce your earnings. You always receive 100% of the gift coin value — the agent's commission is paid separately by Ridhi.",
   },
@@ -331,12 +331,12 @@ const HOST_SECTIONS: Section[] = [
     subtitle: "Get help with hosting, payouts, KYC, and account issues",
     features: [
       "In-app: tap Host Dashboard → Handbook quick action for instant reference",
-      "Email: support@ridhi.app — for payout issues, KYC disputes, account suspension appeals",
+      "Email: hello@ridhi.app — for payout issues, KYC disputes, account suspension appeals",
       "Support hours: Monday–Saturday, 10:00 AM – 7:00 PM IST",
       "Contact your Agent first for host-level issues (stream strategy, level promotion, KYC follow-up)",
-      "Appeal a host suspension: email support@ridhi.app with your Host ID and reason",
-      "Payout not received: email support@ridhi.app with your transaction reference number",
-      "Stream was force-ended incorrectly: email support@ridhi.app with date/time and stream details",
+      "Appeal a host suspension: email hello@ridhi.app with your Host ID and reason",
+      "Payout not received: email hello@ridhi.app with your transaction reference number",
+      "Stream was force-ended incorrectly: email hello@ridhi.app with date/time and stream details",
     ],
   },
 ];
@@ -466,7 +466,7 @@ const AGENT_SECTIONS: Section[] = [
       "Support your hosts with: stream scheduling advice, gift strategy, PK battle tips, KYC guidance",
       "Track each host's progress toward their next level — help them hit their stream hours and PK win targets",
       "Contact host: tap their card → Contact to open a chat or see their registered WhatsApp number (if shared)",
-      "If a host is struggling, escalate to the Admin team via support@ridhi.app — mention the Host ID",
+      "If a host is struggling, escalate to the Admin team via hello@ridhi.app — mention the Host ID",
       "Hosts who leave the platform or are banned are automatically removed from your active roster count",
     ],
   },
@@ -507,7 +507,7 @@ const AGENT_SECTIONS: Section[] = [
       "Demotion Rule 2: 90 days with zero new host recruited → level frozen (no demotion, growth locked)",
       "Level frozen = you retain your current badge but cannot be promoted until you recruit again",
       "To avoid demotion: keep at least 40% of your roster streaming at least once per month",
-      "Appeal a demotion: contact support@ridhi.app with your Agent ID and a short explanation",
+      "Appeal a demotion: contact hello@ridhi.app with your Agent ID and a short explanation",
     ],
     note: "Demotion resets your commission rate to the lower level immediately. Rebuilding your roster to the previous threshold will re-qualify you for promotion.",
   },
@@ -519,7 +519,7 @@ const AGENT_SECTIONS: Section[] = [
     title: "Agent Support",
     subtitle: "How to get help with commissions, roster issues, and account queries",
     features: [
-      "Email: support@ridhi.app — for commission disputes, host roster issues, payout status, KYC queries",
+      "Email: hello@ridhi.app — for commission disputes, host roster issues, payout status, KYC queries",
       "Include your Agent ID in all support emails for faster resolution",
       "Support hours: Monday–Saturday, 10:00 AM – 7:00 PM IST",
       "Commission not credited: email with the month/year reference and your Agent ID",
@@ -1217,7 +1217,7 @@ export default function HandbookPage() {
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground border-t pt-4">
         <p>Ridhi Platform Handbook · Version 3.0.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
-        <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · support@ridhi.app</p>
+        <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · hello@ridhi.app</p>
       </div>
     </div>
   );
