@@ -42,6 +42,7 @@ import Jobs                from "@/pages/jobs";
 import Subscriptions       from "@/pages/subscriptions";
 import DomainHosting       from "@/pages/domain-hosting";
 import BackendAccess       from "@/pages/backend-access";
+import ContentAssets       from "@/pages/content-assets";
 import PortalLogin         from "@/pages/portal-login";
 import AdminLayout         from "@/components/layout/admin-layout";
 
@@ -81,6 +82,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/api-integrations":  ["super_admin"],
   "/domain-hosting":    ["super_admin"],
   "/backend-access":    ["super_admin"],
+  "/content-assets":    ["super_admin", "admin"],
   "/admin-management":  ["super_admin"],
   "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
@@ -185,6 +187,7 @@ function Router() {
       <Route path="/subscriptions"      component={() => <RoleRoute component={Subscriptions}      path="/subscriptions" />} />
       <Route path="/domain-hosting"    component={() => <RoleRoute component={DomainHosting}    path="/domain-hosting" />} />
       <Route path="/backend-access"    component={() => <RoleRoute component={BackendAccess}    path="/backend-access" />} />
+      <Route path="/content-assets"    component={() => <RoleRoute component={ContentAssets}    path="/content-assets" />} />
       <Route component={NotFound} />
     </Switch>
   );
