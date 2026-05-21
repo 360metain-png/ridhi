@@ -3,38 +3,84 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   Star, TrendingUp, IndianRupee, Users, Eye, CheckCircle,
-  Search, Radio, Award, Crown, Zap, ShieldCheck, Heart,
+  Search, Radio, Award, Crown, Zap, ShieldCheck,
   XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
+  Trash2, ShieldOff, Info, Lock, Network, ChevronRight,
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-const PENDING_HOSTS = [
-  { id: "ph1", name: "Anjali Rao",   city: "Bangalore", phone: "+91 99887 76655", agent: "Vikram Rao (A5)",    appliedAt: "1 hour ago",  language: "Kannada", followers: 3200 },
-  { id: "ph2", name: "Rohit Sharma", city: "Delhi",     phone: "+91 88776 65544", agent: "Sunita Joshi (A4)", appliedAt: "3 hours ago", language: "Hindi",   followers: 1800 },
+type HostStatus = "active" | "suspended" | "removed";
+
+interface Host {
+  id: string;
+  name: string;
+  city: string;
+  language: string;
+  level: string;
+  coinsReceived: number;
+  followers: number;
+  isLive: boolean;
+  agentId: string;
+  adminId: string;
+  earnings: number;
+  pkWins: number;
+  streamHours: number;
+  verified: boolean;
+  status: HostStatus;
+  joinDate: string;
+  phone: string;
+}
+
+// ── Shared constants matching agents.tsx ──────────────────────────────────────
+
+const ADMINS = [
+  { id: "adm1", name: "Priya Sharma",  email: "priya@ridhi.app"  },
+  { id: "adm2", name: "Rahul Mehta",   email: "rahul@ridhi.app"  },
+  { id: "adm3", name: "Neha Gupta",    email: "neha@ridhi.app"   },
+];
+
+const AGENTS_META = [
+  { id: "a1", name: "Vikram Rao",   level: "A5", adminId: "adm1" },
+  { id: "a2", name: "Sunita Joshi", level: "A4", adminId: "adm1" },
+  { id: "a3", name: "Deepak Singh", level: "A3", adminId: "adm2" },
+  { id: "a4", name: "Meena Kumari", level: "A2", adminId: "adm2" },
+  { id: "a5", name: "Rajan Pillai", level: "A1", adminId: "adm3" },
+  { id: "a6", name: "Preethi Nair", level: "A2", adminId: "adm3" },
 ];
 
 const HOST_LEVELS = [
-  { level: "L1", title: "Bronze", minCoins: 50000, badge: "🥉", color: "#CD7F32", next: "L2" },
-  { level: "L2", title: "Silver", minCoins: 200000, badge: "🥈", color: "#9E9E9E", next: "L3" },
-  { level: "L3", title: "Gold", minCoins: 500000, badge: "🥇", color: "#FFB800", next: "L4" },
-  { level: "L4", title: "Platinum", minCoins: 1000000, badge: "💎", color: "#00BCD4", next: "L5" },
-  { level: "L5", title: "Diamond", minCoins: 2000000, badge: "🔷", color: "#2196F3", next: "L6" },
-  { level: "L6", title: "Elite", minCoins: 3500000, badge: "⭐", color: "#7B2FBE", next: "L7" },
-  { level: "L7", title: "Royal Crown", minCoins: 5000000, badge: "👑", color: "#E91E8C", next: null },
+  { level: "L1", title: "Bronze",     minCoins:   50000, badge: "🥉", color: "#CD7F32" },
+  { level: "L2", title: "Silver",     minCoins:  200000, badge: "🥈", color: "#9E9E9E" },
+  { level: "L3", title: "Gold",       minCoins:  500000, badge: "🥇", color: "#FFB800" },
+  { level: "L4", title: "Platinum",   minCoins: 1000000, badge: "💎", color: "#00BCD4" },
+  { level: "L5", title: "Diamond",    minCoins: 2000000, badge: "🔷", color: "#2196F3" },
+  { level: "L6", title: "Elite",      minCoins: 3500000, badge: "⭐", color: "#7B2FBE" },
+  { level: "L7", title: "Royal Crown",minCoins: 5000000, badge: "👑", color: "#E91E8C" },
 ];
 
-const HOSTS = [
-  { id: "h1", name: "Priya Sharma", city: "Mumbai", language: "Hindi", level: "L7", coinsReceived: 6840000, followers: 128400, isLive: true, agent: "Vikram Rao (A5)", earnings: 284000, pkWins: 48, streamHours: 1240, verified: true, status: "active" },
-  { id: "h2", name: "Rahul Verma", city: "Delhi", language: "Hindi", level: "L6", coinsReceived: 3920000, followers: 98200, isLive: false, agent: "Sunita Joshi (A4)", earnings: 142000, pkWins: 32, streamHours: 840, verified: true, status: "active" },
-  { id: "h3", name: "Kavya Reddy", city: "Hyderabad", language: "Telugu", level: "L5", coinsReceived: 2140000, followers: 76800, isLive: true, agent: "Deepak Singh (A3)", earnings: 84000, pkWins: 24, streamHours: 620, verified: true, status: "active" },
-  { id: "h4", name: "Dev Kumar", city: "Bangalore", language: "English", level: "L4", coinsReceived: 1280000, followers: 54300, isLive: false, agent: "Meena Kumari (A2)", earnings: 58000, pkWins: 18, streamHours: 440, verified: false, status: "active" },
-  { id: "h5", name: "Meera Pillai", city: "Kochi", language: "Malayalam", level: "L3", coinsReceived: 620000, followers: 41200, isLive: false, agent: "Rajan Pillai (A1)", earnings: 24000, pkWins: 9, streamHours: 280, verified: true, status: "active" },
-  { id: "h6", name: "Arjun Shah", city: "Surat", language: "Gujarati", level: "L2", coinsReceived: 240000, followers: 28700, isLive: false, agent: "None", earnings: 9600, pkWins: 4, streamHours: 140, verified: false, status: "active" },
-  { id: "h7", name: "Riya Das", city: "Kolkata", language: "Bengali", level: "L1", coinsReceived: 72000, followers: 12100, isLive: false, agent: "Vikram Rao (A5)", earnings: 2800, pkWins: 1, streamHours: 48, verified: false, status: "suspended" },
+const INITIAL_HOSTS: Host[] = [
+  { id: "h1",  name: "Priya Sharma",   city: "Mumbai",    language: "Hindi",     level: "L7", coinsReceived: 6840000, followers: 128400, isLive: true,  agentId: "a1", adminId: "adm1", earnings: 284000, pkWins: 48, streamHours: 1240, verified: true,  status: "active",    joinDate: "Feb 2024", phone: "+91 99001 11111" },
+  { id: "h2",  name: "Rahul Verma",    city: "Delhi",     language: "Hindi",     level: "L6", coinsReceived: 3920000, followers:  98200, isLive: false, agentId: "a2", adminId: "adm1", earnings: 142000, pkWins: 32, streamHours:  840, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99002 22222" },
+  { id: "h3",  name: "Kavya Reddy",    city: "Hyderabad", language: "Telugu",    level: "L5", coinsReceived: 2140000, followers:  76800, isLive: true,  agentId: "a3", adminId: "adm2", earnings:  84000, pkWins: 24, streamHours:  620, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99003 33333" },
+  { id: "h4",  name: "Dev Kumar",      city: "Bangalore", language: "English",   level: "L4", coinsReceived: 1280000, followers:  54300, isLive: false, agentId: "a4", adminId: "adm2", earnings:  58000, pkWins: 18, streamHours:  440, verified: false, status: "active",    joinDate: "May 2024", phone: "+91 99004 44444" },
+  { id: "h5",  name: "Meera Pillai",   city: "Kochi",     language: "Malayalam", level: "L3", coinsReceived:  620000, followers:  41200, isLive: false, agentId: "a5", adminId: "adm3", earnings:  24000, pkWins:  9, streamHours:  280, verified: true,  status: "active",    joinDate: "Jun 2024", phone: "+91 99005 55555" },
+  { id: "h6",  name: "Arjun Shah",     city: "Surat",     language: "Gujarati",  level: "L2", coinsReceived:  240000, followers:  28700, isLive: false, agentId: "a1", adminId: "adm1", earnings:   9600, pkWins:  4, streamHours:  140, verified: false, status: "active",    joinDate: "Jul 2024", phone: "+91 99006 66666" },
+  { id: "h7",  name: "Riya Das",       city: "Kolkata",   language: "Bengali",   level: "L1", coinsReceived:   72000, followers:  12100, isLive: false, agentId: "a1", adminId: "adm1", earnings:   2800, pkWins:  1, streamHours:   48, verified: false, status: "suspended", joinDate: "Aug 2024", phone: "+91 99007 77777" },
+  { id: "h8",  name: "Kiran Nair",     city: "Pune",      language: "Marathi",   level: "L3", coinsReceived:  580000, followers:  33400, isLive: true,  agentId: "a6", adminId: "adm3", earnings:  22000, pkWins:  7, streamHours:  210, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99008 88888" },
+  { id: "h9",  name: "Ananya Sen",     city: "Chennai",   language: "Tamil",     level: "L4", coinsReceived: 1140000, followers:  48900, isLive: false, agentId: "a5", adminId: "adm3", earnings:  44000, pkWins: 14, streamHours:  390, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99009 99999" },
+  { id: "h10", name: "Rohan Mishra",   city: "Lucknow",   language: "Hindi",     level: "L2", coinsReceived:  210000, followers:  22600, isLive: false, agentId: "a3", adminId: "adm2", earnings:   8400, pkWins:  3, streamHours:   98, verified: false, status: "active",    joinDate: "Sep 2024", phone: "+91 99010 10101" },
+];
+
+const PENDING_HOSTS = [
+  { id: "ph1", name: "Anjali Rao",   city: "Bangalore", phone: "+91 99887 76655", agentId: "a1", appliedAt: "1 hour ago",  language: "Kannada", followers: 3200 },
+  { id: "ph2", name: "Rohit Sharma", city: "Delhi",     phone: "+91 88776 65544", agentId: "a2", appliedAt: "3 hours ago", language: "Hindi",   followers: 1800 },
 ];
 
 const hostEarningsData = [
@@ -45,133 +91,323 @@ const hostEarningsData = [
   { month: "Dec", l7: 284000, l6: 142000, l5: 84000, l4: 58000 },
 ];
 
-const levelOf = (l: string) => HOST_LEVELS.find((h) => h.level === l);
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const levelOf    = (l: string) => HOST_LEVELS.find(h => h.level === l);
+const agentName  = (id: string) => AGENTS_META.find(a => a.id === id)?.name ?? "—";
+const adminName  = (id: string) => ADMINS.find(a => a.id === id)?.name ?? "—";
+
+const STATUS_META: Record<HostStatus, { label: string; cls: string; dot: string }> = {
+  active:    { label: "Active",    cls: "text-green-600", dot: "bg-green-500"  },
+  suspended: { label: "Suspended", cls: "text-amber-600", dot: "bg-amber-500"  },
+  removed:   { label: "Removed",   cls: "text-red-600",   dot: "bg-red-500"    },
+};
+
+// ── Remove Confirm Dialog ─────────────────────────────────────────────────────
+
+function RemoveDialog({
+  host, open, onClose, onConfirm,
+}: { host: Host | null; open: boolean; onClose: () => void; onConfirm: () => void }) {
+  if (!host) return null;
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-600">
+            <Trash2 className="w-5 h-5" /> Remove Host
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-1">
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to remove <strong className="text-foreground">{host.name}</strong>?
+            Their account will be deactivated and removed from their agent's network.
+          </p>
+          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
+            This action cannot be undone. The host's earnings history will be preserved for audit purposes.
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button size="sm" variant="destructive" onClick={onConfirm}>Remove Host</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Host Detail Sheet ─────────────────────────────────────────────────────────
+
+function HostDetail({ host, onClose }: { host: Host; onClose: () => void }) {
+  const lvl   = levelOf(host.level)!;
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <span className="text-lg">{lvl.badge}</span>
+            {host.name}
+            {host.isLive && <Badge className="h-5 bg-red-500 hover:bg-red-500 text-xs px-1.5">LIVE</Badge>}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {/* Identity */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {[
+              { label: "City",        value: host.city       },
+              { label: "Language",    value: host.language   },
+              { label: "Phone",       value: host.phone      },
+              { label: "Joined",      value: host.joinDate   },
+              { label: "Followers",   value: host.followers.toLocaleString() },
+              { label: "Stream Hrs",  value: host.streamHours + " hrs"       },
+            ].map(r => (
+              <div key={r.label} className="bg-muted rounded-lg px-3 py-2">
+                <p className="text-xs text-muted-foreground">{r.label}</p>
+                <p className="font-semibold mt-0.5">{r.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Level */}
+          <div className="flex items-center gap-3 bg-muted/60 rounded-xl p-3">
+            <span className="text-2xl">{lvl.badge}</span>
+            <div className="flex-1">
+              <p className="font-bold" style={{ color: lvl.color }}>{host.level} — {lvl.title}</p>
+              <p className="text-xs text-muted-foreground">Min {(lvl.minCoins / 100000).toFixed(1)}L coins required</p>
+            </div>
+            {host.verified && (
+              <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-full">
+                <ShieldCheck className="w-3 h-3" /> Verified
+              </div>
+            )}
+          </div>
+
+          {/* Earnings */}
+          <div className="grid grid-cols-3 gap-3 text-center">
+            {[
+              { label: "Coins Received", value: "🪙 " + (host.coinsReceived / 1000).toFixed(0) + "K", color: "text-yellow-600" },
+              { label: "Earnings",       value: "₹" + (host.earnings / 1000).toFixed(0) + "K",       color: "text-green-600"  },
+              { label: "PK Wins",        value: "⚡ " + host.pkWins,                                   color: "text-pink-600"   },
+            ].map(m => (
+              <div key={m.label} className="bg-muted rounded-xl py-3">
+                <p className={`text-lg font-bold ${m.color}`}>{m.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{m.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Network */}
+          <div className="space-y-1.5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Network Chain</p>
+            <div className="flex items-center gap-1.5 text-sm flex-wrap">
+              <div className="flex items-center gap-1 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-1 text-xs font-medium text-violet-700">
+                <Crown className="w-3 h-3" /> Super Admin
+              </div>
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              <div className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-xs font-medium text-blue-700">
+                {adminName(host.adminId)}
+              </div>
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              <div className="flex items-center gap-1 bg-pink-50 border border-pink-200 rounded-full px-2.5 py-1 text-xs font-medium text-pink-700">
+                <Briefcase className="w-3 h-3" /> {agentName(host.agentId)}
+              </div>
+              <ChevronRight className="w-3 h-3 text-muted-foreground" />
+              <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 text-xs font-medium text-emerald-700">
+                <Star className="w-3 h-3" /> {host.name}
+              </div>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function HostsPage() {
-  const [search, setSearch]         = useState("");
-  const [levelFilter, setLevelFilter] = useState<string>("all");
-  const [pending, setPending]        = useState(PENDING_HOSTS);
-  const role                          = localStorage.getItem("ridhi_admin_role");
-  const canApproveHosts               = role === "agent" || role === "admin" || role === "super_admin";
+  const { toast } = useToast();
+  const role         = localStorage.getItem("ridhi_admin_role") ?? "admin";
+  const myEmail      = localStorage.getItem("ridhi_admin_email") ?? "";
 
-  const filtered = HOSTS.filter((h) => {
-    const matchSearch = h.name.toLowerCase().includes(search.toLowerCase()) || h.city.toLowerCase().includes(search.toLowerCase());
-    const matchLevel = levelFilter === "all" || h.level === levelFilter;
-    return matchSearch && matchLevel;
+  const isSA    = role === "super_admin";
+  const isAdmin = role === "admin";
+  const isAgent = role === "agent";
+
+  // Resolve current viewer's ID
+  const myAdminId = isAdmin ? (ADMINS.find(a => a.email === myEmail)?.id ?? "adm1") : null;
+  // For agent role — derive their agent ID from email (mock: use first agent of first admin)
+  const myAgentId = isAgent ? "a5" : null; // demo: Rajan Pillai
+
+  const [hosts, setHosts]           = useState<Host[]>(INITIAL_HOSTS);
+  const [pending, setPending]        = useState(PENDING_HOSTS);
+  const [search, setSearch]          = useState("");
+  const [levelFilter, setLevelFilter]= useState("all");
+  const [agentFilter, setAgentFilter]= useState("all");
+  const [adminFilter, setAdminFilter]= useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [detailHost, setDetailHost]  = useState<Host | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<Host | null>(null);
+
+  // ── Role-based data scoping ──────────────────────────────────────────────
+  const scopedHosts = (() => {
+    const active = hosts.filter(h => h.status !== "removed");
+    if (isSA)    return active;
+    if (isAdmin) {
+      // Admin sees hosts whose agent belongs to this admin
+      const myAgentIds = AGENTS_META.filter(a => a.adminId === myAdminId).map(a => a.id);
+      return active.filter(h => myAgentIds.includes(h.agentId));
+    }
+    if (isAgent) return active.filter(h => h.agentId === myAgentId);
+    return [];
+  })();
+
+  const filtered = scopedHosts.filter(h => {
+    const matchSearch  = h.name.toLowerCase().includes(search.toLowerCase()) || h.city.toLowerCase().includes(search.toLowerCase());
+    const matchLevel   = levelFilter === "all" || h.level === levelFilter;
+    const matchAgent   = agentFilter === "all" || h.agentId === agentFilter;
+    const matchAdmin   = adminFilter === "all" || h.adminId === adminFilter;
+    const matchStatus  = statusFilter === "all" || h.status === statusFilter;
+    return matchSearch && matchLevel && matchAgent && matchAdmin && matchStatus;
   });
 
-  const liveHosts = HOSTS.filter((h) => h.isLive).length;
-  const totalEarnings = HOSTS.reduce((s, h) => s + h.earnings, 0);
+  // Pending hosts scoped to current viewer
+  const scopedPending = (() => {
+    if (isSA)    return pending;
+    if (isAdmin) { const ids = AGENTS_META.filter(a => a.adminId === myAdminId).map(a => a.id); return pending.filter(p => ids.includes(p.agentId)); }
+    if (isAgent) return pending.filter(p => p.agentId === myAgentId);
+    return [];
+  })();
 
-  const resolveApplication = (id: string, _approved: boolean) =>
-    setPending((p) => p.filter((h) => h.id !== id));
+  const handleSuspend = (id: string) => {
+    setHosts(prev => prev.map(h => h.id === id
+      ? { ...h, status: h.status === "suspended" ? "active" : "suspended" }
+      : h));
+    const h = hosts.find(x => x.id === id)!;
+    toast({ title: h.status === "suspended" ? "Host reactivated" : "Host suspended", description: h.name });
+  };
+
+  const handleRemove = () => {
+    if (!removeTarget) return;
+    setHosts(prev => prev.map(h => h.id === removeTarget.id ? { ...h, status: "removed" } : h));
+    toast({ title: "Host removed", description: `${removeTarget.name} has been removed.`, variant: "destructive" });
+    setRemoveTarget(null);
+  };
+
+  const liveCount     = scopedHosts.filter(h => h.isLive).length;
+  const totalEarnings = scopedHosts.reduce((s, h) => s + h.earnings, 0);
+
+  // Agents visible to the current admin (for filter dropdown)
+  const visibleAgents = isSA
+    ? AGENTS_META
+    : AGENTS_META.filter(a => a.adminId === myAdminId);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Star className="w-6 h-6 text-primary" />
             Host Management
+            {!isSA && (
+              <Badge variant="outline" className="text-xs ml-2 border-violet-300 text-violet-600">
+                <Lock className="w-3 h-3 mr-1" />
+                {isAdmin ? "Your agents' hosts" : "Your hosts only"}
+              </Badge>
+            )}
           </h2>
-          <p className="text-muted-foreground text-sm mt-1">L1 Bronze → L7 Royal Crown · Earnings · PK Battles · Live Streams</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            {isSA    && "Super Admin — all hosts across all agents & admins · full remove/suspend access"}
+            {isAdmin && "Admin view — hosts recruited by your agents"}
+            {isAgent && "Agent view — your personally recruited hosts"}
+          </p>
         </div>
         <Badge className="gap-1 bg-green-600 hover:bg-green-600">
           <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse inline-block" />
-          {liveHosts} Live Now
+          {liveCount} Live Now
         </Badge>
       </div>
 
-      {/* ── Pending Host Approvals (Agent / Admin) ── */}
-      {canApproveHosts && pending.length > 0 && (
+      {/* ── Access info banner ── */}
+      {(isAdmin || isAgent) && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-200">
+          <Info className="w-4 h-4 text-violet-600 flex-shrink-0" />
+          <p className="text-sm text-violet-800">
+            {isAdmin
+              ? `You are viewing hosts recruited by your ${visibleAgents.length} agents. Hosts under other admins' agents are not visible to you.`
+              : `You are viewing only the hosts you personally recruited. Other agents' hosts are not accessible.`}
+            {" "}Contact Super Admin for full directory access.
+          </p>
+        </div>
+      )}
+
+      {/* ── Pending Host Approvals ── */}
+      {scopedPending.length > 0 && (
         <Card className="border-blue-200 bg-blue-50/40">
           <CardHeader className="py-3 px-4">
             <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
               <ShieldAlert className="w-4 h-4 text-blue-600" />
               Pending Host Applications
-              <Badge className="bg-blue-500 text-white text-xs">{pending.length} awaiting review</Badge>
+              <Badge className="bg-blue-500 text-white text-xs">{scopedPending.length} awaiting</Badge>
               <span className="ml-auto text-xs font-normal text-blue-600">
-                {role === "agent" ? "Agent approval required" : "Admin / Agent review"}
+                {isAgent ? "Agent approval required" : "Admin / Agent review"}
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="space-y-3">
-              {pending.map((app) => (
-                <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-blue-100 p-3 shadow-sm">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {app.name.split(" ").map((n) => n[0]).join("")}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{app.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Briefcase className="w-3 h-3" />{app.agent}</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.followers.toLocaleString()} followers</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{app.appliedAt}</span>
-                    </div>
-                    <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1.5">{app.language}</Badge>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-xs gap-1 border-red-200 text-red-600 hover:bg-red-50"
-                      onClick={() => resolveApplication(app.id, false)}
-                    >
-                      <XCircle className="w-3 h-3" /> Reject
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => resolveApplication(app.id, true)}
-                    >
-                      <CheckCircle className="w-3 h-3" /> Approve
-                    </Button>
-                  </div>
+          <CardContent className="px-4 pb-4 space-y-3">
+            {scopedPending.map(app => (
+              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-blue-100 p-3 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                  {app.name.split(" ").map(n => n[0]).join("")}
                 </div>
-              ))}
-            </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm">{app.name}</p>
+                  <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><Briefcase className="w-3 h-3" />{agentName(app.agentId)}</span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.followers.toLocaleString()} followers</span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{app.appliedAt}</span>
+                  </div>
+                  <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1.5">{app.language}</Badge>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
+                    <XCircle className="w-3 h-3" /> Reject
+                  </Button>
+                  <Button size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
+                    <CheckCircle className="w-3 h-3" /> Approve
+                  </Button>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
-      {canApproveHosts && pending.length === 0 && (
+      {scopedPending.length === 0 && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
           <CheckCircle className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-green-700 font-medium">All host applications reviewed — no pending approvals.</p>
+          <p className="text-sm text-green-700 font-medium">No pending host applications.</p>
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
-        {HOST_LEVELS.map((lvl) => {
-          const count = HOSTS.filter((h) => h.level === lvl.level).length;
-          return (
-            <button
-              key={lvl.level}
-              onClick={() => setLevelFilter(levelFilter === lvl.level ? "all" : lvl.level)}
-              className={`text-left border rounded-lg p-3 transition-all ${levelFilter === lvl.level ? "ring-2 ring-offset-1" : "hover:bg-muted/50"}`}
-              style={{ borderColor: lvl.color + "60", ...(levelFilter === lvl.level ? { ringColor: lvl.color } : {}) }}
-            >
-              <p className="text-xl">{lvl.badge}</p>
-              <p className="text-xs font-bold mt-1" style={{ color: lvl.color }}>{lvl.level} {lvl.title}</p>
-              <p className="text-lg font-bold">{count}</p>
-              <p className="text-xs text-muted-foreground">hosts</p>
-            </button>
-          );
-        })}
-      </div>
-
+      {/* ── KPIs ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Hosts", value: HOSTS.length, icon: Users, color: "text-purple-600 bg-purple-50" },
-          { label: "Live Right Now", value: liveHosts, icon: Radio, color: "text-red-600 bg-red-50" },
+          { label: isSA ? "Total Hosts" : isAdmin ? "Your Agents' Hosts" : "Your Hosts", value: scopedHosts.length, icon: Users, color: "text-purple-600 bg-purple-50" },
+          { label: "Live Right Now", value: liveCount, icon: Radio, color: "text-red-600 bg-red-50" },
           { label: "Host Earnings (Month)", value: "₹" + (totalEarnings / 1000).toFixed(0) + "K", icon: IndianRupee, color: "text-green-600 bg-green-50" },
-          { label: "PK Battles Won", value: HOSTS.reduce((s, h) => s + h.pkWins, 0), icon: Zap, color: "text-yellow-600 bg-yellow-50" },
-        ].map((s) => (
+          { label: "PK Battles Won", value: scopedHosts.reduce((s, h) => s + h.pkWins, 0), icon: Zap, color: "text-yellow-600 bg-yellow-50" },
+        ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${s.color}`}><s.icon className="w-5 h-5" /></div>
+              <div className={`p-2 rounded-lg ${s.color} flex-shrink-0`}><s.icon className="w-5 h-5" /></div>
               <div>
                 <p className="text-2xl font-bold">{s.value}</p>
                 <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -181,198 +417,322 @@ export default function HostsPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Host Level Earnings (Monthly)
+      {/* ── Level tiles ── */}
+      <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
+        {HOST_LEVELS.map(lvl => {
+          const count = scopedHosts.filter(h => h.level === lvl.level).length;
+          return (
+            <button
+              key={lvl.level}
+              onClick={() => setLevelFilter(levelFilter === lvl.level ? "all" : lvl.level)}
+              className={`text-left border rounded-xl p-3 transition-all ${levelFilter === lvl.level ? "ring-2 ring-offset-1 ring-violet-400 border-violet-300" : "hover:bg-muted/50"}`}
+              style={{ borderColor: lvl.color + "60" }}
+            >
+              <p className="text-xl">{lvl.badge}</p>
+              <p className="text-xs font-bold mt-1" style={{ color: lvl.color }}>{lvl.level}</p>
+              <p className="text-lg font-bold">{count}</p>
+              <p className="text-[10px] text-muted-foreground">{lvl.title}</p>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── SA: Hierarchy drill-down preview ── */}
+      {isSA && (
+        <Card className="border-violet-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2 text-violet-700">
+              <Network className="w-4 h-4" /> Host Distribution — by Admin & Agent
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[220px]">
+            <div className="space-y-3">
+              {ADMINS.map(adm => {
+                const admHosts = scopedHosts.filter(h => h.adminId === adm.id);
+                const admAgents = AGENTS_META.filter(a => a.adminId === adm.id);
+                return (
+                  <div key={adm.id} className="border rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between bg-violet-50 border-b border-violet-100 px-4 py-2">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-violet-800">
+                        <Crown className="w-4 h-4" /> {adm.name} (Admin)
+                      </div>
+                      <Badge variant="outline" className="text-xs border-violet-300 text-violet-600">
+                        {admHosts.length} hosts total
+                      </Badge>
+                    </div>
+                    <div className="divide-y">
+                      {admAgents.map(ag => {
+                        const agHosts = admHosts.filter(h => h.agentId === ag.id);
+                        return (
+                          <div key={ag.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30">
+                            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                            <Briefcase className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
+                            <span className="text-sm font-medium flex-1">{ag.name}</span>
+                            <Badge variant="outline" className="text-xs" style={{ borderColor: "#E91E8C40", color: "#E91E8C" }}>{ag.level}</Badge>
+                            <span className="text-xs text-muted-foreground">{agHosts.length} hosts</span>
+                            <div className="flex gap-1 flex-wrap">
+                              {agHosts.slice(0, 4).map(h => {
+                                const lvl = levelOf(h.level);
+                                return (
+                                  <span key={h.id} className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                                    style={{ backgroundColor: lvl?.color + "20", color: lvl?.color }}>
+                                    {h.name.split(" ")[0]}
+                                  </span>
+                                );
+                              })}
+                              {agHosts.length > 4 && <span className="text-xs text-muted-foreground">+{agHosts.length - 4}</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Earnings Chart (SA + Admin) ── */}
+      {!isAgent && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" /> Host Level Earnings (Monthly)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={hostEarningsData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} />
                   <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} />
                   <Line dataKey="l7" name="L7 Royal Crown" stroke="#E91E8C" strokeWidth={2} dot={false} />
-                  <Line dataKey="l6" name="L6 Elite" stroke="#7B2FBE" strokeWidth={2} dot={false} />
-                  <Line dataKey="l5" name="L5 Diamond" stroke="#2196F3" strokeWidth={2} dot={false} />
-                  <Line dataKey="l4" name="L4 Platinum" stroke="#00BCD4" strokeWidth={2} dot={false} />
+                  <Line dataKey="l6" name="L6 Elite"       stroke="#7B2FBE" strokeWidth={2} dot={false} />
+                  <Line dataKey="l5" name="L5 Diamond"     stroke="#2196F3" strokeWidth={2} dot={false} />
+                  <Line dataKey="l4" name="L4 Platinum"    stroke="#00BCD4" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+      )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Crown className="w-4 h-4" />
-              Top Hosts This Month
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {HOSTS.slice(0, 5).map((h, i) => {
-              const lvl = levelOf(h.level);
-              return (
-                <div key={h.id} className="flex items-center gap-3">
-                  <span className={`text-lg font-bold w-6 ${i === 0 ? "text-yellow-500" : i === 1 ? "text-gray-400" : i === 2 ? "text-amber-600" : "text-muted-foreground"}`}>#{i + 1}</span>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ backgroundColor: lvl?.color + "20" }}>
-                    {lvl?.badge}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-medium truncate">{h.name}</p>
-                      {h.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />}
-                      {h.isLive && <Badge className="text-xs h-4 bg-red-500 hover:bg-red-500 px-1">LIVE</Badge>}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{h.city} · {h.language}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold">🪙 {(h.coinsReceived / 1000).toFixed(0)}K</p>
-                    <p className="text-xs text-muted-foreground">received</p>
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* ── Host Directory ── */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="w-4 h-4" />
               Host Directory
+              <span className="text-sm font-normal text-muted-foreground">({filtered.length} hosts)</span>
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {isSA && (
+                <Select value={adminFilter} onValueChange={setAdminFilter}>
+                  <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Filter Admin" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Admins</SelectItem>
+                    {ADMINS.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+              {(isSA || isAdmin) && (
+                <Select value={agentFilter} onValueChange={setAgentFilter}>
+                  <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="Filter Agent" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Agents</SelectItem>
+                    {visibleAgents.map(a => <SelectItem key={a.id} value={a.id}>{a.name} ({a.level})</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search hosts..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8 h-8 w-48 text-sm" />
+                <Input placeholder="Search hosts…" value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 w-40 text-sm" />
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-muted-foreground text-xs">
-                <th className="text-left p-4 pb-3">Host</th>
-                <th className="text-left pb-3">Level</th>
-                <th className="text-left pb-3">Language</th>
-                <th className="text-right pb-3">Followers</th>
-                <th className="text-right pb-3">Coins Recv.</th>
-                <th className="text-right pb-3">Earnings</th>
-                <th className="text-right pb-3">PK Wins</th>
-                <th className="text-left pb-3">Agent</th>
-                <th className="text-left pb-3">Status</th>
-                <th className="text-right pb-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filtered.map((h) => {
-                const lvl = levelOf(h.level);
-                return (
-                  <tr key={h.id} className="hover:bg-muted/50">
-                    <td className="p-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <p className="font-medium">{h.name}</p>
-                            {h.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />}
-                            {h.isLive && <Badge className="text-xs h-4 bg-red-500 hover:bg-red-500 px-1">LIVE</Badge>}
-                          </div>
-                          <p className="text-xs text-muted-foreground">{h.city}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3">
-                      <div className="flex items-center gap-1.5">
-                        <span>{lvl?.badge}</span>
-                        <Badge variant="outline" className="text-xs" style={{ borderColor: lvl?.color, color: lvl?.color }}>
-                          {h.level} {lvl?.title}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="py-3 text-muted-foreground">{h.language}</td>
-                    <td className="py-3 text-right">{h.followers.toLocaleString()}</td>
-                    <td className="py-3 text-right font-medium">🪙 {(h.coinsReceived / 1000).toFixed(0)}K</td>
-                    <td className="py-3 text-right font-medium text-green-600">₹{(h.earnings / 1000).toFixed(0)}K</td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                        {h.pkWins}
-                      </div>
-                    </td>
-                    <td className="py-3 text-xs text-muted-foreground">{h.agent}</td>
-                    <td className="py-3">
-                      <div className={`flex items-center gap-1.5 text-xs ${h.status === "active" ? "text-green-600" : "text-red-500"}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${h.status === "active" ? "bg-green-500" : "bg-red-500"}`} />
-                        {h.status}
-                      </div>
-                    </td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><Eye className="w-3.5 h-3.5" /></Button>
-                        {!h.verified && <Button variant="ghost" size="sm" className="h-7 text-xs text-blue-600 px-2">Verify</Button>}
-                        {h.status === "active" && h.level !== "L7" && <Button variant="ghost" size="sm" className="h-7 text-xs px-2">Promote</Button>}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Award className="w-4 h-4" />
-            Level Progression Requirements
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-muted-foreground text-xs">
+                  <th className="text-left p-4 pb-3">Host</th>
                   <th className="text-left pb-3">Level</th>
-                  <th className="text-left pb-3">Title</th>
-                  <th className="text-right pb-3">Min Coins Required</th>
-                  <th className="text-right pb-3">Hosts at Level</th>
-                  <th className="text-right pb-3">Avg Monthly Earning</th>
+                  <th className="text-left pb-3">Language</th>
+                  <th className="text-right pb-3">Followers</th>
+                  <th className="text-right pb-3">Coins Recv.</th>
+                  <th className="text-right pb-3">Earnings</th>
+                  <th className="text-right pb-3">PK Wins</th>
+                  {(isSA || isAdmin) && <th className="text-left pb-3">Agent</th>}
+                  {isSA && <th className="text-left pb-3">Admin</th>}
+                  <th className="text-left pb-3">Status</th>
+                  <th className="text-right pb-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {HOST_LEVELS.map((lvl) => {
-                  const hostsAtLevel = HOSTS.filter((h) => h.level === lvl.level).length;
-                  const avgEarning = HOSTS.filter((h) => h.level === lvl.level).reduce((s, h) => s + h.earnings, 0) / Math.max(hostsAtLevel, 1);
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={12} className="text-center py-10 text-muted-foreground text-sm">No hosts found</td></tr>
+                ) : filtered.map(h => {
+                  const lvl = levelOf(h.level);
+                  const sm  = STATUS_META[h.status];
                   return (
-                    <tr key={lvl.level}>
-                      <td className="py-3">
+                    <tr key={h.id} className={`hover:bg-muted/40 ${h.status === "suspended" ? "opacity-70" : ""}`}>
+                      <td className="p-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span>{lvl.badge}</span>
-                          <Badge variant="outline" className="text-xs" style={{ borderColor: lvl.color, color: lvl.color }}>{lvl.level}</Badge>
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0"
+                            style={{ backgroundColor: (lvl?.color ?? "#888") + "20" }}>
+                            {lvl?.badge}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium">{h.name}</p>
+                              {h.verified && <ShieldCheck className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />}
+                              {h.isLive && <Badge className="text-xs h-4 bg-red-500 hover:bg-red-500 px-1">LIVE</Badge>}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{h.city} · since {h.joinDate}</p>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-3 font-medium" style={{ color: lvl.color }}>{lvl.title}</td>
-                      <td className="py-3 text-right">🪙 {(lvl.minCoins / 100000).toFixed(1)}L</td>
-                      <td className="py-3 text-right font-bold">{hostsAtLevel}</td>
-                      <td className="py-3 text-right text-green-600 font-medium">₹{(avgEarning / 1000).toFixed(1)}K</td>
+                      <td className="py-3">
+                        <Badge variant="outline" className="text-xs" style={{ borderColor: lvl?.color, color: lvl?.color }}>
+                          {h.level} {lvl?.title}
+                        </Badge>
+                      </td>
+                      <td className="py-3 text-muted-foreground text-xs">{h.language}</td>
+                      <td className="py-3 text-right">{h.followers.toLocaleString()}</td>
+                      <td className="py-3 text-right font-medium">🪙 {(h.coinsReceived / 1000).toFixed(0)}K</td>
+                      <td className="py-3 text-right font-semibold text-green-600">₹{(h.earnings / 1000).toFixed(0)}K</td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Zap className="w-3.5 h-3.5 text-yellow-500" />{h.pkWins}
+                        </div>
+                      </td>
+                      {(isSA || isAdmin) && (
+                        <td className="py-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="w-3 h-3 text-pink-500" />
+                            {agentName(h.agentId)}
+                          </span>
+                        </td>
+                      )}
+                      {isSA && (
+                        <td className="py-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Crown className="w-3 h-3 text-violet-500" />
+                            {adminName(h.adminId)}
+                          </span>
+                        </td>
+                      )}
+                      <td className="py-3">
+                        <div className={`flex items-center gap-1.5 text-xs ${sm.cls}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${sm.dot}`} />{sm.label}
+                        </div>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
+                            onClick={() => setDetailHost(h)}>
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                          {!h.verified && (isSA || isAdmin) && (
+                            <Button variant="ghost" size="sm" className="h-7 text-xs text-blue-600 px-2">Verify</Button>
+                          )}
+                          {isSA && (
+                            <>
+                              <Button variant="ghost" size="sm"
+                                className={`h-7 text-xs px-2 gap-1 ${h.status === "suspended" ? "text-green-600" : "text-amber-600"}`}
+                                onClick={() => handleSuspend(h.id)}>
+                                {h.status === "suspended"
+                                  ? <><CheckCircle className="w-3 h-3" /> Restore</>
+                                  : <><ShieldOff className="w-3 h-3" /> Suspend</>}
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs px-2 gap-1 text-red-600 hover:text-red-700"
+                                onClick={() => setRemoveTarget(h)}>
+                                <Trash2 className="w-3 h-3" /> Remove
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
+          <div className="flex items-center gap-4 px-4 py-2.5 border-t bg-muted/30 text-xs text-muted-foreground flex-wrap">
+            {isSA    && <span className="flex items-center gap-1 text-violet-600"><Crown className="w-3 h-3" /> SA can remove, suspend, or verify any host</span>}
+            {isAdmin && <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> Showing only hosts under your {visibleAgents.length} agents</span>}
+            {isAgent && <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> Showing only hosts you personally recruited</span>}
+          </div>
         </CardContent>
       </Card>
+
+      {/* ── Level Progression (SA + Admin) ── */}
+      {!isAgent && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Award className="w-4 h-4" /> Level Progression Requirements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-muted-foreground text-xs">
+                    <th className="text-left pb-3">Level</th>
+                    <th className="text-left pb-3">Title</th>
+                    <th className="text-right pb-3">Min Coins Required</th>
+                    <th className="text-right pb-3">Hosts at Level</th>
+                    <th className="text-right pb-3">Avg Monthly Earning</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {HOST_LEVELS.map(lvl => {
+                    const hostsAtLevel = scopedHosts.filter(h => h.level === lvl.level).length;
+                    const avgEarning   = scopedHosts.filter(h => h.level === lvl.level).reduce((s, h) => s + h.earnings, 0) / Math.max(hostsAtLevel, 1);
+                    return (
+                      <tr key={lvl.level}>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            <span>{lvl.badge}</span>
+                            <Badge variant="outline" className="text-xs" style={{ borderColor: lvl.color, color: lvl.color }}>{lvl.level}</Badge>
+                          </div>
+                        </td>
+                        <td className="py-3 font-medium" style={{ color: lvl.color }}>{lvl.title}</td>
+                        <td className="py-3 text-right">🪙 {(lvl.minCoins / 100000).toFixed(1)}L</td>
+                        <td className="py-3 text-right font-bold">{hostsAtLevel}</td>
+                        <td className="py-3 text-right text-green-600 font-medium">₹{(avgEarning / 1000).toFixed(1)}K</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialogs */}
+      {detailHost && <HostDetail host={detailHost} onClose={() => setDetailHost(null)} />}
+      <RemoveDialog
+        host={removeTarget} open={!!removeTarget}
+        onClose={() => setRemoveTarget(null)} onConfirm={handleRemove}
+      />
     </div>
   );
 }
