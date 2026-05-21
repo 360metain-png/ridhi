@@ -78,6 +78,68 @@ const FAQS: { section: string; icon: React.ComponentType<{ className?: string }>
   },
 ];
 
+/* Build JSON-LD FAQPage schema from all FAQ data */
+function buildFaqSchema(): Record<string, unknown> {
+  const mainEntity = FAQS.flatMap(({ items }) =>
+    items.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: a,
+      },
+    }))
+  );
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity,
+  };
+}
+
+/* Organization schema */
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Ridhi",
+  url: "https://ridhi.app",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://ridhi.app/ridhi_logo.png",
+    width: 512,
+    height: 512,
+  },
+  description:
+    "Ridhi is India's #1 social networking and dating app — live streams, voice rooms, dating & match, coin economy, reels, and jobs.",
+  sameAs: ["https://instagram.com/ridhiapp"],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "Customer Support",
+    email: "hello@ridhi.app",
+    availableLanguage: ["en-IN", "hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "pa", "ur"],
+    areaServed: "IN",
+    hoursAvailable: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "10:00",
+      closes: "19:00",
+    },
+  },
+};
+
+/* WebSite schema */
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Ridhi Help & Support",
+  url: "https://ridhi.app/admin/support",
+  publisher: {
+    "@type": "Organization",
+    name: "Ridhi",
+  },
+};
+
 function FAQItem({ q, a }: FAQ) {
   const [open, setOpen] = useState(false);
   return (
@@ -107,169 +169,202 @@ export default function SupportPage() {
     <div className="min-h-screen bg-gray-50 font-sans">
       <Helmet>
         <title>Ridhi Help & Support — FAQs, Contact & Troubleshooting</title>
-        <meta name="robots" content="index, follow" />
-        <meta name="description" content="Get help with Ridhi — India's social networking and dating app. Find answers to FAQs on accounts, coins, live streams, dating, privacy, and more. Contact us at hello@ridhi.app." />
-        <meta property="og:title"       content="Ridhi Help & Support" />
-        <meta property="og:description" content="Answers to common questions about Ridhi — accounts, coins, live streams, dating, privacy, and more." />
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta name="description" content="Get help with Ridhi — India's social networking and dating app. Find answers to 27 FAQs on accounts, coins, live streams, dating, privacy, and more. Contact us at hello@ridhi.app." />
+        <meta name="keywords" content="Ridhi support, Ridhi help, Ridhi FAQ, Ridhi app help, dating app support, live stream support, coin recharge help, India dating app, social app India, Ridhi customer service" />
+
+        {/* Open Graph */}
+        <meta property="og:title"       content="Ridhi Help & Support — 27 FAQs & Contact" />
+        <meta property="og:description" content="Get help with Ridhi — India's social networking and dating app. Find answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
         <meta property="og:type"        content="website" />
-        <meta name="twitter:card"       content="summary" />
-        <meta name="twitter:title"      content="Ridhi Help & Support" />
-        <meta name="twitter:description" content="Answers to common questions about Ridhi — accounts, coins, live streams, dating, privacy, and more." />
+        <meta property="og:url"         content="https://ridhi.app/admin/support" />
+        <meta property="og:site_name"   content="Ridhi" />
+        <meta property="og:image"       content="https://ridhi.app/opengraph.jpg" />
+        <meta property="og:locale"      content="en_IN" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card"        content="summary_large_image" />
+        <meta name="twitter:title"       content="Ridhi Help & Support — 27 FAQs & Contact" />
+        <meta name="twitter:description" content="Get help with Ridhi — India's social networking and dating app. Find answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
+        <meta name="twitter:image"       content="https://ridhi.app/opengraph.jpg" />
+        <meta name="twitter:site"        content="@ridhiapp" />
+
+        {/* Canonical + Alternate Language */}
         <link rel="canonical" href="https://ridhi.app/admin/support" />
+        <link rel="alternate" href="https://ridhi.app/admin/support" hrefLang="en-in" />
+        <link rel="alternate" href="https://ridhi.app/admin/support" hrefLang="x-default" />
+
+        {/* Performance hints */}
+        <link rel="preconnect" href="https://ridhi.app" />
+
+        {/* JSON-LD: FAQPage */}
+        <script type="application/ld+json">{JSON.stringify(buildFaqSchema())}</script>
+
+        {/* JSON-LD: Organization */}
+        <script type="application/ld+json">{JSON.stringify(orgSchema)}</script>
+
+        {/* JSON-LD: WebSite */}
+        <script type="application/ld+json">{JSON.stringify(websiteSchema)}</script>
       </Helmet>
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div
-        className="relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #1a0533 0%, #2d0a5e 50%, #1a0020 100%)" }}
-      >
-        <div className="absolute top-[-60px] left-[-60px] w-[300px] h-[300px] rounded-full bg-purple-700/30 blur-[80px]" />
-        <div className="absolute bottom-[-40px] right-[-40px] w-[250px] h-[250px] rounded-full bg-pink-600/25 blur-[70px]" />
+      <main>
+        {/* ── Hero / Header ────────────────────────────────────────────── */}
+        <header
+          className="relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #1a0533 0%, #2d0a5e 50%, #1a0020 100%)" }}
+        >
+          <div className="absolute top-[-60px] left-[-60px] w-[300px] h-[300px] rounded-full bg-purple-700/30 blur-[80px]" />
+          <div className="absolute bottom-[-40px] right-[-40px] w-[250px] h-[250px] rounded-full bg-pink-600/25 blur-[70px]" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-14 text-center">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <img
-              src={`${BASE}ridhi_logo.png`}
-              alt="Ridhi"
-              className="w-12 h-12 object-contain"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-            <div className="text-left">
-              <p className="text-white font-black text-2xl leading-none">Ridhi</p>
-              <p className="text-purple-300 text-xs mt-0.5 tracking-widest font-medium uppercase">Support Centre</p>
+          <div className="relative z-10 max-w-4xl mx-auto px-6 py-14 text-center">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <img
+                src={`${BASE}ridhi_logo.png`}
+                alt="Ridhi app logo — purple speech bubble with pink heart"
+                className="w-12 h-12 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+              <div className="text-left">
+                <p className="text-white font-black text-2xl leading-none">Ridhi</p>
+                <p className="text-purple-300 text-xs mt-0.5 tracking-widest font-medium uppercase">Support Centre</p>
+              </div>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
+              How can we help you?
+            </h1>
+            <p className="mt-3 text-purple-200/80 text-base max-w-md mx-auto">
+              Find answers to common questions, or reach out to our support team — we're here for you.
+            </p>
+
+            {/* Contact chips */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <a
+                href="mailto:hello@ridhi.app"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #7B2FBE, #E91E8C)" }}
+                aria-label="Email Ridhi support at hello@ridhi.app"
+              >
+                <Mail className="w-4 h-4" /> hello@ridhi.app
+              </a>
+              <a
+                href="https://instagram.com/ridhiapp"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors"
+                aria-label="Follow Ridhi on Instagram"
+              >
+                <MessageCircle className="w-4 h-4" /> @ridhiapp
+              </a>
             </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-            How can we help you?
-          </h1>
-          <p className="mt-3 text-purple-200/80 text-base max-w-md mx-auto">
-            Find answers to common questions, or reach out to our support team — we're here for you.
-          </p>
+        </header>
 
-          {/* Contact chips */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        {/* ── Contact cards ──────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-6 -mt-6" aria-label="Contact methods">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                icon: Mail,
+                title: "Email Support",
+                desc: "hello@ridhi.app",
+                sub: "Response within 24 hours",
+                href: "mailto:hello@ridhi.app",
+                grad: "from-purple-600 to-pink-500",
+              },
+              {
+                icon: MessageCircle,
+                title: "In-App Chat",
+                desc: "Settings → Help & Support",
+                sub: "Fastest way to reach us",
+                href: null,
+                grad: "from-pink-500 to-rose-500",
+              },
+              {
+                icon: AlertTriangle,
+                title: "Report a Problem",
+                desc: "Three-dot menu on any content",
+                sub: "Reviewed within 24 hours",
+                href: null,
+                grad: "from-orange-500 to-amber-500",
+              },
+            ].map(({ icon: Icon, title, desc, sub, href, grad }) => (
+              <article
+                key={title}
+                className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100"
+                itemScope
+                itemType="https://schema.org/ContactPoint"
+              >
+                <div className={`h-1 bg-gradient-to-r ${grad}`} />
+                <div className="p-5">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center mb-3`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="font-bold text-gray-900 text-sm" itemProp="contactType">{title}</p>
+                  {href
+                    ? <a href={href} className="text-purple-600 text-sm font-medium hover:underline mt-0.5 block" itemProp="email">{desc}</a>
+                    : <p className="text-gray-600 text-sm mt-0.5" itemProp="areaServed">{desc}</p>
+                  }
+                  <p className="text-gray-400 text-xs mt-1" itemProp="availableLanguage">{sub}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ── FAQ sections ───────────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-6 py-12 space-y-10" aria-label="Frequently asked questions">
+          <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+            <HelpCircle className="w-6 h-6 text-purple-600" /> Frequently Asked Questions
+          </h2>
+
+          {FAQS.map(({ section, icon: SIcon, color, items }) => (
+            <article key={section} className="space-y-3">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center`}>
+                  <SIcon className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-black text-gray-800 text-lg">{section}</h3>
+              </div>
+              <div className="space-y-2">
+                {items.map((item) => <FAQItem key={item.q} {...item} />)}
+              </div>
+            </article>
+          ))}
+        </section>
+
+        {/* ── Still need help ────────────────────────────────────────── */}
+        <section className="max-w-4xl mx-auto px-6 pb-16" aria-label="Contact support team">
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ background: "linear-gradient(135deg, #1a0533, #2d0a5e)" }}
+          >
+            <p className="text-white font-black text-xl">Still need help?</p>
+            <p className="text-purple-200/80 text-sm mt-2 max-w-sm mx-auto">
+              Our support team is available Monday–Saturday, 10 AM – 7 PM IST.
+            </p>
             <a
               href="mailto:hello@ridhi.app"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 mt-5 px-6 py-3 rounded-full text-sm font-bold text-white hover:opacity-90 transition-opacity"
               style={{ background: "linear-gradient(135deg, #7B2FBE, #E91E8C)" }}
+              aria-label="Email Ridhi support team"
             >
-              <Mail className="w-4 h-4" /> hello@ridhi.app
-            </a>
-            <a
-              href="https://instagram.com/ridhiapp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" /> @ridhiapp
+              <Mail className="w-4 h-4" /> Email us at hello@ridhi.app
             </a>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
 
-      {/* ── Contact cards ──────────────────────────────────────────────── */}
-      <div className="max-w-4xl mx-auto px-6 -mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              icon: Mail,
-              title: "Email Support",
-              desc: "hello@ridhi.app",
-              sub: "Response within 24 hours",
-              href: "mailto:hello@ridhi.app",
-              grad: "from-purple-600 to-pink-500",
-            },
-            {
-              icon: MessageCircle,
-              title: "In-App Chat",
-              desc: "Settings → Help & Support",
-              sub: "Fastest way to reach us",
-              href: null,
-              grad: "from-pink-500 to-rose-500",
-            },
-            {
-              icon: AlertTriangle,
-              title: "Report a Problem",
-              desc: "Three-dot menu on any content",
-              sub: "Reviewed within 24 hours",
-              href: null,
-              grad: "from-orange-500 to-amber-500",
-            },
-          ].map(({ icon: Icon, title, desc, sub, href, grad }) => (
-            <div
-              key={title}
-              className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100"
-            >
-              <div className={`h-1 bg-gradient-to-r ${grad}`} />
-              <div className="p-5">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center mb-3`}>
-                  <Icon className="w-5 h-5 text-white" />
-                </div>
-                <p className="font-bold text-gray-900 text-sm">{title}</p>
-                {href
-                  ? <a href={href} className="text-purple-600 text-sm font-medium hover:underline mt-0.5 block">{desc}</a>
-                  : <p className="text-gray-600 text-sm mt-0.5">{desc}</p>
-                }
-                <p className="text-gray-400 text-xs mt-1">{sub}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── FAQ sections ───────────────────────────────────────────────── */}
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
-        <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-          <HelpCircle className="w-6 h-6 text-purple-600" /> Frequently Asked Questions
-        </h2>
-
-        {FAQS.map(({ section, icon: SIcon, color, items }) => (
-          <div key={section} className="space-y-3">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center`}>
-                <SIcon className="w-4 h-4 text-white" />
-              </div>
-              <h3 className="font-black text-gray-800 text-lg">{section}</h3>
-            </div>
-            <div className="space-y-2">
-              {items.map((item) => <FAQItem key={item.q} {...item} />)}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Still need help ────────────────────────────────────────────── */}
-      <div className="max-w-4xl mx-auto px-6 pb-16">
-        <div
-          className="rounded-2xl p-8 text-center"
-          style={{ background: "linear-gradient(135deg, #1a0533, #2d0a5e)" }}
-        >
-          <p className="text-white font-black text-xl">Still need help?</p>
-          <p className="text-purple-200/80 text-sm mt-2 max-w-sm mx-auto">
-            Our support team is available Monday–Saturday, 10 AM – 7 PM IST.
-          </p>
-          <a
-            href="mailto:hello@ridhi.app"
-            className="inline-flex items-center gap-2 mt-5 px-6 py-3 rounded-full text-sm font-bold text-white hover:opacity-90 transition-opacity"
-            style={{ background: "linear-gradient(135deg, #7B2FBE, #E91E8C)" }}
-          >
-            <Mail className="w-4 h-4" /> Email us at hello@ridhi.app
-          </a>
-        </div>
-      </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      {/* ── Footer ───────────────────────────────────────────────────── */}
       <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-4xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <p>© {new Date().getFullYear()} Ridhi. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+          <p>&copy; {new Date().getFullYear()} Ridhi. All rights reserved.</p>
+          <nav className="flex items-center gap-4" aria-label="Legal links">
             <a href="#" className="hover:text-purple-600 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-purple-600 transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-purple-600 transition-colors">Community Guidelines</a>
-          </div>
+          </nav>
         </div>
       </footer>
-
     </div>
   );
 }
