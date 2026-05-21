@@ -17,7 +17,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.replit.ridhi",
+      "bundleIdentifier": "com.ridhi.app",
       "buildNumber": "2",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Ridhi uses your location to show people and events near you.",
@@ -34,7 +34,7 @@
       }
     },
     "android": {
-      "package": "com.pt.ridhi",
+      "package": "com.ridhi.app",
       "versionCode": 10,
       "permissions": [
         "ACCESS_FINE_LOCATION",

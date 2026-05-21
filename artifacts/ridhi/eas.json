@@ -44,7 +44,7 @@
         "track": "production",
         "releaseStatus": "completed",
         "metadataPath": "./store.config.json",
-        "applicationId": "com.pt.ridhi"
+        "applicationId": "com.ridhi.app"
       }
     }
   },
