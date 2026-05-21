@@ -54,7 +54,8 @@ export type AdminRole = "super_admin" | "admin";
 export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/":             ["super_admin", "admin"],
   "/analytics":    ["super_admin", "admin"],
-  "/users":        ["super_admin", "admin"],
+  "/users":        ["super_admin"],
+  "/users/:id":    ["super_admin"],
   "/content":      ["super_admin"],
   "/communities":  ["super_admin"],
   "/coins":        ["super_admin"],

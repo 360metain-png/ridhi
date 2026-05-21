@@ -38,7 +38,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Users & Content",
     items: [
-      { name: "Users",            href: "/users",          icon: Users,      allowedRoles: SA_A },
+      { name: "Users",            href: "/users",          icon: Users,      allowedRoles: SA },
       { name: "Content",          href: "/content",        icon: ShieldAlert, badge: "12", allowedRoles: SA },
       { name: "Communities",      href: "/communities",    icon: UsersRound,  allowedRoles: SA },
       { name: "Creative Assets",  href: "/content-assets", icon: Sparkles,    allowedRoles: SA },
