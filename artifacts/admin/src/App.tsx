@@ -45,6 +45,7 @@ import BackendAccess       from "@/pages/backend-access";
 import ContentAssets       from "@/pages/content-assets";
 import PortalLogin         from "@/pages/portal-login";
 import Downloads          from "@/pages/downloads";
+import Support            from "@/pages/support";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -152,6 +153,7 @@ function RoleRoute({ component: Component, path }: { component: React.ComponentT
 function Router() {
   return (
     <Switch>
+      <Route path="/support"             component={Support} />
       <Route path="/login"               component={Login} />
       <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
       <Route path="/login/admin"         component={() => <PortalLogin role="admin" />} />
