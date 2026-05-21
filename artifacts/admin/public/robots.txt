@@ -1,32 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Ridhi Admin Dashboard — robots.txt
-# This is a private internal tool. No crawlers, bots, or AI tools are allowed.
+# Ridhi — robots.txt
+# Admin panel is private. Only the public support page is indexable.
 # ─────────────────────────────────────────────────────────────────────────────
 
 User-agent: *
-Disallow: /
+Disallow: /admin/
+Allow: /admin/support
 
-User-agent: Googlebot
-Disallow: /
-
-User-agent: Bingbot
-Disallow: /
-
-User-agent: Slurp
-Disallow: /
-
-User-agent: DuckDuckBot
-Disallow: /
-
-User-agent: Baiduspider
-Disallow: /
-
-User-agent: YandexBot
-Disallow: /
-
-User-agent: Sogou
-Disallow: /
-
+# AI crawlers — not permitted
 User-agent: GPTBot
 Disallow: /
 
@@ -54,14 +35,7 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-User-agent: Amazonbot
-Disallow: /
-
 User-agent: Diffbot
 Disallow: /
 
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
+Sitemap: https://ridhi.app/admin/sitemap.xml

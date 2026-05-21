@@ -4,6 +4,7 @@ import {
   AlertTriangle, Star, HelpCircle, ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -104,6 +105,18 @@ function FAQItem({ q, a }: FAQ) {
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
+      <Helmet>
+        <title>Ridhi Help & Support — FAQs, Contact & Troubleshooting</title>
+        <meta name="robots" content="index, follow" />
+        <meta name="description" content="Get help with Ridhi — India's social networking and dating app. Find answers to FAQs on accounts, coins, live streams, dating, privacy, and more. Contact us at hello@ridhi.app." />
+        <meta property="og:title"       content="Ridhi Help & Support" />
+        <meta property="og:description" content="Answers to common questions about Ridhi — accounts, coins, live streams, dating, privacy, and more." />
+        <meta property="og:type"        content="website" />
+        <meta name="twitter:card"       content="summary" />
+        <meta name="twitter:title"      content="Ridhi Help & Support" />
+        <meta name="twitter:description" content="Answers to common questions about Ridhi — accounts, coins, live streams, dating, privacy, and more." />
+        <link rel="canonical" href="https://ridhi.app/admin/support" />
+      </Helmet>
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Helmet } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ShieldOff, Lock } from "lucide-react";
@@ -206,6 +207,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        {/* Default: block all admin routes from indexing; /support overrides this */}
+        <Helmet>
+          <meta name="robots" content="noindex, nofollow" />
+          <meta name="title" content="Ridhi Admin – Control Panel" />
+        </Helmet>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
         </WouterRouter>
