@@ -21,7 +21,8 @@ import LiveStreams    from "@/pages/live-streams";
 import Revenue       from "@/pages/revenue";
 import SuperAdmin    from "@/pages/super-admin";
 import PromoCodes    from "@/pages/promo-codes";
-import ReferralProgram from "@/pages/referral-program";
+import ReferralProgram    from "@/pages/referral-program";
+import ApiIntegrations   from "@/pages/api-integrations";
 import Gaming        from "@/pages/gaming";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
@@ -70,7 +71,8 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/settings":     ["super_admin", "admin"],
   "/super-admin":  ["super_admin"],
   "/promo-codes":  ["super_admin"],
-  "/referral":     ["super_admin", "admin"],
+  "/referral":          ["super_admin", "admin"],
+  "/api-integrations":  ["super_admin"],
   "/handbook":     ["super_admin", "admin", "agent", "host"],
 };
 
@@ -150,7 +152,8 @@ function Router() {
       <Route path="/revenue"      component={() => <RoleRoute component={Revenue}      path="/revenue" />} />
       <Route path="/super-admin"  component={() => <RoleRoute component={SuperAdmin}   path="/super-admin" />} />
       <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}      path="/promo-codes" />} />
-      <Route path="/referral"     component={() => <RoleRoute component={ReferralProgram} path="/referral" />} />
+      <Route path="/referral"          component={() => <RoleRoute component={ReferralProgram}  path="/referral" />} />
+      <Route path="/api-integrations"  component={() => <RoleRoute component={ApiIntegrations} path="/api-integrations" />} />
       <Route path="/gaming"       component={() => <RoleRoute component={Gaming}       path="/gaming" />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
