@@ -5,7 +5,7 @@ import {
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
-  LayoutTemplate, Ticket,
+  LayoutTemplate, Ticket, Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -87,6 +87,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Platform",
     items: [
+      { name: "Referral Program", href: "/referral", icon: Share2,   allowedRoles: SA_A },
       { name: "Marketing",   href: "/marketing",   icon: Megaphone,  allowedRoles: SA_A },
       { name: "Settings",    href: "/settings",    icon: Settings,   allowedRoles: SA_A },
       { name: "Super Admin",      href: "/super-admin", icon: ShieldCheck, allowedRoles: SA  },
@@ -174,6 +175,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/jobs":          "Ridhi Jobs Management",
     "/subscriptions": "Subscription Plans",
     "/promo-codes":   "Promo & Offer Codes",
+    "/referral":      "Referral Program",
   };
 
   return (
