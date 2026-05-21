@@ -44,6 +44,7 @@ import DomainHosting       from "@/pages/domain-hosting";
 import BackendAccess       from "@/pages/backend-access";
 import ContentAssets       from "@/pages/content-assets";
 import PortalLogin         from "@/pages/portal-login";
+import Downloads          from "@/pages/downloads";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/admin-management":  ["super_admin"],
   "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
+  "/downloads":         ["super_admin"],
   "/handbook":     ["super_admin", "admin"],
 };
 
@@ -189,6 +191,7 @@ function Router() {
       <Route path="/domain-hosting"    component={() => <RoleRoute component={DomainHosting}    path="/domain-hosting" />} />
       <Route path="/backend-access"    component={() => <RoleRoute component={BackendAccess}    path="/backend-access" />} />
       <Route path="/content-assets"    component={() => <RoleRoute component={ContentAssets}    path="/content-assets" />} />
+      <Route path="/downloads"         component={() => <RoleRoute component={Downloads}         path="/downloads" />} />
       <Route component={NotFound} />
     </Switch>
   );
