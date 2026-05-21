@@ -36,19 +36,18 @@
     "production": {
       "ios": {
         "language": "en-IN",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID",
-        "metadataPath": "./store.config.json"
+        "ascAppId": "6770531782",
+        "appleTeamId": "YOUR_APPLE_TEAM_ID"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "production",
         "releaseStatus": "completed",
-        "metadataPath": "./store.config.json",
         "applicationId": "com.ridhi.app"
       }
     }
   },
   "metadata": {
-    "ascAppId": "YOUR_ASC_APP_ID"
+    "ascAppId": "6770531782"
   }
 }
