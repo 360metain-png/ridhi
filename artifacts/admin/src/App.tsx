@@ -29,6 +29,7 @@ import AdminActivity    from "@/pages/admin-activity";
 import Gaming        from "@/pages/gaming";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
+import Levels        from "@/pages/levels";
 import Calls         from "@/pages/calls";
 import Recordings    from "@/pages/recordings";
 import Promotions    from "@/pages/promotions";
@@ -58,6 +59,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/revenue":      ["super_admin", "admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin", "agent"],
+  "/levels":       ["super_admin", "admin", "agent"],
   "/kyc":          ["super_admin", "admin", "agent"],
   "/calls":        ["super_admin", "admin", "agent", "host"],
   "/recordings":   ["super_admin", "admin"],
@@ -166,6 +168,7 @@ function Router() {
       <Route path="/gaming"       component={() => <RoleRoute component={Gaming}       path="/gaming" />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
+      <Route path="/levels"       component={() => <RoleRoute component={Levels}       path="/levels" />} />
       <Route path="/calls"        component={() => <RoleRoute component={Calls}        path="/calls" />} />
       <Route path="/recordings"   component={() => <RoleRoute component={Recordings}   path="/recordings" />} />
       <Route path="/promotions"   component={() => <RoleRoute component={Promotions}   path="/promotions" />} />

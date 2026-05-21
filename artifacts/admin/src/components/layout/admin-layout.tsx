@@ -6,6 +6,7 @@ import {
   Gamepad2, Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -47,6 +48,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     items: [
       { name: "Hosts",              href: "/hosts",        icon: Star,     allowedRoles: SA_AA },
       { name: "Agents",             href: "/agents",       icon: Briefcase,allowedRoles: SA_A  },
+      { name: "Levels & Promotion", href: "/levels",       icon: TrendingUp, allowedRoles: SA_AA },
       { name: "E-KYC Verification", href: "/kyc",          icon: ScanFace, badge: "4", allowedRoles: SA_AA },
       { name: "Calls",              href: "/calls",        icon: Phone,       allowedRoles: ALL   },
       { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
@@ -169,6 +171,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/gaming":       "Gaming Management",
     "/agents":       "Agent Management",
     "/hosts":        "Host Management",
+    "/levels":       "Levels & Promotion Strategy",
     "/calls":        "Audio & Video Calls",
     "/recordings":   "Call Recordings & Room Activity",
     "/promotions":   "User Promotions & Boosts",
