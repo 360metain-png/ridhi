@@ -18,6 +18,15 @@ async function getRazorpay() {
 
 const TEST_MODE = !process.env["RAZORPAY_KEY_ID"];
 
+// ── Server-side order stores ──────────────────────────────────────────────────
+// createdOrders: IDs issued by this server's create-order endpoint.
+//   Only orders present here can be verified; rejects foreign order IDs.
+// verifiedOrders: maps orderId → paymentId after passing verification.
+//   The mobile client polls this via /payments/status/:orderId.
+// In-memory only; sufficient for the current mock-heavy architecture.
+const createdOrders  = new Set<string>();
+const verifiedOrders = new Map<string, string>();
+
 // ── POST /api/payments/create-order ──────────────────────────────────────────
 router.post("/payments/create-order", async (req, res) => {
   const { amount, currency = "INR", receipt, notes } = req.body as {
@@ -35,8 +44,9 @@ router.post("/payments/create-order", async (req, res) => {
   const rzp = await getRazorpay();
 
   if (!rzp) {
-    // Test-mode: return a simulated order
+    // Test-mode: return a simulated order and record it server-side
     const simulatedOrderId = "order_" + Math.random().toString(36).slice(2, 14).toUpperCase();
+    createdOrders.add(simulatedOrderId);
     req.log.info({ amount, simulatedOrderId }, "Test-mode payment order created");
     res.json({
       id:       simulatedOrderId,
@@ -56,6 +66,7 @@ router.post("/payments/create-order", async (req, res) => {
       notes:    notes ?? {},
     });
 
+    createdOrders.add(order.id);
     req.log.info({ orderId: order.id, amount }, "Razorpay order created");
 
     res.json({
@@ -72,17 +83,33 @@ router.post("/payments/create-order", async (req, res) => {
 });
 
 // ── POST /api/payments/verify ─────────────────────────────────────────────────
+// IMPORTANT: test-mode is determined entirely by the server (TEST_MODE env
+// constant). Client-supplied testMode flags are intentionally ignored so an
+// attacker cannot forge verification by sending { testMode: true }.
 router.post("/payments/verify", (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, testMode } =
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
     req.body as {
       razorpay_order_id:   string;
       razorpay_payment_id: string;
-      razorpay_signature:  string;
-      testMode?:           boolean;
+      razorpay_signature?: string;
     };
 
-  // Test-mode: skip signature verification
-  if (testMode) {
+  if (!razorpay_order_id || !razorpay_payment_id) {
+    res.status(400).json({ error: "Missing required payment fields" });
+    return;
+  }
+
+  // Reject orders not issued by this server — prevents verification of
+  // fabricated or externally-supplied order IDs.
+  if (!createdOrders.has(razorpay_order_id)) {
+    req.log.warn({ razorpay_order_id }, "Verification rejected: unknown order ID");
+    res.status(400).json({ error: "Unknown order" });
+    return;
+  }
+
+  // Test-mode is determined by the server, not the caller.
+  if (TEST_MODE) {
+    verifiedOrders.set(razorpay_order_id, razorpay_payment_id);
     req.log.info({ razorpay_order_id }, "Test-mode payment verified");
     res.json({ success: true, testMode: true, paymentId: razorpay_payment_id });
     return;
@@ -94,7 +121,12 @@ router.post("/payments/verify", (req, res) => {
     return;
   }
 
-  const body    = razorpay_order_id + "|" + razorpay_payment_id;
+  if (!razorpay_signature) {
+    res.status(400).json({ error: "Missing payment signature" });
+    return;
+  }
+
+  const body     = razorpay_order_id + "|" + razorpay_payment_id;
   const expected = crypto
     .createHmac("sha256", keySecret)
     .update(body)
@@ -106,8 +138,23 @@ router.post("/payments/verify", (req, res) => {
     return;
   }
 
+  verifiedOrders.set(razorpay_order_id, razorpay_payment_id);
   req.log.info({ razorpay_payment_id }, "Razorpay payment verified");
   res.json({ success: true, testMode: false, paymentId: razorpay_payment_id });
+});
+
+// ── GET /api/payments/status/:orderId ────────────────────────────────────────
+// Lets the mobile app check whether a given order was server-verified after the
+// in-app browser returns. Only returns success=true if the order passed
+// signature verification (or test-mode verification) on this server.
+router.get("/payments/status/:orderId", (req, res) => {
+  const { orderId } = req.params;
+  const paymentId = verifiedOrders.get(orderId);
+  if (paymentId) {
+    res.json({ verified: true, paymentId });
+  } else {
+    res.json({ verified: false });
+  }
 });
 
 // ── GET /api/payments/config ──────────────────────────────────────────────────

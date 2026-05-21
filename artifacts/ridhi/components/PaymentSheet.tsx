@@ -36,8 +36,38 @@ async function createOrder(amountInPaise: number, label: string) {
   }
 }
 
+// ── API helpers (continued) ────────────────────────────────────────────────────
+async function verifyOrder(orderId: string, paymentId: string) {
+  try {
+    const res = await fetch(`${API_BASE}/payments/verify`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        razorpay_order_id:   orderId,
+        razorpay_payment_id: paymentId,
+        razorpay_signature:  "",
+      }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json() as { success: boolean };
+    return data.success === true;
+  } catch {
+    return false;
+  }
+}
+
+async function checkOrderStatus(orderId: string): Promise<{ verified: boolean; paymentId?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/payments/status/${encodeURIComponent(orderId)}`);
+    if (!res.ok) return { verified: false };
+    return await res.json() as { verified: boolean; paymentId?: string };
+  } catch {
+    return { verified: false };
+  }
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
-type PayStep = "select" | "processing" | "success";
+type PayStep = "select" | "processing" | "success" | "failed";
 type PayMethod = "upi" | "card" | "netbanking" | "wallet";
 
 export interface PaymentSheetProps {
@@ -166,35 +196,57 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
 
     if (order && !order.testMode) {
       // ── Real Razorpay: open backend-hosted checkout in system browser ──────
+      // The checkout page calls /api/payments/verify and records the order as
+      // verified server-side if Razorpay confirms. After the browser closes we
+      // query the server to check whether verification actually succeeded.
       const checkoutUrl = `${API_BASE}/payments/checkout?` + new URLSearchParams({
         orderId: order.id,
         keyId:   order.keyId,
         amount:  String(order.amount),
         desc:    label,
       }).toString();
-      const id = order.id;
       await WebBrowser.openBrowserAsync(checkoutUrl, {
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
         toolbarColor:      "#E91E8C",
       });
-      // Browser closed — show success (payment complete in browser)
-      setTxnId(id.slice(0, 8).toUpperCase());
-      setStep("success");
+      // Browser closed — ask the server whether it received a valid verification
+      const status = await checkOrderStatus(order.id);
+      if (status.verified && status.paymentId) {
+        setTxnId(status.paymentId.slice(0, 16).toUpperCase());
+        setStep("success");
+      } else {
+        setStep("failed");
+      }
       return;
     }
 
-    // ── Test / simulation mode: animate through processing steps ─────────────
-    const id = generateTxnId();
-    let i = 0;
-    const iv = setInterval(() => {
-      i++;
-      if (i < PROCESSING_STEPS.length) { setProcStatus(i); }
-      else {
-        clearInterval(iv);
-        setTxnId(id);
-        setStep("success");
-      }
-    }, 600);
+    // ── Test / simulation mode ────────────────────────────────────────────────
+    // Animate through the processing steps for UX, then ask the server to
+    // record a test-mode verification. Only advance to success when the server
+    // confirms; show failure otherwise.
+    const simOrderId   = order?.id ?? ("order_sim_" + Date.now());
+    const simPaymentId = generateTxnId();
+
+    await new Promise<void>((resolve) => {
+      let i = 0;
+      const iv = setInterval(() => {
+        i++;
+        if (i < PROCESSING_STEPS.length) {
+          setProcStatus(i);
+        } else {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 600);
+    });
+
+    const verified = await verifyOrder(simOrderId, simPaymentId);
+    if (verified) {
+      setTxnId(simPaymentId);
+      setStep("success");
+    } else {
+      setStep("failed");
+    }
   };
 
   const handleDone = () => {
@@ -463,6 +515,25 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
             </View>
           )}
 
+          {/* ── FAILED ──────────────────────────────────────────────────────── */}
+          {step === "failed" && (
+            <View style={styles.processingWrap}>
+              <View style={[styles.failCircle]}>
+                <Feather name="x" size={42} color="#fff" />
+              </View>
+              <Text style={[styles.procTitle, { color: colors.foreground }]}>Payment Not Confirmed</Text>
+              <Text style={[styles.procStatus, { color: colors.mutedForeground, textAlign: "center", paddingHorizontal: 24 }]}>
+                We could not verify your payment with our server. No charge has been applied.
+              </Text>
+              <Pressable onPress={() => setStep("select")} style={[styles.retryBtn, { backgroundColor: colors.primary }]}>
+                <Text style={styles.retryBtnText}>Try Again</Text>
+              </Pressable>
+              <Pressable onPress={onClose} style={[styles.retryBtn, { backgroundColor: colors.muted, marginTop: 8 }]}>
+                <Text style={[styles.retryBtnText, { color: colors.foreground }]}>Cancel</Text>
+              </Pressable>
+            </View>
+          )}
+
           {/* ── SUCCESS ─────────────────────────────────────────────────────── */}
           {step === "success" && (
             <View style={styles.successWrap}>
@@ -565,6 +636,9 @@ const styles = StyleSheet.create({
   procAmountText: { fontSize: 18, fontFamily: "Inter_700Bold" },
   procHint:       { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 8 },
 
+  failCircle:     { width: 90, height: 90, borderRadius: 45, backgroundColor: "#F43F5E", alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  retryBtn:       { paddingVertical: 14, paddingHorizontal: 40, borderRadius: 12, alignItems: "center", minWidth: 200 },
+  retryBtnText:   { color: "#fff", fontSize: 16, fontFamily: "Inter_600SemiBold" },
   successWrap:    { alignItems: "center", paddingHorizontal: 20, paddingTop: 30, paddingBottom: Platform.OS === "ios" ? 40 : 24, gap: 12 },
   successCircle:  { width: 90, height: 90, borderRadius: 45, backgroundColor: "#34C75920", alignItems: "center", justifyContent: "center" },
   successInner:   { width: 72, height: 72, borderRadius: 36, backgroundColor: "#34C759", alignItems: "center", justifyContent: "center" },
