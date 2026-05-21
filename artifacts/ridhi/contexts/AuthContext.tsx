@@ -23,6 +23,10 @@ export interface UserProfile {
   posts: number;
   isVerified: boolean;
   plan?: "free" | "silver" | "gold" | "platinum" | "diamond";
+  planBillingPeriod?: "weekly" | "monthly" | "yearly";
+  planExpiresAt?: string;
+  creatorPlan?: "creator_starter" | "creator_pro" | "creator_elite";
+  creatorPlanExpiresAt?: string;
   createdAt: string;
   locationCoords?: { latitude: number; longitude: number };
   registeredAt?: string;
@@ -41,6 +45,8 @@ interface AuthContextValue {
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
   deductCoins: (amount: number) => Promise<boolean>;
+  subscribePlan: (planId: string, billing: string, bonusCoins: number) => Promise<void>;
+  cancelPlan: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -139,9 +145,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return success;
   }, []);
 
+  const subscribePlan = useCallback(async (planId: string, billing: string, bonusCoins: number) => {
+    const now = new Date();
+    let expiresAt: Date;
+    if (billing === "weekly")  { expiresAt = new Date(now); expiresAt.setDate(expiresAt.getDate() + 7); }
+    else if (billing === "yearly") { expiresAt = new Date(now); expiresAt.setFullYear(expiresAt.getFullYear() + 1); }
+    else { expiresAt = new Date(now); expiresAt.setMonth(expiresAt.getMonth() + 1); }
+
+    const isCreator = planId.startsWith("creator_");
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated: UserProfile = isCreator
+        ? { ...prev, creatorPlan: planId as UserProfile["creatorPlan"], creatorPlanExpiresAt: expiresAt.toISOString(), coins: prev.coins + bonusCoins }
+        : { ...prev, plan: planId as UserProfile["plan"], planBillingPeriod: billing as UserProfile["planBillingPeriod"], planExpiresAt: expiresAt.toISOString(), coins: prev.coins + bonusCoins };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const cancelPlan = useCallback(async () => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated: UserProfile = { ...prev, plan: "free", planExpiresAt: undefined, planBillingPeriod: undefined };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, deductCoins }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, deductCoins, subscribePlan, cancelPlan }}
     >
       {children}
     </AuthContext.Provider>

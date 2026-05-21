@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  Dimensions, Platform, Pressable, ScrollView,
+  Dimensions, Modal, Platform, Pressable, ScrollView,
   StyleSheet, Text, View,
 } from "react-native";
 import { router } from "expo-router";
@@ -8,8 +8,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { SubscriptionBadge } from "@/components/SubscriptionBadge";
+import type { VipTier } from "@/components/SubscriptionBadge";
 
 const { width } = Dimensions.get("window");
 
@@ -756,20 +759,48 @@ function billingLabel(billing: BillingPeriod): string {
   return billing === "weekly" ? "/week" : billing === "monthly" ? "/month" : "/year";
 }
 
+function fmtDate(iso?: string): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 export default function SubscriptionScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const topPad  = Platform.OS === "web" ? 67 : insets.top;
+  const { user, subscribePlan, cancelPlan } = useAuth();
+
   const [section,      setSection]      = useState<Section>("plans");
   const [billing,      setBilling]      = useState<BillingPeriod>("monthly");
-  const [selectedPlan, setSelectedPlan] = useState("gold");
+  const [selectedPlan, setSelectedPlan] = useState<"free"|"silver"|"gold"|"platinum"|"diamond">(user?.plan ?? "gold");
   const [showCompare,  setShowCompare]  = useState(false);
   const [unlockCat,    setUnlockCat]    = useState(0);
   const [payAmount,    setPayAmount]    = useState(0);
   const [payLabel,     setPayLabel]     = useState("");
   const [showPayment,  setShowPayment]  = useState(false);
+  const [pendingPlanId,  setPendingPlanId]  = useState<string>("");
+  const [pendingBilling, setPendingBilling] = useState<string>("monthly");
+  const [pendingBonus,   setPendingBonus]   = useState<number>(0);
+  const [showSuccess,    setShowSuccess]    = useState(false);
+  const [activatedPlan,  setActivatedPlan]  = useState<string>("");
 
   const currentPlan = PLANS.find(p => p.id === selectedPlan)!;
+
+  const activePlanId    = user?.plan ?? "free";
+  const activePlanName  = PLANS.find(p => p.id === activePlanId)?.name ?? "Free";
+  const planExpiry      = user?.planExpiresAt;
+  const creatorPlanId   = user?.creatorPlan;
+  const creatorExpiry   = user?.creatorPlanExpiresAt;
+
+  const handlePlanSuccess = async (txnId: string) => {
+    await subscribePlan(pendingPlanId, pendingBilling, pendingBonus);
+    const planName = pendingPlanId.startsWith("creator_")
+      ? CREATOR_PLANS.find(p => p.id === pendingPlanId)?.name ?? pendingPlanId
+      : PLANS.find(p => p.id === pendingPlanId)?.name ?? pendingPlanId;
+    setActivatedPlan(planName);
+    setShowPayment(false);
+    setShowSuccess(true);
+  };
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -832,6 +863,32 @@ export default function SubscriptionScreen() {
         {/* ══════════════ VIP PLANS ══════════════ */}
         {section === "plans" && (
           <View style={styles.sectionWrap}>
+
+            {/* ── Active plan status card ── */}
+            {activePlanId !== "free" ? (
+              <View style={[styles.activePlanCard, { backgroundColor: colors.card, borderColor: colors.primary + "50" }]}>
+                <LinearGradient colors={["#7B2FBE20", "#E91E8C10"]} style={StyleSheet.absoluteFill} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.activePlanLabel, { color: colors.mutedForeground }]}>Current Plan</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 }}>
+                    <SubscriptionBadge tier={activePlanId as VipTier} size="md" />
+                    <Text style={[styles.activePlanName, { color: colors.foreground }]}>{activePlanName}</Text>
+                  </View>
+                  <Text style={[styles.activePlanExpiry, { color: colors.mutedForeground }]}>
+                    Renews · {fmtDate(planExpiry)}
+                  </Text>
+                </View>
+                <Pressable onPress={() => cancelPlan()} style={[styles.cancelBtn, { borderColor: colors.border }]}>
+                  <Text style={[styles.cancelTxt, { color: colors.mutedForeground }]}>Cancel</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={[styles.activePlanCard, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <Feather name="award" size={18} color={colors.mutedForeground} />
+                <Text style={[styles.activePlanName, { color: colors.foreground, flex: 1 }]}>No active plan · Free tier</Text>
+                <Text style={[styles.activePlanExpiry, { color: colors.primary }]}>↓ Subscribe below</Text>
+              </View>
+            )}
 
             {/* What you unlock — category selector */}
             <View style={[styles.unlockCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -897,7 +954,7 @@ export default function SubscriptionScreen() {
               const periodStr = plan.id === "free" ? "" : billingLabel(billing);
               const unavail   = priceNum === null;
               return (
-                <Pressable key={plan.id} onPress={() => !unavail && setSelectedPlan(plan.id)}
+                <Pressable key={plan.id} onPress={() => !unavail && setSelectedPlan(plan.id as "free"|"silver"|"gold"|"platinum"|"diamond")}
                   style={[styles.planCard, { backgroundColor: colors.card, borderColor: sel ? plan.color : colors.border, borderWidth: sel ? 2 : 1, opacity: unavail ? 0.5 : 1 }]}>
 
                   {plan.popular && (
@@ -964,11 +1021,29 @@ export default function SubscriptionScreen() {
                     )}
                   </View>
 
-                  {plan.id !== "free" && !unavail && (
-                    <Pressable onPress={() => { setPayAmount(priceNum!); setPayLabel(`${plan.name} — ${priceStr}${periodStr}`); setShowPayment(true); }}>
+                  {/* Active badge on current plan */}
+                  {activePlanId === plan.id && plan.id !== "free" && (
+                    <View style={[styles.activeBanner, { backgroundColor: "#34C75918", borderColor: "#34C75940" }]}>
+                      <Feather name="check-circle" size={14} color="#34C759" />
+                      <Text style={[styles.activeBannerTxt, { color: "#34C759" }]}>Active · Renews {fmtDate(planExpiry)}</Text>
+                    </View>
+                  )}
+
+                  {plan.id !== "free" && !unavail && activePlanId !== plan.id && (
+                    <Pressable onPress={() => {
+                      setPendingPlanId(plan.id);
+                      setPendingBilling(billing);
+                      setPendingBonus(plan.bonusCoins);
+                      setPayAmount(priceNum!);
+                      setPayLabel(`${plan.name} — ${priceStr}${periodStr}`);
+                      setShowPayment(true);
+                    }}>
                       <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                        <Feather name="zap" size={15} color="#fff" />
                         <Text style={styles.subBtnTxt}>
-                          {sel ? `Upgrade to ${plan.name} — ${priceStr}${periodStr}` : `Subscribe — ${priceStr}${periodStr}`}
+                          {PLAN_RANK[activePlanId] > 0 && PLAN_RANK[plan.id] > PLAN_RANK[activePlanId]
+                            ? `Upgrade to ${plan.name} — ${priceStr}${periodStr}`
+                            : `Subscribe — ${priceStr}${periodStr}`}
                         </Text>
                       </LinearGradient>
                     </Pressable>
@@ -1115,11 +1190,29 @@ export default function SubscriptionScreen() {
                     ))}
                   </View>
 
-                  <Pressable onPress={() => { setPayAmount(price); setPayLabel(`${plan.name} — ₹${price.toLocaleString("en-IN")}${period}`); setShowPayment(true); }}>
-                    <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
-                      <Text style={styles.subBtnTxt}>Start {plan.name} — ₹{price.toLocaleString("en-IN")}{period}</Text>
-                    </LinearGradient>
-                  </Pressable>
+                  {/* Active badge on current creator plan */}
+                  {creatorPlanId === plan.id && (
+                    <View style={[styles.activeBanner, { backgroundColor: "#34C75918", borderColor: "#34C75940" }]}>
+                      <Feather name="check-circle" size={14} color="#34C759" />
+                      <Text style={[styles.activeBannerTxt, { color: "#34C759" }]}>Active · Renews {fmtDate(creatorExpiry)}</Text>
+                    </View>
+                  )}
+
+                  {creatorPlanId !== plan.id && (
+                    <Pressable onPress={() => {
+                      setPendingPlanId(plan.id);
+                      setPendingBilling(billing);
+                      setPendingBonus(0);
+                      setPayAmount(price);
+                      setPayLabel(`${plan.name} — ₹${price.toLocaleString("en-IN")}${period}`);
+                      setShowPayment(true);
+                    }}>
+                      <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subBtn}>
+                        <Feather name="zap" size={15} color="#fff" />
+                        <Text style={styles.subBtnTxt}>Start {plan.name} — ₹{price.toLocaleString("en-IN")}{period}</Text>
+                      </LinearGradient>
+                    </Pressable>
+                  )}
                 </View>
               );
             })}
@@ -1282,10 +1375,43 @@ export default function SubscriptionScreen() {
       <PaymentSheet
         visible={showPayment}
         onClose={() => setShowPayment(false)}
-        onSuccess={() => setShowPayment(false)}
+        onSuccess={handlePlanSuccess}
         amount={payAmount}
         label={payLabel}
       />
+
+      {/* ── Plan Activated Success Modal ── */}
+      <Modal visible={showSuccess} transparent animationType="fade" onRequestClose={() => setShowSuccess(false)}>
+        <View style={styles.successOverlay}>
+          <View style={[styles.successCard, { backgroundColor: colors.card }]}>
+            <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.successCircle}>
+              <Feather name="check" size={36} color="#fff" />
+            </LinearGradient>
+            <Text style={[styles.successTitle, { color: colors.foreground }]}>Plan Activated!</Text>
+            <Text style={[styles.successSub, { color: colors.mutedForeground }]}>
+              Your <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>{activatedPlan}</Text> is now active.{"\n"}All features are unlocked immediately.
+            </Text>
+            <View style={[styles.successFeatures, { backgroundColor: colors.muted }]}>
+              {[
+                { icon: "check-circle", text: "VIP badge on your profile" },
+                { icon: "check-circle", text: "Bonus coins added to wallet" },
+                { icon: "check-circle", text: "All plan features unlocked" },
+                { icon: "check-circle", text: "Auto-renews until cancelled" },
+              ].map(f => (
+                <View key={f.text} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Feather name={f.icon as any} size={14} color="#34C759" />
+                  <Text style={[styles.successFeatureTxt, { color: colors.foreground }]}>{f.text}</Text>
+                </View>
+              ))}
+            </View>
+            <Pressable onPress={() => setShowSuccess(false)} style={{ width: "100%" }}>
+              <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.successBtn}>
+                <Text style={styles.successBtnTxt}>Awesome, let's go!</Text>
+              </LinearGradient>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1392,8 +1518,31 @@ const styles = StyleSheet.create({
   featRow:       { flexDirection: "row", alignItems: "center", gap: 8 },
   featTxt:       { fontSize: 13, fontFamily: "Inter_400Regular", flex: 1 },
   moreLocked:    { fontSize: 11, fontFamily: "Inter_400Regular", marginLeft: 22 },
-  subBtn:        { margin: 12, marginTop: 4, borderRadius: 12, paddingVertical: 13, alignItems: "center" },
+  subBtn:        { margin: 12, marginTop: 4, borderRadius: 12, paddingVertical: 13, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 6 },
   subBtnTxt:     { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
+
+  // Active plan status
+  activePlanCard:   { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 16, borderWidth: 1.5, padding: 14, overflow: "hidden" },
+  activePlanLabel:  { fontSize: 11, fontFamily: "Inter_500Medium", letterSpacing: 0.5, textTransform: "uppercase" },
+  activePlanName:   { fontSize: 16, fontFamily: "Inter_700Bold" },
+  activePlanExpiry: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 3 },
+  cancelBtn:        { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 10, borderWidth: 1 },
+  cancelTxt:        { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+
+  // Active banner on plan card
+  activeBanner:    { flexDirection: "row", alignItems: "center", gap: 6, marginHorizontal: 12, marginBottom: 12, borderRadius: 8, borderWidth: 1, paddingVertical: 7, paddingHorizontal: 10 },
+  activeBannerTxt: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+
+  // Success modal
+  successOverlay:    { flex: 1, backgroundColor: "rgba(0,0,0,0.65)", alignItems: "center", justifyContent: "center", padding: 24 },
+  successCard:       { width: "100%", borderRadius: 24, padding: 24, alignItems: "center", gap: 16 },
+  successCircle:     { width: 80, height: 80, borderRadius: 40, alignItems: "center", justifyContent: "center" },
+  successTitle:      { fontSize: 22, fontFamily: "Inter_700Bold" },
+  successSub:        { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
+  successFeatures:   { width: "100%", borderRadius: 14, padding: 14, gap: 10 },
+  successFeatureTxt: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  successBtn:        { width: "100%", borderRadius: 14, paddingVertical: 15, alignItems: "center" },
+  successBtnTxt:     { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
 
   // Compare
   compareToggle:    { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 14, borderWidth: 1, paddingVertical: 13 },
