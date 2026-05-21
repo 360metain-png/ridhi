@@ -39,9 +39,9 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: "Users & Content",
     items: [
       { name: "Users",            href: "/users",          icon: Users,      allowedRoles: SA_A },
-      { name: "Content",          href: "/content",        icon: ShieldAlert, badge: "12", allowedRoles: SA_A },
-      { name: "Communities",      href: "/communities",    icon: UsersRound,  allowedRoles: SA_A },
-      { name: "Creative Assets",  href: "/content-assets", icon: Sparkles,    allowedRoles: SA_A },
+      { name: "Content",          href: "/content",        icon: ShieldAlert, badge: "12", allowedRoles: SA },
+      { name: "Communities",      href: "/communities",    icon: UsersRound,  allowedRoles: SA },
+      { name: "Creative Assets",  href: "/content-assets", icon: Sparkles,    allowedRoles: SA },
     ],
   },
   {
@@ -53,22 +53,22 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "E-KYC Verification", href: "/kyc",          icon: ScanFace, badge: "4", allowedRoles: SA_AA },
       { name: "Calls",              href: "/calls",        icon: Phone,       allowedRoles: ALL   },
       { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
-      { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA_A  },
-      { name: "Live Streams",       href: "/live-streams", icon: Radio,    allowedRoles: ALL   },
+      { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA },
+      { name: "Live Streams",       href: "/live-streams", icon: Radio,       allowedRoles: SA },
     ],
   },
   {
     label: "Commerce",
     items: [
-      { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA_A },
-      { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA_A },
-      { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA_A },
+      { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA },
+      { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA },
+      { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA },
     ],
   },
   {
     label: "Jobs",
     items: [
-      { name: "Jobs Management", href: "/jobs", icon: Briefcase, allowedRoles: SA_A },
+      { name: "Jobs Management", href: "/jobs", icon: Briefcase, allowedRoles: SA },
     ],
   },
   {
