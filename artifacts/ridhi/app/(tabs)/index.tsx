@@ -93,6 +93,16 @@ const TRENDING_POSTS: Post[] = [
   },
 ];
 
+const LIVE_HOSTS = [
+  { id: "lh1", name: "Kavya Reddy",   city: "Hyderabad", viewers: "1.2K", level: "L5", levelColor: "#FFD700", gradient: ["#7B2FBE", "#E91E8C"] },
+  { id: "lh2", name: "Priya Sharma",  city: "Mumbai",    viewers: "840",  level: "L4", levelColor: "#C0C0C0", gradient: ["#E91E8C", "#FF6B35"] },
+  { id: "lh3", name: "Rahul D.",      city: "Delhi",     viewers: "612",  level: "L3", levelColor: "#cd7f32", gradient: ["#1976D2", "#7B2FBE"] },
+  { id: "lh4", name: "Meera P.",      city: "Ahmedabad", viewers: "490",  level: "L4", levelColor: "#C0C0C0", gradient: ["#388E3C", "#00BCD4"] },
+  { id: "lh5", name: "Dev Trivedi",   city: "Pune",      viewers: "380",  level: "L2", levelColor: "#cd7f32", gradient: ["#FF6F00", "#E91E8C"] },
+  { id: "lh6", name: "Ananya Singh",  city: "Delhi",     viewers: "294",  level: "L3", levelColor: "#cd7f32", gradient: ["#880E4F", "#C2185B"] },
+  { id: "lh7", name: "Siddharth J.",  city: "Chennai",   viewers: "218",  level: "L2", levelColor: "#cd7f32", gradient: ["#006064", "#1976D2"] },
+];
+
 const COMMUNITY_POSTS: Post[] = [
   {
     id: "c1",
@@ -408,6 +418,48 @@ export default function FeedScreen() {
             onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
           />
+
+          {/* ── Live Hosts Now ──────────────────────────────────────────── */}
+          <View style={styles.liveSection}>
+            <View style={styles.liveSectionHeader}>
+              <View style={[styles.liveDot, { backgroundColor: "#FF3B30" }]} />
+              <Text style={[styles.liveSectionTitle, { color: colors.foreground }]}>Live Now</Text>
+              <Text style={[styles.liveCount, { color: colors.mutedForeground }]}>284 hosts</Text>
+              <Pressable onPress={() => router.push("/explore")} style={[styles.seeAllBtn, { backgroundColor: colors.muted }]}>
+                <Text style={[styles.seeAllText, { color: colors.primary }]}>See all</Text>
+              </Pressable>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.liveScroll}
+            >
+              {LIVE_HOSTS.map((host) => (
+                <Pressable key={host.id} style={[styles.liveCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <LinearGradient
+                    colors={host.gradient as [string, string]}
+                    style={StyleSheet.absoluteFill}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  />
+                  {/* Viewer count badge */}
+                  <View style={styles.liveViewerBadge}>
+                    <View style={styles.liveDotSmall} />
+                    <Text style={styles.liveViewerText}>{host.viewers}</Text>
+                  </View>
+                  {/* Level badge */}
+                  <View style={[styles.liveLevelBadge, { backgroundColor: host.levelColor + "CC" }]}>
+                    <Text style={styles.liveLevelText}>{host.level}</Text>
+                  </View>
+                  {/* Host info at bottom */}
+                  <View style={styles.liveCardBottom}>
+                    <Text style={styles.liveHostName} numberOfLines={1}>{host.name}</Text>
+                    <Text style={styles.liveHostCity} numberOfLines={1}>{host.city}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
 
           <PromoBanner />
 
@@ -1230,6 +1282,23 @@ const styles = StyleSheet.create({
   localTabDot: { width: 3, height: 3, borderRadius: 2 },
 
   // Near You section
+  // ── Live Hosts section ───────────────────────────────────────────────────
+  liveSection: { paddingTop: 4, paddingBottom: 4 },
+  liveSectionHeader: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingBottom: 10 },
+  liveDot: { width: 8, height: 8, borderRadius: 4 },
+  liveDotSmall: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#FF3B30" },
+  liveSectionTitle: { fontSize: 15, fontFamily: "Inter_700Bold", flex: 1 },
+  liveCount: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  liveScroll: { paddingHorizontal: 12, gap: 10, paddingRight: 16 },
+  liveCard: { width: 110, height: 156, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden", justifyContent: "space-between", padding: 8 },
+  liveViewerBadge: { flexDirection: "row", alignItems: "center", gap: 3, backgroundColor: "rgba(0,0,0,0.45)", alignSelf: "flex-start", paddingHorizontal: 6, paddingVertical: 3, borderRadius: 8 },
+  liveViewerText: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#fff" },
+  liveLevelBadge: { alignSelf: "flex-end", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  liveLevelText: { fontSize: 10, fontFamily: "Inter_700Bold", color: "#fff" },
+  liveCardBottom: { gap: 1 },
+  liveHostName: { fontSize: 11, fontFamily: "Inter_700Bold", color: "#fff" },
+  liveHostCity: { fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.75)" },
+
   nearYouSection: { paddingTop: 4, paddingBottom: 4 },
   sectionHeader: {
     flexDirection: "row",

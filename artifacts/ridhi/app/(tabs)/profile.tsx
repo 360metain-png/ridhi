@@ -509,6 +509,84 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      {/* ── CREATOR STATUS ────────────────────────────────────────────────── */}
+      {user.isHost && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MY HOST STATUS</Text>
+          <View style={[styles.levelCard, { backgroundColor: colors.card, borderColor: "#FFB800" }]}>
+            {/* Level header */}
+            <View style={styles.levelHeader}>
+              <LinearGradient colors={["#FFB800", "#FF8C00"]} style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>L3</Text>
+              </LinearGradient>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.levelName, { color: colors.foreground }]}>Silver Host</Text>
+                <Text style={[styles.levelSub, { color: colors.mutedForeground }]}>4,284 fans · Mumbai</Text>
+              </View>
+              <View style={[styles.nextLevelPill, { borderColor: "#FFD700" + "60", backgroundColor: "#FFD70012" }]}>
+                <Text style={[styles.nextLevelText, { color: "#FFB800" }]}>→ L4 Gold</Text>
+              </View>
+            </View>
+            {/* Progress bars */}
+            {[
+              { label: "Coins Received",  current: 240000, target: 500000, pct: 48, color: "#E91E8C" },
+              { label: "Stream Hours",    current: 124,    target: 200,    pct: 62, color: "#7B2FBE" },
+              { label: "PK Wins",         current: 8,      target: 10,     pct: 80, color: "#FFB800" },
+            ].map((bar) => (
+              <View key={bar.label} style={styles.progressRow}>
+                <View style={styles.progressLabelRow}>
+                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>{bar.label}</Text>
+                  <Text style={[styles.progressLabel, { color: colors.foreground }]}>{bar.pct}%</Text>
+                </View>
+                <View style={[styles.progressTrack, { backgroundColor: colors.muted }]}>
+                  <View style={[styles.progressFill, { width: `${bar.pct}%` as any, backgroundColor: bar.color }]} />
+                </View>
+              </View>
+            ))}
+            <Text style={[styles.levelTip, { color: colors.mutedForeground }]}>
+              💡 Stream 76 more hours + 2 PK wins to reach L4 Gold
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {user.isAgent && !user.isHost && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MY AGENT STATUS</Text>
+          <View style={[styles.levelCard, { backgroundColor: colors.card, borderColor: "#00BCD4" }]}>
+            <View style={styles.levelHeader}>
+              <LinearGradient colors={["#00BCD4", "#0097A7"]} style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>A2</Text>
+              </LinearGradient>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.levelName, { color: colors.foreground }]}>Senior Agent</Text>
+                <Text style={[styles.levelSub, { color: colors.mutedForeground }]}>5% commission · 54 hosts</Text>
+              </View>
+              <View style={[styles.nextLevelPill, { borderColor: "#00BCD460", backgroundColor: "#00BCD412" }]}>
+                <Text style={[styles.nextLevelText, { color: "#00BCD4" }]}>→ A3</Text>
+              </View>
+            </View>
+            {[
+              { label: "Hosts Managed",  current: 54,  target: 100, pct: 54, color: "#00BCD4" },
+              { label: "Active Rate",    current: 79,  target: 80,  pct: 99, color: "#7B2FBE" },
+            ].map((bar) => (
+              <View key={bar.label} style={styles.progressRow}>
+                <View style={styles.progressLabelRow}>
+                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>{bar.label}</Text>
+                  <Text style={[styles.progressLabel, { color: colors.foreground }]}>{bar.pct}%</Text>
+                </View>
+                <View style={[styles.progressTrack, { backgroundColor: colors.muted }]}>
+                  <View style={[styles.progressFill, { width: `${bar.pct}%` as any, backgroundColor: bar.color }]} />
+                </View>
+              </View>
+            ))}
+            <Text style={[styles.levelTip, { color: colors.mutedForeground }]}>
+              🎯 Recruit 46 more hosts to reach A3 — unlock 7% commission
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* ── MENU SECTIONS ─────────────────────────────────────────────────── */}
       {MENU_SECTIONS.map((section) => (
         <View key={section.title} style={styles.section}>
@@ -628,6 +706,22 @@ const styles = StyleSheet.create({
   // ── Section wrapper ───────────────────────────────────────────────────────
   section: { paddingHorizontal: 16, paddingTop: 22 },
   sectionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8, marginBottom: 8 },
+
+  // ── Level / Creator Status card ───────────────────────────────────────────
+  levelCard: { borderRadius: 18, borderWidth: 1.5, padding: 16, gap: 12 },
+  levelHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
+  levelBadge: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  levelBadgeText: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
+  levelName: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  levelSub: { fontSize: 12, fontFamily: "Inter_400Regular" },
+  nextLevelPill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, borderWidth: 1 },
+  nextLevelText: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  progressRow: { gap: 4 },
+  progressLabelRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  progressLabel: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  progressTrack: { height: 7, borderRadius: 6, overflow: "hidden" },
+  progressFill: { height: "100%", borderRadius: 6 },
+  levelTip: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 
   // ── Earn cards ────────────────────────────────────────────────────────────
   earnRow: { flexDirection: "row", gap: 10 },
