@@ -4,7 +4,7 @@ import { Button }    from "@/components/ui/button";
 import { Input }     from "@/components/ui/input";
 import { Label }     from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, UserCog, Briefcase, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X } from "lucide-react";
+import { Shield, UserCog, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X } from "lucide-react";
 import type { AdminRole } from "@/App";
 
 type PortalConfig = {
@@ -53,22 +53,6 @@ const CONFIGS: Record<AdminRole, PortalConfig> = {
       { label: "Finance & Revenue Overview",  allowed: true  },
       { label: "System Settings",             allowed: false },
       { label: "Super Admin Panel",           allowed: false },
-    ],
-  },
-  agent: {
-    role: "agent", label: "Agent", sublabel: "Manages Hosts",
-    icon: Briefcase,
-    gradient: "from-blue-500 to-blue-700",
-    gradientFrom: "from-blue-500", gradientTo: "to-cyan-600",
-    ringColor: "ring-blue-300",
-    email: "agent.rahul@ridhi.app", password: "agent123", badge: "Agent A3",
-    permissions: [
-      { label: "Dashboard (own stats)",       allowed: true  },
-      { label: "Approve & Manage Hosts",      allowed: true  },
-      { label: "Calls & Live Streams",        allowed: true  },
-      { label: "KYC Verification",            allowed: true  },
-      { label: "Finance & Revenue",           allowed: false },
-      { label: "Admin / Super Admin Panel",   allowed: false },
     ],
   },
 };

@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Shield, UserCog, Briefcase, ChevronRight, ArrowRight, Smartphone } from "lucide-react";
+import { Shield, UserCog, ChevronRight, ArrowRight, Smartphone } from "lucide-react";
 
 const PORTALS = [
   {
@@ -15,7 +15,7 @@ const PORTALS = [
     badgeClass: "bg-purple-600 text-white",
     tagline:    "Full Platform Control",
     desc:       "Manage all admins, platform settings, finance, and system configuration.",
-    access:     ["All pages & features", "Admin & Agent approval", "Finance & payouts", "System settings"],
+    access:     ["All pages & features", "Admin approval", "Finance & payouts", "System settings"],
   },
   {
     role:       "admin",
@@ -28,31 +28,15 @@ const PORTALS = [
     iconBg:     "bg-indigo-100",
     iconColor:  "text-indigo-700",
     badgeClass: "bg-indigo-600 text-white",
-    tagline:    "Manages Agents",
-    desc:       "Oversee agents, content moderation, user management and platform operations.",
-    access:     ["Users & content", "Agent management", "Revenue overview", "Marketing tools"],
-  },
-  {
-    role:       "agent",
-    label:      "Agent",
-    path:       "/login/agent",
-    icon:       Briefcase,
-    gradient:   "from-blue-500 to-blue-700",
-    lightBg:    "bg-blue-50",
-    border:     "border-blue-200 hover:border-blue-400",
-    iconBg:     "bg-blue-100",
-    iconColor:  "text-blue-700",
-    badgeClass: "bg-blue-600 text-white",
-    tagline:    "Manages Hosts",
-    desc:       "Approve and support hosts, monitor live streams, handle KYC verifications.",
-    access:     ["Host management", "KYC verification", "Calls & live streams", "Performance analytics"],
+    tagline:    "Platform Operations",
+    desc:       "Oversee content moderation, user management, hosts, agents, and platform operations.",
+    access:     ["Users & content", "Hosts & agents", "Revenue overview", "Marketing tools"],
   },
 ];
 
 const HIERARCHY = [
   { label: "Super Admin", color: "bg-purple-600" },
   { label: "Admin",       color: "bg-indigo-500" },
-  { label: "Agent",       color: "bg-blue-500"   },
 ];
 
 export default function Login() {
@@ -94,7 +78,7 @@ export default function Login() {
 
       {/* Portal Cards */}
       <div className="flex-1 flex items-start justify-center px-4 pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-2xl">
           {PORTALS.map((p) => {
             const Icon = p.icon;
             return (

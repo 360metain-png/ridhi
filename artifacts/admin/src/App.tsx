@@ -47,12 +47,12 @@ import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
 
-export type AdminRole = "super_admin" | "admin" | "agent";
+export type AdminRole = "super_admin" | "admin";
 
 // Which roles may access each route
 export const ROUTE_ROLES: Record<string, AdminRole[]> = {
-  "/":             ["super_admin", "admin", "agent"],
-  "/analytics":    ["super_admin", "admin", "agent"],
+  "/":             ["super_admin", "admin"],
+  "/analytics":    ["super_admin", "admin"],
   "/users":        ["super_admin", "admin"],
   "/content":      ["super_admin", "admin"],
   "/communities":  ["super_admin", "admin"],
@@ -60,10 +60,10 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/payouts":      ["super_admin", "admin"],
   "/revenue":      ["super_admin", "admin"],
   "/agents":       ["super_admin", "admin"],
-  "/hosts":        ["super_admin", "admin", "agent"],
-  "/levels":       ["super_admin", "admin", "agent"],
-  "/kyc":          ["super_admin", "admin", "agent"],
-  "/calls":        ["super_admin", "admin", "agent"],
+  "/hosts":        ["super_admin", "admin"],
+  "/levels":       ["super_admin", "admin"],
+  "/kyc":          ["super_admin", "admin"],
+  "/calls":        ["super_admin", "admin"],
   "/recordings":   ["super_admin", "admin"],
   "/promotions":   ["super_admin", "admin"],
   "/business-ads":        ["super_admin", "admin"],
@@ -71,7 +71,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/commercial-banners":  ["super_admin", "admin"],
   "/jobs":           ["super_admin", "admin"],
   "/subscriptions":  ["super_admin", "admin"],
-  "/live-streams": ["super_admin", "admin", "agent"],
+  "/live-streams": ["super_admin", "admin"],
   "/ai-hub":       ["super_admin", "admin"],
   "/marketing":    ["super_admin", "admin"],
   "/settings":     ["super_admin"],
@@ -84,13 +84,12 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/admin-management":  ["super_admin"],
   "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
-  "/handbook":     ["super_admin", "admin", "agent"],
+  "/handbook":     ["super_admin", "admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
   super_admin: "Super Admin",
   admin:       "Admin",
-  agent:       "Agent",
 };
 
 function AccessDenied({ route }: { route: string }) {
@@ -151,7 +150,6 @@ function Router() {
       <Route path="/login"               component={Login} />
       <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
       <Route path="/login/admin"         component={() => <PortalLogin role="admin" />} />
-      <Route path="/login/agent"         component={() => <PortalLogin role="agent" />} />
       <Route path="/"             component={() => <RoleRoute component={Dashboard}   path="/" />} />
       <Route path="/users"        component={() => <RoleRoute component={Users}        path="/users" />} />
       <Route path="/users/:id"    component={() => <RoleRoute component={UserDetail}   path="/users" />} />

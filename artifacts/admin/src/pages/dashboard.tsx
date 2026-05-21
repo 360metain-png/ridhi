@@ -148,7 +148,6 @@ const LEVEL_PROGRESS = [
 const roleLabel: Record<AdminRole, string> = {
   super_admin: "Super Admin",
   admin: "Admin",
-  agent: "Agent",
 };
 
 export default function Dashboard() {
@@ -161,15 +160,13 @@ export default function Dashboard() {
 
   const isSA    = role === "super_admin";
   const isAdmin = role === "admin";
-  const isAgent = role === "agent";
 
-  const networkStats = isSA ? NETWORK_SA : isAdmin ? NETWORK_ADMIN : isAgent ? NETWORK_AGENT : null;
-  const activityFeed = isSA ? RECENT_ACTIVITY_SA : isAdmin ? RECENT_ACTIVITY_ADMIN : isAgent ? RECENT_ACTIVITY_AGENT : RECENT_ACTIVITY_SA;
+  const networkStats = isSA ? NETWORK_SA : NETWORK_ADMIN;
+  const activityFeed = isSA ? RECENT_ACTIVITY_SA : RECENT_ACTIVITY_ADMIN;
 
   const subtitles: Record<AdminRole, string> = {
     super_admin: "Full platform overview — SA view",
     admin:       "Your network: agents + hosts under your management",
-    agent:       "Your host roster and commission dashboard",
   };
 
   return (
@@ -251,34 +248,9 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* ── Agent KPIs ─────────────────────────────────────────────────── */}
-      {isAgent && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {NETWORK_AGENT.map((s) => (
-            <Card key={s.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${s.color} flex-shrink-0`}><s.icon className="w-5 h-5" /></div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-xl font-bold truncate">{s.value}</p>
-                    {s.badge === "LIVE" && (
-                      <Badge className="text-[10px] px-1 py-0 h-4 bg-red-500 text-white animate-pulse">LIVE</Badge>
-                    )}
-                    {s.badge === "⚠" && (
-                      <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 border-orange-400 text-orange-500">⚠</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate">{s.label}</p>
-                  <p className="text-xs text-muted-foreground truncate">{s.sub}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
 
       {/* ── Creator Network Health (SA / Admin) ────────────────────────── */}
-      {networkStats && !isAgent && (
+      {networkStats && (
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
             Creator Network Health
@@ -356,57 +328,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Agent commission chart (Agent view) ────────────────────────── */}
-      {isAgent && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader><CardTitle className="text-base">My Host Activity (7 Days)</CardTitle></CardHeader>
-            <CardContent>
-              <div className="h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={[
-                    { day: "Mon", live: 8,  coins: 12000 }, { day: "Tue", live: 10, coins: 15400 },
-                    { day: "Wed", live: 7,  coins: 9800  }, { day: "Thu", live: 11, coins: 18200 },
-                    { day: "Fri", live: 14, coins: 22400 }, { day: "Sat", live: 18, coins: 31000 },
-                    { day: "Sun", live: 15, coins: 28600 },
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} />
-                    <Tooltip />
-                    <Bar yAxisId="left"  dataKey="live"  name="Hosts Live"    fill="#E91E8C" radius={[4,4,0,0]} />
-                    <Bar yAxisId="right" dataKey="coins" name="Coins Gifted"  fill="#7B2FBE" radius={[4,4,0,0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="text-base">My Host Levels</CardTitle></CardHeader>
-            <CardContent className="space-y-2 pt-2">
-              {[
-                { label: "L3+ (Silver+)",  count: 12, pct: 22, color: "#C0C0C0" },
-                { label: "L2 (Bronze+)",   count: 21, pct: 39, color: "#cd7f32" },
-                { label: "L1 (Bronze)",    count: 21, pct: 39, color: "#7B2FBE" },
-              ].map((row) => (
-                <div key={row.label}>
-                  <div className="flex justify-between text-xs mb-0.5">
-                    <span className="text-muted-foreground">{row.label}</span>
-                    <span className="font-medium">{row.count} hosts · {row.pct}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${row.pct}%`, backgroundColor: row.color }} />
-                  </div>
-                </div>
-              ))}
-              <p className="text-xs text-muted-foreground pt-2">
-                🎯 Level up 5 more hosts to L3 to reach A3 Agent tier.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* ── Charts row 2 (SA / Admin) ───────────────────────────────────── */}
       {(isSA || isAdmin) && (

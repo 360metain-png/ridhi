@@ -22,9 +22,9 @@ interface NavItem {
   allowedRoles: AdminRole[];
 }
 
-const ALL:   AdminRole[] = ["super_admin", "admin", "agent"];
+const ALL:   AdminRole[] = ["super_admin", "admin"];
 const SA_A:  AdminRole[] = ["super_admin", "admin"];
-const SA_AA: AdminRole[] = ["super_admin", "admin", "agent"];
+const SA_AA: AdminRole[] = ["super_admin", "admin"];
 const SA:    AdminRole[] = ["super_admin"];
 
 const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
@@ -115,18 +115,6 @@ function getRoleInfo(role: string | null, email: string | null): RoleInfo {
     badgeClass: "bg-indigo-100 text-indigo-700 border-indigo-200",
     avatarClass: "bg-indigo-500", initial: "A",
     name: email?.split("@")[0]?.replace("admin.", "") ?? "Admin User",
-  };
-  if (role === "agent") return {
-    label: "Agent", sublabel: "Manages Hosts", badge: "Agent A3",
-    badgeClass: "bg-blue-100 text-blue-700 border-blue-200",
-    avatarClass: "bg-blue-500", initial: "A",
-    name: email?.split("@")[0]?.replace("agent.", "") ?? "Agent User",
-  };
-  if (role === "host") return {
-    label: "Host", sublabel: "Content Creator", badge: "Host L5",
-    badgeClass: "bg-pink-100 text-pink-700 border-pink-200",
-    avatarClass: "bg-pink-500", initial: "H",
-    name: email?.split("@")[0]?.replace("host.", "") ?? "Host User",
   };
   return {
     label: "Super Admin", sublabel: "Full Platform Control", badge: "Super Admin",
@@ -296,11 +284,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                               {item.href === "/agents" && role === "admin" && (
                                 <Badge className="text-[9px] px-1 h-4 bg-orange-100 text-orange-700 border border-orange-200">
                                   3
-                                </Badge>
-                              )}
-                              {item.href === "/hosts" && role === "agent" && (
-                                <Badge className="text-[9px] px-1 h-4 bg-orange-100 text-orange-700 border border-orange-200">
-                                  2
                                 </Badge>
                               )}
                             </div>
