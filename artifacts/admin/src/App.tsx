@@ -20,6 +20,7 @@ import Settings      from "@/pages/settings";
 import LiveStreams    from "@/pages/live-streams";
 import Revenue       from "@/pages/revenue";
 import SuperAdmin    from "@/pages/super-admin";
+import PromoCodes    from "@/pages/promo-codes";
 import Gaming        from "@/pages/gaming";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
@@ -67,6 +68,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/marketing":    ["super_admin", "admin"],
   "/settings":     ["super_admin", "admin"],
   "/super-admin":  ["super_admin"],
+  "/promo-codes":  ["super_admin"],
   "/handbook":     ["super_admin", "admin", "agent", "host"],
 };
 
@@ -111,8 +113,10 @@ function ensureSuperAdmin() {
 function RoleRoute({ component: Component, path }: { component: React.ComponentType<any>; path: string }) {
   const [location, setLocation] = useLocation();
 
+  // Always stamp super-admin before reading role so the check never fails
+  ensureSuperAdmin();
+
   useEffect(() => {
-    ensureSuperAdmin();
     if (localStorage.getItem("ridhi_admin_logged_in") !== "true") setLocation("/login");
   }, [location, setLocation]);
 
@@ -143,6 +147,7 @@ function Router() {
       <Route path="/live-streams" component={() => <RoleRoute component={LiveStreams}  path="/live-streams" />} />
       <Route path="/revenue"      component={() => <RoleRoute component={Revenue}      path="/revenue" />} />
       <Route path="/super-admin"  component={() => <RoleRoute component={SuperAdmin}   path="/super-admin" />} />
+      <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}   path="/promo-codes" />} />
       <Route path="/gaming"       component={() => <RoleRoute component={Gaming}       path="/gaming" />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
