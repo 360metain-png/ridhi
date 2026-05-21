@@ -6,7 +6,7 @@ import {
   Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
-  TrendingUp,
+  TrendingUp, Globe, Terminal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -96,6 +96,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Admin Activity",     href: "/admin-activity",    icon: Activity,      allowedRoles: SA   },
       { name: "My Work Report",     href: "/my-report",         icon: ClipboardList, allowedRoles: SA_A },
       { name: "API Integrations",   href: "/api-integrations",  icon: Plug,          allowedRoles: SA   },
+      { name: "Domain & Hosting",   href: "/domain-hosting",    icon: Globe,         allowedRoles: SA   },
+      { name: "Backend Access",     href: "/backend-access",    icon: Terminal,      allowedRoles: SA   },
       { name: "Promo & Offer Codes",href: "/promo-codes",       icon: Ticket,        allowedRoles: SA   },
       { name: "Handbook",           href: "/handbook",          icon: BookOpen,      allowedRoles: ALL  },
     ],

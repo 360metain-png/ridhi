@@ -40,6 +40,8 @@ import SpecialAds          from "@/pages/special-ads";
 import CommercialBanners   from "@/pages/commercial-banners";
 import Jobs                from "@/pages/jobs";
 import Subscriptions       from "@/pages/subscriptions";
+import DomainHosting       from "@/pages/domain-hosting";
+import BackendAccess       from "@/pages/backend-access";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -76,6 +78,8 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/promo-codes":  ["super_admin"],
   "/referral":          ["super_admin", "admin"],
   "/api-integrations":  ["super_admin"],
+  "/domain-hosting":   ["super_admin"],
+  "/backend-access":   ["super_admin"],
   "/admin-management":  ["super_admin"],
   "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
@@ -177,6 +181,8 @@ function Router() {
       <Route path="/commercial-banners" component={() => <RoleRoute component={CommercialBanners} path="/commercial-banners" />} />
       <Route path="/jobs"               component={() => <RoleRoute component={Jobs}               path="/jobs" />} />
       <Route path="/subscriptions"      component={() => <RoleRoute component={Subscriptions}      path="/subscriptions" />} />
+      <Route path="/domain-hosting"    component={() => <RoleRoute component={DomainHosting}    path="/domain-hosting" />} />
+      <Route path="/backend-access"    component={() => <RoleRoute component={BackendAccess}    path="/backend-access" />} />
       <Route component={NotFound} />
     </Switch>
   );
