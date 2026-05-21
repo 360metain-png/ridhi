@@ -26,7 +26,6 @@ import ApiIntegrations   from "@/pages/api-integrations";
 import AdminManagement  from "@/pages/admin-management";
 import MyReport         from "@/pages/my-report";
 import AdminActivity    from "@/pages/admin-activity";
-import Gaming        from "@/pages/gaming";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
 import Levels        from "@/pages/levels";
@@ -69,7 +68,6 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/commercial-banners":  ["super_admin", "admin"],
   "/jobs":           ["super_admin", "admin"],
   "/subscriptions":  ["super_admin", "admin"],
-  "/gaming":         ["super_admin", "admin"],
   "/live-streams": ["super_admin", "admin", "agent", "host"],
   "/ai-hub":       ["super_admin", "admin"],
   "/marketing":    ["super_admin", "admin"],
@@ -165,7 +163,6 @@ function Router() {
       <Route path="/admin-management"  component={() => <RoleRoute component={AdminManagement}  path="/admin-management"  />} />
       <Route path="/admin-activity"    component={() => <RoleRoute component={AdminActivity}    path="/admin-activity"    />} />
       <Route path="/my-report"         component={() => <RoleRoute component={MyReport}         path="/my-report"         />} />
-      <Route path="/gaming"       component={() => <RoleRoute component={Gaming}       path="/gaming" />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
       <Route path="/levels"       component={() => <RoleRoute component={Levels}       path="/levels" />} />

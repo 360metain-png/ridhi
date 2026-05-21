@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Users, UserPlus, FileText, Coins, IndianRupee, TrendingUp, Radio,
-  Gamepad2, Zap, Heart, Star, Award, Briefcase, Shield, Crown,
+  Zap, Heart, Star, Award, Briefcase, Shield, Crown,
   ArrowUpRight, CheckCircle, Clock, AlertTriangle,
 } from "lucide-react";
 import {
@@ -34,12 +34,6 @@ const registrationsData = [
   { name: "Sun", value: 3000 },
 ];
 
-const gamingData = [
-  { day: "Mon", ludo: 420, battles: 64  }, { day: "Tue", ludo: 380, battles: 72  },
-  { day: "Wed", ludo: 510, battles: 88  }, { day: "Thu", ludo: 470, battles: 76  },
-  { day: "Fri", ludo: 620, battles: 110 }, { day: "Sat", ludo: 740, battles: 132 },
-  { day: "Sun", ludo: 810, battles: 148 },
-];
 
 const agentPerformanceData = [
   { name: "Vikram R", hosts: 312, active: 278, earnings: "₹1.2L", level: "A5" },
@@ -57,15 +51,15 @@ const hostLevelData = [
 ];
 
 const contentPieData = [
-  { name: "Posts", value: 38 }, { name: "Reels", value: 28 },
-  { name: "Stories", value: 22 }, { name: "Gaming", value: 12 },
+  { name: "Posts", value: 40 }, { name: "Reels", value: 32 },
+  { name: "Stories", value: 18 }, { name: "Audio", value: 10 },
 ];
 const PIE_COLORS = ["#E91E8C", "#7B2FBE", "#FFB800", "#00BCD4"];
 
 const RECENT_ACTIVITY_SA = [
   { type: "level",  msg: "Kavya Reddy promoted to L5 Gold Host — Agent: Vikram Rao",   time: "2m ago",  icon: "⭐" },
   { type: "agent",  msg: "Deepak Singh (A2→A3) — passed 100-host milestone",           time: "8m ago",  icon: "📈" },
-  { type: "gaming", msg: "Diwali Coin Cup: 128 players registered",                     time: "15m ago", icon: "🏆" },
+  { type: "kyc",    msg: "Diwali coin gifting event: 4.2L coins circulated in 1h",       time: "15m ago", icon: "🪙" },
   { type: "payout", msg: "Payout ₹48,000 approved for Vikram R (A5 Agent)",            time: "22m ago", icon: "💸" },
   { type: "live",   msg: "Kavya Reddy started PK Battle — 1,240 viewers",              time: "28m ago", icon: "🔴" },
   { type: "fraud",  msg: "Anti-cheat flagged cluster-99 for bot patterns",             time: "34m ago", icon: "🚨" },
@@ -105,8 +99,8 @@ const PLATFORM_STATS = [
   { label: "Posts Today",        value: "45,678",  change: "+12.5%",       up: true,  icon: FileText,    color: "text-purple-600 bg-purple-50" },
   { label: "Coins In Circulation",value:"8.4 Cr",  change: "+18.2%",       up: true,  icon: Coins,       color: "text-yellow-600 bg-yellow-50" },
   { label: "Live Streams Now",   value: "284",     change: "+34 from 1h",  up: true,  icon: Radio,       color: "text-red-600 bg-red-50"       },
-  { label: "Gaming Sessions",    value: "8,420",   change: "+22.4%",       up: true,  icon: Gamepad2,    color: "text-indigo-600 bg-indigo-50" },
-  { label: "PK Battles Live",    value: "48",      change: "+16 today",    up: true,  icon: Zap,         color: "text-orange-600 bg-orange-50" },
+  { label: "Audio Rooms Live",   value: "148",     change: "+22 from 1h",  up: true,  icon: Radio,       color: "text-indigo-600 bg-indigo-50" },
+  { label: "PK Battles Live",   value: "48",      change: "+16 today",    up: true,  icon: Zap,         color: "text-orange-600 bg-orange-50" },
 ];
 
 const NETWORK_SA = [
@@ -480,17 +474,25 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Gaming Activity (7 Days)</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">Host Coin Earnings (7 Days)</CardTitle></CardHeader>
             <CardContent>
               <div className="h-[200px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={gamingData}>
+                  <LineChart data={[
+                    { day: "Mon", gifted: 380000, withdrawn: 42000 },
+                    { day: "Tue", gifted: 420000, withdrawn: 38000 },
+                    { day: "Wed", gifted: 510000, withdrawn: 55000 },
+                    { day: "Thu", gifted: 470000, withdrawn: 48000 },
+                    { day: "Fri", gifted: 620000, withdrawn: 71000 },
+                    { day: "Sat", gifted: 740000, withdrawn: 88000 },
+                    { day: "Sun", gifted: 810000, withdrawn: 96000 },
+                  ]}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Line dataKey="ludo"    name="Ludo"       stroke="#E91E8C" strokeWidth={2} dot={false} />
-                    <Line dataKey="battles" name="PK Battles" stroke="#FFB800" strokeWidth={2} dot={false} strokeDasharray="4 2" />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} />
+                    <Tooltip formatter={(v: number) => `${(v/1000).toFixed(0)}K coins`} />
+                    <Line dataKey="gifted"    name="Coins Gifted"    stroke="#E91E8C" strokeWidth={2} dot={false} />
+                    <Line dataKey="withdrawn" name="Withdrawals"     stroke="#7B2FBE" strokeWidth={2} dot={false} strokeDasharray="4 2" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
