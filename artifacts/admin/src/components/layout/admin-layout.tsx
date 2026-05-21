@@ -22,7 +22,7 @@ interface NavItem {
   allowedRoles: AdminRole[];
 }
 
-const ALL:   AdminRole[] = ["super_admin", "admin", "agent", "host"];
+const ALL:   AdminRole[] = ["super_admin", "admin", "agent"];
 const SA_A:  AdminRole[] = ["super_admin", "admin"];
 const SA_AA: AdminRole[] = ["super_admin", "admin", "agent"];
 const SA:    AdminRole[] = ["super_admin"];

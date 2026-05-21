@@ -149,7 +149,6 @@ const roleLabel: Record<AdminRole, string> = {
   super_admin: "Super Admin",
   admin: "Admin",
   agent: "Agent",
-  host: "Host",
 };
 
 export default function Dashboard() {
@@ -163,16 +162,14 @@ export default function Dashboard() {
   const isSA    = role === "super_admin";
   const isAdmin = role === "admin";
   const isAgent = role === "agent";
-  const isHost  = role === "host";
 
   const networkStats = isSA ? NETWORK_SA : isAdmin ? NETWORK_ADMIN : isAgent ? NETWORK_AGENT : null;
-  const activityFeed = isSA ? RECENT_ACTIVITY_SA : isAdmin ? RECENT_ACTIVITY_ADMIN : isAgent ? RECENT_ACTIVITY_AGENT : RECENT_ACTIVITY_HOST;
+  const activityFeed = isSA ? RECENT_ACTIVITY_SA : isAdmin ? RECENT_ACTIVITY_ADMIN : isAgent ? RECENT_ACTIVITY_AGENT : RECENT_ACTIVITY_SA;
 
   const subtitles: Record<AdminRole, string> = {
     super_admin: "Full platform overview — SA view",
     admin:       "Your network: agents + hosts under your management",
     agent:       "Your host roster and commission dashboard",
-    host:        "Your creator stats and earnings",
   };
 
   return (
@@ -182,7 +179,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">
-            {isHost ? "My Dashboard" : "Platform Overview"}
+            Platform Overview
           </h2>
           <p className="text-muted-foreground text-sm mt-1">{subtitles[role]}</p>
         </div>
@@ -217,25 +214,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Host personal KPIs ─────────────────────────────────────────── */}
-      {isHost && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {HOST_QUICK.map((s) => (
-            <Card key={s.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <s.icon className={`w-5 h-5 flex-shrink-0 ${s.color}`} />
-                <div className="min-w-0">
-                  <p className="text-lg font-bold truncate">{s.value}</p>
-                  <p className="text-xs text-muted-foreground truncate">{s.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* ── Host level progress ────────────────────────────────────────── */}
-      {isHost && (
+      {/* ── Host level progress (removed — hosts use mobile app) ── */}
+      {false && (
         <Card className="border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -560,7 +540,7 @@ export default function Dashboard() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">
-              {isHost ? "My Recent Activity" : "Live Activity Feed"}
+              {"Live Activity Feed"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -579,18 +559,11 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              {isHost ? "Quick Stats" : "Quick Platform Stats"}
+              Quick Platform Stats
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {(isHost ? [
-              { label: "Rank in Mumbai",       value: "#14 this week",         icon: ArrowUpRight, color: "text-purple-500" },
-              { label: "Total Gifts Received", value: "4,284 coins lifetime",  icon: Heart,        color: "text-pink-500"   },
-              { label: "Longest Streak",       value: "12 days streaming",     icon: Zap,          color: "text-yellow-500" },
-              { label: "Top Fan",              value: "Rohit M — 840 coins",   icon: Star,         color: "text-amber-500"  },
-              { label: "Missions Done",        value: "7 of 10 this week",     icon: CheckCircle,  color: "text-green-500"  },
-              { label: "Agent",                value: "Vikram Rao (A5)",       icon: Briefcase,    color: "text-violet-500" },
-            ] : (isSA || isAdmin) ? [
+            {((isSA || isAdmin) ? [
               { label: "Active Hosts (Live)",  value: "18 / 284 total",         icon: Radio,        color: "text-red-500"    },
               { label: "Top Agent (A5)",       value: "Vikram Rao · 312 hosts", icon: Award,        color: "text-purple-500" },
               { label: "Active PK Battles",    value: "48 rooms · 96 players",  icon: Zap,          color: "text-yellow-500" },

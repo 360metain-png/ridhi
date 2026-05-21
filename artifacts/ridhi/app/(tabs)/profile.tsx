@@ -84,7 +84,8 @@ const MENU_SECTIONS = [
     title: "Create & Live",
     items: [
       { icon: "video",       label: "Go Live",         route: "/live-stream",      color: "#FF3B30" },
-      { icon: "zap",         label: "Creator Studio",  route: "/creator-dashboard",color: "#E91E8C" },
+      { icon: "zap",         label: "Creator Studio",  route: "/creator-dashboard", color: "#E91E8C" },
+      { icon: "bar-chart-2", label: "Host Dashboard",  route: "/host-dashboard",    color: "#7B2FBE" },
       { icon: "crosshair",   label: "PK Battles",      route: "/pk-battle",        color: "#7B2FBE" },
       { icon: "phone",       label: "Random Call",     route: "/random-call",      color: "#34C759" },
     ],

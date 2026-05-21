@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Shield, UserCog, Briefcase, Star, ChevronRight, ArrowRight } from "lucide-react";
+import { Shield, UserCog, Briefcase, ChevronRight, ArrowRight, Smartphone } from "lucide-react";
 
 const PORTALS = [
   {
@@ -47,28 +47,12 @@ const PORTALS = [
     desc:       "Approve and support hosts, monitor live streams, handle KYC verifications.",
     access:     ["Host management", "KYC verification", "Calls & live streams", "Performance analytics"],
   },
-  {
-    role:       "host",
-    label:      "Host",
-    path:       "/login/host",
-    icon:       Star,
-    gradient:   "from-pink-500 to-rose-600",
-    lightBg:    "bg-pink-50",
-    border:     "border-pink-200 hover:border-pink-400",
-    iconBg:     "bg-pink-100",
-    iconColor:  "text-pink-700",
-    badgeClass: "bg-pink-600 text-white",
-    tagline:    "Content Creator",
-    desc:       "View your performance, join calls, go live, and track your earnings.",
-    access:     ["My dashboard", "Calls & live", "Earnings tracker", "Handbook & guides"],
-  },
 ];
 
 const HIERARCHY = [
   { label: "Super Admin", color: "bg-purple-600" },
   { label: "Admin",       color: "bg-indigo-500" },
   { label: "Agent",       color: "bg-blue-500"   },
-  { label: "Host",        color: "bg-pink-500"   },
 ];
 
 export default function Login() {
@@ -110,7 +94,7 @@ export default function Login() {
 
       {/* Portal Cards */}
       <div className="flex-1 flex items-start justify-center px-4 pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full max-w-5xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 w-full max-w-4xl">
           {PORTALS.map((p) => {
             const Icon = p.icon;
             return (
@@ -158,6 +142,16 @@ export default function Login() {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Mobile app note */}
+      <div className="flex items-center justify-center gap-2 pb-8 px-4">
+        <div className="flex items-center gap-2 bg-white/10 backdrop-blur rounded-xl px-4 py-2.5 border border-white/20">
+          <Smartphone className="w-4 h-4 text-pink-300 shrink-0" />
+          <p className="text-xs text-white/70">
+            <span className="font-semibold text-white">Hosts & Users</span> — use the Ridhi Android / iOS app to access your account
+          </p>
         </div>
       </div>
 
