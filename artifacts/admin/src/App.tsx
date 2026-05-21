@@ -101,10 +101,18 @@ function AccessDenied({ route }: { route: string }) {
   );
 }
 
+// Auto-login as Super Admin — always grant full access without going through login
+function ensureSuperAdmin() {
+  localStorage.setItem("ridhi_admin_logged_in", "true");
+  localStorage.setItem("ridhi_admin_role",      "super_admin");
+  localStorage.setItem("ridhi_admin_email",     "arjun@ridhi.app");
+}
+
 function RoleRoute({ component: Component, path }: { component: React.ComponentType<any>; path: string }) {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
+    ensureSuperAdmin();
     if (localStorage.getItem("ridhi_admin_logged_in") !== "true") setLocation("/login");
   }, [location, setLocation]);
 
