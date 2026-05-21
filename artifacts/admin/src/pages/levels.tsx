@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Star, Briefcase, TrendingUp, Zap, Award, ArrowRight, ArrowUp,
+  Star, Briefcase, TrendingUp, Zap, Award, ArrowRight, ArrowUp, ArrowDown,
   CheckCircle, Clock, Target, Users, IndianRupee, Radio, Crown,
   Lightbulb, Rocket, Shield, Gift, Calendar, BarChart2, Info,
-  ChevronRight, Heart, MessageCircle, Share2,
+  ChevronRight, Heart, MessageCircle, Share2, AlertTriangle, XCircle,
+  Flame, TrendingDown, Bell, Pause, Ban, FileText,
 } from "lucide-react";
 import { RadialBarChart, RadialBar, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
@@ -62,6 +63,28 @@ const RECENT_PROMOTIONS = [
   { name: "Ananya Sen",    from: "L3", to: "L4", type: "host",  date: "Dec 10", trigger: "Crossed 10L coins threshold"  },
   { name: "Sunita Joshi",  from: "A3", to: "A4", type: "agent", date: "Nov 28", trigger: "Reached 150 active hosts"     },
   { name: "Meera Pillai",  from: "L2", to: "L3", type: "host",  date: "Nov 22", trigger: "Crossed 5L coins threshold"   },
+];
+
+// ── Demotion-risk roster ───────────────────────────────────────────────────────
+
+const HOST_DEMOTION_RISK = [
+  { id: "hd1", name: "Arjun Shah",   level: "L2", lastStream: 38, coinsThisMonth:  12_000, trend: "declining", risk: "critical", reason: "38 days inactive — demotion in 22 days if no stream",  city: "Surat"     },
+  { id: "hd2", name: "Rohan Mishra", level: "L2", lastStream: 22, coinsThisMonth:  28_000, trend: "declining", risk: "warning",  reason: "22 days since last stream — 8 days before warning lock", city: "Lucknow"   },
+  { id: "hd3", name: "Kiran Nair",   level: "L3", lastStream: 14, coinsThisMonth:  41_000, trend: "flat",      risk: "watch",   reason: "Monthly coins down 60% vs last month — monitoring",      city: "Pune"      },
+  { id: "hd4", name: "Riya Das",     level: "L1", lastStream:  9, coinsThisMonth:   8_000, trend: "declining", risk: "watch",   reason: "Earning rate 45% below L1 average — early signal",       city: "Kolkata"   },
+];
+
+const AGENT_DEMOTION_RISK = [
+  { id: "ad1", name: "Rajan Pillai", level: "A1", hosts: 7,  activeHosts:  3, activeRate: 43, trend: "declining", risk: "critical", reason: "Active rate 43% for 2 consecutive months — below 60% threshold"   },
+  { id: "ad2", name: "Preethi Nair", level: "A2", hosts: 24, activeHosts: 13, activeRate: 54, trend: "declining", risk: "warning",  reason: "Active rate fell from 67% → 54% in 30 days — on watch"           },
+  { id: "ad3", name: "Meena Kumari", level: "A2", hosts: 28, activeHosts: 19, activeRate: 68, trend: "flat",      risk: "watch",   reason: "No new host onboarded in 45 days — recruitment stalled"          },
+];
+
+// Pending manual promo requests (submitted by agents / admins for SA approval)
+const PENDING_PROMOS = [
+  { id: "pp1", type: "host",  name: "Dev Kumar",   currentLevel: "L4", targetLevel: "L5", requestedBy: "agent.rahul@ridhi.app",  reason: "Met all thresholds, event host partner",       date: "Dec 20" },
+  { id: "pp2", type: "agent", name: "Deepak Singh", currentLevel: "A3", targetLevel: "A4", requestedBy: "admin.sneha@ridhi.app", reason: "Consistently 80%+ active rate past 3 months", date: "Dec 19" },
+  { id: "pp3", type: "host",  name: "Meera Pillai", currentLevel: "L3", targetLevel: "L4", requestedBy: "agent.rahul@ridhi.app", reason: "Brand tie-up, needs L4 for fan club unlock",  date: "Dec 17" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -508,9 +531,12 @@ export default function LevelsPage() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="hosts">
-        <TabsList className="grid grid-cols-2 w-80">
-          <TabsTrigger value="hosts"  className="gap-2"><Star className="w-4 h-4" /> Host Levels</TabsTrigger>
-          <TabsTrigger value="agents" className="gap-2"><Briefcase className="w-4 h-4" /> Agent Levels</TabsTrigger>
+        <TabsList className="h-9 flex flex-wrap gap-0.5">
+          <TabsTrigger value="hosts"     className="text-xs gap-1.5"><Star          className="w-3.5 h-3.5" /> Host Levels</TabsTrigger>
+          <TabsTrigger value="agents"    className="text-xs gap-1.5"><Briefcase     className="w-3.5 h-3.5" /> Agent Levels</TabsTrigger>
+          <TabsTrigger value="promoq"    className="text-xs gap-1.5"><ArrowUp       className="w-3.5 h-3.5" /> Promotion Queue</TabsTrigger>
+          <TabsTrigger value="demotion"  className="text-xs gap-1.5"><AlertTriangle className="w-3.5 h-3.5" /> Demotion Risk</TabsTrigger>
+          <TabsTrigger value="strategy"  className="text-xs gap-1.5"><FileText      className="w-3.5 h-3.5" /> P&D Policy</TabsTrigger>
         </TabsList>
 
         {/* ═══════════════ HOST TAB ═══════════════ */}
@@ -773,6 +799,480 @@ export default function LevelsPage() {
             </div>
           </div>
         </TabsContent>
+
+        {/* ═══════════════ PROMOTION QUEUE ═══════════════ */}
+        <TabsContent value="promoq" className="space-y-6 mt-4">
+
+          {/* KPI row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Auto-eligible",    value: HOSTS_PROGRESS.filter(h => { const n = nextLevel(h.level, HOST_LEVELS); return n && Math.min(pct(h.coinsReceived, n.minCoins), pct(h.streamHours, n.minHours)) >= 100; }).length + AGENTS_PROGRESS.filter(ag => { const n = nextLevel(ag.level, AGENT_LEVELS); return n && Math.min(pct(ag.hosts, n.minHosts), pct(Math.round((ag.activeHosts/ag.hosts)*100), n.minActiveRate)) >= 100; }).length, sub: "Meet all thresholds",       icon: CheckCircle,   color: "text-green-600",  bg: "bg-green-50"  },
+              { label: "Near Promotion",   value: 5, sub: "75–99% of target",          icon: Clock,         color: "text-amber-600",  bg: "bg-amber-50"  },
+              { label: "Pending Approval", value: PENDING_PROMOS.length, sub: "Manual requests",           icon: Bell,          color: "text-blue-600",   bg: "bg-blue-50"   },
+              { label: "Promoted (30d)",   value: RECENT_PROMOTIONS.length, sub: "This month",            icon: Rocket,        color: "text-purple-600", bg: "bg-purple-50" },
+            ].map(k => (
+              <Card key={k.label}>
+                <CardContent className="p-4 flex gap-3 items-start">
+                  <div className={`p-2.5 rounded-lg ${k.bg}`}><k.icon className={`w-4 h-4 ${k.color}`} /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{k.label}</p>
+                    <p className="text-2xl font-bold">{k.value}</p>
+                    <p className="text-xs text-muted-foreground">{k.sub}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pending manual promotion approvals */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Bell className="w-4 h-4 text-blue-500" /> Pending Manual Promotion Requests
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">{PENDING_PROMOS.length} awaiting SA approval</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {PENDING_PROMOS.map(p => (
+                <div key={p.id} className="flex items-start justify-between gap-3 border rounded-xl p-4 bg-blue-50/40 border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">
+                      {p.type === "host" ? "⭐" : "💼"}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{p.name}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <Badge variant="outline" className="text-[10px] h-4 px-1">{p.currentLevel}</Badge>
+                        <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                        <Badge className="text-[10px] h-4 px-1 bg-green-600 text-white">{p.targetLevel}</Badge>
+                        <span className="text-xs text-muted-foreground">· {p.type}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">"{p.reason}"</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">Requested by {p.requestedBy} · {p.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700"><CheckCircle className="w-3 h-3" />Approve</Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-destructive border-destructive/30"><XCircle className="w-3 h-3" />Decline</Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Auto-eligible promotions — Hosts */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Star className="w-4 h-4 text-pink-500" /> Host Auto-Promotion Queue
+                <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                  {HOSTS_PROGRESS.filter(h => { const n = nextLevel(h.level, HOST_LEVELS); return n && Math.min(pct(h.coinsReceived, n.minCoins), pct(h.streamHours, n.minHours)) >= 100; }).length} ready
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent><HostReadyList /></CardContent>
+          </Card>
+
+          {/* Auto-eligible promotions — Agents */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-purple-500" /> Agent Auto-Promotion Queue
+                <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                  {AGENTS_PROGRESS.filter(ag => { const n = nextLevel(ag.level, AGENT_LEVELS); return n && Math.min(pct(ag.hosts, n.minHosts), pct(Math.round((ag.activeHosts/ag.hosts)*100), n.minActiveRate)) >= 100; }).length} ready
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent><AgentReadyList /></CardContent>
+          </Card>
+
+          {/* Promotion timeline explainer */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2"><Info className="w-4 h-4 text-violet-500" />Promotion Flow & Timing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Host Promotion Timeline</p>
+                  {[
+                    { from: "New → L1 Bronze",    time: "1–2 weeks",    note: "50K coins + 20h stream" },
+                    { from: "L1 → L2 Silver",     time: "3–6 weeks",    note: "200K coins + 60h + 2 PK wins" },
+                    { from: "L2 → L3 Gold",       time: "6–12 weeks",   note: "500K coins + 150h + 5 PK wins" },
+                    { from: "L3 → L4 Platinum",   time: "3–5 months",   note: "1M coins + 300h + 10 PK wins" },
+                    { from: "L4 → L5 Diamond",    time: "5–9 months",   note: "2M coins + 600h + 20 PK wins" },
+                    { from: "L5 → L6 Elite",      time: "9–14 months",  note: "3.5M coins + 1000h + 35 PK wins" },
+                    { from: "L6 → L7 Royal Crown","time": "14–24 months", note: "5M coins + 1500h + 50 PK wins" },
+                  ].map(t => (
+                    <div key={t.from} className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-1.5 min-w-[130px]">
+                        <ArrowUp className="w-3 h-3 text-green-600 shrink-0" />
+                        <span className="font-medium">{t.from}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] shrink-0">{t.time}</Badge>
+                      <span className="text-muted-foreground truncate">{t.note}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Agent Promotion Timeline</p>
+                  {[
+                    { from: "New → A1 Agent",       time: "2–4 weeks",    note: "5 hosts recruited" },
+                    { from: "A1 → A2 Senior Agent",  time: "1–2 months",   note: "20 hosts + 65% active rate" },
+                    { from: "A2 → A3 Super Agent",   time: "2–4 months",   note: "60 hosts + 70% active rate" },
+                    { from: "A3 → A4 Elite Agent",   time: "4–8 months",   note: "150 hosts + 75% active rate" },
+                    { from: "A4 → A5 Master Agent",  time: "8–14 months",  note: "250 hosts + 80% active rate" },
+                  ].map(t => (
+                    <div key={t.from} className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-1.5 min-w-[140px]">
+                        <ArrowUp className="w-3 h-3 text-purple-600 shrink-0" />
+                        <span className="font-medium">{t.from}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] shrink-0">{t.time}</Badge>
+                      <span className="text-muted-foreground truncate">{t.note}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══════════════ DEMOTION RISK ═══════════════ */}
+        <TabsContent value="demotion" className="space-y-6 mt-4">
+
+          {/* Risk KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Critical (action now)", value: HOST_DEMOTION_RISK.filter(h => h.risk === "critical").length + AGENT_DEMOTION_RISK.filter(a => a.risk === "critical").length, sub: "Demotion trigger met",     icon: XCircle,       color: "text-red-600",    bg: "bg-red-50",    badge: "bg-red-600"    },
+              { label: "Warning Stage",          value: HOST_DEMOTION_RISK.filter(h => h.risk === "warning").length  + AGENT_DEMOTION_RISK.filter(a => a.risk === "warning").length,  sub: "Near threshold breach",   icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-50", badge: "bg-orange-500" },
+              { label: "Watch List",             value: HOST_DEMOTION_RISK.filter(h => h.risk === "watch").length    + AGENT_DEMOTION_RISK.filter(a => a.risk === "watch").length,    sub: "Declining performance",   icon: TrendingDown,  color: "text-yellow-600", bg: "bg-yellow-50", badge: "bg-yellow-600" },
+              { label: "Level Frozen",           value: 1, sub: "Pending review", icon: Pause,         color: "text-gray-600",   bg: "bg-gray-50",   badge: "bg-gray-500"   },
+            ].map(k => (
+              <Card key={k.label} className={k.label === "Critical (action now)" ? "border-red-200" : ""}>
+                <CardContent className="p-4 flex gap-3 items-start">
+                  <div className={`p-2.5 rounded-lg ${k.bg}`}><k.icon className={`w-4 h-4 ${k.color}`} /></div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{k.label}</p>
+                    <p className="text-2xl font-bold">{k.value}</p>
+                    <p className="text-xs text-muted-foreground">{k.sub}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Risk legend */}
+          <div className="flex flex-wrap gap-3">
+            {[
+              { color: "bg-red-500",    label: "Critical",          desc: "Demotion criteria already met — immediate action required" },
+              { color: "bg-orange-500", label: "Warning",           desc: "Approaching demotion threshold — proactive outreach needed" },
+              { color: "bg-yellow-500", label: "Watch",             desc: "Performance declining — monitor closely for 2 weeks" },
+              { color: "bg-gray-400",   label: "Frozen",            desc: "Level locked pending compliance/KYC review" },
+            ].map(r => (
+              <div key={r.label} className="flex items-center gap-2 text-xs bg-muted/40 rounded-lg px-3 py-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${r.color} shrink-0`} />
+                <span className="font-semibold">{r.label}:</span>
+                <span className="text-muted-foreground">{r.desc}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Host demotion risk */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Star className="w-4 h-4 text-pink-500" /> Host Demotion Risk
+                <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">{HOST_DEMOTION_RISK.filter(h => h.risk === "critical").length} critical</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {HOST_DEMOTION_RISK.map(h => {
+                const riskMap = { critical: { border: "border-red-300 bg-red-50/50", badge: "bg-red-600 text-white", icon: XCircle, iconColor: "text-red-600" }, warning: { border: "border-orange-200 bg-orange-50/30", badge: "bg-orange-500 text-white", icon: AlertTriangle, iconColor: "text-orange-600" }, watch: { border: "border-yellow-200 bg-yellow-50/30", badge: "bg-yellow-500 text-white", icon: TrendingDown, iconColor: "text-yellow-600" } };
+                const r = riskMap[h.risk as keyof typeof riskMap];
+                const RIcon = r.icon;
+                return (
+                  <div key={h.id} className={`rounded-xl border p-4 ${r.border}`}>
+                    <div className="flex items-start justify-between flex-wrap gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white border flex items-center justify-center">
+                          <RIcon className={`w-5 h-5 ${r.iconColor}`} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-sm">{h.name}</p>
+                            <Badge variant="outline" className="text-[10px] h-4 px-1">{h.level}</Badge>
+                            <Badge className={`text-[10px] h-4 px-1.5 capitalize ${r.badge}`}>{h.risk}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{h.city}</p>
+                          <p className="text-xs mt-1 font-medium">{h.reason}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Last stream</p>
+                          <p className={`text-sm font-bold ${h.lastStream > 30 ? "text-red-600" : h.lastStream > 14 ? "text-orange-600" : "text-yellow-600"}`}>{h.lastStream}d ago</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Coins / month</p>
+                          <p className="text-sm font-bold">{fmtCoins(h.coinsThisMonth)}</p>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          {h.risk === "critical" && (
+                            <Button size="sm" className="h-7 text-xs gap-1 bg-red-600 hover:bg-red-700 text-white">
+                              <ArrowDown className="w-3 h-3" />Demote to {(() => { const idx = HOST_LEVELS.findIndex(l => l.level === h.level); return idx > 0 ? HOST_LEVELS[idx - 1].level : "—"; })()}
+                            </Button>
+                          )}
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                            <Bell className="w-3 h-3" />Send Warning
+                          </Button>
+                          {h.risk !== "critical" && (
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                              <Pause className="w-3 h-3" />Freeze Level
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+
+          {/* Agent demotion risk */}
+          <Card>
+            <CardHeader className="py-4">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-purple-500" /> Agent Demotion Risk
+                <Badge className="bg-red-100 text-red-700 border-red-200 text-xs">{AGENT_DEMOTION_RISK.filter(a => a.risk === "critical").length} critical</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {AGENT_DEMOTION_RISK.map(ag => {
+                const riskMap = { critical: { border: "border-red-300 bg-red-50/50", badge: "bg-red-600 text-white", icon: XCircle, iconColor: "text-red-600" }, warning: { border: "border-orange-200 bg-orange-50/30", badge: "bg-orange-500 text-white", icon: AlertTriangle, iconColor: "text-orange-600" }, watch: { border: "border-yellow-200 bg-yellow-50/30", badge: "bg-yellow-500 text-white", icon: TrendingDown, iconColor: "text-yellow-600" } };
+                const r = riskMap[ag.risk as keyof typeof riskMap];
+                const RIcon = r.icon;
+                return (
+                  <div key={ag.id} className={`rounded-xl border p-4 ${r.border}`}>
+                    <div className="flex items-start justify-between flex-wrap gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white border flex items-center justify-center">
+                          <RIcon className={`w-5 h-5 ${r.iconColor}`} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-sm">{ag.name}</p>
+                            <Badge variant="outline" className="text-[10px] h-4 px-1">{ag.level}</Badge>
+                            <Badge className={`text-[10px] h-4 px-1.5 capitalize ${r.badge}`}>{ag.risk}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">{ag.hosts} total hosts · {ag.activeHosts} active</p>
+                          <p className="text-xs mt-1 font-medium">{ag.reason}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="text-center">
+                          <p className="text-xs text-muted-foreground">Active rate</p>
+                          <p className={`text-lg font-bold ${ag.activeRate < 50 ? "text-red-600" : ag.activeRate < 65 ? "text-orange-600" : "text-yellow-600"}`}>{ag.activeRate}%</p>
+                          <Progress value={ag.activeRate} className="h-1 w-16 mt-1" />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          {ag.risk === "critical" && (
+                            <Button size="sm" className="h-7 text-xs gap-1 bg-red-600 hover:bg-red-700 text-white">
+                              <ArrowDown className="w-3 h-3" />Demote to {(() => { const idx = AGENT_LEVELS.findIndex(l => l.level === ag.level); return idx > 0 ? AGENT_LEVELS[idx - 1].level : "—"; })()}
+                            </Button>
+                          )}
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Bell className="w-3 h-3" />Send Warning</Button>
+                          {ag.risk !== "critical" && <Button size="sm" variant="outline" className="h-7 text-xs gap-1"><Pause className="w-3 h-3" />Freeze Level</Button>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══════════════ P&D POLICY ═══════════════ */}
+        <TabsContent value="strategy" className="space-y-6 mt-4">
+
+          {/* Policy overview banner */}
+          <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 p-5 text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-5 h-5" />
+              <h3 className="font-black text-lg">Ridhi P&D Framework — Official Policy</h3>
+            </div>
+            <p className="text-white/80 text-sm max-w-2xl">The Promotions & Demotions framework governs how Hosts (L1–L7) and Agents (A1–A5) move between levels. All promotions are merit-based; demotions follow a grace-period warning system to protect active creators.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+
+            {/* Host promotion rules */}
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><ArrowUp className="w-4 h-4 text-green-600" />Host Promotion Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Promotion Criteria (ALL must be met)</p>
+                  {[
+                    { rule: "Minimum coin threshold reached (level-specific)",          icon: Gift,     color: "text-pink-600"   },
+                    { rule: "Minimum cumulative stream hours met",                       icon: Radio,    color: "text-blue-600"   },
+                    { rule: "Minimum PK battle wins (L2 and above)",                    icon: Zap,      color: "text-orange-600" },
+                    { rule: "No active violations or community strikes",                 icon: Shield,   color: "text-purple-600" },
+                    { rule: "KYC verified (mandatory from L2 onwards)",                 icon: CheckCircle, color: "text-green-600" },
+                  ].map(r => (
+                    <div key={r.rule} className="flex items-center gap-2.5 text-xs">
+                      <r.icon className={`w-3.5 h-3.5 shrink-0 ${r.color}`} />
+                      <span>{r.rule}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl bg-green-50 border border-green-200 p-3 space-y-1.5">
+                  <p className="text-xs font-bold text-green-800">Auto vs Manual Promotions</p>
+                  <p className="text-xs text-green-700">🤖 <strong>Auto:</strong> System checks thresholds nightly at 12:00 AM IST. Push notification sent to host when eligible.</p>
+                  <p className="text-xs text-green-700">🛡️ <strong>Manual override (SA only):</strong> Fast-track for strategic reasons (event partners, brand tie-ups, special programs).</p>
+                  <p className="text-xs text-green-700">📋 <strong>Agent request:</strong> Agents may submit a manual promo request; requires Admin review + SA final approval.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Host demotion rules */}
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><ArrowDown className="w-4 h-4 text-red-600" />Host Demotion Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {[
+                    { stage: "Watch",    days: "14–29d inactive",   action: "System alert to agent, no visible change to host",    color: "border-yellow-300 bg-yellow-50", badge: "bg-yellow-500 text-white" },
+                    { stage: "Warning",  days: "30–59d inactive",   action: "Push notification to host + agent. Level highlighted in app as 'At Risk'.", color: "border-orange-300 bg-orange-50", badge: "bg-orange-500 text-white" },
+                    { stage: "Freeze",   days: "60d inactive",      action: "Level frozen — host cannot earn level-based perks. 7-day recovery window.", color: "border-red-200 bg-red-50", badge: "bg-red-500 text-white" },
+                    { stage: "Demote",   days: "67d+ inactive",     action: "Automatic 1-level demotion. Host notified with appeal link.", color: "border-red-400 bg-red-100", badge: "bg-red-700 text-white" },
+                  ].map(s => (
+                    <div key={s.stage} className={`rounded-xl border p-3 ${s.color}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`text-[10px] px-1.5 ${s.badge}`}>{s.stage}</Badge>
+                        <span className="text-xs font-bold">{s.days}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{s.action}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl bg-blue-50 border border-blue-200 p-3">
+                  <p className="text-xs font-bold text-blue-800 mb-1">Additional demotion triggers</p>
+                  <ul className="space-y-1 text-xs text-blue-700">
+                    <li>· Community violations (hate speech, NSFW) → immediate level freeze + review</li>
+                    <li>· Coin refund disputes reducing total below level threshold → recalculated</li>
+                    <li>· Fraudulent PK win manipulation → wins disqualified + level audit</li>
+                    <li>· Account sharing / multi-device abuse → temporary freeze</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Agent promotion rules */}
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><ArrowUp className="w-4 h-4 text-purple-600" />Agent Promotion Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Promotion Criteria (ALL must be met)</p>
+                  {[
+                    { rule: "Minimum number of total hosts under management (level-specific)", icon: Users,    color: "text-purple-600" },
+                    { rule: "Minimum active host rate maintained for 30+ consecutive days",    icon: TrendingUp, color: "text-green-600"  },
+                    { rule: "No fraudulent host recruitment complaints in past 90 days",       icon: Shield,   color: "text-blue-600"   },
+                    { rule: "All managed hosts must be KYC-verified",                         icon: CheckCircle, color: "text-green-600" },
+                    { rule: "Minimum 1 new host onboarded in past 30 days",                   icon: Rocket,   color: "text-pink-600"   },
+                  ].map(r => (
+                    <div key={r.rule} className="flex items-center gap-2.5 text-xs">
+                      <r.icon className={`w-3.5 h-3.5 shrink-0 ${r.color}`} />
+                      <span>{r.rule}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-xl bg-purple-50 border border-purple-200 p-3 space-y-1.5">
+                  <p className="text-xs font-bold text-purple-800">Commission Lock-in</p>
+                  <p className="text-xs text-purple-700">Commission rate is locked at the <strong>current level</strong> and upgrades immediately upon promotion. If demoted, commission drops to the lower level starting the next billing cycle (7-day grace).</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Agent demotion rules */}
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><ArrowDown className="w-4 h-4 text-red-600" />Agent Demotion Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {[
+                    { stage: "Watch",    trigger: "Active rate drops below threshold",     action: "Admin notified. Agent receives dashboard alert. 30-day recovery window starts.",  color: "border-yellow-300 bg-yellow-50", badge: "bg-yellow-500 text-white" },
+                    { stage: "Warning",  trigger: "Below threshold for 2 consecutive months", action: "Formal warning issued. Commission frozen at current level. 30-day improvement plan.", color: "border-orange-300 bg-orange-50", badge: "bg-orange-500 text-white" },
+                    { stage: "Demote",   trigger: "Below threshold for 3rd month",            action: "1-level demotion applied. New commission rate takes effect next billing cycle.",     color: "border-red-300 bg-red-50",    badge: "bg-red-600 text-white"    },
+                    { stage: "Suspend",  trigger: "Fraudulent recruitment detected",          action: "Immediate suspension. Full audit. Hosts reassigned to Admin pool.",                 color: "border-red-400 bg-red-100",   badge: "bg-red-800 text-white"    },
+                  ].map(s => (
+                    <div key={s.stage} className={`rounded-xl border p-3 ${s.color}`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`text-[10px] px-1.5 ${s.badge}`}>{s.stage}</Badge>
+                        <span className="text-xs font-bold">{s.trigger}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{s.action}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Appeals + Special Programs */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><FileText className="w-4 h-4 text-blue-500" />Appeals Process</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs text-muted-foreground">
+                {[
+                  { step: "1", text: "Host/Agent submits demotion appeal within 14 days of demotion via in-app form" },
+                  { step: "2", text: "Assigned Agent (for hosts) or Admin (for agents) reviews the case within 5 business days" },
+                  { step: "3", text: "If valid extenuating circumstances (illness, internet outage, family emergency), level is restored" },
+                  { step: "4", text: "Super Admin makes final call on disputed cases. Decision is logged and binding for 90 days" },
+                  { step: "5", text: "A restored level comes with a 45-day probation — any re-trigger results in immediate demotion without appeal" },
+                ].map(s => (
+                  <div key={s.step} className="flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{s.step}</span>
+                    <span>{s.text}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" />Special Promotion Programs</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[
+                  { name: "Fast-Track Elite",    desc: "Hosts who hit 2× the threshold in 50% of expected time get instantly promoted 2 levels.", badge: "Host only", color: "bg-pink-100 text-pink-700" },
+                  { name: "Event Boost",         desc: "Hosting official Ridhi events (festivals, partnerships) counts as 2× stream hours and 1.5× coins.", badge: "Host + Agent", color: "bg-purple-100 text-purple-700" },
+                  { name: "City Champion",       desc: "Top-earning host in each tier 2/3 city gets a 3-month level freeze guarantee — no demotion risk during the window.", badge: "Host only", color: "bg-blue-100 text-blue-700" },
+                  { name: "Master Trainer",      desc: "Agents whose hosts collectively earn ₹10L+ in a month get an A-level fast-track bypass one time.", badge: "Agent only", color: "bg-green-100 text-green-700" },
+                  { name: "Comeback Bonus",      desc: "Hosts returning after 30–90d absence with a verified reason get a 60-day grace period at their previous level.", badge: "Host only", color: "bg-amber-100 text-amber-700" },
+                ].map(p => (
+                  <div key={p.name} className="border rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs font-bold">{p.name}</p>
+                      <Badge className={`text-[10px] px-1.5 ${p.color}`}>{p.badge}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{p.desc}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
       </Tabs>
     </div>
   );
