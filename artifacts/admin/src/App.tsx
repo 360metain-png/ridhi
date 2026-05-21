@@ -42,6 +42,7 @@ import Jobs                from "@/pages/jobs";
 import Subscriptions       from "@/pages/subscriptions";
 import DomainHosting       from "@/pages/domain-hosting";
 import BackendAccess       from "@/pages/backend-access";
+import PortalLogin         from "@/pages/portal-login";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -117,18 +118,19 @@ function AccessDenied({ route }: { route: string }) {
   );
 }
 
-// Auto-login as Super Admin — always grant full access without going through login
-function ensureSuperAdmin() {
-  localStorage.setItem("ridhi_admin_logged_in", "true");
-  localStorage.setItem("ridhi_admin_role",      "super_admin");
-  localStorage.setItem("ridhi_admin_email",     "arjun@ridhi.app");
+// Only seed a default session on first load — never overwrite a real login
+function seedDefaultSession() {
+  if (!localStorage.getItem("ridhi_admin_logged_in")) {
+    localStorage.setItem("ridhi_admin_logged_in", "true");
+    localStorage.setItem("ridhi_admin_role",      "super_admin");
+    localStorage.setItem("ridhi_admin_email",     "arjun@ridhi.app");
+  }
 }
 
 function RoleRoute({ component: Component, path }: { component: React.ComponentType<any>; path: string }) {
   const [location, setLocation] = useLocation();
 
-  // Always stamp super-admin before reading role so the check never fails
-  ensureSuperAdmin();
+  seedDefaultSession();
 
   useEffect(() => {
     if (localStorage.getItem("ridhi_admin_logged_in") !== "true") setLocation("/login");
@@ -147,7 +149,11 @@ function RoleRoute({ component: Component, path }: { component: React.ComponentT
 function Router() {
   return (
     <Switch>
-      <Route path="/login"        component={Login} />
+      <Route path="/login"               component={Login} />
+      <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
+      <Route path="/login/admin"         component={() => <PortalLogin role="admin" />} />
+      <Route path="/login/agent"         component={() => <PortalLogin role="agent" />} />
+      <Route path="/login/host"          component={() => <PortalLogin role="host" />} />
       <Route path="/"             component={() => <RoleRoute component={Dashboard}   path="/" />} />
       <Route path="/users"        component={() => <RoleRoute component={Users}        path="/users" />} />
       <Route path="/users/:id"    component={() => <RoleRoute component={UserDetail}   path="/users" />} />

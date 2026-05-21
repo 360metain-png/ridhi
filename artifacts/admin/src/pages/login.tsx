@@ -1,235 +1,169 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
-import { Button }    from "@/components/ui/button";
-import { Input }     from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Label }     from "@/components/ui/label";
-import { Badge }     from "@/components/ui/badge";
-import { Shield, Star, Briefcase, UserCog, Eye, EyeOff, ChevronRight, Check, X, ArrowRight } from "lucide-react";
+import { Shield, UserCog, Briefcase, Star, ChevronRight, ArrowRight } from "lucide-react";
 
-type RoleTab = "super_admin" | "admin" | "agent" | "host";
-
-const ROLE_TABS: {
-  id: RoleTab; label: string; icon: typeof Shield;
-  color: string; bg: string; border: string; desc: string;
-}[] = [
-  { id: "super_admin", label: "Super Admin", icon: Shield,   color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-300", desc: "Full platform control" },
-  { id: "admin",       label: "Admin",       icon: UserCog,  color: "text-indigo-700", bg: "bg-indigo-50", border: "border-indigo-300", desc: "Manages Agents" },
-  { id: "agent",       label: "Agent",       icon: Briefcase,color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-300",   desc: "Manages Hosts" },
-  { id: "host",        label: "Host",        icon: Star,     color: "text-pink-700",   bg: "bg-pink-50",   border: "border-pink-300",   desc: "Content creator" },
+const PORTALS = [
+  {
+    role:       "super_admin",
+    label:      "Super Admin",
+    path:       "/login/super-admin",
+    icon:       Shield,
+    gradient:   "from-purple-600 to-purple-800",
+    lightBg:    "bg-purple-50",
+    border:     "border-purple-200 hover:border-purple-400",
+    iconBg:     "bg-purple-100",
+    iconColor:  "text-purple-700",
+    badgeClass: "bg-purple-600 text-white",
+    tagline:    "Full Platform Control",
+    desc:       "Manage all admins, platform settings, finance, and system configuration.",
+    access:     ["All pages & features", "Admin & Agent approval", "Finance & payouts", "System settings"],
+  },
+  {
+    role:       "admin",
+    label:      "Admin",
+    path:       "/login/admin",
+    icon:       UserCog,
+    gradient:   "from-indigo-500 to-indigo-700",
+    lightBg:    "bg-indigo-50",
+    border:     "border-indigo-200 hover:border-indigo-400",
+    iconBg:     "bg-indigo-100",
+    iconColor:  "text-indigo-700",
+    badgeClass: "bg-indigo-600 text-white",
+    tagline:    "Manages Agents",
+    desc:       "Oversee agents, content moderation, user management and platform operations.",
+    access:     ["Users & content", "Agent management", "Revenue overview", "Marketing tools"],
+  },
+  {
+    role:       "agent",
+    label:      "Agent",
+    path:       "/login/agent",
+    icon:       Briefcase,
+    gradient:   "from-blue-500 to-blue-700",
+    lightBg:    "bg-blue-50",
+    border:     "border-blue-200 hover:border-blue-400",
+    iconBg:     "bg-blue-100",
+    iconColor:  "text-blue-700",
+    badgeClass: "bg-blue-600 text-white",
+    tagline:    "Manages Hosts",
+    desc:       "Approve and support hosts, monitor live streams, handle KYC verifications.",
+    access:     ["Host management", "KYC verification", "Calls & live streams", "Performance analytics"],
+  },
+  {
+    role:       "host",
+    label:      "Host",
+    path:       "/login/host",
+    icon:       Star,
+    gradient:   "from-pink-500 to-rose-600",
+    lightBg:    "bg-pink-50",
+    border:     "border-pink-200 hover:border-pink-400",
+    iconBg:     "bg-pink-100",
+    iconColor:  "text-pink-700",
+    badgeClass: "bg-pink-600 text-white",
+    tagline:    "Content Creator",
+    desc:       "View your performance, join calls, go live, and track your earnings.",
+    access:     ["My dashboard", "Calls & live", "Earnings tracker", "Handbook & guides"],
+  },
 ];
 
-const DEMO_CREDS: Record<RoleTab, { email: string; password: string; badge: string }> = {
-  super_admin: { email: "arjun@ridhi.app",          password: "admin123",  badge: "Super Admin"  },
-  admin:       { email: "admin.sneha@ridhi.app",    password: "admin123",  badge: "Admin"        },
-  agent:       { email: "agent.rahul@ridhi.app",    password: "agent123",  badge: "Agent A3"     },
-  host:        { email: "host.priya@ridhi.app",     password: "host123",   badge: "Host L5"      },
-};
-
-type Perm = { label: string; allowed: boolean };
-
-const PERMISSIONS: Record<RoleTab, Perm[]> = {
-  super_admin: [
-    { label: "Dashboard & Analytics",           allowed: true  },
-    { label: "User & Content Management",        allowed: true  },
-    { label: "Approve & Manage Admins",          allowed: true  },
-    { label: "Approve & Manage Agents",          allowed: true  },
-    { label: "Approve & Manage Hosts",           allowed: true  },
-    { label: "Finance, Revenue & Payouts",       allowed: true  },
-    { label: "Super Admin Panel",                allowed: true  },
-  ],
-  admin: [
-    { label: "Dashboard & Analytics",           allowed: true  },
-    { label: "User & Content Management",        allowed: true  },
-    { label: "Approve & Manage Agents",          allowed: true  },
-    { label: "View & Manage Hosts",              allowed: true  },
-    { label: "Finance, Revenue & Payouts",       allowed: true  },
-    { label: "Super Admin Panel",                allowed: false },
-    { label: "Admin Management",                 allowed: false },
-  ],
-  agent: [
-    { label: "Dashboard (own stats)",            allowed: true  },
-    { label: "Approve & Manage Hosts",           allowed: true  },
-    { label: "Calls & Live Streams",             allowed: true  },
-    { label: "KYC Verification",                 allowed: true  },
-    { label: "User & Content Management",        allowed: false },
-    { label: "Finance & Revenue",                allowed: false },
-    { label: "Super Admin / Admin Panel",        allowed: false },
-  ],
-  host: [
-    { label: "Dashboard (own stats)",            allowed: true  },
-    { label: "Calls & Live Streams",             allowed: true  },
-    { label: "Handbook",                         allowed: true  },
-    { label: "User & Content Management",        allowed: false },
-    { label: "Agent / Host Management",          allowed: false },
-    { label: "Finance & Revenue",                allowed: false },
-    { label: "Admin / Super Admin Panel",        allowed: false },
-  ],
-};
-
-// Visual hierarchy showing who manages whom
 const HIERARCHY = [
-  { role: "Super Admin", color: "bg-purple-600", arrow: true },
-  { role: "Admin",       color: "bg-indigo-500", arrow: true },
-  { role: "Agent",       color: "bg-blue-500",   arrow: true },
-  { role: "Host",        color: "bg-pink-500",   arrow: false },
+  { label: "Super Admin", color: "bg-purple-600" },
+  { label: "Admin",       color: "bg-indigo-500" },
+  { label: "Agent",       color: "bg-blue-500"   },
+  { label: "Host",        color: "bg-pink-500"   },
 ];
 
 export default function Login() {
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole]         = useState<RoleTab>("super_admin");
-  const [showPass, setShowPass] = useState(false);
-  const [error, setError]       = useState("");
-  const [, setLocation]         = useLocation();
-
-  const fillDemo = () => { setEmail(DEMO_CREDS[role].email); setPassword(DEMO_CREDS[role].password); setError(""); };
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) { setError("Please enter email and password."); return; }
-    localStorage.setItem("ridhi_admin_logged_in", "true");
-    localStorage.setItem("ridhi_admin_role",      role);
-    localStorage.setItem("ridhi_admin_email",     email);
-    setLocation("/");
-  };
-
-  const active = ROLE_TABS.find((t) => t.id === role)!;
-  const perms  = PERMISSIONS[role];
+  const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8">
-      <div className="w-full max-w-md px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-950 to-gray-900 flex flex-col">
 
-        {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center mx-auto mb-3 shadow-lg">
-            <span className="text-white font-black text-2xl">R</span>
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <span className="text-white font-black text-base">R</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900">Ridhi</h1>
-          <p className="text-sm text-muted-foreground mt-1">Control Panel · 4-Tier Role System</p>
+          <div>
+            <p className="text-white font-black text-base leading-none">Ridhi</p>
+            <p className="text-purple-300 text-[10px] leading-none mt-0.5">Control Panel</p>
+          </div>
         </div>
-
-        {/* Hierarchy strip */}
-        <div className="flex items-center justify-center gap-1 mb-5">
+        <div className="flex items-center gap-1.5">
           {HIERARCHY.map((h, i) => (
-            <div key={h.role} className="flex items-center gap-1">
-              <span className={`text-white text-[10px] font-bold px-2 py-0.5 rounded-full ${h.color}`}>{h.role}</span>
-              {h.arrow && <ArrowRight className="w-3 h-3 text-muted-foreground" />}
+            <div key={h.label} className="flex items-center gap-1">
+              <span className={`${h.color} text-white text-[10px] font-bold px-2 py-0.5 rounded-full`}>{h.label}</span>
+              {i < HIERARCHY.length - 1 && <ArrowRight className="w-3 h-3 text-gray-500" />}
             </div>
           ))}
         </div>
+      </div>
 
-        <Card className="shadow-xl border-0 ring-1 ring-black/5">
-          <CardHeader className="pb-0 pt-5 px-5">
-
-            {/* Role tabs — 4 in a 2×2 grid */}
-            <div className="grid grid-cols-4 gap-1.5 mb-3">
-              {ROLE_TABS.map((tab) => {
-                const isActive = role === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => { setRole(tab.id); setEmail(""); setPassword(""); setError(""); }}
-                    className={`flex flex-col items-center gap-0.5 py-2.5 px-1 rounded-xl border-2 transition-all text-center ${
-                      isActive
-                        ? `${tab.bg} ${tab.border} ${tab.color}`
-                        : "border-transparent bg-muted/40 text-muted-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    <span className="text-[10px] font-bold leading-tight">{tab.label}</span>
-                    <span className="text-[9px] leading-tight opacity-70">{tab.desc}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Permissions for selected role */}
-            <div className={`rounded-xl border p-3 mb-0 ${active.bg} ${active.border}`}>
-              <p className={`text-xs font-bold mb-2 ${active.color}`}>{DEMO_CREDS[role].badge} — Access Permissions</p>
-              <div className="space-y-1">
-                {perms.map((p) => (
-                  <div key={p.label} className="flex items-center gap-2">
-                    {p.allowed
-                      ? <Check className="w-3 h-3 text-green-600 flex-shrink-0" />
-                      : <X     className="w-3 h-3 text-destructive flex-shrink-0" />}
-                    <span className={`text-xs ${p.allowed ? "text-foreground" : "text-muted-foreground line-through"}`}>
-                      {p.label}
-                    </span>
-                    {!p.allowed && (
-                      <Badge variant="destructive" className="text-[9px] px-1 py-0 h-3.5 ml-auto leading-none">Locked</Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="px-5 pb-5 pt-4">
-            <form onSubmit={handleLogin} className="space-y-3.5">
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={DEMO_CREDS[role].email}
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
-                  className="h-10"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPass ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
-                    className="h-10 pr-10"
-                    required
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {error && <p className="text-xs text-destructive font-medium">{error}</p>}
-
-              <Button
-                type="submit"
-                className="w-full h-10 text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 border-0"
-              >
-                Sign In as {DEMO_CREDS[role].badge}
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-
-              <button
-                type="button"
-                onClick={fillDemo}
-                className="w-full text-xs text-center text-muted-foreground hover:text-primary transition-colors py-0.5"
-              >
-                Use demo credentials — <span className="font-semibold">{DEMO_CREDS[role].email}</span>
-              </button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <p className="text-center text-xs text-muted-foreground mt-4">
-          Ridhi Control Panel · India's #1 Social App
+      {/* Hero */}
+      <div className="text-center py-10 px-4">
+        <h1 className="text-4xl md:text-5xl font-black text-white mb-3">
+          Select Your Portal
+        </h1>
+        <p className="text-purple-300 text-base max-w-md mx-auto">
+          Each role has its own dedicated dashboard. Choose the portal that matches your access level.
         </p>
       </div>
+
+      {/* Portal Cards */}
+      <div className="flex-1 flex items-start justify-center px-4 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full max-w-5xl">
+          {PORTALS.map((p) => {
+            const Icon = p.icon;
+            return (
+              <button
+                key={p.role}
+                onClick={() => setLocation(p.path)}
+                className={`group text-left bg-white rounded-2xl border-2 ${p.border} shadow-lg hover:shadow-2xl transition-all duration-200 hover:-translate-y-1 overflow-hidden`}
+              >
+                {/* Gradient top bar */}
+                <div className={`h-1.5 bg-gradient-to-r ${p.gradient}`} />
+
+                <div className="p-5 space-y-4">
+                  {/* Icon + badge */}
+                  <div className="flex items-start justify-between">
+                    <div className={`w-12 h-12 rounded-xl ${p.iconBg} flex items-center justify-center`}>
+                      <Icon className={`w-6 h-6 ${p.iconColor}`} />
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${p.badgeClass}`}>
+                      {p.tagline}
+                    </span>
+                  </div>
+
+                  {/* Title + desc */}
+                  <div>
+                    <h2 className="text-xl font-black text-gray-900">{p.label}</h2>
+                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">{p.desc}</p>
+                  </div>
+
+                  {/* Access list */}
+                  <div className={`rounded-xl ${p.lightBg} p-3 space-y-1.5`}>
+                    {p.access.map((a) => (
+                      <div key={a} className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${p.gradient} shrink-0`} />
+                        <span className="text-xs text-gray-600">{a}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <div className={`flex items-center justify-between rounded-xl bg-gradient-to-r ${p.gradient} px-4 py-2.5 text-white group-hover:opacity-90 transition-opacity`}>
+                    <span className="text-sm font-bold">Enter Portal</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <p className="text-center text-xs text-gray-600 pb-6">
+        Ridhi Control Panel · India's #1 Social App
+      </p>
     </div>
   );
 }
