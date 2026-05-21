@@ -6,7 +6,7 @@ import {
   Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
-  TrendingUp, Globe, Terminal, Sparkles, Download,
+  TrendingUp, Globe, Terminal, Sparkles, Download, Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -102,6 +102,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Promo & Offer Codes",href: "/promo-codes",       icon: Ticket,        allowedRoles: SA   },
       { name: "Handbook",           href: "/handbook",          icon: BookOpen,      allowedRoles: ALL  },
       { name: "Downloads & Reports",href: "/downloads",         icon: Download,      allowedRoles: SA   },
+      { name: "App Screenshots",    href: "/screenshots",       icon: Monitor,       allowedRoles: SA   },
     ],
   },
 ];
@@ -175,6 +176,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/referral":          "Referral Program",
     "/api-integrations":  "3rd Party API Integrations",
     "/downloads":         "Downloads & Reports",
+    "/screenshots":       "App Store Screenshots",
     "/admin-management":  "Admin Role Management",
     "/admin-activity":    "Admin Activity Monitor",
     "/my-report":         "My Work Report",
