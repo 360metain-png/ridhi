@@ -14,7 +14,8 @@ import {
   LayoutTemplate, Plus, Eye, MousePointer, TrendingUp, Zap, Palette,
   Play, Pause, Trash2, Pencil, X, Copy, BarChart3, Layers, Image,
   Star, Clock, Calendar, Target, Sparkles, ArrowRight, Megaphone,
-  RefreshCw, CheckCircle, Settings2, Monitor, Smartphone,
+  RefreshCw, CheckCircle, Settings2, Monitor, Smartphone, Upload,
+  Link2, ImageOff,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -24,6 +25,8 @@ type Placement    = "feed" | "top_bar" | "bottom_sticky" | "between_stories" | "
 type AnimStyle    = "none" | "slide_in" | "fade" | "bounce" | "shimmer" | "pulse";
 type StylePreset  = "gradient" | "neon_glow" | "frosted" | "dark_minimal" | "festive" | "sports";
 
+type ImageMode = "background" | "side" | "top";
+
 interface CommercialBanner {
   id: string;
   title: string;
@@ -32,6 +35,8 @@ interface CommercialBanner {
   subtext: string;
   ctaText: string;
   ctaUrl: string;
+  imageUrl: string;
+  imageMode: ImageMode;
   stylePreset: StylePreset;
   gradientFrom: string;
   gradientTo: string;
@@ -102,7 +107,7 @@ const INITIAL_BANNERS: CommercialBanner[] = [
   {
     id: "cb1", title: "Ridhi Premium Launch", advertiser: "Ridhi Internal",
     headline: "💎 Unlock Premium — First Month Free!", subtext: "Priority matching, unlimited likes & no ads. Your upgrade starts today.",
-    ctaText: "Upgrade Now", ctaUrl: "/wallet",
+    ctaText: "Upgrade Now", ctaUrl: "/wallet", imageUrl: "", imageMode: "background",
     stylePreset: "gradient", gradientFrom: "#7B2FBE", gradientTo: "#E91E8C", gradientAngle: 135,
     textColor: "white", accentColor: "#fff", animStyle: "fade", animSpeed: "normal",
     borderRadius: 16, showGlow: false, showOverlay: false, overlayOpacity: 20,
@@ -112,7 +117,7 @@ const INITIAL_BANNERS: CommercialBanner[] = [
   {
     id: "cb2", title: "Diwali Coin Bonanza", advertiser: "Ridhi Commerce",
     headline: "🪔 Diwali Special — 3× Coins All Week!", subtext: "Recharge any pack before midnight and triple your balance instantly.",
-    ctaText: "Get Coins", ctaUrl: "/wallet",
+    ctaText: "Get Coins", ctaUrl: "/wallet", imageUrl: "", imageMode: "background",
     stylePreset: "festive", gradientFrom: "#FF6B00", gradientTo: "#FFD700", gradientAngle: 135,
     textColor: "white", accentColor: "#fff", animStyle: "bounce", animSpeed: "normal",
     borderRadius: 16, showGlow: false, showOverlay: false, overlayOpacity: 20,
@@ -122,7 +127,7 @@ const INITIAL_BANNERS: CommercialBanner[] = [
   {
     id: "cb3", title: "Night Mode Live Launch", advertiser: "Ridhi Product",
     headline: "⚡ Go Live in Dark Mode — New Feature!", subtext: "Stream with neon overlays & audience reactions. Available now on Android & iOS.",
-    ctaText: "Go Live", ctaUrl: "/live",
+    ctaText: "Go Live", ctaUrl: "/live", imageUrl: "", imageMode: "background",
     stylePreset: "neon_glow", gradientFrom: "#0F0F1A", gradientTo: "#1A0A2E", gradientAngle: 135,
     textColor: "white", accentColor: "#BF5FFF", animStyle: "pulse", animSpeed: "slow",
     borderRadius: 16, showGlow: true, showOverlay: false, overlayOpacity: 20,
@@ -132,7 +137,7 @@ const INITIAL_BANNERS: CommercialBanner[] = [
   {
     id: "cb4", title: "IPL Prediction Contest", advertiser: "Sports Partner",
     headline: "🏏 IPL Winner Prediction — Win 5,000 Coins!", subtext: "Pick the winner before today's match. Free entry. Instant rewards.",
-    ctaText: "Predict Now", ctaUrl: "/gaming",
+    ctaText: "Predict Now", ctaUrl: "/gaming", imageUrl: "", imageMode: "background",
     stylePreset: "sports", gradientFrom: "#FF0844", gradientTo: "#FFB199", gradientAngle: 125,
     textColor: "white", accentColor: "#fff", animStyle: "shimmer", animSpeed: "fast",
     borderRadius: 10, showGlow: true, showOverlay: false, overlayOpacity: 20,
@@ -142,7 +147,7 @@ const INITIAL_BANNERS: CommercialBanner[] = [
   {
     id: "cb5", title: "New User Welcome", advertiser: "Ridhi Onboarding",
     headline: "👋 Welcome! You have 100 Free Coins", subtext: "Complete your profile in 2 minutes and earn your first reward.",
-    ctaText: "Complete Profile", ctaUrl: "/profile",
+    ctaText: "Complete Profile", ctaUrl: "/profile", imageUrl: "", imageMode: "background",
     stylePreset: "frosted", gradientFrom: "#C9D6FF", gradientTo: "#E2E2E2", gradientAngle: 135,
     textColor: "dark", accentColor: "#7B2FBE", animStyle: "slide_in", animSpeed: "normal",
     borderRadius: 20, showGlow: false, showOverlay: true, overlayOpacity: 20,
@@ -175,8 +180,12 @@ function BannerPreview({ b, size = "md" }: { b: Partial<CommercialBanner>; size?
   const glow     = b.showGlow ?? preset.glow;
   const radius   = b.borderRadius ?? preset.radius;
   const anim     = ANIM_META[b.animStyle ?? preset.anim].css;
+  const imgUrl   = b.imageUrl ?? "";
+  const imgMode  = b.imageMode ?? "background";
 
   const w = size === "sm" ? 180 : 240;
+
+  const hasImage = imgUrl.trim() !== "";
 
   return (
     <div className="mx-auto" style={{ width: w }}>
@@ -199,36 +208,67 @@ function BannerPreview({ b, size = "md" }: { b: Partial<CommercialBanner>; size?
           <div className="w-4 h-4 rounded-full bg-zinc-700" />
         </div>
 
-        {/* Banner */}
+        {/* ── Banner ── */}
+        {/* Top image mode */}
+        {hasImage && imgMode === "top" && (
+          <div style={{ borderRadius: `${radius}px ${radius}px 0 0`, overflow: "hidden", height: size === "sm" ? 40 : 52 }}>
+            <img src={imgUrl} alt="banner" className="w-full h-full object-cover" />
+          </div>
+        )}
+
         <div
           className={`relative overflow-hidden ${anim}`}
           style={{
-            background: `linear-gradient(${angle}deg, ${from}, ${to})`,
-            borderRadius: radius,
+            background: hasImage && imgMode === "background"
+              ? undefined
+              : `linear-gradient(${angle}deg, ${from}, ${to})`,
+            borderRadius: hasImage && imgMode === "top"
+              ? `0 0 ${radius}px ${radius}px`
+              : radius,
             padding: size === "sm" ? "10px 12px" : "14px",
             boxShadow: glow ? `0 0 20px ${from}88` : undefined,
           }}
         >
+          {/* Background image mode */}
+          {hasImage && imgMode === "background" && (
+            <>
+              <img src={imgUrl} alt="banner bg" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: `linear-gradient(${angle}deg, ${from}CC, ${to}99)` }} />
+            </>
+          )}
+
           {b.showOverlay && (
             <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded" />
           )}
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-1.5">
-              <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.25)", color: tc }}>
-                Sponsored
-              </span>
-              <X className="w-3 h-3 opacity-60" style={{ color: tc }} />
-            </div>
-            <p className="font-bold leading-tight mb-1" style={{ fontSize: size === "sm" ? 9 : 11, color: tc }}>
-              {b.headline || "Your headline here"}
-            </p>
-            <p className="opacity-80 leading-tight mb-2" style={{ fontSize: 7, color: tc }}>
-              {b.subtext || "Supporting subtext goes here"}
-            </p>
-            <div className="flex items-center gap-1 text-[7px] font-bold px-2 py-1 rounded-full self-start"
-              style={{ backgroundColor: accent === "#fff" ? "rgba(255,255,255,0.25)" : accent, color: accent === "#fff" ? "#fff" : "#fff", display: "inline-flex" }}>
-              {b.ctaText || "Learn More"}
-              <ArrowRight className="w-2 h-2" />
+
+          <div className={`relative z-10 ${hasImage && imgMode === "side" ? "flex items-center gap-2" : ""}`}>
+            {/* Side image mode */}
+            {hasImage && imgMode === "side" && (
+              <div className="flex-shrink-0" style={{ width: size === "sm" ? 32 : 44, height: size === "sm" ? 32 : 44, borderRadius: 6, overflow: "hidden" }}>
+                <img src={imgUrl} alt="banner side" className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            <div className="flex-1">
+              <div className="flex justify-between items-start mb-1.5">
+                <span className="text-[7px] font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,0,0,0.25)", color: tc }}>
+                  Sponsored
+                </span>
+                <X className="w-3 h-3 opacity-60" style={{ color: tc }} />
+              </div>
+              <p className="font-bold leading-tight mb-1" style={{ fontSize: size === "sm" ? 9 : 11, color: tc }}>
+                {b.headline || "Your headline here"}
+              </p>
+              {imgMode !== "side" && (
+                <p className="opacity-80 leading-tight mb-2" style={{ fontSize: 7, color: tc }}>
+                  {b.subtext || "Supporting subtext goes here"}
+                </p>
+              )}
+              <div className="flex items-center gap-1 text-[7px] font-bold px-2 py-1 rounded-full self-start"
+                style={{ backgroundColor: accent === "#fff" ? "rgba(255,255,255,0.25)" : accent, color: "#fff", display: "inline-flex" }}>
+                {b.ctaText || "Learn More"}
+                <ArrowRight className="w-2 h-2" />
+              </div>
             </div>
           </div>
         </div>
@@ -290,7 +330,8 @@ export default function CommercialBanners() {
 
   const blankBanner = (): CommercialBanner => ({
     id: `cb${Date.now()}`, title: "", advertiser: "", headline: "", subtext: "",
-    ctaText: "Learn More", ctaUrl: "", stylePreset: "gradient",
+    ctaText: "Learn More", ctaUrl: "", imageUrl: "", imageMode: "background",
+    stylePreset: "gradient",
     gradientFrom: "#7B2FBE", gradientTo: "#E91E8C", gradientAngle: 135,
     textColor: "white", accentColor: "#fff", animStyle: "fade", animSpeed: "normal",
     borderRadius: 16, showGlow: false, showOverlay: false, overlayOpacity: 20,
@@ -567,6 +608,107 @@ export default function CommercialBanners() {
                         onChange={e => setEditing(p => p ? { ...p, ctaUrl: e.target.value } : null)} />
                     </div>
                   </div>
+                </div>
+
+                {/* ── Image Upload ── */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Image className="w-3.5 h-3.5 text-pink-500" /> Banner Image <span className="normal-case font-normal text-muted-foreground/60">(optional)</span>
+                  </h3>
+
+                  {/* Drop zone */}
+                  <label
+                    className="relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border hover:border-violet-400 transition-colors cursor-pointer bg-muted/30 hover:bg-violet-500/5"
+                    style={{ minHeight: 100 }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = ev => setEditing(p => p ? { ...p, imageUrl: ev.target?.result as string } : null);
+                        reader.readAsDataURL(file);
+                        e.target.value = "";
+                      }}
+                    />
+                    {editing.imageUrl ? (
+                      <div className="relative w-full p-3">
+                        <img src={editing.imageUrl} alt="preview" className="w-full rounded-lg object-cover max-h-32" />
+                        <button
+                          type="button"
+                          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors z-10"
+                          onClick={e => { e.preventDefault(); e.stopPropagation(); setEditing(p => p ? { ...p, imageUrl: "" } : null); }}
+                        >
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                        <div className="flex items-center gap-1 mt-2 justify-center">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+                          <span className="text-xs text-emerald-500 font-medium">Image uploaded</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                          <Upload className="w-5 h-5 text-violet-500" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs font-semibold text-foreground">Drop image here or click to browse</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">JPG, PNG, GIF, WebP, SVG · Max 5 MB</p>
+                        </div>
+                      </>
+                    )}
+                  </label>
+
+                  {/* URL input alternative */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs flex items-center gap-1.5"><Link2 className="w-3 h-3" /> Or paste image URL</Label>
+                    <Input
+                      className="h-8 text-xs font-mono"
+                      placeholder="https://example.com/banner.jpg"
+                      value={editing.imageUrl.startsWith("data:") ? "" : editing.imageUrl}
+                      onChange={e => setEditing(p => p ? { ...p, imageUrl: e.target.value } : null)}
+                    />
+                  </div>
+
+                  {/* Image placement mode */}
+                  {editing.imageUrl && (
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Image Layout</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          { key: "background", label: "Background", desc: "Full-bleed behind text", icon: "▣" },
+                          { key: "side",       label: "Side",       desc: "Thumbnail left of text", icon: "◧" },
+                          { key: "top",        label: "Top",        desc: "Image above the text",  icon: "⬒" },
+                        ] as const).map(m => (
+                          <button
+                            key={m.key}
+                            type="button"
+                            onClick={() => setEditing(p => p ? { ...p, imageMode: m.key } : null)}
+                            className={`rounded-xl border-2 px-2 py-2.5 text-center transition-all ${
+                              editing.imageMode === m.key
+                                ? "border-violet-500 bg-violet-500/10"
+                                : "border-border hover:border-violet-300"
+                            }`}
+                          >
+                            <div className="text-lg mb-1">{m.icon}</div>
+                            <p className="text-[11px] font-semibold text-foreground">{m.label}</p>
+                            <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">{m.desc}</p>
+                            {editing.imageMode === m.key && <CheckCircle className="w-3 h-3 text-violet-500 mx-auto mt-1" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!editing.imageUrl && (
+                    <div className="flex items-start gap-2 text-[10px] text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
+                      <ImageOff className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                      <span>No image selected — banner will use the gradient background only. Adding an image makes your ad stand out significantly.</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Style Presets */}
