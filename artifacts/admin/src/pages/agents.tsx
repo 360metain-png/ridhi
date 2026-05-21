@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import {
-  Briefcase, Users, TrendingUp, IndianRupee, Star, Eye, ChevronRight,
-  Search, Award, UserCheck, Coins, Plus, CheckCircle, XCircle, Clock,
-  Phone, MapPin, Calendar, ShieldAlert,
+  Briefcase, Users, TrendingUp, IndianRupee, Star, Eye,
+  Search, Award, Coins, Plus, CheckCircle, XCircle, Clock,
+  Phone, MapPin, ShieldAlert, ArrowRight, Info,
 } from "lucide-react";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -26,13 +26,14 @@ const AGENT_LEVELS = [
   { level: "A5", title: "Master Agent", hostsRequired: 250, commissionRate: 10, color: "#E91E8C", icon: "👑" },
 ];
 
+// Agent income = commissionRate% × totalHostEarnings (agents earn ONLY from their hosts' income)
 const AGENTS = [
-  { id: "a1", name: "Vikram Rao", city: "Delhi", level: "A5", hosts: 312, activeHosts: 289, commission: 10, earned: 284000, pendingPayout: 48000, status: "active", joinDate: "Jan 2024", topHost: "Priya Sharma" },
-  { id: "a2", name: "Sunita Joshi", city: "Mumbai", level: "A4", hosts: 178, activeHosts: 142, commission: 8, earned: 142000, pendingPayout: 21000, status: "active", joinDate: "Mar 2024", topHost: "Rahul Verma" },
-  { id: "a3", name: "Deepak Singh", city: "Bangalore", level: "A3", hosts: 74, activeHosts: 58, commission: 6, earned: 84000, pendingPayout: 14000, status: "active", joinDate: "May 2024", topHost: "Kavya R" },
-  { id: "a4", name: "Meena Kumari", city: "Hyderabad", level: "A2", hosts: 28, activeHosts: 19, commission: 4, earned: 42000, pendingPayout: 8000, status: "active", joinDate: "Jun 2024", topHost: "Dev T" },
-  { id: "a5", name: "Rajan Pillai", city: "Kochi", level: "A1", hosts: 7, activeHosts: 5, commission: 2, earned: 12000, pendingPayout: 3000, status: "active", joinDate: "Aug 2024", topHost: "Ananya S" },
-  { id: "a6", name: "Preethi Nair", city: "Chennai", level: "A2", hosts: 24, activeHosts: 16, commission: 4, earned: 38000, pendingPayout: 0, status: "suspended", joinDate: "Apr 2024", topHost: "Kiran N" },
+  { id: "a1", name: "Vikram Rao",   city: "Delhi",     level: "A5", hosts: 312, activeHosts: 289, commission: 10, totalHostEarnings: 2840000, earned: 284000, pendingPayout: 48000, status: "active",    joinDate: "Jan 2024", topHost: "Priya Sharma" },
+  { id: "a2", name: "Sunita Joshi", city: "Mumbai",    level: "A4", hosts: 178, activeHosts: 142, commission: 8,  totalHostEarnings: 1775000, earned: 142000, pendingPayout: 21000, status: "active",    joinDate: "Mar 2024", topHost: "Rahul Verma" },
+  { id: "a3", name: "Deepak Singh", city: "Bangalore", level: "A3", hosts: 74,  activeHosts: 58,  commission: 6,  totalHostEarnings: 1400000, earned: 84000,  pendingPayout: 14000, status: "active",    joinDate: "May 2024", topHost: "Kavya R"     },
+  { id: "a4", name: "Meena Kumari", city: "Hyderabad", level: "A2", hosts: 28,  activeHosts: 19,  commission: 4,  totalHostEarnings: 1050000, earned: 42000,  pendingPayout: 8000,  status: "active",    joinDate: "Jun 2024", topHost: "Dev T"       },
+  { id: "a5", name: "Rajan Pillai", city: "Kochi",     level: "A1", hosts: 7,   activeHosts: 5,   commission: 2,  totalHostEarnings:  600000, earned: 12000,  pendingPayout: 3000,  status: "active",    joinDate: "Aug 2024", topHost: "Ananya S"    },
+  { id: "a6", name: "Preethi Nair", city: "Chennai",   level: "A2", hosts: 24,  activeHosts: 16,  commission: 4,  totalHostEarnings:  950000, earned: 38000,  pendingPayout: 0,     status: "suspended", joinDate: "Apr 2024", topHost: "Kiran N"     },
 ];
 
 const agentEarningsData = [
@@ -156,12 +157,23 @@ export default function AgentsPage() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Income model banner */}
+      <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-purple-50 border border-purple-200">
+        <Info className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+        <div className="flex-1 text-sm text-purple-800">
+          <span className="font-bold">Agent Income Model — </span>
+          Agents earn <span className="font-bold">only from their hosts' income</span>. No other revenue source.
+          <span className="mx-2 text-purple-400">·</span>
+          <span className="font-mono bg-purple-100 px-2 py-0.5 rounded text-xs">Agent Income = Commission% × Total Host Earnings</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "Total Agents", value: AGENTS.length, icon: Briefcase, color: "text-purple-600 bg-purple-50" },
           { label: "Total Hosts Managed", value: AGENTS.reduce((s, a) => s + a.hosts, 0).toLocaleString(), icon: Users, color: "text-blue-600 bg-blue-50" },
-          { label: "Total Commission Paid", value: "₹" + (AGENTS.reduce((s, a) => s + a.earned, 0) / 100).toFixed(0) + "K", icon: IndianRupee, color: "text-green-600 bg-green-50" },
-          { label: "Pending Payouts", value: "₹" + (AGENTS.reduce((s, a) => s + a.pendingPayout, 0) / 100).toFixed(0) + "K", icon: Coins, color: "text-orange-600 bg-orange-50" },
+          { label: "Total Host Earnings (source)", value: "₹" + (AGENTS.reduce((s, a) => s + a.totalHostEarnings, 0) / 100000).toFixed(1) + "L", icon: Star, color: "text-green-600 bg-green-50" },
+          { label: "Agent Commission Paid (from hosts)", value: "₹" + (AGENTS.reduce((s, a) => s + a.earned, 0) / 100).toFixed(0) + "K", icon: IndianRupee, color: "text-pink-600 bg-pink-50" },
         ].map((s) => (
           <Card key={s.label}>
             <CardContent className="p-4 flex items-center gap-3">
@@ -222,9 +234,10 @@ export default function AgentsPage() {
                 <th className="text-left pb-3">Level</th>
                 <th className="text-right pb-3">Hosts</th>
                 <th className="text-right pb-3">Active</th>
-                <th className="text-right pb-3">Commission</th>
-                <th className="text-right pb-3">Earned</th>
-                <th className="text-right pb-3">Pending</th>
+                <th className="text-right pb-3 text-green-700">Host Earnings</th>
+                <th className="text-right pb-3">Rate</th>
+                <th className="text-right pb-3 text-purple-700">Agent Income</th>
+                <th className="text-right pb-3 text-orange-600">Pending</th>
                 <th className="text-left pb-3">Status</th>
                 <th className="text-right pb-3">Actions</th>
               </tr>
@@ -235,7 +248,7 @@ export default function AgentsPage() {
                   <td className="p-4 py-3">
                     <div>
                       <p className="font-medium">{a.name}</p>
-                      <p className="text-xs text-muted-foreground">{a.city} · since {a.joinDate}</p>
+                      <p className="text-xs text-muted-foreground">{a.city} · since {a.joinDate} · Top: {a.topHost}</p>
                     </div>
                   </td>
                   <td className="py-3">
@@ -246,9 +259,24 @@ export default function AgentsPage() {
                   </td>
                   <td className="py-3 text-right font-medium">{a.hosts}</td>
                   <td className="py-3 text-right text-green-600 font-medium">{a.activeHosts}</td>
-                  <td className="py-3 text-right">{a.commission}%</td>
-                  <td className="py-3 text-right font-medium">₹{(a.earned / 100).toFixed(0)}K</td>
-                  <td className="py-3 text-right text-orange-500">₹{(a.pendingPayout / 100).toFixed(0)}K</td>
+                  {/* Host earnings — the source of agent income */}
+                  <td className="py-3 text-right">
+                    <span className="font-semibold text-green-700">₹{(a.totalHostEarnings / 1000).toFixed(0)}K</span>
+                  </td>
+                  {/* Commission rate applied to host earnings */}
+                  <td className="py-3 text-right">
+                    <span className="font-medium">{a.commission}%</span>
+                  </td>
+                  {/* Agent income = rate × host earnings */}
+                  <td className="py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <ArrowRight className="w-3 h-3 text-muted-foreground" />
+                      <span className="font-bold text-purple-700">₹{(a.earned / 1000).toFixed(0)}K</span>
+                    </div>
+                  </td>
+                  <td className="py-3 text-right text-orange-500">
+                    {a.pendingPayout > 0 ? `₹${(a.pendingPayout / 1000).toFixed(0)}K` : <span className="text-muted-foreground">—</span>}
+                  </td>
                   <td className="py-3">
                     <div className={`flex items-center gap-1.5 text-xs ${a.status === "active" ? "text-green-600" : "text-red-500"}`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${a.status === "active" ? "bg-green-500" : "bg-red-500"}`} />
@@ -265,6 +293,11 @@ export default function AgentsPage() {
               ))}
             </tbody>
           </table>
+          {/* Table legend */}
+          <div className="flex items-center gap-4 px-4 py-2.5 border-t bg-muted/30 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Host Earnings = total paid out to all hosts under this agent</span>
+            <span className="flex items-center gap-1"><ArrowRight className="w-3 h-3" /> Agent Income = Commission Rate × Host Earnings</span>
+          </div>
         </CardContent>
       </Card>
 
@@ -272,25 +305,73 @@ export default function AgentsPage() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Award className="w-4 h-4" />
-            Revenue Split (Blueprint)
+            Agent Income — Source & Flow
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { label: "Host / Winner Share", pct: 40, color: "bg-green-500", earned: "₹84L this month" },
-              { label: "Agent Commission", pct: 10, color: "bg-purple-500", earned: "₹21L this month" },
-              { label: "Ridhi Platform", pct: 50, color: "bg-pink-500", earned: "₹1.05Cr this month" },
-            ].map((s) => (
-              <div key={s.label} className="border rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{s.label}</p>
-                  <span className="text-lg font-bold">{s.pct}%</span>
+        <CardContent className="space-y-5">
+
+          {/* Flow diagram */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-col items-center gap-1 bg-green-50 border border-green-200 rounded-xl px-5 py-3 text-center">
+              <Star className="w-4 h-4 text-green-600" />
+              <p className="text-xs font-semibold text-green-800">Host Earnings</p>
+              <p className="text-lg font-bold text-green-700">₹1 earned</p>
+              <p className="text-[10px] text-green-600">Gifts / gifts coins from users</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            <div className="flex flex-col items-center gap-1 bg-purple-50 border border-purple-200 rounded-xl px-5 py-3 text-center">
+              <Briefcase className="w-4 h-4 text-purple-600" />
+              <p className="text-xs font-semibold text-purple-800">Agent Commission</p>
+              <p className="text-lg font-bold text-purple-700">2–10% of host</p>
+              <p className="text-[10px] text-purple-600">Only income source for agents</p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            <div className="flex flex-col items-center gap-1 bg-pink-50 border border-pink-200 rounded-xl px-5 py-3 text-center">
+              <IndianRupee className="w-4 h-4 text-pink-600" />
+              <p className="text-xs font-semibold text-pink-800">Ridhi Platform</p>
+              <p className="text-lg font-bold text-pink-700">Remaining</p>
+              <p className="text-[10px] text-pink-600">After host + agent share</p>
+            </div>
+          </div>
+
+          {/* Per-level breakdown */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Commission Rate by Agent Level</p>
+            <div className="space-y-2">
+              {AGENT_LEVELS.map((lvl) => (
+                <div key={lvl.level} className="flex items-center gap-3">
+                  <span className="text-sm w-6">{lvl.icon}</span>
+                  <Badge variant="outline" className="text-xs w-7 justify-center" style={{ borderColor: lvl.color, color: lvl.color }}>{lvl.level}</Badge>
+                  <span className="text-xs text-muted-foreground w-28">{lvl.title}</span>
+                  <div className="flex-1">
+                    <Progress value={lvl.commissionRate * 10} className="h-2" />
+                  </div>
+                  <span className="text-sm font-bold w-12 text-right" style={{ color: lvl.color }}>{lvl.commissionRate}%</span>
+                  <span className="text-xs text-muted-foreground">of host earnings</span>
                 </div>
-                <Progress value={s.pct} className={`h-2 [&>div]:${s.color}`} />
-                <p className="text-xs text-muted-foreground">{s.earned}</p>
+              ))}
+            </div>
+          </div>
+
+          {/* Example calculation */}
+          <div className="bg-muted/40 rounded-xl p-4 border text-sm space-y-2">
+            <p className="font-semibold text-sm flex items-center gap-2"><Info className="w-4 h-4 text-purple-600" /> Example — Vikram Rao (A5 Master, 10%)</p>
+            <div className="grid grid-cols-3 gap-3 text-xs mt-2">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                <p className="text-muted-foreground mb-1">Host Earnings (all 312 hosts)</p>
+                <p className="text-lg font-bold text-green-700">₹28.4L</p>
               </div>
-            ))}
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                <p className="text-muted-foreground mb-1">×10% Commission</p>
+                <p className="text-lg font-bold text-purple-700">₹2.84L</p>
+                <p className="text-[10px] text-purple-600 mt-0.5">Vikram's income</p>
+              </div>
+              <div className="bg-muted rounded-lg p-3 text-center">
+                <p className="text-muted-foreground mb-1">No hosts earning = </p>
+                <p className="text-lg font-bold text-destructive">₹0</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Agent earns nothing</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
