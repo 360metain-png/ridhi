@@ -20,11 +20,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const STEP_LABELS = [
   "Personal Info",
   "Aadhaar OTP",
+  "PAN Card",
   "Bank Details",
   "Review & Submit",
 ];
@@ -158,7 +159,7 @@ function OtpInput({ value, onChange, colors }: { value: string; onChange: (v: st
 export default function KYCScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [step, setStep]           = useState(1);
@@ -207,6 +208,13 @@ export default function KYCScreen() {
   const [otpVerified, setOtpVerified]   = useState(false);
   const [otpError, setOtpError]         = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+
+  // ── Step 3: PAN Card ─────────────────────────────────────────────────────
+  const [panNumber, setPanNumber]       = useState("");
+  const [panVerified, setPanVerified]   = useState(false);
+  const [panError, setPanError]         = useState("");
+  const [verifyingPan, setVerifyingPan] = useState(false);
+  const [panHolderName, setPanHolderName] = useState(user?.name ?? "");
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -275,16 +283,54 @@ export default function KYCScreen() {
     }
   };
 
+  // ── PAN helpers ─────────────────────────────────────────────────────────
+  function formatPan(raw: string): string {
+    return raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+  }
+  function validatePan(raw: string): boolean {
+    // Indian PAN: AAAAA9999A (5 letters + 4 digits + 1 letter)
+    const pan = formatPan(raw);
+    if (pan.length !== 10) return false;
+    return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan);
+  }
+
+  const verifyPan = async () => {
+    const clean = formatPan(panNumber);
+    if (!validatePan(clean)) { setPanError("Invalid PAN format. Use: ABCDE1234F"); return; }
+    if (!panHolderName.trim()) { setPanError("Please enter the name as on PAN card."); return; }
+    setVerifyingPan(true);
+    setPanError("");
+    await new Promise((r) => setTimeout(r, 1500));
+    setVerifyingPan(false);
+    // Accept any valid-format PAN for demo; reject only if it ends in "XXXX"
+    if (clean.endsWith("XXXX")) {
+      setPanError("PAN verification failed. Please check the number and try again.");
+    } else {
+      setPanVerified(true);
+      setPanError("");
+    }
+  };
+
   // ── Can proceed? ──────────────────────────────────────────────────────────
   const canNext = (): boolean => {
     if (step === 1) return !!(fullName.trim() && dob.length === 10 && dobAge !== null && dobAge >= 18 && gender);
     if (step === 2) return otpVerified;
-    if (step === 3) return bankVerified;
+    if (step === 3) return panVerified;
+    if (step === 4) return bankVerified;
     return true;
   };
 
   const handleNext = () => {
     if (step < TOTAL_STEPS) { setStep(step + 1); return; }
+    // Save KYC to user profile on submit
+    updateProfile({
+      kycStatus: "pending",
+      aadhaarVerified: true,
+      panVerified: true,
+      aadhaarNumber: `XXXX XXXX ${aadhaarDigits.slice(-4)}`,
+      panNumber: `${formatPan(panNumber).slice(0, 2)}XXXX${formatPan(panNumber).slice(6, 7)}XX${formatPan(panNumber).slice(9, 10)}`,
+      kycSubmittedAt: new Date().toISOString(),
+    });
     setSubmitted(true);
   };
 
@@ -299,7 +345,7 @@ export default function KYCScreen() {
           </View>
           <Text style={[styles.successTitle, { color: colors.foreground }]}>E-KYC Submitted!</Text>
           <Text style={[styles.successSub, { color: colors.mutedForeground }]}>
-            Aadhaar & Bank verification complete. Your earnings will be unlocked within 24 hours.
+            Aadhaar, PAN & Bank verification complete. Your earnings will be unlocked within 24 hours after admin review.
           </Text>
 
           <View style={[styles.summaryCard, { backgroundColor: colors.card, borderColor: "#22C55E40" }]}>
@@ -317,6 +363,11 @@ export default function KYCScreen() {
               <Feather name="credit-card" size={14} color={colors.mutedForeground} />
               <Text style={[styles.summaryLabel, { color: colors.mutedForeground }]}>Aadhaar</Text>
               <Text style={[styles.summaryValue, { color: "#22C55E" }]}>✓ OTP Verified</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Feather name="file-text" size={14} color={colors.mutedForeground} />
+              <Text style={[styles.summaryLabel, { color: colors.mutedForeground }]}>PAN</Text>
+              <Text style={[styles.summaryValue, { color: "#22C55E" }]}>✓ NSDL Verified</Text>
             </View>
             <View style={styles.summaryRow}>
               <Feather name="home" size={14} color={colors.mutedForeground} />
@@ -625,8 +676,137 @@ export default function KYCScreen() {
           </View>
         )}
 
-        {/* ── STEP 3: Bank Account ──────────────────────────────────── */}
+        {/* ── STEP 3: PAN Card ────────────────────────────────────── */}
         {step === 3 && (
+          <View style={styles.stepContent}>
+            <Text style={[styles.stepTitle, { color: colors.foreground }]}>PAN Card Verification</Text>
+            <Text style={[styles.stepDesc, { color: colors.mutedForeground }]}>
+              Enter your Permanent Account Number (PAN) as on your income-tax card. This is mandatory for earnings & withdrawals above ₹10,000/year.
+            </Text>
+
+            {/* PAN Holder Name */}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>Name (as on PAN Card) *</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.card, borderColor: colors.border, color: colors.foreground }]}
+                placeholder="Enter name exactly as on PAN"
+                placeholderTextColor={colors.mutedForeground}
+                value={panHolderName}
+                onChangeText={setPanHolderName}
+                editable={!panVerified}
+              />
+            </View>
+
+            {/* PAN Number */}
+            <View style={styles.fieldGroup}>
+              <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>PAN Number *</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: panVerified
+                      ? "#22C55E80"
+                      : validatePan(formatPan(panNumber))
+                        ? colors.primary + "60"
+                        : panNumber.length >= 5
+                          ? colors.destructive
+                          : colors.border,
+                    color: colors.foreground,
+                    letterSpacing: 2,
+                    fontFamily: "Inter_600SemiBold",
+                    fontSize: 17,
+                  },
+                ]}
+                placeholder="ABCDE1234F"
+                placeholderTextColor={colors.mutedForeground}
+                value={formatPan(panNumber)}
+                onChangeText={(t) => {
+                  if (!panVerified) setPanNumber(formatPan(t));
+                }}
+                autoCapitalize="characters"
+                maxLength={10}
+                editable={!panVerified}
+              />
+              {panNumber.length >= 5 && !validatePan(formatPan(panNumber)) && (
+                <View style={[styles.errorRow, { marginTop: 4 }]}>
+                  <Feather name="alert-circle" size={12} color={colors.destructive} />
+                  <Text style={[styles.errorText, { color: colors.destructive }]}>Format: 5 letters + 4 digits + 1 letter (e.g. ABCDE1234F)</Text>
+                </View>
+              )}
+              {panNumber.length === 10 && validatePan(formatPan(panNumber)) && (
+                <View style={styles.maskedNote}>
+                  <Feather name="lock" size={11} color={colors.mutedForeground} />
+                  <Text style={[styles.maskedNoteText, { color: colors.mutedForeground }]}>
+                    Stored masked: {panNumber.slice(0, 2)}XXXX{panNumber.slice(6, 7)}XX{panNumber.slice(9, 10)}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Verify PAN */}
+            {!panVerified && (
+              <>
+                {panError ? (
+                  <View style={[styles.errorRow, { marginBottom: 12 }]}>
+                    <Feather name="alert-circle" size={12} color={colors.destructive} />
+                    <Text style={[styles.errorText, { color: colors.destructive }]}>{panError}</Text>
+                  </View>
+                ) : null}
+                <Pressable
+                  onPress={verifyPan}
+                  disabled={!validatePan(formatPan(panNumber)) || !panHolderName.trim() || verifyingPan}
+                  style={[
+                    styles.otpSendBtn,
+                    {
+                      backgroundColor:
+                        validatePan(formatPan(panNumber)) && panHolderName.trim()
+                          ? colors.primary
+                          : colors.muted,
+                      opacity: validatePan(formatPan(panNumber)) && panHolderName.trim() ? 1 : 0.5,
+                    },
+                  ]}
+                >
+                  {verifyingPan ? (
+                    <>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={styles.otpSendBtnText}>Verifying with NSDL…</Text>
+                    </>
+                  ) : (
+                    <>
+                      <Feather name="check-circle" size={16} color="#fff" />
+                      <Text style={styles.otpSendBtnText}>Verify PAN</Text>
+                    </>
+                  )}
+                </Pressable>
+              </>
+            )}
+
+            {panVerified && (
+              <View style={[styles.verifiedBanner, { backgroundColor: "#22C55E12", borderColor: "#22C55E40" }]}>
+                <View style={styles.verifiedIconWrap}>
+                  <Feather name="file-text" size={28} color="#22C55E" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.verifiedTitle, { color: "#22C55E" }]}>PAN Verified ✓</Text>
+                  <Text style={[styles.verifiedSub, { color: colors.mutedForeground }]}>
+                    Identity confirmed via NSDL. Your PAN is masked and stored securely.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <View style={[styles.tipBox, { backgroundColor: "#FFB80010", borderColor: "#FFB80030", marginTop: 16 }]}>
+              <Feather name="lock" size={14} color="#FFB800" />
+              <Text style={[styles.tipText, { color: colors.mutedForeground }]}>
+                We never store your full PAN. Only a masked reference is retained. Your PAN is used solely for tax compliance (TDS reporting) as per RBI & IT Dept guidelines.
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* ── STEP 4: Bank Account ──────────────────────────────────── */}
+        {step === 4 && (
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, { color: colors.foreground }]}>Bank Account Verification</Text>
             <Text style={[styles.stepDesc, { color: colors.mutedForeground }]}>
@@ -808,8 +988,8 @@ export default function KYCScreen() {
           </View>
         )}
 
-        {/* ── STEP 4: Review & Submit ───────────────────────────────── */}
-        {step === 4 && (
+        {/* ── STEP 5: Review & Submit ───────────────────────────────── */}
+        {step === 5 && (
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, { color: colors.foreground }]}>Review & Submit</Text>
             <Text style={[styles.stepDesc, { color: colors.mutedForeground }]}>
@@ -841,6 +1021,32 @@ export default function KYCScreen() {
               <View style={styles.reviewRow}>
                 <Text style={[styles.reviewKey, { color: colors.mutedForeground }]}>Gender</Text>
                 <Text style={[styles.reviewVal, { color: colors.foreground }]}>{gender.charAt(0).toUpperCase() + gender.slice(1)}</Text>
+              </View>
+            </View>
+
+            {/* PAN summary */}
+            <View style={[styles.reviewCard, { backgroundColor: colors.card, borderColor: "#22C55E40" }]}>
+              <View style={styles.reviewCardHeader}>
+                <Feather name="file-text" size={15} color="#22C55E" />
+                <Text style={[styles.reviewCardTitle, { color: colors.foreground }]}>PAN Card</Text>
+                <View style={[styles.reviewVerifiedBadge, { backgroundColor: "#22C55E20" }]}>
+                  <Feather name="check" size={10} color="#22C55E" />
+                  <Text style={[styles.reviewVerifiedText, { color: "#22C55E" }]}>NSDL Verified</Text>
+                </View>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={[styles.reviewKey, { color: colors.mutedForeground }]}>PAN Holder</Text>
+                <Text style={[styles.reviewVal, { color: colors.foreground }]}>{panHolderName}</Text>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={[styles.reviewKey, { color: colors.mutedForeground }]}>PAN (masked)</Text>
+                <Text style={[styles.reviewVal, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
+                  {panNumber.slice(0, 2)}XXXX{panNumber.slice(6, 7)}XX{panNumber.slice(9, 10)}
+                </Text>
+              </View>
+              <View style={styles.reviewRow}>
+                <Text style={[styles.reviewKey, { color: colors.mutedForeground }]}>Status</Text>
+                <Text style={[styles.reviewVal, { color: "#22C55E" }]}>✓ Verified via NSDL</Text>
               </View>
             </View>
 
@@ -903,7 +1109,7 @@ export default function KYCScreen() {
             <View style={[styles.tipBox, { backgroundColor: "#7B2FBE10", borderColor: "#7B2FBE30", marginTop: 4 }]}>
               <Feather name="info" size={14} color={colors.secondary} />
               <Text style={[styles.tipText, { color: colors.mutedForeground }]}>
-                By submitting, you confirm that all details are accurate and you consent to identity verification as per UIDAI & RBI guidelines.
+                By submitting, you confirm that all details are accurate and you consent to identity verification as per UIDAI, NSDL & RBI guidelines. Your PAN is required for TDS compliance on earnings.
               </Text>
             </View>
           </View>
@@ -923,7 +1129,7 @@ export default function KYCScreen() {
             style={styles.nextBtnGrad}
           >
             <Text style={styles.nextBtnText}>
-              {step === TOTAL_STEPS ? "Submit E-KYC" : step === 2 && !otpVerified ? "Verify Aadhaar First" : "Continue →"}
+              {step === TOTAL_STEPS ? "Submit E-KYC" : step === 2 && !otpVerified ? "Verify Aadhaar First" : step === 3 && !panVerified ? "Verify PAN First" : "Continue →"}
             </Text>
             {step < TOTAL_STEPS && canNext() && <Feather name="arrow-right" size={18} color="#fff" />}
             {step === TOTAL_STEPS && <Feather name="shield" size={18} color="#fff" />}

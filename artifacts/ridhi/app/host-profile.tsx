@@ -127,6 +127,53 @@ export default function HostProfileScreen() {
     }
   }, [user?.isHost]);
 
+  // ── KYC gate: must be verified before registering as host ──────────────
+  const kycVerified = user?.kycStatus === "verified";
+
+  if (!kycVerified) {
+    return (
+      <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ minHeight: "100%" }} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ paddingTop: topPad + 24, paddingHorizontal: 24, paddingBottom: 28 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6, marginBottom: 12 }}>
+            <Feather name="arrow-left" size={22} color="#fff" />
+          </Pressable>
+          <View style={{ alignItems: "center", gap: 14 }}>
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" }}>
+              <Feather name="shield" size={36} color="#fff" />
+            </View>
+            <Text style={{ color: "#fff", fontSize: 22, fontFamily: "Inter_700Bold", textAlign: "center" }}>Identity Verification Required</Text>
+            <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 }}>
+              Complete E-KYC (Aadhaar + PAN) before you can register as a Host and start earning.
+            </Text>
+          </View>
+          <View style={{ marginTop: 24, backgroundColor: "rgba(255,255,255,0.12)", borderRadius: 16, padding: 16, gap: 12 }}>
+            {[
+              { icon: "credit-card", text: "Aadhaar OTP verification via UIDAI" },
+              { icon: "file-text",   text: "PAN card verification via NSDL" },
+              { icon: "home",        text: "Bank account penny-drop verification" },
+            ].map((item) => (
+              <View key={item.text} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Feather name={item.icon as any} size={16} color="#FFB800" />
+                <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: 13, fontFamily: "Inter_400Regular" }}>{item.text}</Text>
+              </View>
+            ))}
+          </View>
+        </LinearGradient>
+        <View style={{ padding: 24, gap: 14 }}>
+          <Pressable onPress={() => router.push("/kyc")}>
+            <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 16, borderRadius: 16 }}>
+              <Feather name="shield" size={18} color="#fff" />
+              <Text style={{ color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" }}>Complete E-KYC Now</Text>
+            </LinearGradient>
+          </Pressable>
+          <Pressable onPress={() => router.back()}>
+            <Text style={{ color: colors.mutedForeground, fontSize: 14, fontFamily: "Inter_500Medium", textAlign: "center" }}>Go Back</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    );
+  }
+
   // ── Show registration gate if not a host ────────────────────────────────────
   if (!user?.isHost) {
     return (

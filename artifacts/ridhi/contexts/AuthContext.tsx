@@ -34,6 +34,14 @@ export interface UserProfile {
   isAgent?: boolean;
   hostRegisteredAt?: string;
   agentRegisteredAt?: string;
+  // KYC / Identity verification
+  kycStatus?: "unverified" | "pending" | "verified" | "rejected";
+  aadhaarVerified?: boolean;
+  panVerified?: boolean;
+  aadhaarNumber?: string; // masked: XXXX XXXX XXXX
+  panNumber?: string;     // masked: XXXXX9999X
+  kycSubmittedAt?: string;
+  kycVerifiedAt?: string;
 }
 
 interface AuthContextValue {

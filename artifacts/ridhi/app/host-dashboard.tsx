@@ -248,15 +248,27 @@ export default function HostDashboard() {
                 </View>
               ))}
             </View>
-            <Pressable
-              onPress={() => router.push("/withdraw" as any)}
-              style={styles.payoutBtn}
-            >
-              <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payoutBtnGrad}>
-                <Feather name="arrow-up-circle" size={16} color="#fff" />
-                <Text style={styles.payoutBtnText}>Request Payout</Text>
-              </LinearGradient>
-            </Pressable>
+            {user?.kycStatus === "verified" ? (
+              <Pressable
+                onPress={() => router.push("/withdraw" as any)}
+                style={styles.payoutBtn}
+              >
+                <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.payoutBtnGrad}>
+                  <Feather name="arrow-up-circle" size={16} color="#fff" />
+                  <Text style={styles.payoutBtnText}>Request Payout</Text>
+                </LinearGradient>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => router.push("/kyc" as any)}
+                style={[styles.payoutBtn, { backgroundColor: colors.card, borderWidth: 1, borderColor: "#FFB80040" }]}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 16, paddingHorizontal: 20, borderRadius: 16, backgroundColor: "#FFB80015" }}>
+                  <Feather name="shield" size={16} color="#FFB800" />
+                  <Text style={{ color: "#FFB800", fontSize: 15, fontFamily: "Inter_700Bold" }}>Complete KYC to Withdraw</Text>
+                </View>
+              </Pressable>
+            )}
           </View>
         </View>
 

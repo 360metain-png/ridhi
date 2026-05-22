@@ -13,7 +13,6 @@ import {
   Image,
 } from "react-native";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -132,11 +131,11 @@ export default function WithdrawScreen() {
   const { gross, platformFee, gst, totalDeduct, net } = calc(coinAmt);
 
   useEffect(() => {
-    AsyncStorage.getItem("ridhi_kyc_submitted").then((val) => {
-      if (!val || val !== "true") setStep("kyc_gate");
-      setKycChecked(true);
-    });
-  }, []);
+    // Check real KYC status from user profile
+    const verified = user?.kycStatus === "verified";
+    if (!verified) setStep("kyc_gate");
+    setKycChecked(true);
+  }, [user?.kycStatus]);
 
   useEffect(() => {
     if (step === "success") {

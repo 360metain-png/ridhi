@@ -106,22 +106,35 @@ export default function CreatorDashboardScreen() {
         contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 32 }}
       >
         {/* ── KYC Gate Banner ── */}
-        <Pressable
-          onPress={() => router.push("/kyc" as any)}
-          style={styles.kycBanner}
-        >
-          <View style={styles.kycBannerLeft}>
-            <Feather name="alert-triangle" size={18} color="#FFB800" />
-            <View>
-              <Text style={styles.kycBannerTitle}>Complete E-KYC to Unlock Earnings</Text>
-              <Text style={styles.kycBannerSub}>Upload identity + address proof · Pending admin approval</Text>
+        {user?.kycStatus !== "verified" ? (
+          <Pressable
+            onPress={() => router.push("/kyc" as any)}
+            style={styles.kycBanner}
+          >
+            <View style={styles.kycBannerLeft}>
+              <Feather name="alert-triangle" size={18} color="#FFB800" />
+              <View>
+                <Text style={styles.kycBannerTitle}>Complete E-KYC to Unlock Earnings</Text>
+                <Text style={styles.kycBannerSub}>Aadhaar + PAN + Bank verification required · 2–5 minutes</Text>
+              </View>
             </View>
+            <View style={styles.kycBannerAction}>
+              <Text style={styles.kycBannerActionText}>Verify Now</Text>
+              <Feather name="arrow-right" size={14} color="#FFB800" />
+            </View>
+          </Pressable>
+        ) : (
+          <View style={[styles.kycBanner, { borderColor: "#22C55E40", backgroundColor: "#22C55E10" }]}>
+            <View style={styles.kycBannerLeft}>
+              <Feather name="check-circle" size={18} color="#22C55E" />
+              <View>
+                <Text style={[styles.kycBannerTitle, { color: "#22C55E" }]}>E-KYC Verified ✓</Text>
+                <Text style={styles.kycBannerSub}>Aadhaar, PAN & Bank verified · Withdrawals enabled</Text>
+              </View>
+            </View>
+            <Feather name="check" size={14} color="#22C55E" />
           </View>
-          <View style={styles.kycBannerAction}>
-            <Text style={styles.kycBannerActionText}>Verify Now</Text>
-            <Feather name="arrow-right" size={14} color="#FFB800" />
-          </View>
-        </Pressable>
+        )}
 
         <View style={styles.statsGrid}>
           {ANALYTICS.map((stat) => (
