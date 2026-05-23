@@ -723,14 +723,16 @@ export const CHATS: ChatPreview[] = [
 ];
 
 export const NOTIFICATIONS = [
-  { id: "n1", type: "like",    actor: "Ananya Singh",  content: "liked your photo",                  timeAgo: "5m",  read: false },
-  { id: "n2", type: "match",   actor: "Shreya Kapoor", content: "you have a new match!",             timeAgo: "20m", read: false },
-  { id: "n3", type: "comment", actor: "Rahul Mehta",   content: "commented: \"Wow amazing shot!\"",  timeAgo: "1h",  read: false },
-  { id: "n4", type: "coin",    actor: "System",        content: "Daily login reward: +10 coins",     timeAgo: "2h",  read: true  },
-  { id: "n5", type: "follow",  actor: "Kavya Reddy",   content: "started following you",             timeAgo: "3h",  read: true  },
-  { id: "n6", type: "match",   actor: "Pooja Nair",    content: "you have a new match!",             timeAgo: "5h",  read: true  },
-  { id: "n7", type: "like",    actor: "Meera Patel",   content: "liked your post",                   timeAgo: "1d",  read: true  },
-  { id: "n8", type: "coin",    actor: "System",        content: "Referral reward: +50 coins added",  timeAgo: "2d",  read: true  },
+  { id: "n1", type: "campaign_live",     actor: "Ridhi Ads",     content: "Your campaign \"Summer Sale — 40% Off!\" is now live. Estimated reach: 28K users.", timeAgo: "5m",  read: false },
+  { id: "n2", type: "campaign_rejected", actor: "Ridhi Ads",     content: "Campaign \"Online Cooking Classes\" was rejected. Reason: unverified health claims.", timeAgo: "1h",  read: false },
+  { id: "n3", type: "like",    actor: "Ananya Singh",  content: "liked your photo",                  timeAgo: "2h",  read: false },
+  { id: "n4", type: "match",   actor: "Shreya Kapoor", content: "you have a new match!",             timeAgo: "3h", read: false },
+  { id: "n5", type: "comment", actor: "Rahul Mehta",   content: "commented: \"Wow amazing shot!\"",  timeAgo: "5h",  read: false },
+  { id: "n6", type: "coin",    actor: "System",        content: "Daily login reward: +10 coins",     timeAgo: "6h",  read: true  },
+  { id: "n7", type: "follow",  actor: "Kavya Reddy",   content: "started following you",             timeAgo: "8h",  read: true  },
+  { id: "n8", type: "match",   actor: "Pooja Nair",    content: "you have a new match!",             timeAgo: "1d",  read: true  },
+  { id: "n9", type: "like",    actor: "Meera Patel",   content: "liked your post",                   timeAgo: "1d",  read: true  },
+  { id: "n10", type: "coin",   actor: "System",        content: "Referral reward: +50 coins added",  timeAgo: "2d",  read: true  },
 ];
 
 export interface MarketingNotification {
@@ -999,6 +1001,161 @@ export const MARKETING_NOTIFICATIONS: MarketingNotification[] = [
     timeAgo: "2d",
     read: true,
   },
+];
+
+// ── User Ad Campaigns ───────────────────────────────────────────────────────
+export type AdCampaignStatus = "pending" | "active" | "paused" | "completed" | "rejected";
+export type AdCampaignFormat = "feed" | "story" | "reel" | "banner" | "explore";
+export type AdPayMethod = "coins" | "direct";
+
+export interface AdCampaign {
+  id: string;
+  headline: string;
+  body: string;
+  cta: string;
+  format: AdCampaignFormat;
+  imageUri?: string;
+  videoUri?: string;
+  videoDurationSec?: number;
+  targetCity: string;
+  targetAge: string;
+  targetGender: string;
+  targetInterests: string;
+  dailyBudget: number;
+  days: number;
+  totalCost: number;
+  payMethod: AdPayMethod;
+  status: AdCampaignStatus;
+  submittedAt: string;
+  startDate?: string;
+  endDate?: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  spent: number;
+  rejectionReason?: string;
+  invoiceId?: string;
+  invoiceDate?: string;
+  gstAmount: number;
+}
+
+export const USER_CAMPAIGNS: AdCampaign[] = [
+  {
+    id: "uc1",
+    headline: "Summer Sale — 40% Off Everything!",
+    body: "Shop the biggest summer sale of the year. Limited stock, unlimited style.",
+    cta: "Shop Now",
+    format: "feed",
+    imageUri: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?w=600",
+    targetCity: "Mumbai",
+    targetAge: "18–34",
+    targetGender: "All",
+    targetInterests: "Fashion, Shopping",
+    dailyBudget: 500,
+    days: 7,
+    totalCost: 3500,
+    payMethod: "direct",
+    status: "active",
+    submittedAt: "15 May, 10:30 AM",
+    startDate: "16 May",
+    endDate: "22 May",
+    impressions: 28400,
+    clicks: 852,
+    ctr: 3.0,
+    spent: 2100,
+    invoiceId: "RDH-INV-2025051501",
+    invoiceDate: "15 May 2025",
+    gstAmount: 534,
+  },
+  {
+    id: "uc2",
+    headline: "New Collection Launch — Ethnic Wear",
+    body: "Discover handcrafted ethnic wear from India's finest artisans. Free shipping on first order.",
+    cta: "Explore",
+    format: "story",
+    imageUri: "https://images.unsplash.com/photo-1605763240004-7e93b172d754?w=600",
+    targetCity: "Delhi, Jaipur",
+    targetAge: "25–44",
+    targetGender: "Female",
+    targetInterests: "Fashion, Culture",
+    dailyBudget: 300,
+    days: 5,
+    totalCost: 1500,
+    payMethod: "coins",
+    status: "completed",
+    submittedAt: "10 May, 2:15 PM",
+    startDate: "11 May",
+    endDate: "15 May",
+    impressions: 18700,
+    clicks: 561,
+    ctr: 3.0,
+    spent: 1500,
+    gstAmount: 0,
+  },
+  {
+    id: "uc3",
+    headline: "Fitness Bootcamp — Join Today!",
+    body: "Transform your body in 30 days. Personal trainers, diet plans & community support.",
+    cta: "Sign Up",
+    format: "reel",
+    videoUri: "https://sample-videos.com/zip/10/mp4/720p/10 sec.mp4",
+    videoDurationSec: 10,
+    targetCity: "Bangalore",
+    targetAge: "18–34",
+    targetGender: "All",
+    targetInterests: "Fitness, Health",
+    dailyBudget: 800,
+    days: 10,
+    totalCost: 8000,
+    payMethod: "direct",
+    status: "pending",
+    submittedAt: "18 May, 9:00 AM",
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    spent: 0,
+    gstAmount: 1220,
+  },
+  {
+    id: "uc4",
+    headline: "Online Cooking Classes — Master Chef",
+    body: "Learn 50+ Indian recipes from celebrity chefs. Live classes every weekend.",
+    cta: "Book Now",
+    format: "explore",
+    imageUri: "https://images.unsplash.com/photo-1556910103-1c02745a30bf?w=600",
+    targetCity: "All India",
+    targetAge: "25–54",
+    targetGender: "All",
+    targetInterests: "Food, Cooking",
+    dailyBudget: 200,
+    days: 14,
+    totalCost: 2800,
+    payMethod: "coins",
+    status: "rejected",
+    submittedAt: "14 May, 11:00 AM",
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    spent: 0,
+    rejectionReason: "Creative contains unverified health claims. Please revise and resubmit.",
+    gstAmount: 0,
+  },
+];
+
+// ── Campaign status notifications ──────────────────────────────────────────────
+export interface CampaignNotification {
+  id: string;
+  type: "campaign_live" | "campaign_rejected" | "campaign_completed";
+  campaignId: string;
+  campaignHeadline: string;
+  timeAgo: string;
+  read: boolean;
+}
+
+export const CAMPAIGN_NOTIFICATIONS: CampaignNotification[] = [
+  { id: "cn1", type: "campaign_live", campaignId: "uc1", campaignHeadline: "Summer Sale — 40% Off Everything!", timeAgo: "2h", read: false },
+  { id: "cn2", type: "campaign_rejected", campaignId: "uc4", campaignHeadline: "Online Cooking Classes — Master Chef", timeAgo: "4h", read: false },
+  { id: "cn3", type: "campaign_completed", campaignId: "uc2", campaignHeadline: "New Collection Launch — Ethnic Wear", timeAgo: "3d", read: true },
 ];
 
 export const COIN_PACKAGES = [

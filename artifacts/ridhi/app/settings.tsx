@@ -218,6 +218,12 @@ export default function SettingsScreen() {
           <SettingRow icon="key" label="Biometric Login" onPress={() => Alert.alert("Biometric Login", "Use Face ID or Fingerprint for faster, secure login.", [{ text: "Cancel", style: "cancel" }, { text: "Enable", onPress: () => Alert.alert("Enabled ✓", "Biometric login is now active on this device.", [{ text: "OK" }]) }])} />
         </View>
 
+        <SectionHeader title="Business" />
+        <View style={[styles.section, { borderColor: colors.border }]}>
+          <SettingRow icon="megaphone" label="Ads Manager" subtitle="Create & manage ad campaigns" onPress={() => router.push("/ads-manager" as any)} />
+          <SettingRow icon="briefcase" label="Brand Register" subtitle="Register your business on Ridhi" onPress={() => router.push("/brand-register" as any)} />
+        </View>
+
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />

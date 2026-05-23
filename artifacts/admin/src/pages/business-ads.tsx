@@ -335,10 +335,30 @@ export default function BusinessAdsPage() {
   const [search,    setSearch]    = useState("");
   const [fmtFilter, setFmtFilter] = useState<"all" | AdFormat>("all");
 
-  const handleApprove = (id: string) =>
+  const handleApprove = (id: string) => {
     setCampaigns(p => p.map(c => c.id === id ? { ...c, status: "active" as AdStatus, startDate: "18 May", endDate: "25 May" } : c));
-  const handleReject  = (id: string, reason: string) =>
+    const c = campaigns.find(x => x.id === id);
+    if (c) {
+      // Simulated notification dispatch
+      setTimeout(() => {
+        alert(`Notification sent to ${c.bizContact}
+✅ Campaign "${c.headline}" approved & live!
+Channels: Push + SMS + Email`);
+      }, 200);
+    }
+  };
+  const handleReject = (id: string, reason: string) => {
     setCampaigns(p => p.map(c => c.id === id ? { ...c, status: "rejected" as AdStatus, rejectionReason: reason } : c));
+    const c = campaigns.find(x => x.id === id);
+    if (c) {
+      setTimeout(() => {
+        alert(`Notification sent to ${c.bizContact}
+❌ Campaign "${c.headline}" rejected.
+Reason: ${reason}
+Channels: Push + SMS + Email`);
+      }, 200);
+    }
+  };
   const handlePause   = (id: string) =>
     setCampaigns(p => p.map(c => c.id === id ? { ...c, status: "paused"   as AdStatus } : c));
   const handleResume  = (id: string) =>

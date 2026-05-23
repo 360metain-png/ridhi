@@ -51,6 +51,9 @@ const SOCIAL_ICONS: Record<string, { icon: string; color: string }> = {
   comment: { icon: "message-circle", color: "#4A90E2" },
   coin:    { icon: "star",          color: "#FFB800" },
   follow:  { icon: "user-plus",     color: "#34C759" },
+  campaign_live:     { icon: "megaphone", color: "#22C55E" },
+  campaign_rejected: { icon: "alert-circle", color: "#EF4444" },
+  campaign_completed:{ icon: "check-circle", color: "#3B82F6" },
 };
 
 function getNavTarget(type: string): string {
@@ -60,6 +63,9 @@ function getNavTarget(type: string): string {
     case "match":   return "/(tabs)/match";
     case "coin":    return "/wallet";
     case "follow":  return "/(tabs)/profile";
+    case "campaign_live":
+    case "campaign_rejected":
+    case "campaign_completed": return "/ads-manager";
     default:        return "/(tabs)";
   }
 }
@@ -99,10 +105,11 @@ function SocialNotifCard({
         <View style={styles.metaRow}>
           <Text style={[styles.timeText, { color: colors.mutedForeground }]}>{item.timeAgo}</Text>
           <Text style={[styles.actionText, { color: colors.primary }]}>
-            {item.type === "follow"  ? "View Profile →" :
-             item.type === "match"   ? "See Match →" :
-             item.type === "coin"    ? "Open Wallet →" :
-             item.type === "comment" ? "View Post →" : "View →"}
+            {item.type === "follow"           ? "View Profile →" :
+             item.type === "match"            ? "See Match →" :
+             item.type === "coin"             ? "Open Wallet →" :
+             item.type === "comment"          ? "View Post →" :
+             item.type.startsWith("campaign") ? "Ads Manager →" : "View →"}
           </Text>
         </View>
       </View>

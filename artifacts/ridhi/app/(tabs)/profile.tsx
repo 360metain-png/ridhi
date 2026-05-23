@@ -102,6 +102,13 @@ const MENU_SECTIONS = [
     ],
   },
   {
+    title: "Business Tools",
+    items: [
+      { icon: "megaphone",   label: "Ads Manager",       route: "/ads-manager",    color: "#7B2FBE" },
+      { icon: "briefcase",   label: "Brand Register",    route: "/brand-register", color: "#E91E8C" },
+    ],
+  },
+  {
     title: "Creator Marketplace",
     items: [
       { icon: "target",      label: "Brand Deals",        route: "/creator-marketplace", color: "#E91E8C" },
