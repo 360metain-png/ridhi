@@ -10,7 +10,7 @@ import {
   Star, TrendingUp, IndianRupee, Users, Eye, CheckCircle,
   Search, Radio, Award, Crown, Zap, ShieldCheck,
   XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
-  Trash2, ShieldOff, Info, Lock, Network, ChevronRight,
+  Trash2, ShieldOff, Info, Lock, Network, ChevronRight, UserCheck,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -332,15 +332,37 @@ export default function HostsPage() {
         </Badge>
       </div>
 
+      {/* ── Recruitment Chain Banner ── */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-50 to-pink-50 border border-violet-200">
+        <Network className="w-5 h-5 text-violet-600 flex-shrink-0" />
+        <div className="flex items-center gap-2 text-sm text-violet-900 flex-wrap">
+          <span className="font-bold">Recruitment Chain:</span>
+          <span className="flex items-center gap-1 bg-violet-100 border border-violet-300 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Crown className="w-3 h-3" /> Super Admin
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <UserCheck className="w-3 h-3" /> Admin <span className="text-blue-400">recruits</span>
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-pink-50 border border-pink-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Briefcase className="w-3 h-3" /> Agent <span className="text-pink-400">recruits</span>
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Star className="w-3 h-3" /> Host
+          </span>
+        </div>
+      </div>
+
       {/* ── Access info banner ── */}
       {(isAdmin || isAgent) && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-200">
-          <Info className="w-4 h-4 text-violet-600 flex-shrink-0" />
-          <p className="text-sm text-violet-800">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+          <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800">
             {isAdmin
-              ? `You are viewing hosts recruited by your ${visibleAgents.length} agents. Hosts under other admins' agents are not visible to you.`
-              : `You are viewing only the hosts you personally recruited. Other agents' hosts are not accessible.`}
-            {" "}Contact Super Admin for full directory access.
+              ? <><strong>Admin view</strong> — You see hosts recruited by <strong>your agents</strong>. Hosts under other admins' agents are hidden. You can verify, suspend, or remove any host in your chain.</>
+              : <><strong>Agent view</strong> — You see only <strong>hosts you personally recruited</strong>. You manage their day-to-day status and earnings. Contact your admin for escalations.</>}
           </p>
         </div>
       )}
@@ -603,6 +625,16 @@ export default function HostsPage() {
                               {h.isLive && <Badge className="text-xs h-4 bg-red-500 hover:bg-red-500 px-1">LIVE</Badge>}
                             </div>
                             <p className="text-xs text-muted-foreground">{h.city} · since {h.joinDate}</p>
+                            {isAdmin && (
+                              <p className="text-[10px] text-pink-600 font-medium mt-0.5">
+                                Recruited by {agentName(h.agentId)}
+                              </p>
+                            )}
+                            {isAgent && (
+                              <p className="text-[10px] text-emerald-600 font-medium mt-0.5">
+                                Recruited by you
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

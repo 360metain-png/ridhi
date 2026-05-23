@@ -269,14 +269,14 @@ export default function AgentsPage() {
             Agent Management
             {!isSA && (
               <Badge variant="outline" className="text-xs ml-2 border-violet-300 text-violet-600">
-                <Lock className="w-3 h-3 mr-1" /> Showing your agents only
+                <Lock className="w-3 h-3 mr-1" /> Your agents only
               </Badge>
             )}
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
             {isSA
               ? "Super Admin — full hierarchy view · assign agents to admins · remove agents"
-              : "Admin view — your recruited agents and their host networks"}
+              : "Admins recruit agents → Agents recruit hosts — manage your network"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -286,18 +286,41 @@ export default function AgentsPage() {
               {showHierarchy ? "Hide" : "Show"} Hierarchy
             </Button>
           )}
-          <Button className="gap-2"><Plus className="w-4 h-4" /> Invite Agent</Button>
+          <Button className="gap-2"><Plus className="w-4 h-4" /> Recruit Agent</Button>
+        </div>
+      </div>
+
+      {/* ── Recruitment Chain Banner ── */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-50 to-pink-50 border border-violet-200">
+        <Network className="w-5 h-5 text-violet-600 flex-shrink-0" />
+        <div className="flex items-center gap-2 text-sm text-violet-900 flex-wrap">
+          <span className="font-bold">Recruitment Chain:</span>
+          <span className="flex items-center gap-1 bg-violet-100 border border-violet-300 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Crown className="w-3 h-3" /> Super Admin
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <UserCheck className="w-3 h-3" /> Admin <span className="text-blue-400">recruits</span>
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-pink-50 border border-pink-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Briefcase className="w-3 h-3" /> Agent <span className="text-pink-400">recruits</span>
+          </span>
+          <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
+          <span className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-0.5 text-xs font-medium">
+            <Star className="w-3 h-3" /> Host
+          </span>
         </div>
       </div>
 
       {/* ── Role info banner ── */}
       {isAdmin && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 border border-violet-200">
-          <Info className="w-4 h-4 text-violet-600 flex-shrink-0" />
-          <p className="text-sm text-violet-800">
-            You are viewing agents you recruited.
-            <strong className="ml-1">Only your {activeAgents} active agents</strong> and their host networks are visible to you.
-            Contact Super Admin to see the full directory.
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+          <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800">
+            You are viewing <strong>agents you personally recruited</strong>.
+            You can manage their status, review their host networks, and approve new agent applications.
+            <strong className="ml-1">{activeAgents} active agents</strong> under you right now.
           </p>
         </div>
       )}
@@ -546,6 +569,11 @@ export default function AgentsPage() {
                           <div>
                             <p className="font-medium">{a.name}</p>
                             <p className="text-xs text-muted-foreground">{a.city} · since {a.joinDate}</p>
+                            {!isSA && (
+                              <p className="text-[10px] text-violet-600 font-medium mt-0.5">
+                                Recruited by you · {a.hosts} hosts managed
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
