@@ -442,7 +442,7 @@ export default function ChatroomDetailScreen() {
               accessibilityRole="button"
               accessibilityLabel="Share room"
             >
-              <Feather name="share-2" size={16} color={colors.foreground} />
+              <Feather name="share" size={16} color={colors.foreground} />
               <Text style={[styles.infoActionText, { color: colors.foreground }]}>Share</Text>
             </Pressable>
           </View>

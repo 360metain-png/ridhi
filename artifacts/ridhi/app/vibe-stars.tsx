@@ -377,7 +377,7 @@ export default function VibeStarsScreen() {
 
                 {/* Share nudge */}
                 <Pressable style={[styles.shareRow, { borderColor: sign.color + "30", backgroundColor: sign.color + "10" }]}>
-                  <Feather name="share-2" size={14} color={sign.color} />
+                  <Feather name="share" size={14} color={sign.color} />
                   <Text style={[styles.shareText, { color: sign.color }]}>Share my horoscope</Text>
                 </Pressable>
               </LinearGradient>

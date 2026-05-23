@@ -181,7 +181,7 @@ export default function StoryViewerScreen() {
                 <Feather name="heart" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
               <Pressable style={styles.replyActionBtn}>
-                <Feather name="share-2" size={22} color="rgba(255,255,255,0.9)" />
+                <Feather name="share" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
             </View>
           )}

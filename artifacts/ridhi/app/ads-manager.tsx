@@ -232,7 +232,7 @@ function InvoiceModal({
               onPress={() => Alert.alert("Share Invoice", "Invoice shared successfully.")}
               style={[styles.invoiceBtn, { backgroundColor: colors.primary + "15" }]}
             >
-              <Feather name="share-2" size={16} color={colors.primary} />
+              <Feather name="share" size={16} color={colors.primary} />
               <Text style={[styles.invoiceBtnText, { color: colors.primary }]}>Share</Text>
             </TouchableOpacity>
             <TouchableOpacity

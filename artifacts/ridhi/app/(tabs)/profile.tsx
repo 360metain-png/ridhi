@@ -134,7 +134,7 @@ const MENU_SECTIONS = [
 export default function ProfileScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
-  const { user, logout, updateProfile } = useAuth();
+  const { user, isLoading: authLoading, logout, updateProfile } = useAuth();
 
   const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
@@ -155,7 +155,31 @@ export default function ProfileScreen() {
   const toggleFollow = (id: string) =>
     setFollowStates((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center", paddingTop: topPad }]}>
+        {authLoading ? (
+          <View style={{ alignItems: "center", gap: 16 }}>
+            <View style={[styles.loadingRing, { borderColor: colors.primary }]} />
+            <Text style={[styles.loadingText, { color: colors.mutedForeground }]}>Loading your profile…</Text>
+          </View>
+        ) : (
+          <View style={{ alignItems: "center", gap: 20, paddingHorizontal: 32 }}>
+            <View style={[styles.ghostIconWrap, { backgroundColor: colors.primary + "18" }]}>
+              <Feather name="user" size={40} color={colors.primary} />
+            </View>
+            <Text style={[styles.ghostTitle, { color: colors.foreground }]}>Not logged in</Text>
+            <Text style={[styles.ghostSub, { color: colors.mutedForeground, textAlign: "center" }]}>
+              Sign in to view your profile, manage your earnings, and access all features.
+            </Text>
+            <Pressable onPress={() => router.push("/auth/login")} style={[styles.ghostBtn, { backgroundColor: colors.primary }]}>
+              <Text style={styles.ghostBtnText}>Sign In</Text>
+            </Pressable>
+          </View>
+        )}
+      </View>
+    );
+  }
 
   const displayName = user.nickname || user.name;
 
@@ -783,6 +807,15 @@ const styles = StyleSheet.create({
   avatarPickerIcon: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   avatarPickerOptionTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   avatarPickerOptionSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+
+  // ── Empty / loading state ───────────────────────────────────────────────
+  loadingRing: { width: 44, height: 44, borderRadius: 22, borderWidth: 3, borderTopColor: "transparent", borderStyle: "solid" },
+  loadingText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  ghostIconWrap: { width: 80, height: 80, borderRadius: 40, alignItems: "center", justifyContent: "center" },
+  ghostTitle: { fontSize: 20, fontFamily: "Inter_700Bold" },
+  ghostSub: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
+  ghostBtn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 16 },
+  ghostBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 
   // ── Bottom sheet ──────────────────────────────────────────────────────────
   sheetOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },

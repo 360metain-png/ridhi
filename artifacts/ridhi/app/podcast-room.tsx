@@ -259,7 +259,7 @@ export default function PodcastRoomScreen() {
           </View>
         </View>
         <Pressable style={styles.headerBtn} onPress={() => {}}>
-          <Feather name="share-2" size={20} color="#fff" />
+          <Feather name="share" size={20} color="#fff" />
         </Pressable>
       </View>
 
@@ -470,7 +470,7 @@ export default function PodcastRoomScreen() {
         </Pressable>
 
         <Pressable style={styles.barItem} onPress={() => {}}>
-          <Feather name="share-2" size={24} color="rgba(255,255,255,0.7)" />
+          <Feather name="share" size={24} color="rgba(255,255,255,0.7)" />
           <Text style={styles.barLabel}>Share</Text>
         </Pressable>
       </View>
