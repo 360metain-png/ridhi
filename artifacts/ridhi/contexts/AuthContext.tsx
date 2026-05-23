@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { apiFetch } from "@/utils/api";
 
 export interface UserProfile {
   id: string;
@@ -57,6 +58,7 @@ interface AuthContextValue {
   deductCoins: (amount: number) => Promise<boolean>;
   subscribePlan: (planId: string, billing: string, bonusCoins: number) => Promise<void>;
   cancelPlan: () => Promise<void>;
+  syncKycStatus: (userId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -88,9 +90,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem("ridhi_user").then((data) => {
+    AsyncStorage.getItem("ridhi_user").then(async (data) => {
       if (data) {
-        setUser(JSON.parse(data));
+        const parsed = JSON.parse(data) as UserProfile;
+        setUser(parsed);
+        // Sync KYC status from backend on app load
+        try {
+          const resp = await apiFetch<{ success: boolean; kyc?: { status: string; aadhaarVerified: boolean; panVerified: boolean; bankVerified: boolean } }>(
+            `/api/kyc/status/${encodeURIComponent(parsed.id)}`,
+          );
+          if (resp.success && resp.kyc) {
+            const k = resp.kyc;
+            const updated: Partial<UserProfile> = {
+              kycStatus: k.status === "approved" ? "verified" : (k.status as UserProfile["kycStatus"]),
+              aadhaarVerified: k.aadhaarVerified,
+              panVerified: k.panVerified,
+            };
+            setUser((prev) => {
+              if (!prev) return prev;
+              const u = { ...prev, ...updated };
+              AsyncStorage.setItem("ridhi_user", JSON.stringify(u));
+              return u;
+            });
+          }
+        } catch {
+          // offline or error: keep local state
+        }
       }
       setIsLoading(false);
     });
@@ -200,9 +225,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const syncKycStatus = useCallback(async (userId: string) => {
+    try {
+      const resp = await apiFetch<{ success: boolean; kyc?: { status: string; aadhaarVerified: boolean; panVerified: boolean; bankVerified: boolean } }>(
+        `/api/kyc/status/${encodeURIComponent(userId)}`,
+      );
+      if (resp.success && resp.kyc) {
+        const k = resp.kyc;
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated: UserProfile = {
+            ...prev,
+            kycStatus: k.status === "approved" ? "verified" : (k.status as UserProfile["kycStatus"]),
+            aadhaarVerified: k.aadhaarVerified,
+            panVerified: k.panVerified,
+          };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch {
+      // offline: keep local state
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus }}
     >
       {children}
     </AuthContext.Provider>

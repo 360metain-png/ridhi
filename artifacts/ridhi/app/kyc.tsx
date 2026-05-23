@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/utils/api";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 
@@ -228,25 +229,55 @@ export default function KYCScreen() {
   const sendOtp = async () => {
     if (aadhaarDigits.length !== 12) return;
     setSendingOtp(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setSendingOtp(false);
-    setOtpSent(true);
-    setResendCooldown(30);
-    setOtpValue("");
     setOtpError("");
+    try {
+      const resp = await apiFetch<{ success: boolean; message: string; demo?: boolean }>(
+        "/api/kyc/aadhaar/send-otp",
+        {
+          method: "POST",
+          body: JSON.stringify({ aadhaarNumber: aadhaarDigits }),
+        },
+      );
+      setSendingOtp(false);
+      if (resp.success) {
+        setOtpSent(true);
+        setResendCooldown(30);
+        setOtpValue("");
+        // In demo mode the response includes the OTP in the message
+        if (resp.demo) {
+          setOtpError(resp.message); // show as a helpful hint in demo mode
+        }
+      } else {
+        setOtpError(resp.message || "Failed to send OTP");
+      }
+    } catch (err: any) {
+      setSendingOtp(false);
+      setOtpError(err.message || "Failed to send OTP. Please try again.");
+    }
   };
 
   const verifyOtp = async () => {
-    if (otpValue.length !== 6) return;
+    if (otpValue.length !== 6 || !aadhaarDigits) return;
     setSendingOtp(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSendingOtp(false);
-    // Accept any 6-digit OTP for demo; in production validate via UIDAI API
-    if (otpValue === "000000") {
-      setOtpError("Incorrect OTP. Please try again.");
-    } else {
-      setOtpVerified(true);
-      setOtpError("");
+    setOtpError("");
+    try {
+      const resp = await apiFetch<{ success: boolean; message: string }>(
+        "/api/kyc/aadhaar/verify-otp",
+        {
+          method: "POST",
+          body: JSON.stringify({ aadhaarNumber: aadhaarDigits, otp: otpValue }),
+        },
+      );
+      setSendingOtp(false);
+      if (resp.success) {
+        setOtpVerified(true);
+        setOtpError("");
+      } else {
+        setOtpError(resp.message || "Incorrect OTP. Please try again.");
+      }
+    } catch (err: any) {
+      setSendingOtp(false);
+      setOtpError(err.message || "Verification failed. Please try again.");
     }
   };
 
@@ -272,14 +303,27 @@ export default function KYCScreen() {
   const verifyBank = async () => {
     if (!accNumber || accNumber !== accConfirm || ifsc.length !== 11 || !holderName || !accType) return;
     setVerifyingBank(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setVerifyingBank(false);
-    // Simulate penny-drop verification
-    if (accNumber.length < 9) {
-      setBankError("Account number too short. Please verify and try again.");
-    } else {
-      setBankVerified(true);
-      setBankError("");
+    setBankError("");
+    try {
+      const resp = await apiFetch<{ success: boolean; message: string; accountName?: string; bankName?: string }>(
+        "/api/kyc/bank/verify",
+        {
+          method: "POST",
+          body: JSON.stringify({ accountNumber: accNumber, ifsc }),
+        },
+      );
+      setVerifyingBank(false);
+      if (resp.success) {
+        setBankVerified(true);
+        setBankError("");
+        if (resp.accountName) setHolderName(resp.accountName);
+        if (resp.bankName && !bankInfo) setBankInfo({ name: resp.bankName, icon: "🏦" });
+      } else {
+        setBankError(resp.message || "Bank verification failed. Please check details and try again.");
+      }
+    } catch (err: any) {
+      setVerifyingBank(false);
+      setBankError(err.message || "Bank verification failed. Please try again.");
     }
   };
 
@@ -300,14 +344,24 @@ export default function KYCScreen() {
     if (!panHolderName.trim()) { setPanError("Please enter the name as on PAN card."); return; }
     setVerifyingPan(true);
     setPanError("");
-    await new Promise((r) => setTimeout(r, 1500));
-    setVerifyingPan(false);
-    // Accept any valid-format PAN for demo; reject only if it ends in "XXXX"
-    if (clean.endsWith("XXXX")) {
-      setPanError("PAN verification failed. Please check the number and try again.");
-    } else {
-      setPanVerified(true);
-      setPanError("");
+    try {
+      const resp = await apiFetch<{ success: boolean; message: string }>(
+        "/api/kyc/pan/verify",
+        {
+          method: "POST",
+          body: JSON.stringify({ panNumber: clean, name: panHolderName.trim() }),
+        },
+      );
+      setVerifyingPan(false);
+      if (resp.success) {
+        setPanVerified(true);
+        setPanError("");
+      } else {
+        setPanError(resp.message || "PAN verification failed. Please check the number and try again.");
+      }
+    } catch (err: any) {
+      setVerifyingPan(false);
+      setPanError(err.message || "PAN verification failed. Please try again.");
     }
   };
 
@@ -320,18 +374,44 @@ export default function KYCScreen() {
     return true;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < TOTAL_STEPS) { setStep(step + 1); return; }
-    // Save KYC to user profile on submit
-    updateProfile({
-      kycStatus: "pending",
-      aadhaarVerified: true,
-      panVerified: true,
-      aadhaarNumber: `XXXX XXXX ${aadhaarDigits.slice(-4)}`,
-      panNumber: `${formatPan(panNumber).slice(0, 2)}XXXX${formatPan(panNumber).slice(6, 7)}XX${formatPan(panNumber).slice(9, 10)}`,
-      kycSubmittedAt: new Date().toISOString(),
-    });
-    setSubmitted(true);
+    // Submit KYC to backend
+    try {
+      const resp = await apiFetch<{ success: boolean; status: string; message: string }>(
+        "/api/kyc/submit",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            userId: user?.id,
+            aadhaarNumber: aadhaarDigits,
+            aadhaarVerified: otpVerified,
+            panNumber: formatPan(panNumber),
+            panVerified,
+            bankAccountNumber: accNumber,
+            bankIfsc: ifsc,
+            bankName: bankInfo?.name,
+            bankHolderName: holderName,
+            bankVerified,
+          }),
+        },
+      );
+      if (resp.success) {
+        updateProfile({
+          kycStatus: resp.status === "approved" ? "verified" : "pending",
+          aadhaarVerified: otpVerified,
+          panVerified,
+          aadhaarNumber: `XXXX XXXX ${aadhaarDigits.slice(-4)}`,
+          panNumber: `${formatPan(panNumber).slice(0, 2)}XXXX${formatPan(panNumber).slice(6, 7)}XX${formatPan(panNumber).slice(9, 10)}`,
+          kycSubmittedAt: new Date().toISOString(),
+        });
+        setSubmitted(true);
+      } else {
+        setOtpError(resp.message || "KYC submission failed. Please try again.");
+      }
+    } catch (err: any) {
+      setOtpError(err.message || "KYC submission failed. Please try again.");
+    }
   };
 
   // ── Success Screen ────────────────────────────────────────────────────────

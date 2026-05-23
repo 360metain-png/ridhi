@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/utils/api";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -131,11 +132,24 @@ export default function WithdrawScreen() {
   const { gross, platformFee, gst, totalDeduct, net } = calc(coinAmt);
 
   useEffect(() => {
-    // Check real KYC status from user profile
-    const verified = user?.kycStatus === "verified";
-    if (!verified) setStep("kyc_gate");
-    setKycChecked(true);
-  }, [user?.kycStatus]);
+    // Fetch real KYC status from backend
+    async function checkKyc() {
+      if (!user?.id) { setKycChecked(true); return; }
+      try {
+        const resp = await apiFetch<{ success: boolean; kyc?: { status: string; aadhaarVerified: boolean; panVerified: boolean; bankVerified: boolean } }>(
+          `/api/kyc/status/${encodeURIComponent(user.id)}`,
+        );
+        const verified = resp.success && resp.kyc?.status === "approved";
+        if (!verified) setStep("kyc_gate");
+      } catch {
+        // offline: fall back to local profile
+        const verified = user?.kycStatus === "verified";
+        if (!verified) setStep("kyc_gate");
+      }
+      setKycChecked(true);
+    }
+    checkKyc();
+  }, [user?.id, user?.kycStatus]);
 
   useEffect(() => {
     if (step === "success") {
