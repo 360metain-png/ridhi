@@ -313,7 +313,7 @@ export default function AgentDashboardScreen() {
             <Text style={[regStyles.fieldLabel, { color: colors.mutedForeground }]}>Experience (optional)</Text>
             <TextInput
               value={regExp} onChangeText={setRegExp}
-              placeholder="e.g. Social media manager, Talent recruiter…"
+              placeholder="e.g. Social media manager, Brand partnerships…"
               placeholderTextColor={colors.mutedForeground}
               style={[regStyles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }]}
             />

@@ -122,7 +122,7 @@ export const CHATROOMS: Chatroom[] = [
   {
     id: "cr6",
     name: "Tech Talks India",
-    description: "Startups, AI, coding, gadgets & career advice",
+    description: "Startups, AI, coding, gadgets & tech trends",
     category: "Tech",
     memberCount: 19200,
     onlineCount: 654,

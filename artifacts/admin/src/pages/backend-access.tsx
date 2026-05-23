@@ -43,7 +43,7 @@ const recentLogs = [
   { ts: "14:22:28", level: "WARN",  service: "media",  msg: "Transcode queue depth > 50 (current: 63)" },
   { ts: "14:22:25", level: "INFO",  service: "api",    msg: "POST /api/coins/recharge 200 — 118ms" },
   { ts: "14:22:21", level: "INFO",  service: "cron",   msg: "Daily coin bonus distributed — 14,320 users" },
-  { ts: "14:22:18", level: "ERROR", service: "media",  msg: "FFmpeg timeout for job job_8k2p9 — retrying (1/3)" },
+  { ts: "14:22:18", level: "ERROR", service: "media",  msg: "FFmpeg timeout for media_8k2p9 — retrying (1/3)" },
   { ts: "14:22:14", level: "INFO",  service: "api",    msg: "GET /api/live-streams 200 — 31ms" },
   { ts: "14:22:11", level: "INFO",  service: "db",     msg: "Autovacuum on users table completed — 0.3s" },
   { ts: "14:22:08", level: "INFO",  service: "api",    msg: "POST /api/match/swipe 200 — 23ms" },

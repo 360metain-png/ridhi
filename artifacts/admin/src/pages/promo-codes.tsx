@@ -30,7 +30,6 @@ type CodeType =
   | "subscription_discount"
   | "vip_upgrade"
   | "pitch_discount"
-  | "job_post_discount"
   | "creator_plan_discount"
   | "deal_post_discount";
 
@@ -64,7 +63,6 @@ const CODE_TYPE_META: Record<CodeType, { label: string; icon: React.ComponentTyp
   subscription_discount:  { label: "Subscription Discount",  icon: Crown,      color: "text-purple-700", bg: "bg-purple-50 border-purple-200", unit: "%" },
   vip_upgrade:            { label: "Free VIP Upgrade",       icon: Star,       color: "text-pink-700",   bg: "bg-pink-50 border-pink-200",     unit: "days" },
   pitch_discount:         { label: "Pitch Fee Discount",     icon: Briefcase,  color: "text-blue-700",   bg: "bg-blue-50 border-blue-200",     unit: "%" },
-  job_post_discount:      { label: "Job Post Discount",      icon: Zap,        color: "text-cyan-700",   bg: "bg-cyan-50 border-cyan-200",     unit: "%" },
   creator_plan_discount:  { label: "Creator Plan Discount",  icon: TrendingUp, color: "text-green-700",  bg: "bg-green-50 border-green-200",   unit: "%" },
   deal_post_discount:     { label: "Deal Post Discount",     icon: Tag,        color: "text-indigo-700", bg: "bg-indigo-50 border-indigo-200", unit: "%" },
 };
@@ -111,11 +109,11 @@ const INITIAL_CODES: PromoCode[] = [
     totalSavings: 0,
   },
   {
-    id: "p6", code: "JOBS20", type: "job_post_discount", title: "Jobs Feature Launch",
-    description: "20% off on job posting coin cost",
-    value: 20, usageLimit: 3000, usedCount: 640, perUserLimit: 2,
+    id: "p6", code: "BRAND25", type: "deal_post_discount", title: "Brand Onboarding Offer",
+    description: "25% off on brand deal posting — new brands only",
+    value: 25, usageLimit: 3000, usedCount: 640, perUserLimit: 2,
     validFrom: "2025-05-01", validUntil: "2025-07-31", status: "paused",
-    targetAudience: "Employers", createdBy: "Arjun Mehta", createdAt: "2025-04-30",
+    targetAudience: "New brands", createdBy: "Arjun Mehta", createdAt: "2025-04-30",
     totalSavings: 19200,
   },
   {
@@ -153,7 +151,7 @@ const typeBreakdownData = [
   { type: "Creator Plan",  count: 872         },
   { type: "Pitch Fee",     count: 10000       },
   { type: "Deal Post",     count: 184         },
-  { type: "Job Post",      count: 640         },
+  { type: "Brand Deal",    count: 640         },
 ];
 
 const STATUS_STYLE: Record<CodeStatus, string> = {

@@ -263,7 +263,7 @@ export default function Settings() {
                 <ToggleRow label="Reels"                    desc="Short-form vertical video feed."                                                         defaultOn={true}  />
                 <ToggleRow label="Dating / Match"           desc="Tinder-style swipe match feature. Toggle off if legal review needed."                   defaultOn={true}  />
                 <ToggleRow label="Communities"              desc="Group communities with posts, threads, and moderation."                                  defaultOn={true}  />
-                <ToggleRow label="Jobs Board"               desc="Job posting and discovery feature."                                                      defaultOn={true}  />
+                <ToggleRow label="Brand Marketplace"        desc="Brand deals & business posting feature."                                               defaultOn={true}  />
                 <ToggleRow label="Creator Dashboard"        desc="Analytics and earnings dashboard for hosts."                                             defaultOn={true}  />
               </CardContent>
             </Card>

@@ -63,8 +63,6 @@ const ALL_MODULES: ModulePermission[] = [
   { key: "business-ads",       label: "Business Ads",       icon: Zap,          section: "Commerce" },
   { key: "special-ads",        label: "Special Client Ads", icon: Crown,        section: "Commerce" },
   { key: "commercial-banners", label: "Commercial Banners", icon: LayoutTemplate, section: "Commerce" },
-  // Jobs
-  { key: "jobs",         label: "Jobs Management",    icon: Briefcase,       section: "Jobs" },
   // Finance
   { key: "subscriptions",label: "Subscriptions",      icon: Crown,           section: "Finance" },
   { key: "coins",        label: "Coins",              icon: Coins,           section: "Finance" },
@@ -79,7 +77,7 @@ const ALL_MODULES: ModulePermission[] = [
   { key: "handbook",     label: "Handbook",           icon: BookOpen,        section: "Platform" },
 ];
 
-const SECTION_ORDER = ["Overview","Users & Content","Creators","Commerce","Jobs","Finance","AI & Intelligence","Platform"];
+const SECTION_ORDER = ["Overview","Users & Content","Creators","Commerce","Finance","AI & Intelligence","Platform"];
 
 // Preset permission templates
 const PRESETS: Record<string, { label: string; desc: string; color: string; perms: string[] }> = {
@@ -100,8 +98,8 @@ const PRESETS: Record<string, { label: string; desc: string; color: string; perm
   },
   creator_admin: {
     label: "Creator Admin", color: "bg-pink-100 text-pink-700 border-pink-200",
-    desc: "Manages hosts, agents, gaming, jobs",
-    perms: ["dashboard","hosts","agents","kyc","calls","gaming","jobs","handbook"],
+    desc: "Manages hosts, agents, gaming, live streams",
+    perms: ["dashboard","hosts","agents","kyc","calls","gaming","live-streams","handbook"],
   },
   marketing_admin: {
     label: "Marketing Admin", color: "bg-purple-100 text-purple-700 border-purple-200",

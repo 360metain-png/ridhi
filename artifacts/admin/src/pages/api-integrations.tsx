@@ -410,7 +410,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Google Maps",
     provider: "Google",
     category: "maps",
-    description: "Location-based features — nearby users, city search, job location, meet-up spots",
+    description: "Location-based features — nearby users, city search, dating meet-up spots",
     docsUrl: "https://developers.google.com/maps",
     status: "connected",
     env: "production",

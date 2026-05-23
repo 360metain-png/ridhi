@@ -218,7 +218,7 @@ function OverviewTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creato
               <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Secondary</p>
               {[
                 { label: "Gaming Arena",        rank: 1, color: "bg-cyan-500"    },
-                { label: "Job Marketplace",     rank: 2, color: "bg-orange-500"  },
+                { label: "Brand Marketplace",   rank: 2, color: "bg-orange-500"  },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3 py-1.5 border-b last:border-0">
                   <span className={`w-5 h-5 rounded-full ${s.color} text-white text-xs flex items-center justify-center font-bold flex-shrink-0`}>{s.rank}</span>
@@ -458,7 +458,7 @@ function PlanConfigTab() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {["Basic Profile", "Random Matches", "Standard Chat", "Limited Filters", "Watch Live Streams", "Join Communities", "Basic Gaming Access", "Job Search Access", "Resume Upload"].map((f) => (
+            {["Basic Profile", "Random Matches", "Standard Chat", "Limited Filters", "Watch Live Streams", "Join Communities", "Basic Gaming Access", "Join Audio Rooms", "Send Virtual Gifts"].map((f) => (
               <span key={f} className="text-xs bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">{f}</span>
             ))}
           </div>

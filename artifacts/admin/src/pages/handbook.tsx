@@ -568,7 +568,7 @@ const ADMIN_SECTIONS: Section[] = [
       "❌ ADMIN CANNOT ACCESS: Coins, Payouts, Revenue, Subscriptions (Super Admin only — all financial pages)",
       "❌ ADMIN CANNOT ACCESS: Content Moderation, Communities, Creative Assets (Super Admin only)",
       "❌ ADMIN CANNOT ACCESS: Promotions & Ads, Live Streams, Business Ads, Special Ads, Commercial Banners (Super Admin only)",
-      "❌ ADMIN CANNOT ACCESS: Jobs Management, Platform Settings, Admin Management (Super Admin only)",
+      "❌ ADMIN CANNOT ACCESS: Brand Marketplace, Platform Settings, Admin Management (Super Admin only)",
       "If you navigate to a restricted page, you will see an Access Denied screen",
       "Your role and all the pages you can access are decided by the Super Admin — contact them if you need expanded access",
     ],
@@ -770,7 +770,7 @@ const SA_SECTIONS: Section[] = [
     ],
     features: [
       "Super Admin sees every page in the sidebar with no restrictions",
-      "SA is the only role that can access: Users, Coins, Payouts, Revenue, Subscriptions, Content Moderation, Communities, Creative Assets, Promotions, Live Streams, Jobs, Business Ads, Special Ads, Commercial Banners, Settings, Admin Management",
+      "SA is the only role that can access: Users, Coins, Payouts, Revenue, Subscriptions, Content Moderation, Communities, Creative Assets, Promotions, Live Streams, Brand Marketplace, Business Ads, Special Ads, Commercial Banners, Settings, Admin Management",
       "SA decides what Admin accounts exist and what responsibilities each Admin handles",
       "Super Admin accounts cannot be revoked from the Admin Management panel — requires server-level access",
     ],
@@ -925,23 +925,6 @@ const SA_SECTIONS: Section[] = [
       "Promo Codes: create discount or coin-bonus codes for marketing campaigns with usage limits and expiry dates",
       "Campaign analytics: impressions, click-through rate, conversions, and total ad revenue",
       "All ad pages (Promotions, Business Ads, Special Ads, Commercial Banners) are Super Admin only",
-    ],
-  },
-  {
-    id: "sa-jobs",
-    icon: Briefcase,
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-    title: "Jobs Management (SA Exclusive)",
-    subtitle: "Review, approve, feature, and remove all job postings on the platform",
-    features: [
-      "All job postings: title, company, city, category, plan tier, posted date, status (Active / Expired / Pending Review)",
-      "Pending Review tab: new job posts from employers — Approve or Reject with a reason",
-      "Remove a post that violates guidelines from the Actions menu",
-      "Feature a job: pinned to top of Jobs discovery for higher visibility",
-      "Job posting plans: ₹499 Basic (30 days), ₹999 Standard (30 days + highlight), ₹1,999 Premium (30 days + featured + alerts)",
-      "Analytics: total posts this month, total applications, top categories and cities",
-      "Jobs Management is Super Admin only — Admin cannot approve, remove, or feature job postings",
     ],
   },
   {
@@ -1170,7 +1153,7 @@ export default function HandbookPage() {
             <div>
               <p className="font-semibold text-rose-900">Ridhi Super Admin — Full Platform Control</p>
               <p className="text-sm text-rose-700 mt-1">
-                Super Admin has unrestricted access to all platform systems including user data, all financial operations, content moderation, community management, creative assets, live streams, jobs, ads, system health, API integrations, and Admin Management. SA decides who becomes an Admin, what they are responsible for, and can revoke any Admin account instantly.
+                Super Admin has unrestricted access to all platform systems including user data, all financial operations, content moderation, community management, creative assets, live streams, brand marketplace, ads, system health, API integrations, and Admin Management. SA decides who becomes an Admin, what they are responsible for, and can revoke any Admin account instantly.
               </p>
             </div>
           </div>

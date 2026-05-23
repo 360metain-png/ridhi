@@ -85,7 +85,7 @@ const PLANS = [
       "5 video calls/day (HD quality)",
       "Unlimited match swipes",
       "Weekly profile boost (1×/week on Explore)",
-      "Job application priority badge",
+      "Profile highlight badge",
       "Priority chat message delivery",
     ],
     locked: [

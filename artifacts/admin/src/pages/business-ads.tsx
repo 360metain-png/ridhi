@@ -80,8 +80,8 @@ const CAMPAIGNS: Campaign[] = [
     startDate: "—", endDate: "—", status: "pending", submittedAt: "18 May 9:05 AM",
   },
   {
-    id: "b4", bizName: "CareerBoost Academy",     bizContact: "marketing@careerboost.in",
-    headline: "Get job-ready in 60 days — Guaranteed!", body: "Python, Data Science, UI/UX. 2,000+ placements. Starts June 1st.",
+    id: "b4", bizName: "SkillUp Academy",         bizContact: "marketing@skillup.in",
+    headline: "Learn in-demand skills in 60 days", body: "Python, Data Science, UI/UX. Live projects. Expert mentors. Starts June 1st.",
     cta: "Enroll Now", format: "explore", objective: "leads", budgetType: "cpc",
     dailyBudget: 800, totalBudget: 5600, spent: 0,
     impressions: 0, clicks: 0, ctr: 0,

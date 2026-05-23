@@ -6,9 +6,9 @@ const APP_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "MobileApplication",
   name: "Ridhi",
-  alternateName: "Ridhi App – Live Streaming, Voice Chat Rooms & Job Platform",
+  alternateName: "Ridhi App – Live Streaming, Voice Chat Rooms & Social Dating",
   description:
-    "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and explore job opportunities — all in one powerful app.",
+    "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and find your match — all in one powerful app.",
   applicationCategory: "SocialNetworkingApplication",
   applicationSubCategory: "EntertainmentApplication",
   operatingSystem: "Android, iOS",
@@ -55,9 +55,9 @@ const APP_SCHEMA = {
 const WEBPAGE_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  name: "Ridhi App – Live Streaming, Voice Chat Rooms & Job Platform",
+  name: "Ridhi App – Live Streaming, Voice Chat Rooms & Social Dating",
   description:
-    "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and explore job opportunities—all in one powerful app.",
+    "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and find your match—all in one powerful app.",
   url: "https://ridhi.app",
   inLanguage: "en-IN",
   mainEntity: { "@type": "SoftwareApplication", name: "Ridhi" },
@@ -65,7 +65,7 @@ const WEBPAGE_SCHEMA = {
   about: [
     { "@type": "Thing", name: "Live Streaming App" },
     { "@type": "Thing", name: "Voice Chat Rooms" },
-    { "@type": "Thing", name: "Job Search App India" },
+    { "@type": "Thing", name: "Dating App India" },
     { "@type": "Thing", name: "Social Networking App" },
     { "@type": "Thing", name: "Virtual Gifts App" },
     { "@type": "Thing", name: "Audio Chat App India" },
@@ -94,7 +94,7 @@ const ORG_SCHEMA = {
   },
   areaServed: "IN",
   description:
-    "Ridhi Technologies builds India-first live streaming, social networking, and career discovery experiences for the next billion users.",
+    "Ridhi Technologies builds India-first live streaming, social networking, and dating experiences for the next billion users.",
 };
 
 // ── JSON-LD: FAQPage ──────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ const FAQ_SCHEMA = {
       name: "What is Ridhi app?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Ridhi is an all-in-one Indian app for live streaming, voice chat rooms, social networking, virtual gifts, and job search. It supports 13 Indian languages.",
+        text: "Ridhi is an all-in-one Indian app for live streaming, voice chat rooms, social networking, virtual gifts, and dating. It supports 13 Indian languages.",
       },
     },
     {
@@ -173,7 +173,7 @@ export default function Root({ children }: PropsWithChildren) {
         {/* ── SEO Keywords ─────────────────────────────────────────────── */}
         <meta
           name="keywords"
-          content="Ridhi app, live streaming app India, audio chat rooms, voice chat app, social networking app, job app India, earn online India, virtual gifts app, dating app India, best live streaming app India, voice chat rooms, earn money live streaming, online community app"
+          content="Ridhi app, live streaming app India, audio chat rooms, voice chat app, social networking app, dating app India, earn online India, virtual gifts app, dating app India, best live streaming app India, voice chat rooms, earn money live streaming, online community app"
         />
 
         {/* ── Geo / Local SEO ────────────────────────────────────────── */}
