@@ -407,7 +407,7 @@ export default function WalletScreen() {
                   </Text>
                 </View>
                 <Text style={{ fontSize: 9, fontFamily: "Inter_400Regular", color: pack.popular ? "rgba(255,255,255,0.55)" : colors.mutedForeground, marginTop: 1 }}>
-                  +18% GST extra
+                  +18% GST incl. (Total ₹{Math.round(pack.price * 1.18).toLocaleString()})
                 </Text>
                 {(pack as any).perCoin && (
                   <Text style={[styles.perCoinText, { color: pack.popular ? "rgba(255,255,255,0.65)" : colors.mutedForeground }]}>
@@ -486,7 +486,6 @@ export default function WalletScreen() {
         amount={pendingPack ? parseInt(String(pendingPack.price).replace(/[^0-9]/g, "")) : 0}
         label={pendingPack ? pendingPack.label : ""}
         sublabel={pendingPack ? `${pendingPack.coins}${(pendingPack as any).bonus ? ` + ${(pendingPack as any).bonus} bonus` : ""} coins` : ""}
-        noGst
       />
     </View>
   );
