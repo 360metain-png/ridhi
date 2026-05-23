@@ -328,6 +328,28 @@ export default function SuperAdminPage() {
     googleClientId:       "438••••••apps.googleusercontent.com",
     googleClientSecret:   "google_secret_secured",
   });
+  const [coinGenUser, setCoinGenUser] = useState("");
+  const [coinGenAmount, setCoinGenAmount] = useState("");
+  const [coinGenReason, setCoinGenReason] = useState("support");
+  const [coinGenLog, setCoinGenLog] = useState<Array<{ id: string; user: string; amount: number; reason: string; by: string; time: string }>>([]);
+
+  const handleCoinGen = () => {
+    const amount = parseInt(coinGenAmount);
+    if (!coinGenUser.trim() || isNaN(amount) || amount <= 0) return;
+    const entry = {
+      id: `cg_${Date.now()}`,
+      user: coinGenUser.trim(),
+      amount,
+      reason: coinGenReason,
+      by: "Arjun Mehta (Super Admin)",
+      time: new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+    };
+    setCoinGenLog((prev) => [entry, ...prev]);
+    setCoinGenUser("");
+    setCoinGenAmount("");
+    setCoinGenReason("support");
+  };
+
   const [coinConfig, setCoinConfig] = useState({
     coinValueInr:           "1.00",
     autoGenDailyLogin:      "10",
@@ -528,6 +550,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="commercial-ads" className="text-xs gap-1.5">
             <LayoutTemplate className="w-3.5 h-3.5" /> Commercial ADs
+          </TabsTrigger>
+          <TabsTrigger value="coin-gen" className="text-xs gap-1.5">
+            <Coins className="w-3.5 h-3.5" /> Coin Generator
           </TabsTrigger>
         </TabsList>
 
@@ -2344,6 +2369,162 @@ export default function SuperAdminPage() {
               </div>
             );
           })()}
+        </TabsContent>
+
+        {/* ─── COIN GENERATOR TAB ─── */}
+        <TabsContent value="coin-gen" className="mt-4 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* ── Generator Panel ── */}
+            <Card className="lg:col-span-1">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-amber-500" />
+                  Generate Coins
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-xs text-amber-800 font-medium flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Super Admin Only — All actions are logged & auditable
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">User Phone / Email / ID</Label>
+                  <Input
+                    placeholder="e.g. +91 98765 43210 or user@email.com"
+                    value={coinGenUser}
+                    onChange={(e) => setCoinGenUser(e.target.value)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Coin Amount</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 500"
+                    value={coinGenAmount}
+                    onChange={(e) => setCoinGenAmount(e.target.value)}
+                    className="h-9 text-xs"
+                    min={1}
+                    max={100000}
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Max 100,000 coins per operation. Use responsibly.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Reason</Label>
+                  <select
+                    value={coinGenReason}
+                    onChange={(e) => setCoinGenReason(e.target.value)}
+                    className="w-full h-9 text-xs rounded-md border border-input bg-background px-3"
+                  >
+                    <option value="support">Customer Support Compensation</option>
+                    <option value="promo">Promotional Campaign</option>
+                    <option value="bug">Bug Fix Compensation</option>
+                    <option value="creator">Creator Program Bonus</option>
+                    <option value="test">Internal Testing</option>
+                    <option value="refund">Refund / Reversal</option>
+                    <option value="other">Other (see notes)</option>
+                  </select>
+                </div>
+
+                <Button
+                  className="w-full gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                  size="sm"
+                  disabled={!coinGenUser.trim() || !coinGenAmount || parseInt(coinGenAmount) <= 0}
+                  onClick={handleCoinGen}
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  Grant {coinGenAmount ? parseInt(coinGenAmount).toLocaleString() : "0"} Coins
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* ── Activity Log ── */}
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <ClipboardCheck className="w-4 h-4 text-violet-500" />
+                  Generation Log
+                  <Badge variant="outline" className="text-xs">{coinGenLog.length} entries</Badge>
+                </CardTitle>
+                {coinGenLog.length > 0 && (
+                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1"
+                    onClick={() => setCoinGenLog([])}>
+                    <RotateCcw className="w-3 h-3" /> Clear
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="p-0">
+                {coinGenLog.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Coins className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No coin grants yet</p>
+                    <p className="text-xs text-muted-foreground mt-1">Generated coins will appear here with full audit trail</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/40">
+                        <tr className="text-xs text-muted-foreground">
+                          <th className="text-left p-3 font-medium">User</th>
+                          <th className="text-left p-3 font-medium">Amount</th>
+                          <th className="text-left p-3 font-medium">Reason</th>
+                          <th className="text-left p-3 font-medium">Granted By</th>
+                          <th className="text-left p-3 font-medium">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {coinGenLog.map((entry) => (
+                          <tr key={entry.id} className="border-t hover:bg-muted/20 transition-colors">
+                            <td className="p-3">
+                              <p className="font-medium text-sm">{entry.user}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono">{entry.id}</p>
+                            </td>
+                            <td className="p-3">
+                              <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
+                                +{entry.amount.toLocaleString()} coins
+                              </Badge>
+                            </td>
+                            <td className="p-3">
+                              <span className="text-xs capitalize">{entry.reason}</span>
+                            </td>
+                            <td className="p-3 text-xs text-muted-foreground">{entry.by}</td>
+                            <td className="p-3 text-xs text-muted-foreground">{entry.time}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ── Quick Stats ── */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Total Granted Today", value: coinGenLog.filter(l => l.time.includes(new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short" }))).reduce((s, l) => s + l.amount, 0).toLocaleString(), icon: Coins, color: "text-amber-500" },
+              { label: "Total Granted (All)", value: coinGenLog.reduce((s, l) => s + l.amount, 0).toLocaleString(), icon: IndianRupee, color: "text-green-500" },
+              { label: "Unique Users", value: new Set(coinGenLog.map(l => l.user)).size.toString(), icon: Users, color: "text-blue-500" },
+              { label: "Operations", value: coinGenLog.length.toString(), icon: Activity, color: "text-violet-500" },
+            ].map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  <div>
+                    <p className="text-lg font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
       </Tabs>
