@@ -20,7 +20,7 @@ import {
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
   Banknote, ArrowRightLeft, Sliders,
   LayoutTemplate, TrendingUp, MousePointer, Pause, Play, Target,
-  Monitor, Palette, ArrowRight, Sparkles,
+  Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2,
 } from "lucide-react";
 
 const ADMIN_ROLES = [
@@ -350,6 +350,9 @@ export default function SuperAdminPage() {
     setCoinGenReason("support");
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTabActive, setSearchTabActive] = useState(false);
+
   const [coinConfig, setCoinConfig] = useState({
     coinValueInr:           "1.00",
     autoGenDailyLogin:      "10",
@@ -553,6 +556,12 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="coin-gen" className="text-xs gap-1.5">
             <Coins className="w-3.5 h-3.5" /> Coin Generator
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-xs gap-1.5">
+            <Crown className="w-3.5 h-3.5" /> Subscriptions
+          </TabsTrigger>
+          <TabsTrigger value="search" className="text-xs gap-1.5">
+            <Search className="w-3.5 h-3.5" /> Quick Search
           </TabsTrigger>
         </TabsList>
 
@@ -2525,6 +2534,332 @@ export default function SuperAdminPage() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* ─── SUBSCRIPTIONS TAB ─── */}
+        <TabsContent value="subscriptions" className="mt-4 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* VIP Plans Editor */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-pink-500" /> VIP Plans
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {([
+                  { tier: "Silver", weekly: 99, monthly: 199, yearly: 1999, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
+                  { tier: "Gold", weekly: 199, monthly: 499, yearly: 4999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+                  { tier: "Platinum", weekly: 399, monthly: 999, yearly: 9999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                  { tier: "Diamond", weekly: 999, monthly: 2499, yearly: 24999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                ] as const).map((plan) => (
+                  <div key={plan.tier} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-bold ${plan.color}`}>{plan.tier} VIP</span>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Weekly (₹)</Label>
+                        <Input type="number" defaultValue={plan.weekly} className="h-8 text-xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Monthly (₹)</Label>
+                        <Input type="number" defaultValue={plan.monthly} className="h-8 text-xs font-semibold" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground">Yearly (₹)</Label>
+                        <Input type="number" defaultValue={plan.yearly} className="h-8 text-xs" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] text-muted-foreground">Bonus Coins/mo</span>
+                      <Input type="number" defaultValue={plan.coins} className="h-8 text-xs w-24 text-right" />
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" variant="outline" className="w-full gap-1 text-xs h-8">
+                  <PlusCircle className="w-3.5 h-3.5" /> Add Custom VIP Tier
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Creator Plans Editor */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Video className="w-4 h-4 text-blue-500" /> Creator Plans
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {([
+                  { name: "Creator Basic", price: 499, features: "Badge, Live, Basic Analytics", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                  { name: "Creator Pro", price: 1499, features: "HD, PK Battle, Revenue Insights", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                  { name: "Creator Elite", price: 4999, features: "Homepage, Verified, Manager", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                ] as const).map((plan) => (
+                  <div key={plan.name} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`text-sm font-bold ${plan.color}`}>{plan.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Input type="number" defaultValue={plan.price} className="h-8 text-xs w-20 text-right font-semibold" />
+                        <span className="text-xs text-muted-foreground">/mo</span>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                    <Input defaultValue={plan.features} className="h-8 text-xs" placeholder="Comma-separated features" />
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-red-600 hover:text-red-700 hover:bg-red-50">
+                        <Trash2 className="w-3 h-3" /> Remove
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-6 text-[10px] gap-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                        <Save className="w-3 h-3" /> Save
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" variant="outline" className="w-full gap-1 text-xs h-8">
+                  <PlusCircle className="w-3.5 h-3.5" /> Add Creator Plan
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button size="sm" className="gap-1.5 h-9 text-xs">
+              <Save className="w-4 h-4" /> Save All Changes
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5 h-9 text-xs">
+              <RotateCcw className="w-4 h-4" /> Revert Defaults
+            </Button>
+            <Badge variant="outline" className="text-xs h-9 px-3">Last updated: Today, 10:30 AM</Badge>
+          </div>
+        </TabsContent>
+
+        {/* ─── QUICK SEARCH TAB ─── */}
+        <TabsContent value="search" className="mt-4 space-y-6">
+          <div className="bg-white dark:bg-card rounded-xl border shadow-sm p-4">
+            <div className="relative w-full max-w-lg mx-auto">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search across admins, hosts, agents, APIs, integrations, alerts..."
+                className="pl-10 h-11 text-sm w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!searchQuery && (
+            <div className="text-center py-12 text-muted-foreground space-y-2">
+              <Search className="w-10 h-10 mx-auto opacity-30" />
+              <p className="text-sm">Start typing to search across the entire Super Admin panel</p>
+              <p className="text-xs opacity-70">Searches names, emails, API paths, integration names, alerts, and more</p>
+            </div>
+          )}
+
+          {searchQuery && (
+            <div className="space-y-5">
+              {/* Admins */}
+              {(() => {
+                const admins = ADMIN_ROLES.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase()) || a.role.toLowerCase().includes(searchQuery.toLowerCase()));
+                return admins.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Admins — {admins.length}</p>
+                    <div className="space-y-2">
+                      {admins.map(a => (
+                        <Card key={a.id}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">{a.name.split(" ").map(n=>n[0]).join("")}</div>
+                            <div>
+                              <p className="font-medium">{a.name}</p>
+                              <p className="text-xs text-muted-foreground">{a.email} · {a.role} · {a.status}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">Admin</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Hosts */}
+              {(() => {
+                const matches = hosts.filter(h => h.name.toLowerCase().includes(searchQuery.toLowerCase()) || h.email.toLowerCase().includes(searchQuery.toLowerCase()) || h.city.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Hosts — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map(h => (
+                        <Card key={h.id}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">{h.name.split(" ").map(n=>n[0]).join("")}</div>
+                            <div>
+                              <p className="font-medium">{h.name}</p>
+                              <p className="text-xs text-muted-foreground">{h.email} · {h.city} · {h.level} ({h.levelLabel})</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">Host</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Agents */}
+              {(() => {
+                const matches = agents.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase()) || a.city.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Agents — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map(a => (
+                        <Card key={a.id}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">{a.name.split(" ").map(n=>n[0]).join("")}</div>
+                            <div>
+                              <p className="font-medium">{a.name}</p>
+                              <p className="text-xs text-muted-foreground">{a.email} · {a.city} · {a.levelLabel} · {a.commission} commission</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">Agent</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* APIs */}
+              {(() => {
+                const matches = platformApis.filter(api => api.name.toLowerCase().includes(searchQuery.toLowerCase()) || api.path.toLowerCase().includes(searchQuery.toLowerCase()) || api.category.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">APIs — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map(api => (
+                        <Card key={api.id}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <Code className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{api.name}</p>
+                              <p className="text-xs text-muted-foreground">{api.path} · {api.category} · {api.calls}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">API</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Integrations */}
+              {(() => {
+                const matches: { name: string; desc: string; category: string; status: string }[] = [];
+                integrations.forEach(group => {
+                  group.items.forEach(item => {
+                    if (item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.desc.toLowerCase().includes(searchQuery.toLowerCase()) || group.category.toLowerCase().includes(searchQuery.toLowerCase())) {
+                      matches.push({ name: item.name, desc: item.desc, category: group.category, status: item.status });
+                    }
+                  });
+                });
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Integrations — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map((item, i) => (
+                        <Card key={i}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <Link className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{item.name}</p>
+                              <p className="text-xs text-muted-foreground">{item.desc} · {item.category}</p>
+                            </div>
+                          </div>
+                          <Badge variant={item.status === "active" ? "outline" : "secondary"} className="text-xs capitalize">{item.status}</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Webhooks */}
+              {(() => {
+                const matches = webhooks.filter(w => w.name.toLowerCase().includes(searchQuery.toLowerCase()) || w.url.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Webhooks — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map((w, i) => (
+                        <Card key={i}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <Webhook className="w-4 h-4 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{w.name}</p>
+                              <p className="text-xs text-muted-foreground">{w.url} · {w.events.join(", ")}</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">Webhook</Badge>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Security Alerts */}
+              {(() => {
+                const matches = SECURITY_ALERTS.filter(a => a.message.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Security Alerts — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map((a, i) => (
+                        <Card key={i}><CardContent className="p-3 flex items-center gap-3 text-sm">
+                          <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${a.severity === "high" ? "text-red-500" : a.severity === "medium" ? "text-amber-500" : "text-blue-500"}`} />
+                          <div>
+                            <p className="font-medium text-sm">{a.message}</p>
+                            <p className="text-xs text-muted-foreground">{a.time} · Severity: {a.severity}</p>
+                          </div>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* No results */}
+              {(() => {
+                const totalMatches =
+                  ADMIN_ROLES.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  hosts.filter(h => h.name.toLowerCase().includes(searchQuery.toLowerCase()) || h.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  agents.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  platformApis.filter(api => api.name.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  SECURITY_ALERTS.filter(a => a.message.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  webhooks.filter(w => w.name.toLowerCase().includes(searchQuery.toLowerCase())).length;
+                const intMatches: { name: string }[] = [];
+                integrations.forEach(g => g.items.forEach(item => { if (item.name.toLowerCase().includes(searchQuery.toLowerCase())) intMatches.push(item); }));
+                return totalMatches + intMatches.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Search className="w-8 h-8 mx-auto opacity-30 mb-2" />
+                    <p className="text-sm">No results found for “{searchQuery}”</p>
+                    <p className="text-xs opacity-70 mt-1">Try a different keyword or check the spelling</p>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </TabsContent>
 
       </Tabs>
