@@ -220,7 +220,7 @@ export default function SettingsScreen() {
 
         <SectionHeader title="Business" />
         <View style={[styles.section, { borderColor: colors.border }]}>
-          <SettingRow icon="megaphone" label="Ads Manager" subtitle="Create & manage ad campaigns" onPress={() => router.push("/ads-manager" as any)} />
+          <SettingRow icon="volume-2" label="Ads Manager" subtitle="Create & manage ad campaigns" onPress={() => router.push("/ads-manager" as any)} />
           <SettingRow icon="briefcase" label="Brand Register" subtitle="Register your business on Ridhi" onPress={() => router.push("/brand-register" as any)} />
         </View>
 

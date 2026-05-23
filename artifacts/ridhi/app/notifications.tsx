@@ -51,7 +51,7 @@ const SOCIAL_ICONS: Record<string, { icon: string; color: string }> = {
   comment: { icon: "message-circle", color: "#4A90E2" },
   coin:    { icon: "star",          color: "#FFB800" },
   follow:  { icon: "user-plus",     color: "#34C759" },
-  campaign_live:     { icon: "megaphone", color: "#22C55E" },
+  campaign_live:     { icon: "volume-2", color: "#22C55E" },
   campaign_rejected: { icon: "alert-circle", color: "#EF4444" },
   campaign_completed:{ icon: "check-circle", color: "#3B82F6" },
 };

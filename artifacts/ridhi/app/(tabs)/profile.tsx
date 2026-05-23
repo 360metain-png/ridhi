@@ -104,7 +104,7 @@ const MENU_SECTIONS = [
   {
     title: "Business Tools",
     items: [
-      { icon: "megaphone",   label: "Ads Manager",       route: "/ads-manager",    color: "#7B2FBE" },
+      { icon: "volume-2",    label: "Ads Manager",       route: "/ads-manager",    color: "#7B2FBE" },
       { icon: "briefcase",   label: "Brand Register",    route: "/brand-register", color: "#E91E8C" },
     ],
   },
