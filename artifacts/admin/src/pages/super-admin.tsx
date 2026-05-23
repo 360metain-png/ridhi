@@ -318,6 +318,8 @@ export default function SuperAdminPage() {
     msg91AuthKey:         "MSG91_AUTH_KEY_SECURED",
     msg91OtpTemplate:     "MSG91_OTP_TEMPLATE_ID_SECURED",
     msg91SmsTemplate:     "",
+    msg91Unicode:         false,
+    msg91DefaultLang:     "en",
     msg91WaNumber:        "",
     msg91WaTemplate:      "",
     razorpayKeyId:        "rzp_live_••••••••K7xQ",
@@ -1718,10 +1720,14 @@ export default function SuperAdminPage() {
           {/* ── Section helper component inline ── */}
           {(() => {
 
+            type StringApiKey = {
+              [K in keyof typeof apiKeys]: (typeof apiKeys)[K] extends string ? K : never;
+            }[keyof typeof apiKeys];
+
             const KeyField = ({
               label, field, type = "text", placeholder, hint,
             }: {
-              label: string; field: keyof typeof apiKeys; type?: string; placeholder?: string; hint?: string;
+              label: string; field: StringApiKey; type?: string; placeholder?: string; hint?: string;
             }) => {
               const revealed = revealedKeys[field];
               const val = apiKeys[field];
@@ -1842,9 +1848,44 @@ export default function SuperAdminPage() {
                         placeholder="e.g. 6447a9d5d6fc051..."
                         hint="For transactional & promotional SMS campaigns" />
                     </div>
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-medium text-foreground">Unicode SMS</p>
+                          <p className="text-[10px] text-muted-foreground">Hindi, Tamil, Telugu, etc.</p>
+                        </div>
+                        <Switch
+                          checked={apiKeys.msg91Unicode}
+                          onCheckedChange={v => setApiKeys(p => ({...p, msg91Unicode: v}))}
+                        />
+                      </div>
+                      <div className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3 md:col-span-2">
+                        <div>
+                          <p className="text-xs font-medium text-foreground">Default SMS Language</p>
+                          <p className="text-[10px] text-muted-foreground">Used when user has no language preference</p>
+                        </div>
+                        <select
+                          value={apiKeys.msg91DefaultLang}
+                          onChange={e => setApiKeys(p => ({...p, msg91DefaultLang: e.target.value}))}
+                          className="h-8 text-xs rounded-md border border-input bg-background px-2"
+                        >
+                          <option value="en">English</option>
+                          <option value="hi">हिन्दी (Hindi)</option>
+                          <option value="ta">தமிழ् (Tamil)</option>
+                          <option value="te">తెలుగु (Telugu)</option>
+                          <option value="bn">বাংলা (Bengali)</option>
+                          <option value="mr">मराठी (Marathi)</option>
+                          <option value="gu">ગુજરાતी (Gujarati)</option>
+                          <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                          <option value="ml">മലയാളം (Malayalam)</option>
+                          <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                          <option value="ur">اردو (Urdu)</option>
+                        </select>
+                      </div>
+                    </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-2.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0" />
-                      Currently in demo mode — real OTP delivery requires a valid DLT-approved template ID
+                      Currently in demo mode — real OTP delivery requires a valid DLT-approved template ID. Unicode templates need separate DLT registration.
                     </div>
                   </CardContent>
                 </Card>
