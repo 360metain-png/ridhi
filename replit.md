@@ -76,8 +76,6 @@ Ridhi is an India-first social networking and dating mobile app — think ShareC
 - Notifications screen
 - Dark/Light/System theme switching
 - Multi-language selection (English + 12 Indian languages)
-- Jobs discovery (search, filter, location, categories, premium seeker features)
-- Post a Job (employer posting flow with coin-based plans)
 - Subscriptions: 4 VIP tiers (Silver/Gold/Platinum/Diamond Elite), weekly/monthly/yearly billing, 3 Creator plans (Basic/Pro/Elite), Fan Clubs
 
 ## User preferences

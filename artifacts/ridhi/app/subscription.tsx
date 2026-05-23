@@ -53,7 +53,6 @@ const PLANS = [
       "No video calls",
       "Basic match swipes (20/day)",
       "Chat with all your matches",
-      "Job search & resume upload",
       "Daily missions & coin earning",
     ],
     locked: [

@@ -653,7 +653,7 @@ export default function HostProfileScreen() {
                 { label: "VIP subscriptions",       desc: "₹49–₹6,999/mo from fans upgrading for perks",     color: "#FFB800", icon: "star"      },
                 { label: "Creator Pass & Fan Clubs",desc: "Monthly plans from creators & fan club members",   color: "#34C759", icon: "users"     },
                 { label: "Brand partnerships",      desc: "Brands buy coins to gift viral/top hosts",         color: "#00BCD4", icon: "briefcase" },
-                { label: "Job & Ad products",       desc: "Coin-based job posting & ad placement fees",       color: "#FF6B35", icon: "trending-up" },
+                { label: "Ad products",             desc: "Coin-based ad placement & brand partnership fees",  color: "#FF6B35", icon: "trending-up" },
               ].map(({ label, desc, color, icon }) => (
                 <View key={label} style={styles.ridhiBenefitRow}>
                   <View style={[styles.ridhiBenefitIcon, { backgroundColor: color + "20" }]}>

@@ -177,8 +177,8 @@ export const TRENDING_EPISODES: PodcastEpisode[] = [
     hostName: "Amit Bhardwaj",
     hostAvatar: "https://i.pravatar.cc/150?img=15",
     isVerified: false,
-    title: "AI is Taking Over Indian Jobs — Should You Be Worried?",
-    description: "We break down which jobs are safe, which are at risk, and what skills you need to future-proof your career.",
+    title: "AI is Transforming Indian Careers — Should You Adapt?",
+    description: "We break down which careers are future-proof, which are evolving, and what skills you need to stay ahead.",
     coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400",
     category: "Technology",
     language: "English",
@@ -191,7 +191,7 @@ export const TRENDING_EPISODES: PodcastEpisode[] = [
     isExclusive: false,
     hasAITranscript: true,
     uploadedAgo: "6h ago",
-    tags: ["ai", "technology", "jobs", "career", "india"],
+    tags: ["ai", "technology", "career", "future", "india"],
   },
 ];
 

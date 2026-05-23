@@ -112,7 +112,6 @@ Disallow: /lead-form-fill
 
 # Identity & KYC documents — strictly private
 Disallow: /kyc
-Disallow: /resume
 Disallow: /referral
 
 # Content creation (drafts, unpublished)

@@ -87,7 +87,7 @@ export default function AboutScreen() {
     <>
       <SeoHead
         title="About Ridhi — India's #1 Live Streaming, Voice Chat & Social App"
-        description="Learn about Ridhi — India's all-in-one app for live streaming, voice chat rooms, social networking, jobs, and creator earnings. Built for the next billion users."
+        description="Learn about Ridhi — India's all-in-one app for live streaming, voice chat rooms, social networking, and creator earnings. Built for the next billion users."
       />
       <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky mini-header */}

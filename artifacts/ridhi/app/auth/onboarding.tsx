@@ -314,8 +314,8 @@ export default function OnboardingScreen() {
   return (
     <>
       <SeoHead
-        title="Ridhi App — Live Streaming, Voice Chat & Jobs | India"
-        description="India's #1 app for live streaming, voice chat rooms, social networking & jobs. Go live, earn gifts, chat in 13 Indian languages. Free download on Android & iOS."
+        title="Ridhi App — Live Streaming, Voice Chat & Social | India"
+        description="India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download on Android & iOS."
       />
       <View style={styles.container}>
       {/* Dark gradient base */}

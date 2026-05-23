@@ -67,12 +67,6 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     ],
   },
   {
-    label: "Jobs",
-    items: [
-      { name: "Jobs Management", href: "/jobs", icon: Briefcase, allowedRoles: SA },
-    ],
-  },
-  {
     label: "Finance",
     items: [
       { name: "Subscriptions", href: "/subscriptions", icon: Crown,       allowedRoles: SA },
@@ -171,7 +165,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/ai-hub":        "AI Hub",
     "/kyc":          "E-KYC Verification",
     "/handbook":     "Platform Handbook",
-    "/jobs":          "Ridhi Jobs Management",
     "/subscriptions": "Subscription Plans",
     "/promo-codes":   "Promo & Offer Codes",
     "/referral":          "Referral Program",

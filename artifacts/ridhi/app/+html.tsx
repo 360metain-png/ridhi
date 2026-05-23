@@ -34,7 +34,7 @@ const APP_SCHEMA = {
     { "@type": "ImageObject", url: "https://ridhi.app/screenshots/audio-rooms.png",  caption: "Join Interactive Audio Chat Rooms" },
     { "@type": "ImageObject", url: "https://ridhi.app/screenshots/chat.png",          caption: "Chat & Connect with People" },
     { "@type": "ImageObject", url: "https://ridhi.app/screenshots/gifts.png",         caption: "Send & Earn Virtual Gifts" },
-    { "@type": "ImageObject", url: "https://ridhi.app/screenshots/jobs.png",          caption: "Find Jobs & Grow Your Career" },
+    { "@type": "ImageObject", url: "https://ridhi.app/screenshots/dating.png",       caption: "Dating & Smart AI Matching" },
   ],
   featureList: [
     "Live Streaming with virtual gifts",
@@ -42,7 +42,6 @@ const APP_SCHEMA = {
     "Instant Messaging & Group Chats",
     "Social Feed, Reels & Stories",
     "Dating & Smart AI Matching",
-    "Job Search & Recruiter Connect",
     "Communities by city and interest",
     "Games & PK Battles",
     "Coin Wallet & Creator Earnings",
@@ -129,14 +128,6 @@ const FAQ_SCHEMA = {
     },
     {
       "@type": "Question",
-      name: "Can I find jobs on Ridhi?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, Ridhi has a built-in job search feature where you can discover job opportunities and connect with recruiters directly from the app.",
-      },
-    },
-    {
-      "@type": "Question",
       name: "What languages does Ridhi support?",
       acceptedAnswer: {
         "@type": "Answer",
@@ -165,10 +156,10 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
         {/* ── Primary SEO ─────────────────────────────────────────────── */}
-        <title>Ridhi App – Live Streaming, Voice Chat Rooms &amp; Job Platform | India</title>
+        <title>Ridhi App – Live Streaming, Voice Chat Rooms &amp; Social | India</title>
         <meta
           name="description"
-          content="Ridhi is India's #1 app for live streaming, voice chat rooms, social networking & jobs. Go live, earn gifts, chat in 13 Indian languages. Free download."
+          content="Ridhi is India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download."
         />
         <meta name="robots"       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <meta name="theme-color"  content="#E91E8C" />
@@ -230,8 +221,8 @@ export default function Root({ children }: PropsWithChildren) {
         {/* ── Open Graph ──────────────────────────────────────────────── */}
         <meta property="og:type"              content="website" />
         <meta property="og:site_name"         content="Ridhi" />
-        <meta property="og:title"             content="Ridhi App – Live Streaming, Voice Chat Rooms & Job Platform" />
-        <meta property="og:description"       content="India's #1 app for live streaming, voice chat rooms, social networking & jobs. Go live, earn gifts, chat in 13 Indian languages. Free download." />
+        <meta property="og:title"             content="Ridhi App – Live Streaming, Voice Chat Rooms & Social" />
+        <meta property="og:description"       content="India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download." />
         <meta property="og:image"             content="https://ridhi.app/ridhi_logo.png" />
         <meta property="og:image:width"       content="1200" />
         <meta property="og:image:height"      content="630" />
@@ -247,10 +238,10 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="twitter:card"        content="summary_large_image" />
         <meta name="twitter:site"        content="@ridhiapp" />
         <meta name="twitter:creator"     content="@ridhiapp" />
-        <meta name="twitter:title"       content="Ridhi App – Live Streaming, Voice Chat Rooms & Job Platform" />
-        <meta name="twitter:description" content="India's #1 app for live streaming, voice chat rooms, social networking & jobs. Free download on Android & iOS." />
+        <meta name="twitter:title"       content="Ridhi App – Live Streaming, Voice Chat Rooms & Social | India" />
+        <meta name="twitter:description" content="India's #1 app for live streaming, voice chat rooms, and social networking. Free download on Android & iOS." />
         <meta name="twitter:image"       content="https://ridhi.app/ridhi_logo.png" />
-        <meta name="twitter:image:alt"   content="Ridhi App – Live Streaming, Voice Chat & Jobs" />
+        <meta name="twitter:image:alt"   content="Ridhi App – Live Streaming, Voice Chat & Social" />
 
         {/* ── App Store Smart Banners ────────────────────────────────── */}
         <meta name="apple-itunes-app"  content="app-id=YOUR_APP_ID, app-argument=https://ridhi.app" />
@@ -286,7 +277,7 @@ export default function Root({ children }: PropsWithChildren) {
         <noscript>
           <div style={{ padding: "24px", textAlign: "center", fontFamily: "sans-serif", background: "#0A0A0F", color: "#fff" }}>
             <h1>Ridhi – India's #1 Social App</h1>
-            <p>Download the Ridhi app to live stream, join voice chat rooms, and find jobs. Available free on Android &amp; iOS.</p>
+            <p>Download the Ridhi app to live stream, join voice chat rooms, and connect with people. Available free on Android &amp; iOS.</p>
             <p><a href="https://play.google.com/store/apps/details?id=com.pt.ridhi" style={{ color: "#E91E8C" }}>Download on Google Play</a></p>
           </div>
         </noscript>

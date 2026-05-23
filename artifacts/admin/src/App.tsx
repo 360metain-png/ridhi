@@ -40,7 +40,6 @@ import KYC           from "@/pages/kyc";
 import Handbook      from "@/pages/handbook";
 import SpecialAds          from "@/pages/special-ads";
 import CommercialBanners   from "@/pages/commercial-banners";
-import Jobs                from "@/pages/jobs";
 import Subscriptions       from "@/pages/subscriptions";
 import DomainHosting       from "@/pages/domain-hosting";
 import BackendAccess       from "@/pages/backend-access";
@@ -76,7 +75,6 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/business-ads":        ["super_admin"],
   "/special-ads":         ["super_admin"],
   "/commercial-banners":  ["super_admin"],
-  "/jobs":           ["super_admin"],
   "/subscriptions":  ["super_admin"],
   "/live-streams": ["super_admin"],
   "/ai-hub":       ["super_admin", "admin"],
@@ -194,7 +192,6 @@ function Router() {
       <Route path="/handbook"     component={() => <RoleRoute component={Handbook}     path="/handbook" />} />
       <Route path="/special-ads"        component={() => <RoleRoute component={SpecialAds}        path="/special-ads" />} />
       <Route path="/commercial-banners" component={() => <RoleRoute component={CommercialBanners} path="/commercial-banners" />} />
-      <Route path="/jobs"               component={() => <RoleRoute component={Jobs}               path="/jobs" />} />
       <Route path="/subscriptions"      component={() => <RoleRoute component={Subscriptions}      path="/subscriptions" />} />
       <Route path="/domain-hosting"    component={() => <RoleRoute component={DomainHosting}    path="/domain-hosting" />} />
       <Route path="/backend-access"    component={() => <RoleRoute component={BackendAccess}    path="/backend-access" />} />
