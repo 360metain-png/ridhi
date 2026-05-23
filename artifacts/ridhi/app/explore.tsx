@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -88,7 +89,12 @@ export default function ExploreScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Explore Ridhi — Trending Hashtags, Top Creators & Viral Reels | India"
+        description="Discover what's trending on Ridhi — top hashtags, viral posts, popular creators, and live streams. Explore content in 13 Indian languages. Join the conversation!"
+      />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View
         style={[
           styles.header,
@@ -249,6 +255,7 @@ export default function ExploreScreen() {
         )}
       </ScrollView>
     </View>
+    </>
   );
 }
 

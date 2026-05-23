@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -747,7 +748,12 @@ export default function FeedScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Ridhi Feed — Live Streaming, Reels, Stories & Social Posts | India"
+        description="Your Ridhi home feed — live streams, viral reels, stories, trending posts, and community updates from creators across India. Join the conversation in 13 languages."
+      />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
       <SwipeUpHint label="Scroll to explore" bottomOffset={130} delay={1400} />
       <LinearGradient
         colors={[colors.primary + "18", colors.secondary + "08", "transparent"]}
@@ -1214,6 +1220,7 @@ export default function FeedScreen() {
         </View>
       )}
     </View>
+    </>
   );
 }
 

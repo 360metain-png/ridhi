@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -135,7 +136,12 @@ export default function CommunitiesScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Ridhi Communities — Join Interest Groups, Local Circles & Fan Clubs | India"
+        description="Join 50+ communities on Ridhi — local city groups, language circles, hobby clubs, and fan communities. Connect with like-minded people across India."
+      />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
           <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>
@@ -288,6 +294,7 @@ export default function CommunitiesScreen() {
         </View>
       </ScrollView>
     </View>
+    </>
   );
 }
 

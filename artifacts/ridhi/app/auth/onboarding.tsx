@@ -4,6 +4,7 @@ import {
   Easing,
   Image,
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { SeoHead } from "@/components/SeoHead";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GradientButton } from "@/components/GradientButton";
 
@@ -310,7 +312,12 @@ export default function OnboardingScreen() {
   const currentSlide = SLIDES[activeIndex];
 
   return (
-    <View style={styles.container}>
+    <>
+      <SeoHead
+        title="Ridhi App — Live Streaming, Voice Chat & Jobs | India"
+        description="India's #1 app for live streaming, voice chat rooms, social networking & jobs. Go live, earn gifts, chat in 13 Indian languages. Free download on Android & iOS."
+      />
+      <View style={styles.container}>
       {/* Dark gradient base */}
       <LinearGradient
         colors={["#08080F", "#0D0618", "#08080F"]}
@@ -425,6 +432,7 @@ export default function OnboardingScreen() {
         </Pressable>
       </Animated.View>
     </View>
+    </>
   );
 }
 

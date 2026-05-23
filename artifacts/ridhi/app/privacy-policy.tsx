@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -337,7 +338,13 @@ export default function PrivacyPolicyScreen() {
   const headerOpacity = scrollY.interpolate({ inputRange: [0, 80], outputRange: [0, 1], extrapolate: "clamp" });
 
   return (
-    <View style={[s.root, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Privacy Policy — Ridhi App | Data Protection & User Privacy"
+        description="Read Ridhi's Privacy Policy — how we collect, use, and protect your personal data. Learn about cookies, data rights, and security measures."
+        robots="index, follow, noarchive"
+      />
+      <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky header */}
       <Animated.View style={[s.stickyHeader, { paddingTop: topPad, backgroundColor: colors.surface + "F2", borderBottomColor: colors.border, opacity: headerOpacity }]}>
         <Pressable onPress={() => router.back()} style={s.backBtn}>
@@ -403,6 +410,7 @@ export default function PrivacyPolicyScreen() {
         </View>
       </Animated.ScrollView>
     </View>
+    </>
   );
 }
 

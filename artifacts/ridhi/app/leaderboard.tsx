@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -95,7 +96,12 @@ export default function LeaderboardScreen() {
   const meta = CATEGORY_LABELS[category];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Ridhi Leaderboard — Top Creators, Streamers & Gifters | India"
+        description="See who's topping the Ridhi charts — top creators, biggest gifters, highest earners, and best streamers. Compete and climb the ranks today!"
+      />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[colors.gold + "30", colors.primary + "15", "transparent"]}
         style={[styles.header, { paddingTop: topPad + 10 }]}
@@ -193,6 +199,7 @@ export default function LeaderboardScreen() {
         </View>
       </ScrollView>
     </View>
+    </>
   );
 }
 

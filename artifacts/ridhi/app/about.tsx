@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -83,7 +84,12 @@ export default function AboutScreen() {
   const headerOpacity = scrollY.interpolate({ inputRange: [0, 80], outputRange: [0, 1], extrapolate: "clamp" });
 
   return (
-    <View style={[s.root, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="About Ridhi — India's #1 Live Streaming, Voice Chat & Social App"
+        description="Learn about Ridhi — India's all-in-one app for live streaming, voice chat rooms, social networking, jobs, and creator earnings. Built for the next billion users."
+      />
+      <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky mini-header */}
       <Animated.View style={[s.stickyHeader, { paddingTop: topPad, backgroundColor: colors.surface + "F2", borderBottomColor: colors.border, opacity: headerOpacity }]}>
         <Pressable onPress={() => router.back()} style={s.backBtn}>
@@ -209,6 +215,7 @@ export default function AboutScreen() {
         </View>
       </Animated.ScrollView>
     </View>
+    </>
   );
 }
 

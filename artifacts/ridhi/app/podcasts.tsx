@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import {
@@ -121,7 +122,12 @@ export default function PodcastsScreen() {
   const headerOpacity = scrollY.interpolate({ inputRange: [0, 80], outputRange: [0, 1], extrapolate: "clamp" });
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Ridhi Podcasts — AI Podcasts, Live Audio Shows & Creator Episodes | India"
+        description="Discover podcasts on Ridhi — AI-generated shows, live audio episodes, creator podcasts, and trending audio content in 13 Indian languages."
+      />
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Floating header on scroll */}
       <Animated.View style={[styles.floatingHeader, { opacity: headerOpacity, backgroundColor: colors.surface, borderBottomColor: colors.border, paddingTop: insets.top }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -281,6 +287,7 @@ export default function PodcastsScreen() {
         </Pressable>
       </Animated.ScrollView>
     </View>
+    </>
   );
 }
 

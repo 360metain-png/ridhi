@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -148,7 +149,12 @@ export default function HelpSupportScreen() {
   const headerOpacity = scrollY.interpolate({ inputRange: [0, 80], outputRange: [0, 1], extrapolate: "clamp" });
 
   return (
-    <View style={[s.root, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Help & Support — Ridhi App | FAQs, Contact & Troubleshooting"
+        description="Get help with Ridhi — browse FAQs, contact support, report issues, and find solutions for live streaming, voice chat, payments, and account problems."
+      />
+      <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky header */}
       <Animated.View style={[s.stickyHeader, { paddingTop: topPad, backgroundColor: colors.surface + "F2", borderBottomColor: colors.border, opacity: headerOpacity }]}>
         <Pressable onPress={() => router.back()} style={s.backBtn}>
@@ -320,6 +326,7 @@ export default function HelpSupportScreen() {
         </View>
       </Animated.ScrollView>
     </View>
+    </>
   );
 }
 
