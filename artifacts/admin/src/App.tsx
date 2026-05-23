@@ -24,6 +24,7 @@ import SuperAdmin    from "@/pages/super-admin";
 import PromoCodes    from "@/pages/promo-codes";
 import ReferralProgram    from "@/pages/referral-program";
 import ApiIntegrations   from "@/pages/api-integrations";
+import VideoUploads      from "@/pages/video-uploads";
 import AdminManagement  from "@/pages/admin-management";
 import MyReport         from "@/pages/my-report";
 import AdminActivity    from "@/pages/admin-activity";
@@ -91,6 +92,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/admin-management":  ["super_admin"],
   "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
+  "/video-uploads":     ["super_admin"],
   "/downloads":         ["super_admin"],
   "/screenshots":       ["super_admin"],
   "/handbook":     ["super_admin", "admin"],
@@ -179,6 +181,7 @@ function Router() {
       <Route path="/admin-management"  component={() => <RoleRoute component={AdminManagement}  path="/admin-management"  />} />
       <Route path="/admin-activity"    component={() => <RoleRoute component={AdminActivity}    path="/admin-activity"    />} />
       <Route path="/my-report"         component={() => <RoleRoute component={MyReport}         path="/my-report"         />} />
+      <Route path="/video-uploads"     component={() => <RoleRoute component={VideoUploads}     path="/video-uploads"     />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
       <Route path="/levels"       component={() => <RoleRoute component={Levels}       path="/levels" />} />

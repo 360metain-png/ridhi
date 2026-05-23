@@ -6,7 +6,7 @@ import {
   Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
-  TrendingUp, Globe, Terminal, Sparkles, Download, Monitor,
+  TrendingUp, Globe, Terminal, Sparkles, Download, Monitor, Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -42,6 +42,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Content",          href: "/content",        icon: ShieldAlert, badge: "12", allowedRoles: SA },
       { name: "Communities",      href: "/communities",    icon: UsersRound,  allowedRoles: SA },
       { name: "Creative Assets",  href: "/content-assets", icon: Sparkles,    allowedRoles: SA },
+      { name: "Video Uploads",    href: "/video-uploads",  icon: Film,        badge: "40", allowedRoles: SA },
     ],
   },
   {

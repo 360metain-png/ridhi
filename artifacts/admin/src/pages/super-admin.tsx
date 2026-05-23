@@ -14,7 +14,7 @@ import {
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
   Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle, UserPlus,
   Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
-  Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag,
+  Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag, Film,
   Languages, Layers, Megaphone, MessageCircle, Coins, IndianRupee,
   Percent, GitMerge, CheckSquare, Settings2, Save, TestTube,
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
@@ -480,11 +480,13 @@ export default function SuperAdminPage() {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {[
           { label: "Platform Admins", value: "5", icon: Shield, color: "text-purple-600 bg-purple-50" },
           { label: "Hosts with Access", value: `${activeHosts}/${hosts.length}`, icon: Star, color: "text-pink-600 bg-pink-50" },
           { label: "Agents with Access", value: `${activeAgents}/${agents.length}`, icon: Briefcase, color: "text-blue-600 bg-blue-50" },
+          { label: "Live Streams", value: "8", icon: Radio, color: "text-emerald-600 bg-emerald-50" },
+          { label: "Video Uploads", value: "40", icon: Film, color: "text-violet-600 bg-violet-50" },
           { label: "Security Alerts", value: "4", icon: AlertTriangle, color: "text-yellow-600 bg-yellow-50" },
         ].map((stat) => (
           <Card key={stat.label}>
