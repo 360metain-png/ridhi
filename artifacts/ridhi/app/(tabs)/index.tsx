@@ -153,7 +153,7 @@ type FeedItem =
 export default function FeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, deductCoins } = useAuth();
   const { language: appLang } = useApp();
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [refreshing, setRefreshing] = useState(false);
@@ -181,6 +181,9 @@ export default function FeedScreen() {
   const [privacyTarget, setPrivacyTarget] = useState<string | null>(null);
   const [reportTarget, setReportTarget] = useState<{ id: string; target: "post" | "user" } | null>(null);
   const [reportDone, setReportDone] = useState(false);
+  const [boostTarget, setBoostTarget] = useState<string | null>(null);
+  const [boostTier, setBoostTier] = useState(1);
+  const [boostSuccess, setBoostSuccess] = useState(false);
   const storyProgress = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -352,6 +355,31 @@ export default function FeedScreen() {
     setReportTarget(null);
     setReportDone(true);
     setTimeout(() => setReportDone(false), 2500);
+  };
+
+  const handleBoost = async () => {
+    if (!boostTarget) return;
+    const tiers = [
+      { label: "Lite", views: 500,  coins: 20,  price: "₹16" },
+      { label: "Plus", views: 2000, coins: 50,  price: "₹40" },
+      { label: "Max",  views: 5000, coins: 100, price: "₹80" },
+    ];
+    const selected = tiers[boostTier - 1];
+    const ok = await deductCoins(selected.coins);
+    if (!ok) {
+      setBoostTarget(null);
+      return;
+    }
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === boostTarget
+          ? { ...p, isBoosted: true, boostViews: (p.boostViews ?? 0) + selected.views, likes: p.likes + Math.floor(selected.views * 0.08) }
+          : p
+      )
+    );
+    setBoostTarget(null);
+    setBoostSuccess(true);
+    setTimeout(() => setBoostSuccess(false), 3000);
   };
 
   const handleSendComment = () => {
@@ -1068,6 +1096,18 @@ export default function FeedScreen() {
                   <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Permanently remove this post</Text>
                 </View>
               </Pressable>
+
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => { const id = postMenu.id; setPostMenu(null); setBoostTarget(id); setBoostTier(1); }}>
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.primary + "18" }]}>
+                  <Feather name="trending-up" size={16} color={colors.primary} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Boost Post</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Get more views, likes & followers</Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
             </>
           ) : (
             <>
@@ -1217,6 +1257,74 @@ export default function FeedScreen() {
         <View style={[styles.toast, { backgroundColor: "#1C1C2E", pointerEvents: "none" }]}>
           <Feather name="check-circle" size={16} color="#34C759" />
           <Text style={styles.toastText}>Report submitted. Thank you! 🙏</Text>
+        </View>
+      )}
+
+      {/* ── Boost Post Sheet ───────────────────────────────────────────────── */}
+      <Modal visible={boostTarget !== null} transparent animationType="slide" onRequestClose={() => setBoostTarget(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setBoostTarget(null)} />
+        <View style={[styles.menuSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.menuSheetTitle, { color: colors.foreground }]}>Boost Your Post</Text>
+          <Text style={[styles.menuSheetSub, { color: colors.mutedForeground }]}>
+            Get more views, likes & followers
+          </Text>
+
+          <View style={{ paddingHorizontal: 16, gap: 8, paddingBottom: 12 }}>
+            {[
+              { label: "Lite", views: 500,  coins: 20,  price: "₹16", desc: "~500 views" },
+              { label: "Plus", views: 2000, coins: 50,  price: "₹40", desc: "~2,000 views" },
+              { label: "Max",  views: 5000, coins: 100, price: "₹80", desc: "~5,000 views" },
+            ].map((t, i) => {
+              const isActive = boostTier === i + 1;
+              return (
+                <Pressable key={t.label} onPress={() => setBoostTier(i + 1)}
+                  style={[styles.boostTierCard, {
+                    borderColor: isActive ? colors.primary : colors.border,
+                    backgroundColor: isActive ? colors.primary + "10" : colors.card,
+                  }]}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+                    <View style={[styles.boostTierIcon, { backgroundColor: isActive ? colors.primary : colors.muted }]}>
+                      <Feather name="trending-up" size={16} color={isActive ? "#fff" : colors.mutedForeground} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.boostTierLabel, { color: colors.foreground }]}>{t.label} Boost</Text>
+                      <Text style={[styles.boostTierDesc, { color: colors.mutedForeground }]}>{t.desc} · {t.price}</Text>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <CoinBadge amount={t.coins} size="sm" />
+                    {isActive && <Feather name="check-circle" size={18} color={colors.primary} />}
+                  </View>
+                </Pressable>
+              );
+            })}
+
+            <View style={[styles.boostBalanceRow, { borderTopColor: colors.border }]}>
+              <Text style={[styles.boostBalanceLabel, { color: colors.mutedForeground }]}>Your Balance</Text>
+              <CoinBadge amount={user?.coins ?? 0} size="md" />
+            </View>
+
+            <Pressable
+              onPress={handleBoost}
+              style={[styles.boostPayBtn, { backgroundColor: colors.primary }]}
+            >
+              <Feather name="trending-up" size={16} color="#fff" />
+              <Text style={styles.boostPayBtnText}>Boost Now</Text>
+            </Pressable>
+
+            <Pressable style={[styles.menuCancel, { backgroundColor: colors.muted }]} onPress={() => setBoostTarget(null)}>
+              <Text style={[styles.menuCancelText, { color: colors.foreground }]}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── Boost Success Toast ────────────────────────────────────────────── */}
+      {boostSuccess && (
+        <View style={[styles.toast, { backgroundColor: "#1C1C2E", pointerEvents: "none" }]}>
+          <Feather name="trending-up" size={16} color="#34C759" />
+          <Text style={styles.toastText}>Post boosted! More views incoming ↗️</Text>
         </View>
       )}
     </View>
@@ -1730,4 +1838,43 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   toastText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
+
+  // ── Boost Post ───────────────────────────────────────────────────
+  boostTierCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    gap: 10,
+  },
+  boostTierIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boostTierLabel: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  boostTierDesc:  { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  boostBalanceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  boostBalanceLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  boostPayBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  boostPayBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
 });

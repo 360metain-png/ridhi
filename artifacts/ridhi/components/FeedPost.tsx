@@ -29,6 +29,8 @@ export interface Post {
   timeAgo: string;
   type?: string;
   hashtags?: string[];
+  isBoosted?: boolean;
+  boostViews?: number;
 }
 
 interface FeedPostProps {
@@ -37,6 +39,7 @@ interface FeedPostProps {
   onComment: (id: string) => void;
   onProfile: (userId: string) => void;
   onMenuPress?: (id: string, isOwn: boolean) => void;
+  onBoostPress?: (id: string) => void;
 }
 
 // ─── Privacy badge ─────────────────────────────────────────────────────────────
@@ -114,6 +117,7 @@ export const FeedPost = React.memo(function FeedPost({
   onComment,
   onProfile,
   onMenuPress,
+  onBoostPress,
 }: FeedPostProps) {
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
@@ -172,6 +176,12 @@ export const FeedPost = React.memo(function FeedPost({
                 <View style={[styles.ownBadge, { backgroundColor: colors.primary + "18" }]}>
                   <Text style={[styles.ownBadgeText, { color: colors.primary }]}>You</Text>
                 </View>
+              )}
+              {post.isBoosted && (
+                <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.boostBadge}>
+                  <Feather name="trending-up" size={8} color="#fff" />
+                  <Text style={styles.boostBadgeText}>Promoted</Text>
+                </LinearGradient>
               )}
             </View>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -287,6 +297,8 @@ const styles = StyleSheet.create({
   ownBadgeText:  { fontSize: 9, fontFamily: "Inter_700Bold" },
   meta:          { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1 },
   more:          { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  boostBadge:    { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6, marginLeft: 4 },
+  boostBadgeText:{ fontSize: 8, fontFamily: "Inter_700Bold", color: "#fff" },
   content:       { fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 22, paddingHorizontal: 14, paddingBottom: 10, letterSpacing: 0.1 },
   hashtagRow:    { flexDirection: "row", flexWrap: "wrap", gap: 6, paddingHorizontal: 14, paddingBottom: 10 },
   hashtag:       { fontSize: 13, fontFamily: "Inter_600SemiBold" },
