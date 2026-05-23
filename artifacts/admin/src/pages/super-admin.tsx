@@ -415,6 +415,53 @@ export default function SuperAdminPage() {
     ipBlacklist: "",
   });
 
+  // ── Levels & Commissions state ─────────────────────────────────────────────────────
+  const [autoPromo, setAutoPromo] = useState(true);
+
+  interface HostLevel { level: string; title: string; minCoins: number; badge: string; color: string; }
+  interface AgentLevel { level: string; title: string; hostsRequired: number; commissionRate: number; icon: string; color: string; }
+
+  const DEFAULT_HOST_LEVELS: HostLevel[] = [
+    { level: "L1", title: "Bronze",      minCoins: 50000,   badge: "🥉", color: "#CD7F32" },
+    { level: "L2", title: "Silver",      minCoins: 200000,  badge: "🥈", color: "#9E9E9E" },
+    { level: "L3", title: "Gold",        minCoins: 500000,  badge: "🥇", color: "#FFB800" },
+    { level: "L4", title: "Platinum",    minCoins: 1000000, badge: "💎", color: "#00BCD4" },
+    { level: "L5", title: "Diamond",     minCoins: 2000000, badge: "🔷", color: "#2196F3" },
+    { level: "L6", title: "Elite",       minCoins: 3500000, badge: "⭐", color: "#7B2FBE" },
+    { level: "L7", title: "Royal Crown", minCoins: 5000000, badge: "👑", color: "#E91E8C" },
+  ];
+  const DEFAULT_AGENT_LEVELS: AgentLevel[] = [
+    { level: "A1", title: "Agent",       hostsRequired: 5,   commissionRate: 2,  icon: "🥉", color: "#9E9E9E" },
+    { level: "A2", title: "Senior Agent",hostsRequired: 20,  commissionRate: 4,  icon: "🥈", color: "#4CAF50" },
+    { level: "A3", title: "Super Agent", hostsRequired: 60,  commissionRate: 6,  icon: "🥇", color: "#2196F3" },
+    { level: "A4", title: "Elite Agent", hostsRequired: 150, commissionRate: 8,  icon: "💎", color: "#FF9800" },
+    { level: "A5", title: "Master Agent",hostsRequired: 250, commissionRate: 10, icon: "👑", color: "#E91E8C" },
+  ];
+  const [hostLevels, setHostLevels] = useState<HostLevel[]>(() => JSON.parse(JSON.stringify(DEFAULT_HOST_LEVELS)));
+  const [agentLevels, setAgentLevels] = useState<AgentLevel[]>(() => JSON.parse(JSON.stringify(DEFAULT_AGENT_LEVELS)));
+
+  const updateHostLevel = (idx: number, field: string, val: string | number) =>
+    setHostLevels(prev => prev.map((l, i) => i === idx ? { ...l, [field]: val as never } : l));
+  const removeHostLevel = (idx: number) => setHostLevels(prev => prev.filter((_l, i) => i !== idx));
+  const addHostLevel = () => {
+    const nextNum = hostLevels.length + 1;
+    setHostLevels(prev => [...prev, { level: `L${nextNum}`, title: "New Level", minCoins: 0, badge: "🔴", color: "#888888" }]);
+  };
+  const updateAgentLevel = (idx: number, field: string, val: string | number) =>
+    setAgentLevels(prev => prev.map((l, i) => i === idx ? { ...l, [field]: val as never } : l));
+  const removeAgentLevel = (idx: number) => setAgentLevels(prev => prev.filter((_l, i) => i !== idx));
+  const addAgentLevel = () => {
+    const nextNum = agentLevels.length + 1;
+    setAgentLevels(prev => [...prev, { level: `A${nextNum}`, title: "New Level", hostsRequired: 0, commissionRate: 0, icon: "🔴", color: "#888888" }]);
+  };
+  const resetLevels = () => {
+    setHostLevels(JSON.parse(JSON.stringify(DEFAULT_HOST_LEVELS)));
+    setAgentLevels(JSON.parse(JSON.stringify(DEFAULT_AGENT_LEVELS)));
+  };
+  const saveLevels = () => {
+    handleSaveKey("levels");
+  };
+
   const toggleReveal = (key: string) =>
     setRevealedKeys(prev => ({ ...prev, [key]: !prev[key] }));
 
@@ -588,6 +635,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="search" className="text-xs gap-1.5">
             <Search className="w-3.5 h-3.5" /> Quick Search
+          </TabsTrigger>
+          <TabsTrigger value="levels" className="text-xs gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5" /> Levels & Commissions
           </TabsTrigger>
         </TabsList>
 
@@ -3110,6 +3160,212 @@ export default function SuperAdminPage() {
               })()}
             </div>
           )}
+        </TabsContent>
+
+        {/* ─── LEVELS & COMMISSIONS TAB ─── */}
+        <TabsContent value="levels" className="mt-4 space-y-6">
+
+          {/* Auto-promotion banner */}
+          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="font-semibold text-purple-900 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" /> Automatic Level Promotion
+                </p>
+                <p className="text-xs text-purple-700 mt-1">When enabled, hosts and agents are automatically promoted to the next level when they meet the required thresholds.</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-purple-800 font-medium">{autoPromo ? "Enabled" : "Disabled"}</span>
+                <Switch checked={autoPromo} onCheckedChange={setAutoPromo} />
+              </div>
+            </div>
+          </div>
+
+          {/* Host Levels Editor */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-pink-600" />
+                <CardTitle className="text-base">Host Level Structure</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Define coin thresholds, titles, and visual badges for each host tier.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-xs text-muted-foreground">
+                      <th className="text-left p-2 font-medium">Level</th>
+                      <th className="text-left p-2 font-medium">Title</th>
+                      <th className="text-left p-2 font-medium">Min Coins</th>
+                      <th className="text-left p-2 font-medium">Badge</th>
+                      <th className="text-left p-2 font-medium">Color</th>
+                      <th className="text-left p-2 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {hostLevels.map((hl, i) => (
+                      <tr key={hl.level} className="border-b last:border-0 hover:bg-muted/20">
+                        <td className="p-2 font-mono font-medium">{hl.level}</td>
+                        <td className="p-2">
+                          <Input value={hl.title} onChange={e => updateHostLevel(i, "title", e.target.value)} className="h-7 text-xs" />
+                        </td>
+                        <td className="p-2">
+                          <Input type="number" value={hl.minCoins} onChange={e => updateHostLevel(i, "minCoins", parseInt(e.target.value) || 0)} className="h-7 text-xs" />
+                        </td>
+                        <td className="p-2">
+                          <Input value={hl.badge} onChange={e => updateHostLevel(i, "badge", e.target.value)} className="h-7 text-xs w-20 text-center" />
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center gap-2">
+                            <input type="color" value={hl.color} onChange={e => updateHostLevel(i, "color", e.target.value)} className="w-8 h-7 rounded cursor-pointer" />
+                            <span className="text-xs text-muted-foreground">{hl.color}</span>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          {hostLevels.length > 1 && (
+                            <Button size="sm" variant="ghost" className="h-7 text-xs text-red-500" onClick={() => removeHostLevel(i)}>
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Button size="sm" variant="outline" className="mt-3 text-xs gap-1" onClick={addHostLevel}>
+                <PlusCircle className="w-3.5 h-3.5" /> Add Host Level
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Agent Levels Editor */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-base">Agent Level Structure</CardTitle>
+              </div>
+              <p className="text-xs text-muted-foreground">Define host count thresholds, titles, and commission % for each agent tier.</p>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-xs text-muted-foreground">
+                      <th className="text-left p-2 font-medium">Level</th>
+                      <th className="text-left p-2 font-medium">Title</th>
+                      <th className="text-left p-2 font-medium">Min Hosts</th>
+                      <th className="text-left p-2 font-medium">Commission %</th>
+                      <th className="text-left p-2 font-medium">Badge</th>
+                      <th className="text-left p-2 font-medium">Color</th>
+                      <th className="text-left p-2 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {agentLevels.map((al, i) => (
+                      <tr key={al.level} className="border-b last:border-0 hover:bg-muted/20">
+                        <td className="p-2 font-mono font-medium">{al.level}</td>
+                        <td className="p-2">
+                          <Input value={al.title} onChange={e => updateAgentLevel(i, "title", e.target.value)} className="h-7 text-xs" />
+                        </td>
+                        <td className="p-2">
+                          <Input type="number" value={al.hostsRequired} onChange={e => updateAgentLevel(i, "hostsRequired", parseInt(e.target.value) || 0)} className="h-7 text-xs" />
+                        </td>
+                        <td className="p-2">
+                          <Input type="number" value={al.commissionRate} onChange={e => updateAgentLevel(i, "commissionRate", parseInt(e.target.value) || 0)} className="h-7 text-xs" />
+                        </td>
+                        <td className="p-2">
+                          <Input value={al.icon} onChange={e => updateAgentLevel(i, "icon", e.target.value)} className="h-7 text-xs w-20 text-center" />
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center gap-2">
+                            <input type="color" value={al.color} onChange={e => updateAgentLevel(i, "color", e.target.value)} className="w-8 h-7 rounded cursor-pointer" />
+                            <span className="text-xs text-muted-foreground">{al.color}</span>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          {agentLevels.length > 1 && (
+                            <Button size="sm" variant="ghost" className="h-7 text-xs text-red-500" onClick={() => removeAgentLevel(i)}>
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Button size="sm" variant="outline" className="mt-3 text-xs gap-1" onClick={addAgentLevel}>
+                <PlusCircle className="w-3.5 h-3.5" /> Add Agent Level
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Live preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Host Level Preview</CardTitle>
+                <p className="text-xs text-muted-foreground">How existing hosts map to current thresholds</p>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {HOSTS_WITH_ACCESS.slice(0, 5).map(h => (
+                  <div key={h.id} className="flex items-center justify-between text-sm rounded-lg border p-2.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold">{h.name.split(" ").map(n => n[0]).join("")}</div>
+                      <div>
+                        <p className="font-medium text-sm">{h.name}</p>
+                        <p className="text-xs text-muted-foreground">{h.coins.toLocaleString()} coins</p>
+                      </div>
+                    </div>
+                    {(() => {
+                      const lvl = hostLevels.slice().reverse().find(l => h.coins >= l.minCoins) || hostLevels[0];
+                      return <Badge variant="outline" className="text-xs" style={{ borderColor: lvl.color, color: lvl.color }}>{lvl.level} · {lvl.title}</Badge>;
+                    })()}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Agent Level Preview</CardTitle>
+                <p className="text-xs text-muted-foreground">How existing agents map to current thresholds</p>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {AGENTS_WITH_ACCESS.slice(0, 5).map(a => (
+                  <div key={a.id} className="flex items-center justify-between text-sm rounded-lg border p-2.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">{a.name.split(" ").map(n => n[0]).join("")}</div>
+                      <div>
+                        <p className="font-medium text-sm">{a.name}</p>
+                        <p className="text-xs text-muted-foreground">{a.hosts} hosts · {a.commission} commission</p>
+                      </div>
+                    </div>
+                    {(() => {
+                      const lvl = agentLevels.slice().reverse().find(l => a.hosts >= l.hostsRequired) || agentLevels[0];
+                      return <Badge variant="outline" className="text-xs" style={{ borderColor: lvl.color, color: lvl.color }}>{lvl.level} · {lvl.title}</Badge>;
+                    })()}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Save / Reset */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Changes apply immediately to previews. Save to persist.</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="text-xs gap-1" onClick={resetLevels}>
+                <RotateCcw className="w-3.5 h-3.5" /> Reset Defaults
+              </Button>
+              <Button size="sm" className="text-xs gap-1 bg-gradient-to-r from-purple-600 to-pink-600" onClick={saveLevels}>
+                <Save className="w-3.5 h-3.5" /> Save Levels
+              </Button>
+            </div>
+          </div>
+
         </TabsContent>
 
       </Tabs>
