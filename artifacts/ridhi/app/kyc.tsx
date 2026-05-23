@@ -136,23 +136,30 @@ function OtpInput({ value, onChange, colors }: { value: string; onChange: (v: st
         maxLength={6}
         autoFocus
       />
-      {digits.map((d, i) => (
-        <View
-          key={i}
-          style={[
-            styles.otpCell,
-            {
-              backgroundColor: value.length === i ? colors.primary + "12" : d ? colors.primary + "10" : colors.card,
-              borderColor: value.length === i ? colors.primary : d ? colors.primary : colors.mutedForeground + "40",
-              borderWidth: value.length === i ? 2.5 : d ? 2 : 1.5,
-            },
-          ]}
-        >
-          <Text style={[styles.otpCellText, { color: d ? colors.foreground : colors.mutedForeground }]}>
-            {d || "\u2014"}
-          </Text>
-        </View>
-      ))}
+      {digits.map((d, i) => {
+        const isActive = value.length === i;
+        const isFilled = !!d;
+        return (
+          <View
+            key={i}
+            style={[
+              styles.otpCell,
+              {
+                backgroundColor: isActive ? colors.primary + "22" : isFilled ? colors.primary + "15" : "rgba(255,255,255,0.08)",
+                borderColor: isActive ? colors.primary : isFilled ? colors.primary : "rgba(255,255,255,0.35)",
+                borderWidth: isActive ? 2.5 : isFilled ? 2 : 1.5,
+              },
+            ]}
+          >
+            <Text style={[styles.otpCellText, { color: isFilled ? colors.foreground : colors.mutedForeground + "CC" }]}>
+              {d || "\u2014"}
+            </Text>
+            {isActive && (
+              <View style={[styles.otpCursor, { backgroundColor: colors.primary }]} />
+            )}
+          </View>
+        );
+      })}
     </Pressable>
   );
 }
@@ -1282,8 +1289,9 @@ const styles = StyleSheet.create({
 
   otpRow: { flexDirection: "row", gap: 10, justifyContent: "center", paddingVertical: 8 },
   otpHidden: { position: "absolute", opacity: 0, width: 1, height: 1 },
-  otpCell: { width: 48, height: 58, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  otpCell: { width: 48, height: 58, borderRadius: 14, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   otpCellText: { fontSize: 24, fontFamily: "Inter_700Bold", lineHeight: 30 },
+  otpCursor: { position: "absolute", bottom: 10, width: 20, height: 2, borderRadius: 1 },
 
   verifiedBanner: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 16, borderWidth: 1.5 },
   verifiedIconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: "#22C55E20", alignItems: "center", justifyContent: "center" },
