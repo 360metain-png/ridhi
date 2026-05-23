@@ -31,6 +31,17 @@ const ADMIN_ROLES = [
   { id: 5, name: "Vikash Singh", email: "vikash@ridhi.app", role: "Marketing Admin", status: "active", lastLogin: "30m ago", permissions: "marketing,analytics" },
 ];
 
+const SUPER_ADMIN_USERS = [
+  { id: "u1", name: "Rahul Sharma", phone: "+91 98765 43210", city: "Mumbai", status: "active", role: "user", joined: "2 days ago", coins: 12500 },
+  { id: "u2", name: "Priya Patel", phone: "+91 87654 32109", city: "Delhi", status: "active", role: "vip", joined: "1 month ago", coins: 89000 },
+  { id: "u3", name: "Amit Kumar", phone: "+91 76543 21098", city: "Bangalore", status: "banned", role: "user", joined: "3 months ago", coins: 0 },
+  { id: "u4", name: "Sneha Gupta", phone: "+91 65432 10987", city: "Chennai", status: "active", role: "creator", joined: "2 weeks ago", coins: 45000 },
+  { id: "u5", name: "Vikram Rao", phone: "+91 54321 09876", city: "Hyderabad", status: "suspended", role: "user", joined: "5 months ago", coins: 3200 },
+  { id: "u6", name: "Ananya Krishnan", phone: "+91 43210 98765", city: "Kochi", status: "active", role: "host", joined: "1 month ago", coins: 6200000 },
+  { id: "u7", name: "Karan Malhotra", phone: "+91 32109 87654", city: "Pune", status: "active", role: "user", joined: "4 days ago", coins: 500 },
+  { id: "u8", name: "Neha Iyer", phone: "+91 21098 76543", city: "Jaipur", status: "active", role: "vip", joined: "3 weeks ago", coins: 67000 },
+];
+
 const HOSTS_WITH_ACCESS = [
   { id: "h1", name: "Priya Sharma", email: "host.priya@ridhi.app", level: "L5", levelLabel: "VIP", coins: 380000, access: true, lastLogin: "5m ago", sessions: 3, city: "Mumbai", joinedAdmin: "3 months ago" },
   { id: "h2", name: "Rahul Verma", email: "host.rahul@ridhi.app", level: "L6", levelLabel: "Diamond", coins: 920000, access: true, lastLogin: "1h ago", sessions: 1, city: "Delhi", joinedAdmin: "5 months ago" },
@@ -387,6 +398,19 @@ export default function SuperAdminPage() {
     autoApproveKyc:       false,
     autoApproveWithdraw:  false,
     withdrawAutoThreshold: "1000",
+  });
+
+  const [securitySettings, setSecuritySettings] = useState({
+    enforce2FA: true,
+    minPasswordLength: "8",
+    requireComplexity: true,
+    maxLoginAttempts: "5",
+    lockoutDuration: "30",
+    rateLimitRequests: "100",
+    rateLimitWindow: "60",
+    sessionTimeout: "24",
+    ipWhitelist: "",
+    ipBlacklist: "",
   });
 
   const toggleReveal = (key: string) =>
@@ -797,17 +821,35 @@ export default function SuperAdminPage() {
                   </thead>
                   <tbody>
                     {[
-                      "Dashboard & Analytics", "User Management", "Content Moderation",
-                      "Host Management", "Agent Management", "Audio/Video Calls",
-                      "Gaming Management", "Live Streams", "Coin Economy",
-                      "Payouts & Revenue", "AI Hub Controls", "Marketing",
-                      "Global Settings", "Security Controls", "Payment Gateways",
+                      { name: "Dashboard & Analytics",    sa: true, host: true,  agent: true  },
+                      { name: "User Management",          sa: true, host: false, agent: false },
+                      { name: "Content Moderation",       sa: true, host: false, agent: false },
+                      { name: "Host Management",          sa: true, host: false, agent: true  },
+                      { name: "Agent Management",         sa: true, host: false, agent: false },
+                      { name: "Audio/Video Calls",        sa: true, host: true,  agent: true  },
+                      { name: "Gaming Management",        sa: true, host: false, agent: false },
+                      { name: "Live Streams",             sa: true, host: true,  agent: true  },
+                      { name: "Coin Economy",             sa: true, host: true,  agent: true  },
+                      { name: "Payouts & Revenue",        sa: true, host: false, agent: true  },
+                      { name: "AI Hub Controls",          sa: true, host: false, agent: false },
+                      { name: "Marketing",                sa: true, host: false, agent: true  },
+                      { name: "Global Settings",          sa: true, host: false, agent: false },
+                      { name: "Security Controls",        sa: true, host: false, agent: false },
+                      { name: "Payment Gateways",         sa: true, host: false, agent: true  },
                     ].map((perm) => (
-                      <tr key={perm} className="border-b last:border-0 hover:bg-muted/20">
-                        <td className="py-2 pr-4 font-medium text-foreground">{perm}</td>
+                      <tr key={perm.name} className="border-b last:border-0 hover:bg-muted/20">
+                        <td className="py-2 pr-4 font-medium text-foreground">{perm.name}</td>
                         <td className="py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
-                        <td className="py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
-                        <td className="py-2 text-center"><CheckCircle className="w-4 h-4 text-green-500 mx-auto" /></td>
+                        <td className="py-2 text-center">
+                          {perm.host
+                            ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" />
+                            : <XCircle className="w-4 h-4 text-red-400 mx-auto" />}
+                        </td>
+                        <td className="py-2 text-center">
+                          {perm.agent
+                            ? <CheckCircle className="w-4 h-4 text-green-500 mx-auto" />
+                            : <XCircle className="w-4 h-4 text-red-400 mx-auto" />}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1292,7 +1334,9 @@ export default function SuperAdminPage() {
         </TabsContent>
 
         {/* ─── SECURITY TAB ─── */}
-        <TabsContent value="security" className="mt-4">
+        <TabsContent value="security" className="mt-4 space-y-6">
+
+          {/* Security alerts */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
@@ -1312,6 +1356,141 @@ export default function SuperAdminPage() {
               ))}
             </CardContent>
           </Card>
+
+          {/* Authentication & Password */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-amber-600" /> Authentication & 2FA
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Enforce 2FA for Super Admin</p>
+                    <p className="text-xs text-muted-foreground">Require OTP or authenticator for all Super Admin logins</p>
+                  </div>
+                  <Switch
+                    checked={securitySettings.enforce2FA}
+                    onCheckedChange={v => setSecuritySettings(p => ({...p, enforce2FA: v}))}
+                  />
+                </div>
+                <Separator />
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Minimum Password Length</Label>
+                  <div className="flex items-center gap-2">
+                    <Input type="number" min={6} max={32}
+                      value={securitySettings.minPasswordLength}
+                      onChange={e => setSecuritySettings(p => ({...p, minPasswordLength: e.target.value}))}
+                      className="h-8 text-xs w-20" />
+                    <span className="text-xs text-muted-foreground">characters</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Require Complexity</p>
+                    <p className="text-xs text-muted-foreground">Upper, lower, number, special character</p>
+                  </div>
+                  <Switch
+                    checked={securitySettings.requireComplexity}
+                    onCheckedChange={v => setSecuritySettings(p => ({...p, requireComplexity: v}))}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Wifi className="w-4 h-4 text-blue-600" /> Rate Limiting & Session
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Max Login Attempts</Label>
+                    <Input type="number" min={1} max={20}
+                      value={securitySettings.maxLoginAttempts}
+                      onChange={e => setSecuritySettings(p => ({...p, maxLoginAttempts: e.target.value}))}
+                      className="h-8 text-xs" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Lockout (minutes)</Label>
+                    <Input type="number" min={1} max={1440}
+                      value={securitySettings.lockoutDuration}
+                      onChange={e => setSecuritySettings(p => ({...p, lockoutDuration: e.target.value}))}
+                      className="h-8 text-xs" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Rate Limit (requests)</Label>
+                    <Input type="number"
+                      value={securitySettings.rateLimitRequests}
+                      onChange={e => setSecuritySettings(p => ({...p, rateLimitRequests: e.target.value}))}
+                      className="h-8 text-xs" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Window (seconds)</Label>
+                    <Input type="number"
+                      value={securitySettings.rateLimitWindow}
+                      onChange={e => setSecuritySettings(p => ({...p, rateLimitWindow: e.target.value}))}
+                      className="h-8 text-xs" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Session Timeout (hours)</Label>
+                  <Input type="number" min={1} max={168}
+                    value={securitySettings.sessionTimeout}
+                    onChange={e => setSecuritySettings(p => ({...p, sessionTimeout: e.target.value}))}
+                    className="h-8 text-xs w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* IP Management */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-600" /> IP Whitelist / Blacklist
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Allowed IPs (whitelist)</Label>
+                  <Input
+                    placeholder="e.g. 203.192.12.0/24, 192.168.1.1"
+                    value={securitySettings.ipWhitelist}
+                    onChange={e => setSecuritySettings(p => ({...p, ipWhitelist: e.target.value}))}
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Comma-separated. Leave blank to allow all.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Blocked IPs (blacklist)</Label>
+                  <Input
+                    placeholder="e.g. 45.142.212.98, 103.253.145.0/24"
+                    value={securitySettings.ipBlacklist}
+                    onChange={e => setSecuritySettings(p => ({...p, ipBlacklist: e.target.value}))}
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Comma-separated. These IPs are denied access.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center justify-end gap-3">
+            <Button size="sm" variant="outline" className="gap-1.5 h-9 text-xs">
+              <RotateCcw className="w-4 h-4" /> Revert Defaults
+            </Button>
+            <Button size="sm" className="gap-1.5 h-9 text-xs">
+              <Save className="w-4 h-4" /> Save Security Config
+            </Button>
+          </div>
         </TabsContent>
 
         {/* ─── FEATURES TAB ─── */}
@@ -2818,6 +2997,35 @@ export default function SuperAdminPage() {
                 );
               })()}
 
+              {/* Users */}
+              {(() => {
+                const matches = SUPER_ADMIN_USERS.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.phone.toLowerCase().includes(searchQuery.toLowerCase()) || u.city.toLowerCase().includes(searchQuery.toLowerCase()) || u.role.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matches.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Users — {matches.length}</p>
+                    <div className="space-y-2">
+                      {matches.map(u => (
+                        <Card key={u.id}><CardContent className="p-3 flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${u.role === "host" ? "bg-gradient-to-br from-pink-500 to-purple-600" : u.role === "vip" ? "bg-gradient-to-br from-amber-500 to-yellow-600" : u.role === "creator" ? "bg-gradient-to-br from-blue-500 to-cyan-500" : "bg-gradient-to-br from-gray-500 to-slate-600"}`}>
+                              {u.name.split(" ").map(n=>n[0]).join("")}
+                            </div>
+                            <div>
+                              <p className="font-medium">{u.name}</p>
+                              <p className="text-xs text-muted-foreground">{u.phone} · {u.city} · {u.coins.toLocaleString()} coins</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={u.status === "active" ? "outline" : u.status === "banned" ? "destructive" : "secondary"} className="text-xs capitalize">{u.status}</Badge>
+                            <Badge variant="outline" className="text-xs capitalize">{u.role}</Badge>
+                          </div>
+                        </CardContent></Card>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Security Alerts */}
               {(() => {
                 const matches = SECURITY_ALERTS.filter(a => a.message.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -2843,6 +3051,7 @@ export default function SuperAdminPage() {
               {(() => {
                 const totalMatches =
                   ADMIN_ROLES.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
+                  SUPER_ADMIN_USERS.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.phone.toLowerCase().includes(searchQuery.toLowerCase())).length +
                   hosts.filter(h => h.name.toLowerCase().includes(searchQuery.toLowerCase()) || h.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
                   agents.filter(a => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.email.toLowerCase().includes(searchQuery.toLowerCase())).length +
                   platformApis.filter(api => api.name.toLowerCase().includes(searchQuery.toLowerCase())).length +
