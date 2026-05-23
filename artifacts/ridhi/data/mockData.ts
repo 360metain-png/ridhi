@@ -455,6 +455,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&h=800&fit=crop",
     matchPercent: 89,
     vipTier: "diamond" as const,
+    zodiacSign: "Leo",
+    vibeStar: 5,
+    compatibilityScore: 92,
   },
   {
     id: "m2",
@@ -469,6 +472,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=800&fit=crop",
     matchPercent: 76,
     vipTier: "silver" as const,
+    zodiacSign: "Virgo",
+    vibeStar: 4,
+    compatibilityScore: 78,
   },
   {
     id: "m3",
@@ -483,6 +489,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=600&h=800&fit=crop",
     matchPercent: 93,
     vipTier: "creator_pro" as const,
+    zodiacSign: "Sagittarius",
+    vibeStar: 5,
+    compatibilityScore: 95,
   },
   {
     id: "m4",
@@ -497,6 +506,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop",
     matchPercent: 81,
     vipTier: "gold" as const,
+    zodiacSign: "Capricorn",
+    vibeStar: 4,
+    compatibilityScore: 83,
   },
   {
     id: "m5",
@@ -511,6 +523,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&h=800&fit=crop",
     matchPercent: 87,
     vipTier: "creator_basic" as const,
+    zodiacSign: "Libra",
+    vibeStar: 4,
+    compatibilityScore: 88,
   },
   {
     id: "m6",
@@ -525,6 +540,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&h=800&fit=crop",
     matchPercent: 78,
     vipTier: "platinum" as const,
+    zodiacSign: "Aquarius",
+    vibeStar: 4,
+    compatibilityScore: 80,
   },
   {
     id: "m7",
@@ -539,6 +557,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=600&h=800&fit=crop",
     matchPercent: 82,
     vipTier: "silver" as const,
+    zodiacSign: "Pisces",
+    vibeStar: 4,
+    compatibilityScore: 85,
   },
   {
     id: "m8",
@@ -553,6 +574,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=600&h=800&fit=crop",
     matchPercent: 91,
     vipTier: "gold" as const,
+    zodiacSign: "Aries",
+    vibeStar: 5,
+    compatibilityScore: 93,
   },
 
   // ── Male profiles (shown to female users) ────────────────────────────────
@@ -569,6 +593,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&h=800&fit=crop",
     matchPercent: 88,
     vipTier: "gold" as const,
+    zodiacSign: "Taurus",
+    vibeStar: 4,
+    compatibilityScore: 87,
   },
   {
     id: "m10",
@@ -583,6 +610,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&h=800&fit=crop",
     matchPercent: 79,
     vipTier: "silver" as const,
+    zodiacSign: "Cancer",
+    vibeStar: 4,
+    compatibilityScore: 81,
   },
   {
     id: "m11",
@@ -597,6 +627,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop",
     matchPercent: 92,
     vipTier: "creator_elite" as const,
+    zodiacSign: "Gemini",
+    vibeStar: 5,
+    compatibilityScore: 94,
   },
   {
     id: "m12",
@@ -611,6 +644,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop",
     matchPercent: 84,
     vipTier: "gold" as const,
+    zodiacSign: "Scorpio",
+    vibeStar: 4,
+    compatibilityScore: 86,
   },
   {
     id: "m13",
@@ -625,6 +661,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&h=800&fit=crop",
     matchPercent: 86,
     vipTier: "platinum" as const,
+    zodiacSign: "Leo",
+    vibeStar: 4,
+    compatibilityScore: 89,
   },
   {
     id: "m14",
@@ -638,6 +677,9 @@ export const MATCH_PROFILES = [
     distance: "6 km away",
     imageUri: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=600&h=800&fit=crop",
     matchPercent: 77,
+    zodiacSign: "Virgo",
+    vibeStar: 3,
+    compatibilityScore: 79,
   },
   {
     id: "m15",
@@ -652,6 +694,9 @@ export const MATCH_PROFILES = [
     imageUri: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=600&h=800&fit=crop",
     matchPercent: 83,
     vipTier: "silver" as const,
+    zodiacSign: "Pisces",
+    vibeStar: 4,
+    compatibilityScore: 84,
   },
   {
     id: "m16",
@@ -665,6 +710,9 @@ export const MATCH_PROFILES = [
     distance: "3 km away",
     imageUri: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=800&fit=crop",
     matchPercent: 90,
+    zodiacSign: "Capricorn",
+    vibeStar: 4,
+    compatibilityScore: 91,
   },
 ];
 
@@ -1181,4 +1229,50 @@ export const COIN_TRANSACTIONS = [
   { id: "t10", type: "debit",  amount: 500,  desc: "Game entry — Gold room (Ludo)",            time: "2 days ago, 3:50 PM", icon: "play" },
   { id: "t11", type: "credit", amount: 10,   desc: "Daily login reward",                       time: "2 days ago, 9:00 AM", icon: "gift" },
   { id: "t12", type: "debit",  amount: 25,   desc: "Video call preview — Dev K (New Host)",    time: "3 days ago, 8:00 PM", icon: "video" },
+];
+
+// ── Ad Campaign Performance / CTR History ───────────────────────────────────
+export interface CampaignPerformance {
+  campaignId: string;
+  date: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  spend: number;
+  conversions: number;
+  cpc: number;
+}
+
+export interface AdVariant {
+  id: string;
+  campaignId: string;
+  name: string;
+  headline: string;
+  body: string;
+  ctr: number;
+  impressions: number;
+  isWinner: boolean;
+}
+
+export const CAMPAIGN_PERFORMANCE: CampaignPerformance[] = [
+  { campaignId: "uc1", date: "May 16", impressions: 4200, clicks: 142, ctr: 3.38, spend: 500, conversions: 8, cpc: 3.52 },
+  { campaignId: "uc1", date: "May 17", impressions: 4500, clicks: 155, ctr: 3.44, spend: 500, conversions: 10, cpc: 3.23 },
+  { campaignId: "uc1", date: "May 18", impressions: 4800, clicks: 168, ctr: 3.50, spend: 500, conversions: 9, cpc: 2.98 },
+  { campaignId: "uc1", date: "May 19", impressions: 5100, clicks: 162, ctr: 3.18, spend: 500, conversions: 7, cpc: 3.09 },
+  { campaignId: "uc1", date: "May 20", impressions: 4700, clicks: 145, ctr: 3.09, spend: 500, conversions: 8, cpc: 3.45 },
+  { campaignId: "uc1", date: "May 21", impressions: 4400, clicks: 130, ctr: 2.95, spend: 400, conversions: 6, cpc: 3.08 },
+  { campaignId: "uc1", date: "May 22", impressions: 3700, clicks: 150, ctr: 4.05, spend: 100, conversions: 11, cpc: 0.67 },
+  { campaignId: "uc2", date: "May 11", impressions: 3400, clicks: 105, ctr: 3.09, spend: 300, conversions: 5, cpc: 2.86 },
+  { campaignId: "uc2", date: "May 12", impressions: 3900, clicks: 118, ctr: 3.03, spend: 300, conversions: 6, cpc: 2.54 },
+  { campaignId: "uc2", date: "May 13", impressions: 4200, clicks: 128, ctr: 3.05, spend: 300, conversions: 7, cpc: 2.34 },
+  { campaignId: "uc2", date: "May 14", impressions: 3800, clicks: 110, ctr: 2.89, spend: 300, conversions: 5, cpc: 2.73 },
+  { campaignId: "uc2", date: "May 15", impressions: 3400, clicks: 100, ctr: 2.94, spend: 300, conversions: 4, cpc: 3.00 },
+];
+
+export const AD_VARIANTS: AdVariant[] = [
+  { id: "av1", campaignId: "uc1", name: "Summer Sale A", headline: "Summer Sale — 40% Off Everything!", body: "Shop the biggest summer sale. Limited stock.", ctr: 3.38, impressions: 28400, isWinner: true },
+  { id: "av2", campaignId: "uc1", name: "Summer Sale B", headline: "40% OFF — Summer Clearance", body: "Up to 40% off on all items. Free shipping.", ctr: 2.84, impressions: 27100, isWinner: false },
+  { id: "av3", campaignId: "uc1", name: "Summer Sale C", headline: "🔥 Flash: 40% Off Ends Tonight", body: "Don't miss out. Biggest discount of the season.", ctr: 3.12, impressions: 15200, isWinner: false },
+  { id: "av4", campaignId: "uc2", name: "Ethnic Wear A", headline: "New Collection Launch — Ethnic Wear", body: "Handcrafted ethnic wear from India's finest artisans.", ctr: 3.05, impressions: 18700, isWinner: true },
+  { id: "av5", campaignId: "uc2", name: "Ethnic Wear B", headline: "Ethnic Fashion — Free Shipping", body: "Discover premium ethnic wear. First order free delivery.", ctr: 2.71, impressions: 16500, isWinner: false },
 ];

@@ -85,6 +85,220 @@ export const mockCampaigns: Campaign[] = Array.from({ length: 15 }, (_, i) => ({
   endDate: new Date(Date.now() + Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0]
 }));
 
+// ── 30-Day Time-Series Analytics ───────────────────────────────────
+export interface DailyStat {
+  date: string;
+  dau: number;
+  newUsers: number;
+  revenue: number;
+  coinPurchases: number;
+  adSpend: number;
+  withdrawalRequests: number;
+}
+
+export const ANALYTICS_30D: DailyStat[] = [
+  { date: "Apr 24", dau: 12400, newUsers: 420, revenue: 84700, coinPurchases: 156, adSpend: 0, withdrawalRequests: 8 },
+  { date: "Apr 25", dau: 13100, newUsers: 480, revenue: 92100, coinPurchases: 172, adSpend: 0, withdrawalRequests: 10 },
+  { date: "Apr 26", dau: 12800, newUsers: 390, revenue: 78500, coinPurchases: 148, adSpend: 0, withdrawalRequests: 6 },
+  { date: "Apr 27", dau: 14200, newUsers: 560, revenue: 112400, coinPurchases: 210, adSpend: 0, withdrawalRequests: 12 },
+  { date: "Apr 28", dau: 14500, newUsers: 520, revenue: 105200, coinPurchases: 198, adSpend: 0, withdrawalRequests: 9 },
+  { date: "Apr 29", dau: 13800, newUsers: 450, revenue: 93400, coinPurchases: 175, adSpend: 0, withdrawalRequests: 11 },
+  { date: "Apr 30", dau: 15000, newUsers: 610, revenue: 121000, coinPurchases: 228, adSpend: 0, withdrawalRequests: 14 },
+  { date: "May 1",  dau: 16800, newUsers: 780, revenue: 145600, coinPurchases: 274, adSpend: 0, withdrawalRequests: 16 },
+  { date: "May 2",  dau: 17200, newUsers: 690, revenue: 138200, coinPurchases: 260, adSpend: 0, withdrawalRequests: 13 },
+  { date: "May 3",  dau: 16500, newUsers: 620, revenue: 127800, coinPurchases: 240, adSpend: 0, withdrawalRequests: 15 },
+  { date: "May 4",  dau: 15800, newUsers: 540, revenue: 110500, coinPurchases: 208, adSpend: 0, withdrawalRequests: 10 },
+  { date: "May 5",  dau: 16100, newUsers: 580, revenue: 119300, coinPurchases: 224, adSpend: 0, withdrawalRequests: 12 },
+  { date: "May 6",  dau: 15400, newUsers: 500, revenue: 102400, coinPurchases: 192, adSpend: 0, withdrawalRequests: 9 },
+  { date: "May 7",  dau: 14800, newUsers: 470, revenue: 98200,  coinPurchases: 184, adSpend: 0, withdrawalRequests: 7 },
+  { date: "May 8",  dau: 15700, newUsers: 530, revenue: 115000, coinPurchases: 216, adSpend: 3500, withdrawalRequests: 11 },
+  { date: "May 9",  dau: 16300, newUsers: 590, revenue: 128700, coinPurchases: 242, adSpend: 1500, withdrawalRequests: 13 },
+  { date: "May 10", dau: 17100, newUsers: 650, revenue: 139400, coinPurchases: 262, adSpend: 300,  withdrawalRequests: 14 },
+  { date: "May 11", dau: 17500, newUsers: 710, revenue: 151200, coinPurchases: 284, adSpend: 300,  withdrawalRequests: 17 },
+  { date: "May 12", dau: 16900, newUsers: 640, revenue: 136800, coinPurchases: 257, adSpend: 300,  withdrawalRequests: 12 },
+  { date: "May 13", dau: 18200, newUsers: 820, revenue: 168400, coinPurchases: 316, adSpend: 300,  withdrawalRequests: 18 },
+  { date: "May 14", dau: 18900, newUsers: 890, revenue: 182100, coinPurchases: 342, adSpend: 0,   withdrawalRequests: 20 },
+  { date: "May 15", dau: 19500, newUsers: 950, revenue: 195000, coinPurchases: 366, adSpend: 500,  withdrawalRequests: 22 },
+  { date: "May 16", dau: 20100, newUsers: 1020, revenue: 210400, coinPurchases: 395, adSpend: 500,  withdrawalRequests: 25 },
+  { date: "May 17", dau: 19800, newUsers: 980, revenue: 203200, coinPurchases: 382, adSpend: 500,  withdrawalRequests: 23 },
+  { date: "May 18", dau: 19200, newUsers: 870, revenue: 187600, coinPurchases: 353, adSpend: 0,   withdrawalRequests: 19 },
+  { date: "May 19", dau: 18800, newUsers: 840, revenue: 178900, coinPurchases: 336, adSpend: 500,  withdrawalRequests: 21 },
+  { date: "May 20", dau: 19600, newUsers: 920, revenue: 195800, coinPurchases: 368, adSpend: 500,  withdrawalRequests: 24 },
+  { date: "May 21", dau: 20500, newUsers: 1050, revenue: 215000, coinPurchases: 404, adSpend: 400, withdrawalRequests: 26 },
+  { date: "May 22", dau: 21200, newUsers: 1120, revenue: 228700, coinPurchases: 430, adSpend: 100,  withdrawalRequests: 28 },
+  { date: "May 23", dau: 22400, newUsers: 1240, revenue: 251200, coinPurchases: 472, adSpend: 0,   withdrawalRequests: 31 },
+];
+
+// ── Support Tickets ────────────────────────────────────
+export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "escalated" | "closed";
+export type SupportPriority = "low" | "medium" | "high" | "critical";
+
+export interface SupportTicket {
+  id: string;
+  userId: string;
+  userName: string;
+  userPhone: string;
+  category: string;
+  subject: string;
+  message: string;
+  priority: SupportPriority;
+  status: SupportTicketStatus;
+  createdAt: string;
+  lastUpdated: string;
+  assignedTo?: string;
+  resolution?: string;
+  messages: { from: "user" | "agent"; text: string; time: string }[];
+}
+
+export const SUPPORT_TICKETS: SupportTicket[] = [
+  {
+    id: "st1",
+    userId: "u3",
+    userName: "Vihaan Singh",
+    userPhone: "+91 9876543212",
+    category: "Coin Issue",
+    subject: "Coins not credited after recharge",
+    message: "I paid ₹399 for 1000 coins via UPI but my wallet still shows 0 coins. Payment ID: pay_ABC123.",
+    priority: "high",
+    status: "in_progress",
+    createdAt: "2024-05-22T09:15:00Z",
+    lastUpdated: "2024-05-22T14:30:00Z",
+    assignedTo: "Rohit K",
+    messages: [
+      { from: "user", text: "I paid ₹399 for 1000 coins via UPI but my wallet still shows 0 coins. Payment ID: pay_ABC123.", time: "2024-05-22 09:15" },
+      { from: "agent", text: "Thank you for reaching out. We have located your payment and are verifying it with Razorpay. Please allow 2 hours.", time: "2024-05-22 11:00" },
+      { from: "agent", text: "Your payment has been confirmed. 1000 coins have been credited to your wallet. Apologies for the delay.", time: "2024-05-22 14:30" },
+    ],
+  },
+  {
+    id: "st2",
+    userId: "u12",
+    userName: "Kavya Nair",
+    userPhone: "+91 9876543221",
+    category: "Account",
+    subject: "Account suspended without reason",
+    message: "My account was suspended this morning. I have not violated any community guidelines. Please review urgently.",
+    priority: "critical",
+    status: "escalated",
+    createdAt: "2024-05-22T08:00:00Z",
+    lastUpdated: "2024-05-22T16:00:00Z",
+    assignedTo: "Super Admin",
+    messages: [
+      { from: "user", text: "My account was suspended this morning. I have not violated any community guidelines. Please review urgently.", time: "2024-05-22 08:00" },
+      { from: "agent", text: "We are reviewing your account activity. This may take up to 24 hours. We appreciate your patience.", time: "2024-05-22 10:30" },
+    ],
+  },
+  {
+    id: "st3",
+    userId: "u7",
+    userName: "Sai Kumar",
+    userPhone: "+91 9876543216",
+    category: "Harassment",
+    subject: "User sending abusive messages",
+    message: "User u23 is sending me threatening messages in chat. I have blocked them but they created a new account. Screenshots attached.",
+    priority: "high",
+    status: "in_progress",
+    createdAt: "2024-05-21T18:45:00Z",
+    lastUpdated: "2024-05-21T20:00:00Z",
+    assignedTo: "Meera S",
+    messages: [
+      { from: "user", text: "User u23 is sending me threatening messages in chat. I have blocked them but they created a new account. Screenshots attached.", time: "2024-05-21 18:45" },
+      { from: "agent", text: "We take harassment reports very seriously. We have temporarily restricted the reported account and are investigating. Your safety is our priority.", time: "2024-05-21 20:00" },
+    ],
+  },
+  {
+    id: "st4",
+    userId: "u15",
+    userName: "Rahul Tiwari",
+    userPhone: "+91 9876543224",
+    category: "KYC",
+    subject: "KYC rejection reason unclear",
+    message: "My Aadhaar was rejected but the reason says 'image unclear'. I uploaded a 4K photo. Can someone explain what exactly is wrong?",
+    priority: "medium",
+    status: "open",
+    createdAt: "2024-05-22T12:00:00Z",
+    lastUpdated: "2024-05-22T12:00:00Z",
+    messages: [
+      { from: "user", text: "My Aadhaar was rejected but the reason says 'image unclear'. I uploaded a 4K photo. Can someone explain what exactly is wrong?", time: "2024-05-22 12:00" },
+    ],
+  },
+  {
+    id: "st5",
+    userId: "u9",
+    userName: "Krishna Iyer",
+    userPhone: "+91 9876543218",
+    category: "Withdrawal",
+    subject: "Withdrawal pending for 7 days",
+    message: "I requested withdrawal of ₹12,000 on 15 May. Status still shows 'Pending'. My bank details are correct. Please process.",
+    priority: "medium",
+    status: "resolved",
+    createdAt: "2024-05-15T10:00:00Z",
+    lastUpdated: "2024-05-22T09:00:00Z",
+    assignedTo: "Rohit K",
+    resolution: "Processed via NEFT on 22 May. User confirmed receipt.",
+    messages: [
+      { from: "user", text: "I requested withdrawal of ₹12,000 on 15 May. Status still shows 'Pending'. My bank details are correct. Please process.", time: "2024-05-15 10:00" },
+      { from: "agent", text: "We have flagged this to the finance team. The batch is scheduled for processing on 21 May.", time: "2024-05-17 14:00" },
+      { from: "agent", text: "Your withdrawal has been processed. Ref: NEFT-20240522-0087. Amount should reflect within 24 hours.", time: "2024-05-22 09:00" },
+      { from: "user", text: "Received! Thank you for resolving this.", time: "2024-05-22 11:30" },
+    ],
+  },
+  {
+    id: "st6",
+    userId: "u20",
+    userName: "Natasha Roy",
+    userPhone: "+91 9876543229",
+    category: "App Bug",
+    subject: "App crashes on opening reels tab",
+    message: "Since yesterday, the app crashes every time I tap the Reels tab. I reinstalled but same issue. Samsung Galaxy S23, Android 14.",
+    priority: "high",
+    status: "in_progress",
+    createdAt: "2024-05-21T09:30:00Z",
+    lastUpdated: "2024-05-21T15:00:00Z",
+    assignedTo: "Dev Team",
+    messages: [
+      { from: "user", text: "Since yesterday, the app crashes every time I tap the Reels tab. I reinstalled but same issue. Samsung Galaxy S23, Android 14.", time: "2024-05-21 09:30" },
+      { from: "agent", text: "Thank you for the detailed report. We have identified a compatibility issue with Android 14 on Samsung devices. A hotfix is being deployed today.", time: "2024-05-21 15:00" },
+    ],
+  },
+  {
+    id: "st7",
+    userId: "u5",
+    userName: "Arjun Gupta",
+    userPhone: "+91 9876543214",
+    category: "Refund",
+    subject: "Request refund for accidental double recharge",
+    message: "I tapped the recharge button twice and was charged ₹3998 instead of ₹1999. I only need one pack. Please refund ₹1999.",
+    priority: "medium",
+    status: "open",
+    createdAt: "2024-05-22T16:00:00Z",
+    lastUpdated: "2024-05-22T16:00:00Z",
+    messages: [
+      { from: "user", text: "I tapped the recharge button twice and was charged ₹3998 instead of ₹1999. I only need one pack. Please refund ₹1999.", time: "2024-05-22 16:00" },
+    ],
+  },
+  {
+    id: "st8",
+    userId: "u18",
+    userName: "Pooja Verma",
+    userPhone: "+91 9876543227",
+    category: "Feature Request",
+    subject: "Add Kannada language support",
+    message: "Please add Kannada language option in the app settings. Many of my followers from Karnataka can't read English well.",
+    priority: "low",
+    status: "closed",
+    createdAt: "2024-05-10T11:00:00Z",
+    lastUpdated: "2024-05-12T14:00:00Z",
+    assignedTo: "Product Team",
+    resolution: "Kannada added in v2.3.1 released on 12 May. User notified.",
+    messages: [
+      { from: "user", text: "Please add Kannada language option in the app settings. Many of my followers from Karnataka can't read English well.", time: "2024-05-10 11:00" },
+      { from: "agent", text: "Thank you for the suggestion! We have added Kannada to our Q2 language roadmap.", time: "2024-05-10 16:00" },
+      { from: "agent", text: "Kannada language support is now live in app version 2.3.1. Please update and let us know your feedback!", time: "2024-05-12 14:00" },
+    ],
+  },
+];
+
 // ─── Ridhi Coin Management Types ────────────────────────────────────────────
 
 export type CoinPackageConfig = {
