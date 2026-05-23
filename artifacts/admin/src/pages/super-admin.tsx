@@ -12,7 +12,7 @@ import {
   Shield, Users, Server, Activity, AlertTriangle, CheckCircle, XCircle,
   RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye, EyeOff,
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
-  Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle,
+  Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle, UserPlus,
   Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
   Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag,
   Languages, Layers, Megaphone, MessageCircle, Coins, IndianRupee,
