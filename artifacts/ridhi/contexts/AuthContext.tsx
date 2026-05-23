@@ -42,6 +42,7 @@ export interface UserProfile {
   panNumber?: string;     // masked: XXXXX9999X
   kycSubmittedAt?: string;
   kycVerifiedAt?: string;
+  lastDailyRewardAt?: string;
 }
 
 interface AuthContextValue {
@@ -52,6 +53,7 @@ interface AuthContextValue {
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
+  claimDailyReward: () => Promise<boolean>;
   deductCoins: (amount: number) => Promise<boolean>;
   subscribePlan: (planId: string, billing: string, bonusCoins: number) => Promise<void>;
   cancelPlan: () => Promise<void>;
@@ -140,6 +142,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const claimDailyReward = useCallback(async (): Promise<boolean> => {
+    let claimed = false;
+    setUser((prev) => {
+      if (!prev) return prev;
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const last = prev.lastDailyRewardAt ? new Date(prev.lastDailyRewardAt) : null;
+      const lastDate = last ? new Date(last.getFullYear(), last.getMonth(), last.getDate()) : null;
+      if (lastDate && lastDate.getTime() >= today.getTime()) return prev; // already claimed today
+      claimed = true;
+      const updated = { ...prev, coins: prev.coins + 10, lastDailyRewardAt: now.toISOString() };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    return claimed;
+  }, []);
+
   const deductCoins = useCallback(async (amount: number): Promise<boolean> => {
     let success = false;
     setUser((prev) => {
@@ -182,7 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, deductCoins, subscribePlan, cancelPlan }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan }}
     >
       {children}
     </AuthContext.Provider>
