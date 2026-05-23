@@ -21,6 +21,7 @@ import { useColors } from "@/hooks/useColors";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { CoinAmount } from "@/components/CoinAmount";
 import { Avatar } from "@/components/Avatar";
+import { PrivateHead } from "@/components/PrivateHead";
 import {
   PODCAST_ROOM_SPEAKERS,
   PODCAST_ROOM_CHAT,

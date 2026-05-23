@@ -19,6 +19,7 @@ import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, getDefaultMessages, type RoomMessage } from "@/data/chatrooms";
 import { Avatar } from "@/components/Avatar";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const STICKERS = [
   "😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎", "🤯", "👑",
@@ -39,6 +40,8 @@ function formatCount(n: number): string {
 function SystemBubble({ text }: { text: string }) {
   const colors = useColors();
   return (
+    <>
+      <PrivateHead />
     <View style={styles.systemRow}>
       <View style={[styles.systemBubble, { backgroundColor: colors.muted }]}>
         <Feather name="info" size={11} color={colors.mutedForeground} />
@@ -448,6 +451,7 @@ export default function ChatroomDetailScreen() {
         </View>
       </Modal>
     </KeyboardAvoidingView>
+  </>
   );
 }
 

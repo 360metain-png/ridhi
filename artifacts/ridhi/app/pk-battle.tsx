@@ -20,6 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -284,6 +285,8 @@ export default function PKBattleScreen() {
   }
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[colors.destructive + "15", colors.primary + "08", "transparent"]}
@@ -372,6 +375,7 @@ export default function PKBattleScreen() {
         }
       />
     </View>
+  </>
   );
 }
 

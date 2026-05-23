@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 
 // ── Mock advertiser & form (in production these come from the campaign data) ──
 const ADVERTISER = {
@@ -123,6 +124,8 @@ export default function LeadFormFillScreen() {
   }
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient colors={["#2196F3", "#7B2FBE"]} style={[styles.topGrad, { paddingTop: topPad + 8 }]}>
@@ -280,6 +283,7 @@ export default function LeadFormFillScreen() {
         </Pressable>
       </ScrollView>
     </View>
+  </>
   );
 }
 

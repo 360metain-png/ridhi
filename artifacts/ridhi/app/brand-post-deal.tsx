@@ -19,6 +19,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const DEAL_POST_COST = 1000;
 
@@ -199,6 +200,8 @@ export default function BrandPostDealScreen() {
   }
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.root, { backgroundColor: colors.background }]}>
 
       {/* Header */}
@@ -662,6 +665,7 @@ function Field({ label, icon, color, children }: { label: string; icon: string; 
       </View>
       {children}
     </View>
+  </>
   );
 }
 

@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width, height } = Dimensions.get("window");
 
@@ -94,6 +95,8 @@ export default function StoryViewerScreen() {
   };
 
   return (
+    <>
+      <PrivateHead />
     <View style={styles.container}>
       <LinearGradient colors={story.bgColors} style={styles.story}>
         <View style={[styles.topBar, { paddingTop: topPad + 4 }]}>
@@ -185,6 +188,7 @@ export default function StoryViewerScreen() {
         </View>
       </LinearGradient>
     </View>
+  </>
   );
 }
 

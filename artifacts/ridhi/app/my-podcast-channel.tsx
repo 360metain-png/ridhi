@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatPlays, formatDuration } from "@/data/podcastData";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { CoinAmount } from "@/components/CoinAmount";
+import { PrivateHead } from "@/components/PrivateHead";
 
 type Tab = "published" | "drafts" | "analytics";
 
@@ -136,6 +137,8 @@ export default function MyPodcastChannelScreen() {
     ]);
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {/* ── Header ── */}
       <LinearGradient colors={["#1A0533", "#7B2FBE"]} style={styles.header}>
@@ -438,6 +441,7 @@ export default function MyPodcastChannelScreen() {
         </LinearGradient>
       </Pressable>
     </View>
+  </>
   );
 }
 

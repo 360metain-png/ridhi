@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { GIFTS } from "@/data/coinEconomy";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { PrivateHead } from "@/components/PrivateHead";
 
 type Tab = "received" | "sent";
 
@@ -65,6 +66,8 @@ export default function MyGiftsScreen() {
   const records = tab === "received" ? RECEIVED : SENT;
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.screen, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.header}>
@@ -205,6 +208,7 @@ export default function MyGiftsScreen() {
         </LinearGradient>
       </Pressable>
     </View>
+  </>
   );
 }
 

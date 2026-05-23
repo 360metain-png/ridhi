@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width } = Dimensions.get("window");
 
@@ -218,6 +219,8 @@ export default function VibeStarsScreen() {
   ];
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient colors={["#0D0620","#1A0A3C", colors.background]} style={[styles.header, { paddingTop: topPad + 8 }]}>
@@ -585,6 +588,7 @@ export default function VibeStarsScreen() {
 
       </ScrollView>
     </View>
+  </>
   );
 }
 

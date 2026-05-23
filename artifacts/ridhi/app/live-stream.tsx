@@ -25,6 +25,7 @@ import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -78,6 +79,8 @@ function BigGiftOverlay({ gift, onDone }: { gift: typeof LIVE_GIFTS[0]; onDone: 
   const shadowOpacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0, 0.6] });
 
   return (
+    <>
+      <PrivateHead />
     <Animated.View
       style={[StyleSheet.absoluteFillObject, styles.bigGiftOverlay, { opacity, pointerEvents: "none" }]}
     >
@@ -119,6 +122,7 @@ function HostCoinPill({ coins }: { coins: number }) {
       <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
       <Text style={[styles.hostCoinText, { color: "#FFB800" }]}>{coins.toLocaleString()}</Text>
     </Animated.View>
+  </>
   );
 }
 

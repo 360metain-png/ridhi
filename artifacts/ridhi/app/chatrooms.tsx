@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, ROOM_CATEGORIES, type Chatroom } from "@/data/chatrooms";
+import { SeoHead } from "@/components/SeoHead";
 
 function formatCount(n: number): string {
   if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
@@ -26,6 +27,11 @@ function formatCount(n: number): string {
 function RoomCard({ room, onPress }: { room: Chatroom; onPress: () => void }) {
   const colors = useColors();
   return (
+    <>
+      <SeoHead
+        title="Chatrooms — Join Audio, Video & Text Chat Rooms | Ridhi"
+        description="Discover live chatrooms on Ridhi. Join audio rooms, video hangouts, and text communities across India. Talk, share, and connect in your language."
+      />
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
@@ -319,6 +325,7 @@ export default function ChatroomsScreen() {
         }
       />
     </View>
+  </>
   );
 }
 

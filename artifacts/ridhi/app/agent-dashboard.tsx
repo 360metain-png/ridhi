@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width } = Dimensions.get("window");
 
@@ -346,6 +347,8 @@ export default function AgentDashboardScreen() {
   const MAX_BAR = 100;
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[AGENT.levelColor + "20", "transparent"]}
@@ -659,6 +662,7 @@ export default function AgentDashboardScreen() {
         )}
       </ScrollView>
     </View>
+  </>
   );
 }
 

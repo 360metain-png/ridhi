@@ -19,6 +19,7 @@ import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { CHATS } from "@/data/mockData";
 import { Avatar } from "@/components/Avatar";
+import { PrivateHead } from "@/components/PrivateHead";
 
 interface Message {
   id: string;
@@ -173,6 +174,8 @@ export default function ChatDetailScreen() {
   );
 
   return (
+    <>
+      <PrivateHead />
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior="padding"
@@ -324,6 +327,7 @@ export default function ChatDetailScreen() {
         )}
       </View>
     </KeyboardAvoidingView>
+  </>
   );
 }
 

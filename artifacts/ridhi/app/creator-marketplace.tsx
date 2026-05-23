@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { SeoHead } from "@/components/SeoHead";
 
 const PITCH_COST   = 100;
 const CONNECT_COST = 1000;
@@ -286,6 +287,11 @@ export default function CreatorMarketplaceScreen() {
   ];
 
   return (
+    <>
+      <SeoHead
+        title="Creator Marketplace — Brands & Influencers on Ridhi | India"
+        description="Ridhi Creator Marketplace connects brands with influencers. Post deals, pitch collaborations, and grow your brand through India's top social platform."
+      />
     <View style={[styles.root, { backgroundColor: colors.background }]}>
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -749,6 +755,7 @@ export default function CreatorMarketplaceScreen() {
         </Pressable>
       </Modal>
     </View>
+  </>
   );
 }
 

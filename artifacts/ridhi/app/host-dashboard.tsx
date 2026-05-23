@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width } = Dimensions.get("window");
 
@@ -94,6 +95,8 @@ function fmtCoins(n: number) {
 
 function ProgressBar({ value, color }: { value: number; color: string }) {
   return (
+    <>
+      <PrivateHead />
     <View style={styles.progressTrack}>
       <View style={[styles.progressFill, { width: `${value}%` as any, backgroundColor: color }]} />
     </View>
@@ -359,6 +362,7 @@ export default function HostDashboard() {
 
       </ScrollView>
     </View>
+  </>
   );
 }
 

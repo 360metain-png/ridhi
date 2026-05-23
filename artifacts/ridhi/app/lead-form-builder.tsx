@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { PrivateHead } from "@/components/PrivateHead";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type FieldType = "short" | "long" | "choice" | "yesno" | "dropdown";
@@ -53,6 +54,8 @@ function makeId() {
 // ── Step indicator ────────────────────────────────────────────────────────────
 function StepBar({ step, total, colors }: { step: number; total: number; colors: ReturnType<typeof useColors> }) {
   return (
+    <>
+      <PrivateHead />
     <View style={sb.row}>
       {Array.from({ length: total }, (_, i) => i + 1).map((s) => (
         <View key={s} style={sb.item}>
@@ -465,6 +468,7 @@ export default function LeadFormBuilderScreen() {
         )}
       </ScrollView>
     </View>
+  </>
   );
 }
 

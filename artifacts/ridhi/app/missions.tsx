@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { MISSIONS, DAILY_REWARD_STREAK, Mission } from "@/data/coinEconomy";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 const { width } = Dimensions.get("window");
@@ -29,6 +30,8 @@ const TABS = [
 function ProgressBar({ progress, total, color }: { progress: number; total: number; color: string }) {
   const pct = Math.min(progress / total, 1);
   return (
+    <>
+      <PrivateHead />
     <View style={pbarStyles.track}>
       <View style={[pbarStyles.fill, { width: `${pct * 100}%` as any, backgroundColor: color }]} />
     </View>
@@ -233,6 +236,7 @@ export default function MissionsScreen() {
         )}
       </ScrollView>
     </View>
+  </>
   );
 }
 

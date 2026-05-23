@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -361,6 +362,8 @@ export default function HostProfileScreen() {
   }
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[currentLvl.color + "22", "transparent"]}
@@ -670,6 +673,7 @@ export default function HostProfileScreen() {
         )}
       </ScrollView>
     </View>
+  </>
   );
 }
 

@@ -22,6 +22,7 @@ import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { PODCAST_CATEGORIES, PODCAST_LANGUAGES, PodcastCategory } from "@/data/podcastData";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width } = Dimensions.get("window");
 
@@ -71,6 +72,8 @@ const AI_FEATURES = [
 // ── Sub-components ───────────────────────────────────────────────────────────
 function SectionLabel({ icon, title, colors }: { icon: string; title: string; colors: any }) {
   return (
+    <>
+      <PrivateHead />
     <View style={styles.sectionLabel}>
       <Feather name={icon as any} size={14} color={colors.primary} />
       <Text style={[styles.sectionLabelText, { color: colors.text }]}>{title}</Text>
@@ -667,6 +670,7 @@ export default function PodcastCreateScreen() {
         </View>
       </ScrollView>
     </View>
+  </>
   );
 }
 

@@ -17,6 +17,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const GROUP_CHATS = [
   {
@@ -147,6 +148,8 @@ export default function GroupChatScreen() {
   }
 
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient
         colors={[colors.secondary + "25", colors.primary + "15", "transparent"]}
@@ -203,6 +206,7 @@ export default function GroupChatScreen() {
         ))}
       </ScrollView>
     </View>
+  </>
   );
 }
 

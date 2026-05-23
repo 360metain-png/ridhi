@@ -19,6 +19,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
 
@@ -245,6 +246,8 @@ export default function RandomCallScreen() {
 
   // ──────────────────────────────────────────────────────────────────────────────
   return (
+    <>
+      <PrivateHead />
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient
@@ -777,6 +780,7 @@ export default function RandomCallScreen() {
         </View>
       )}
     </View>
+  </>
   );
 }
 

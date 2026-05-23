@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { PrivateHead } from "@/components/PrivateHead";
 import { GIFTS, GIFT_CATEGORIES, Gift } from "@/data/coinEconomy";
 
 const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");

@@ -20,6 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { PrivateHead } from "@/components/PrivateHead";
 
 const { width: SW } = Dimensions.get("window");
 
@@ -121,6 +122,8 @@ function FloatingOrb({ color, size, x, delay }: { color: string; size: number; x
     return () => loop.stop();
   }, []);
   return (
+    <>
+      <PrivateHead />
     <Animated.View
       style={{
         position: "absolute",
@@ -686,6 +689,7 @@ export default function AudioRoomScreen() {
         )}
       </ScrollView>
     </View>
+  </>
   );
 }
 
