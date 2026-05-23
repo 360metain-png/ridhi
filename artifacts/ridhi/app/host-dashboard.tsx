@@ -95,8 +95,6 @@ function fmtCoins(n: number) {
 
 function ProgressBar({ value, color }: { value: number; color: string }) {
   return (
-    <>
-      <PrivateHead />
     <View style={styles.progressTrack}>
       <View style={[styles.progressFill, { width: `${value}%` as any, backgroundColor: color }]} />
     </View>
@@ -137,7 +135,9 @@ export default function HostDashboard() {
   const kyc = kycColors[h.kycStatus];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <PrivateHead />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
 
       {/* ── Header gradient ── */}
       <LinearGradient

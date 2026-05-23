@@ -653,6 +653,7 @@ export default function BrandPostDealScreen() {
         </Pressable>
       </Modal>
     </View>
+    </>
   );
 }
 
@@ -665,7 +666,6 @@ function Field({ label, icon, color, children }: { label: string; icon: string; 
       </View>
       {children}
     </View>
-  </>
   );
 }
 

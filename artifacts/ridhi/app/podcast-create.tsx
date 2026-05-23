@@ -72,8 +72,6 @@ const AI_FEATURES = [
 // ── Sub-components ───────────────────────────────────────────────────────────
 function SectionLabel({ icon, title, colors }: { icon: string; title: string; colors: any }) {
   return (
-    <>
-      <PrivateHead />
     <View style={styles.sectionLabel}>
       <Feather name={icon as any} size={14} color={colors.primary} />
       <Text style={[styles.sectionLabelText, { color: colors.text }]}>{title}</Text>
@@ -200,7 +198,9 @@ export default function PodcastCreateScreen() {
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <>
+      <PrivateHead />
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient colors={["#1A0533", colors.background]} style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -670,7 +670,7 @@ export default function PodcastCreateScreen() {
         </View>
       </ScrollView>
     </View>
-  </>
+    </>
   );
 }
 

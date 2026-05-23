@@ -122,8 +122,6 @@ function FloatingOrb({ color, size, x, delay }: { color: string; size: number; x
     return () => loop.stop();
   }, []);
   return (
-    <>
-      <PrivateHead />
     <Animated.View
       style={{
         position: "absolute",
@@ -408,7 +406,9 @@ export default function AudioRoomScreen() {
   if (activeRoom) {
     const gr = activeRoom;
     return (
-      <View style={[styles.root, { backgroundColor: "#0A0010" }]}>
+      <>
+        <PrivateHead />
+        <View style={[styles.root, { backgroundColor: "#0A0010" }]}>
         {/* deep gradient backdrop */}
         <LinearGradient
           colors={[gr.gradientA + "55", gr.gradientB + "30", "#0A0010"]}
@@ -594,6 +594,7 @@ export default function AudioRoomScreen() {
           </View>
         )}
       </View>
+      </>
     );
   }
 
@@ -689,7 +690,7 @@ export default function AudioRoomScreen() {
         )}
       </ScrollView>
     </View>
-  </>
+
   );
 }
 

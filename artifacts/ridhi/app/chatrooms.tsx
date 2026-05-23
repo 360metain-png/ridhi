@@ -27,11 +27,6 @@ function formatCount(n: number): string {
 function RoomCard({ room, onPress }: { room: Chatroom; onPress: () => void }) {
   const colors = useColors();
   return (
-    <>
-      <SeoHead
-        title="Chatrooms — Join Audio, Video & Text Chat Rooms | Ridhi"
-        description="Discover live chatrooms on Ridhi. Join audio rooms, video hangouts, and text communities across India. Talk, share, and connect in your language."
-      />
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
@@ -162,7 +157,12 @@ export default function ChatroomsScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Chatrooms — Join Audio, Video & Text Chat Rooms | Ridhi"
+        description="Discover live chatrooms on Ridhi. Join audio rooms, video hangouts, and text communities across India. Talk, share, and connect in your language."
+      />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setShowCreate(false)}>
           <Pressable style={[styles.modalSheet, { backgroundColor: colors.surface }]} onPress={() => {}}>
@@ -325,7 +325,7 @@ export default function ChatroomsScreen() {
         }
       />
     </View>
-  </>
+    </>
   );
 }
 

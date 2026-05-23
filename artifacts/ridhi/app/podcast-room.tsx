@@ -232,7 +232,9 @@ export default function PodcastRoomScreen() {
   const coHosts = PODCAST_ROOM_SPEAKERS.filter((s) => !s.isHost);
 
   return (
-    <View style={styles.root}>
+    <>
+      <PrivateHead />
+      <View style={styles.root}>
       <LinearGradient
         colors={["#0D0118", "#1A0533", "#0A0010"]}
         style={StyleSheet.absoluteFill}
@@ -540,6 +542,7 @@ export default function PodcastRoomScreen() {
         </Pressable>
       </Modal>
     </View>
+    </>
   );
 }
 

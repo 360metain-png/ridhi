@@ -30,8 +30,6 @@ const TABS = [
 function ProgressBar({ progress, total, color }: { progress: number; total: number; color: string }) {
   const pct = Math.min(progress / total, 1);
   return (
-    <>
-      <PrivateHead />
     <View style={pbarStyles.track}>
       <View style={[pbarStyles.fill, { width: `${pct * 100}%` as any, backgroundColor: color }]} />
     </View>
@@ -118,7 +116,9 @@ export default function MissionsScreen() {
   const currentDay = DAILY_REWARD_STREAK.findIndex((d) => !d.claimed);
 
   return (
-    <View style={[styles.wrap, { backgroundColor: colors.background }]}>
+    <>
+      <PrivateHead />
+      <View style={[styles.wrap, { backgroundColor: colors.background }]}>
       {/* Header */}
       <LinearGradient colors={[colors.primary, colors.secondary]} style={[styles.header, { paddingTop: topPad + 8 }]}>
         <View style={styles.headerRow}>
@@ -236,7 +236,7 @@ export default function MissionsScreen() {
         )}
       </ScrollView>
     </View>
-  </>
+    </>
   );
 }
 

@@ -481,6 +481,7 @@ export default function BrandRegisterScreen() {
         />
       </View>
     </View>
+    </>
   );
 }
 
