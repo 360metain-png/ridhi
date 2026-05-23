@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
+import { SeoHead } from "@/components/SeoHead";
 
 const { width } = Dimensions.get("window");
 
@@ -165,7 +166,12 @@ export default function BrandRegisterScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }]}>
+    <>
+      <SeoHead
+        title="Brand Registration — Join Ridhi Creator Marketplace | India"
+        description="Register your brand on Ridhi Creator Marketplace. Connect with influencers, post deals, and grow your business through India's top social platform."
+      />
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
 
       {/* Header */}
       <LinearGradient colors={["#0A0020", "#1C0040", colors.background]} style={[styles.header, { paddingTop: topPad + 8 }]}>
