@@ -222,8 +222,16 @@ export default function AdminManagementPage() {
       a.id === id ? { ...a, status: a.status === "active" ? "inactive" : "active" } : a
     ));
 
-  const deleteAdmin = (id: string) =>
+  const deleteAdmin = (id: string) => {
+    const admin = admins.find((a) => a.id === id);
+    if (!admin) return;
+    if (admin.role === "Super Admin") {
+      window.alert("The Super Admin account cannot be deleted.");
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to permanently delete ${admin.name}'s admin account? This action cannot be undone.`)) return;
     setAdmins((prev) => prev.filter((a) => a.id !== id));
+  };
 
   const permCount = (a: AdminAccount) => Object.values(a.permissions).filter(Boolean).length;
 

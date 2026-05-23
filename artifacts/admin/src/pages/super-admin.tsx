@@ -925,11 +925,75 @@ export default function SuperAdminPage() {
         </TabsContent>
 
         {/* ─── ADMIN ROLES TAB ─── */}
-        <TabsContent value="admins" className="mt-4">
+        <TabsContent value="admins" className="mt-4 space-y-5">
+          {/* Authority banner */}
+          <div className="rounded-xl border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4">
+            <p className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" /> Super Admin Exclusive Authority
+            </p>
+            <p className="text-sm text-purple-800">
+              Only the <strong>Super Admin</strong> role may create, edit, suspend, or remove admin accounts.
+              Regular admins cannot access these pages or perform these actions.
+            </p>
+          </div>
+
+          {/* Quick-action cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="border-purple-200/60">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                    <UserPlus className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Admin Management</p>
+                    <p className="text-xs text-muted-foreground">Create, edit, suspend, and remove admin accounts</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Lock className="w-3 h-3" /> Super Admin only
+                </div>
+                <Button
+                  size="sm"
+                  className="w-full gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90"
+                  onClick={() => window.location.href = "/admin/admin-management"}
+                >
+                  Open Admin Management <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-200/60">
+              <CardContent className="p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Admin Activity Monitor</p>
+                    <p className="text-xs text-muted-foreground">Full audit trail of every action taken by every admin</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Lock className="w-3 h-3" /> Super Admin only
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full gap-1.5 border-purple-300 text-purple-700 hover:bg-purple-50"
+                  onClick={() => window.location.href = "/admin/admin-activity"}
+                >
+                  View Activity Logs <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Admin roster summary */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-4 h-4" /> Platform Admin Role Management
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="w-4 h-4" /> Current Admin Roster
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -940,18 +1004,22 @@ export default function SuperAdminPage() {
                       <th className="text-left py-2 pb-3">Admin</th>
                       <th className="text-left pb-3">Role</th>
                       <th className="text-left pb-3">Status</th>
-                      <th className="text-left pb-3">Permissions</th>
                       <th className="text-left pb-3">Last Login</th>
-                      <th className="text-right pb-3">Actions</th>
+                      <th className="text-left pb-3">Permissions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {ADMIN_ROLES.map((admin) => (
                       <tr key={admin.id}>
                         <td className="py-3">
-                          <div>
-                            <p className="font-medium">{admin.name}</p>
-                            <p className="text-xs text-muted-foreground">{admin.email}</p>
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${admin.role === "Super Admin" ? "from-purple-500 to-pink-500" : "from-indigo-400 to-blue-400"} flex items-center justify-center text-white text-xs font-bold`}>
+                              {admin.name.split(" ").map((n) => n[0]).join("")}
+                            </div>
+                            <div>
+                              <p className="font-medium">{admin.name}</p>
+                              <p className="text-xs text-muted-foreground">{admin.email}</p>
+                            </div>
                           </div>
                         </td>
                         <td className="py-3">
@@ -963,26 +1031,18 @@ export default function SuperAdminPage() {
                             {admin.status}
                           </div>
                         </td>
+                        <td className="py-3 text-xs text-muted-foreground">{admin.lastLogin}</td>
                         <td className="py-3">
                           <code className="text-xs bg-muted px-2 py-0.5 rounded">{admin.permissions}</code>
-                        </td>
-                        <td className="py-3 text-xs text-muted-foreground">{admin.lastLogin}</td>
-                        <td className="py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="sm" className="h-7 text-xs">Edit</Button>
-                            {admin.role !== "Super Admin" && (
-                              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive">Revoke</Button>
-                            )}
-                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <Button className="mt-4 gap-2">
-                <Users className="w-4 h-4" /> Invite New Admin
-              </Button>
+              <p className="text-xs text-muted-foreground mt-3">
+                To modify any admin account, use the <strong>Admin Management</strong> page above.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
