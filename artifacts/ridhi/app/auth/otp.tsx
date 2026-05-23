@@ -161,29 +161,38 @@ export default function OtpScreen() {
 
         <View style={styles.otpRow}>
           {otp.map((digit, i) => (
-            <TextInput
+            <View
               key={i}
-              ref={(ref) => { inputRefs.current[i] = ref; }}
               style={[
-                styles.otpBox,
+                styles.otpCell,
                 {
-                  backgroundColor: colors.muted,
+                  backgroundColor: digit ? colors.primary + "18" : colors.card,
                   borderColor: error
                     ? "#FF3B30"
                     : digit
                     ? colors.primary
-                    : colors.border,
-                  color: colors.foreground,
+                    : colors.mutedForeground + "40",
+                  borderWidth: error || digit ? 2 : 1.5,
                 },
               ]}
-              value={digit}
-              onChangeText={(t) => handleChange(t, i)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
-              keyboardType="number-pad"
-              maxLength={1}
-              textAlign="center"
-              autoFocus={i === 0}
-            />
+            >
+              <Text style={[styles.otpCellText, { color: digit ? colors.foreground : colors.mutedForeground }]}>
+                {digit || "\u2014"}
+              </Text>
+              <TextInput
+                ref={(ref) => { inputRefs.current[i] = ref; }}
+                style={StyleSheet.absoluteFill}
+                value={digit}
+                onChangeText={(t) => handleChange(t, i)}
+                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
+                keyboardType="number-pad"
+                maxLength={1}
+                textAlign="center"
+                autoFocus={i === 0}
+                selectionColor={colors.primary}
+                caretHidden
+              />
+            </View>
           ))}
         </View>
 
@@ -266,13 +275,18 @@ const styles = StyleSheet.create({
     letterSpacing: 6,
   },
   otpRow: { flexDirection: "row", gap: 10, marginVertical: 4 },
-  otpBox: {
+  otpCell: {
     width: 48,
     height: 56,
     borderRadius: 12,
-    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  otpCellText: {
     fontSize: 22,
     fontFamily: "Inter_700Bold",
+    lineHeight: 28,
   },
   errorText: {
     fontSize: 13,

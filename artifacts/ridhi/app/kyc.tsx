@@ -142,13 +142,15 @@ function OtpInput({ value, onChange, colors }: { value: string; onChange: (v: st
           style={[
             styles.otpCell,
             {
-              backgroundColor: colors.card,
-              borderColor: value.length === i ? colors.primary : d ? colors.primary + "60" : colors.border,
-              borderWidth: value.length === i ? 2 : 1.5,
+              backgroundColor: value.length === i ? colors.primary + "12" : d ? colors.primary + "10" : colors.card,
+              borderColor: value.length === i ? colors.primary : d ? colors.primary : colors.mutedForeground + "40",
+              borderWidth: value.length === i ? 2.5 : d ? 2 : 1.5,
             },
           ]}
         >
-          <Text style={[styles.otpCellText, { color: colors.foreground }]}>{d || ""}</Text>
+          <Text style={[styles.otpCellText, { color: d ? colors.foreground : colors.mutedForeground }]}>
+            {d || "\u2014"}
+          </Text>
         </View>
       ))}
     </Pressable>
@@ -1280,8 +1282,8 @@ const styles = StyleSheet.create({
 
   otpRow: { flexDirection: "row", gap: 10, justifyContent: "center", paddingVertical: 8 },
   otpHidden: { position: "absolute", opacity: 0, width: 1, height: 1 },
-  otpCell: { width: 44, height: 54, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  otpCellText: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  otpCell: { width: 48, height: 58, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  otpCellText: { fontSize: 24, fontFamily: "Inter_700Bold", lineHeight: 30 },
 
   verifiedBanner: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 16, borderWidth: 1.5 },
   verifiedIconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: "#22C55E20", alignItems: "center", justifyContent: "center" },
