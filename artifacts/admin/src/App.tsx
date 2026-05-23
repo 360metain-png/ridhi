@@ -48,6 +48,7 @@ import PortalLogin         from "@/pages/portal-login";
 import Downloads          from "@/pages/downloads";
 import Support            from "@/pages/support";
 import Screenshots        from "@/pages/screenshots";
+import ContentEditor      from "@/pages/content-editor";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/downloads":         ["super_admin"],
   "/screenshots":       ["super_admin"],
   "/handbook":     ["super_admin", "admin"],
+  "/content-editor": ["super_admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -156,6 +158,7 @@ function RoleRoute({ component: Component, path }: { component: React.ComponentT
 function Router() {
   return (
     <Switch>
+      <Route path="/content-editor" component={() => <RoleRoute component={ContentEditor} path="/content-editor" />} />
       <Route path="/support"             component={Support} />
       <Route path="/login"               component={Login} />
       <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
