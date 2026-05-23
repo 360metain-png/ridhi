@@ -1852,7 +1852,7 @@ export default function SuperAdminPage() {
                       <div className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3">
                         <div>
                           <p className="text-xs font-medium text-foreground">Unicode SMS</p>
-                          <p className="text-[10px] text-muted-foreground">Hindi, Tamil, Telugu, etc.</p>
+                          <p className="text-[10px] text-muted-foreground">Transactional & promo only</p>
                         </div>
                         <Switch
                           checked={apiKeys.msg91Unicode}
@@ -1862,7 +1862,7 @@ export default function SuperAdminPage() {
                       <div className="rounded-lg border bg-muted/30 p-3 flex items-center justify-between gap-3 md:col-span-2">
                         <div>
                           <p className="text-xs font-medium text-foreground">Default SMS Language</p>
-                          <p className="text-[10px] text-muted-foreground">Used when user has no language preference</p>
+                          <p className="text-[10px] text-muted-foreground">Transactional & promo only. OTP always English.</p>
                         </div>
                         <select
                           value={apiKeys.msg91DefaultLang}
@@ -1885,7 +1885,7 @@ export default function SuperAdminPage() {
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-2.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-yellow-600 flex-shrink-0" />
-                      Currently in demo mode — real OTP delivery requires a valid DLT-approved template ID. Unicode templates need separate DLT registration.
+                      OTP is always sent in English for reliability. Unicode & regional languages apply to transactional & promotional SMS only. DLT registration required per language.
                     </div>
                   </CardContent>
                 </Card>
