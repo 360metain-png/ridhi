@@ -1,28 +1,201 @@
-export type User = { id: string, name: string, avatar: string, phone: string, email: string, city: string, state: string, language: string, joinDate: string, status: "active"|"suspended"|"pending", followers: number, following: number, posts: number, coins: number, reportsReceived: number, isVerified: boolean };
+export type User = {
+  id: string;
+  name: string;
+  avatar: string;
+  phone: string;
+  email: string;
+  city: string;
+  state: string;
+  language: string;
+  joinDate: string;
+  status: "active" | "suspended" | "pending";
+  followers: number;
+  following: number;
+  posts: number;
+  coins: number;
+  reportsReceived: number;
+  isVerified: boolean;
+  // Fake profile detection fields
+  trustScore?: number; // 0-100, higher = more trustworthy
+  riskFlags?: RiskFlag[];
+  lastActivity?: string;
+  deviceCount?: number;
+  ipCount?: number;
+  bioText?: string;
+  profileCompletion?: number; // 0-100
+  socialLinks?: { instagram?: string; facebook?: string; twitter?: string };
+};
+
+export type RiskFlag =
+  | "generic_photo"
+  | "stock_image"
+  | "no_bio"
+  | "suspicious_email"
+  | "multiple_accounts"
+  | "rapid_activity"
+  | "reported"
+  | "no_posts"
+  | "spam_messages"
+  | "vpn_ip"
+  | "suspicious_name"
+  | "incomplete_profile";
 export type Post = { id: string, userId: string, type: "post"|"reel"|"story"|"poll", content: string, mediaUrl: string, likes: number, comments: number, shares: number, reports: number, createdAt: string, status: "active"|"removed"|"flagged" };
 export type Community = { id: string, name: string, category: string, members: number, posts: number, language: string, visibility: "public"|"private", status: "active"|"suspended"|"pending", createdAt: string };
 export type Transaction = { id: string, userId: string, userName: string, type: "Earned"|"Spent"|"Recharged"|"Gift Sent"|"Gift Received", amount: number, balanceAfter: number, description: string, createdAt: string };
 export type WithdrawalRequest = { id: string, creatorId: string, creatorName: string, amount: number, method: "UPI"|"Bank", upiId?: string, bankAccount?: string, requestedAt: string, status: "Pending"|"Approved"|"Rejected"|"Paid" };
 export type Campaign = { id: string, name: string, type: string, reach: number, clicks: number, conversions: number, status: "Draft"|"Active"|"Completed", startDate: string, endDate: string };
 
-export const mockUsers: User[] = Array.from({ length: 30 }, (_, i) => ({
-  id: `u${i + 1}`,
-  name: ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao", "Arjun Gupta", "Ananya Reddy", "Sai Kumar", "Priya Das", "Krishna Iyer", "Riya Desai"][i % 10] + (i >= 10 ? ` ${i}` : ""),
-  avatar: "",
-  phone: `+91 98765${43210 + i}`,
-  email: `user${i}@example.com`,
-  city: ["Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", "Kolkata", "Pune", "Kochi"][i % 8],
-  state: ["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "Telangana", "West Bengal", "Maharashtra", "Kerala"][i % 8],
-  language: ["Hindi", "English", "Marathi", "Tamil", "Telugu", "Bengali", "Malayalam"][i % 7],
-  joinDate: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString().split('T')[0],
-  status: ["active", "suspended", "pending"][Math.floor(Math.random() * 3)] as any,
-  followers: Math.floor(Math.random() * 5000),
-  following: Math.floor(Math.random() * 1000),
-  posts: Math.floor(Math.random() * 200),
-  coins: Math.floor(Math.random() * 1000),
-  reportsReceived: Math.floor(Math.random() * 5),
-  isVerified: Math.random() > 0.8
-}));
+// ── Fake Profile Detection Engine ──
+export function calculateTrustScore(user: Partial<User>): number {
+  let score = 70; // baseline
+  const flags: RiskFlag[] = [];
+
+  // Name heuristics
+  const genericNames = ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao"];
+  const hasGenericName = genericNames.some(n => user.name?.includes(n));
+  if (hasGenericName) { score -= 8; flags.push("suspicious_name"); }
+
+  // Email heuristics
+  const suspiciousDomains = ["tempmail.com", "mailinator.com", "10minutemail.com", "fakeinbox.com"];
+  const hasSuspiciousEmail = suspiciousDomains.some(d => user.email?.endsWith(d));
+  if (hasSuspiciousEmail) { score -= 15; flags.push("suspicious_email"); }
+  if (user.email?.endsWith("example.com")) { score -= 10; flags.push("suspicious_email"); }
+
+  // Bio / profile completion
+  if (!user.bioText || user.bioText.length < 10) {
+    score -= 12; flags.push("no_bio");
+  }
+  if ((user.profileCompletion || 0) < 40) {
+    score -= 10; flags.push("incomplete_profile");
+  }
+
+  // Activity
+  if ((user.posts || 0) === 0) {
+    score -= 15; flags.push("no_posts");
+  }
+  if ((user.followers || 0) === 0 && (user.following || 0) === 0) {
+    score -= 8; flags.push("no_posts"); // reuse flag
+  }
+
+  // Reports
+  if ((user.reportsReceived || 0) >= 2) {
+    score -= 20; flags.push("reported");
+  }
+
+  // Device / IP anomalies
+  if ((user.deviceCount || 1) > 3) {
+    score -= 12; flags.push("multiple_accounts");
+  }
+  if ((user.ipCount || 1) > 2) {
+    score -= 8; flags.push("vpn_ip");
+  }
+
+  // Rapid activity
+  const daysSinceJoin = Math.floor((Date.now() - new Date(user.joinDate || 0).getTime()) / 86400000);
+  if (daysSinceJoin < 3 && (user.posts || 0) > 10) {
+    score -= 10; flags.push("rapid_activity");
+  }
+
+  // Social links
+  if (!user.socialLinks?.instagram && !user.socialLinks?.facebook && !user.socialLinks?.twitter) {
+    // no penalty for this — many legit Indian users don't link socials
+  }
+
+  score = Math.max(0, Math.min(100, score));
+  return score;
+}
+
+export function getRiskLevel(score: number): "safe" | "low" | "medium" | "high" | "critical" {
+  if (score >= 80) return "safe";
+  if (score >= 65) return "low";
+  if (score >= 45) return "medium";
+  if (score >= 25) return "high";
+  return "critical";
+}
+
+export function getRiskFlagLabel(flag: RiskFlag): string {
+  const labels: Record<RiskFlag, string> = {
+    generic_photo: "Generic Photo",
+    stock_image: "Stock Image",
+    no_bio: "No Bio",
+    suspicious_email: "Suspicious Email",
+    multiple_accounts: "Multiple Accounts",
+    rapid_activity: "Rapid Activity",
+    reported: "Reported",
+    no_posts: "No Posts",
+    spam_messages: "Spam Messages",
+    vpn_ip: "VPN / Proxy IP",
+    suspicious_name: "Suspicious Name",
+    incomplete_profile: "Incomplete Profile",
+  };
+  return labels[flag] || flag;
+}
+
+const bioTemplates = [
+  "Hello! I love traveling and music.",
+  "Just here to make new friends and explore.",
+  "Tech enthusiast | Coffee lover | Mumbai",
+  "Living life one day at a time ✨",
+  "", // empty bio
+  "DM me for collabs and promotions",
+  "Follow me on Instagram @username",
+  "",
+  "Digital creator | Fashion | Lifestyle",
+  "Student | Dreamer | Always learning",
+];
+
+export const mockUsers: User[] = Array.from({ length: 30 }, (_, i) => {
+  const hasSuspiciousEmail = i % 7 === 0;
+  const hasEmptyBio = i % 5 === 0;
+  const hasNoPosts = i % 6 === 0;
+  const hasMultipleDevices = i % 8 === 0;
+  const hasReports = i % 9 === 0;
+
+  const baseUser: User = {
+    id: `u${i + 1}`,
+    name: ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao", "Arjun Gupta", "Ananya Reddy", "Sai Kumar", "Priya Das", "Krishna Iyer", "Riya Desai"][i % 10] + (i >= 10 ? ` ${i}` : ""),
+    avatar: "",
+    phone: `+91 98765${43210 + i}`,
+    email: hasSuspiciousEmail
+      ? `user${i}@${["tempmail.com", "mailinator.com", "10minutemail.com"][i % 3]}`
+      : `user${i}@gmail.com`,
+    city: ["Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", "Kolkata", "Pune", "Kochi"][i % 8],
+    state: ["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "Telangana", "West Bengal", "Maharashtra", "Kerala"][i % 8],
+    language: ["Hindi", "English", "Marathi", "Tamil", "Telugu", "Bengali", "Malayalam"][i % 7],
+    joinDate: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString().split('T')[0],
+    status: ["active", "suspended", "pending"][Math.floor(Math.random() * 3)] as any,
+    followers: Math.floor(Math.random() * 5000),
+    following: Math.floor(Math.random() * 1000),
+    posts: hasNoPosts ? 0 : Math.floor(Math.random() * 200),
+    coins: Math.floor(Math.random() * 1000),
+    reportsReceived: hasReports ? Math.floor(Math.random() * 4) + 2 : Math.floor(Math.random() * 2),
+    isVerified: Math.random() > 0.8,
+    bioText: hasEmptyBio ? "" : bioTemplates[i % bioTemplates.length],
+    profileCompletion: Math.floor(Math.random() * 100),
+    deviceCount: hasMultipleDevices ? Math.floor(Math.random() * 3) + 3 : 1,
+    ipCount: hasMultipleDevices ? Math.floor(Math.random() * 3) + 2 : 1,
+    lastActivity: new Date(Date.now() - Math.floor(Math.random() * 86400000 * 7)).toISOString(),
+    socialLinks: (i % 4 === 0) ? { instagram: "@user" + i } : {},
+  };
+
+  const score = calculateTrustScore(baseUser);
+  const flags: RiskFlag[] = [];
+
+  // Re-run flag detection to populate flags array
+  const genericNames = ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao"];
+  if (genericNames.some(n => baseUser.name.includes(n))) flags.push("suspicious_name");
+  if (baseUser.email.endsWith("tempmail.com") || baseUser.email.endsWith("mailinator.com") || baseUser.email.endsWith("10minutemail.com")) flags.push("suspicious_email");
+  if (!baseUser.bioText || baseUser.bioText.length < 10) flags.push("no_bio");
+  if ((baseUser.profileCompletion ?? 0) < 40) flags.push("incomplete_profile");
+  if (baseUser.posts === 0) flags.push("no_posts");
+  if (baseUser.reportsReceived >= 2) flags.push("reported");
+  if ((baseUser.deviceCount ?? 1) > 3) flags.push("multiple_accounts");
+  if ((baseUser.ipCount ?? 1) > 2) flags.push("vpn_ip");
+  const daysSinceJoin = Math.floor((Date.now() - new Date(baseUser.joinDate).getTime()) / 86400000);
+  if (daysSinceJoin < 3 && baseUser.posts > 10) flags.push("rapid_activity");
+
+  return { ...baseUser, trustScore: score, riskFlags: flags };
+});
 
 export const mockPosts: Post[] = Array.from({ length: 30 }, (_, i) => ({
   id: `p${i + 1}`,
