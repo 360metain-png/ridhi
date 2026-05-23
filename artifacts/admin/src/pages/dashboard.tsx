@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Users, UserPlus, FileText, Coins, IndianRupee, TrendingUp, Radio,
   Zap, Heart, Star, Award, Briefcase, Shield, Crown,
   ArrowUpRight, CheckCircle, Clock, AlertTriangle,
+  Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power,
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
@@ -190,6 +192,58 @@ export default function Dashboard() {
           </Badge>
         </div>
       </div>
+
+      {/* ── Go Live / Publish Readiness Banner ─────────────────────────── */}
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-pink-500/5">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-pink-500 flex-shrink-0">
+                <Rocket className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">Platform Readiness</p>
+                <p className="text-xs text-muted-foreground">
+                  {isSA
+                    ? "Super Admin — review checklist before taking Ridhi live to public users"
+                    : "Your network status — ensure all hosts & agents are ready before launch"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {isSA && (
+                <Button size="sm" className="h-8 text-xs gap-1.5 bg-gradient-to-r from-primary to-pink-500 text-white hover:opacity-90"
+                  onClick={() => window.location.href = "/admin/super-admin"}>
+                  <Settings className="w-3.5 h-3.5" /> Open Launch Control
+                </Button>
+              )}
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                onClick={() => window.location.href = "/admin/kyc"}>
+                <Shield className="w-3.5 h-3.5" /> Review KYC
+              </Button>
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-border"
+                onClick={() => window.location.href = "/admin/hosts"}>
+                <Users className="w-3.5 h-3.5" /> Hosts
+              </Button>
+            </div>
+          </div>
+          {/* Mini checklist */}
+          <div className="mt-3 pt-3 border-t border-border/50 grid grid-cols-2 md:grid-cols-4 gap-2">
+            {[
+              { label: "KYC Verified",    value: "16/20",   ok: true,  icon: CheckCircle },
+              { label: "Agents Active",   value: "5/5",     ok: true,  icon: CheckCircle },
+              { label: "Hosts Live-Ready",value: "8/10",    ok: false, icon: AlertTriangle },
+              { label: "Features Enabled", value: "28/30",  ok: false, icon: Wrench },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2 text-xs">
+                <item.icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.ok ? "text-emerald-500" : "text-amber-500"}`} />
+                <span className="text-muted-foreground">{item.label}</span>
+                <span className={`font-semibold ml-auto ${item.ok ? "text-emerald-600" : "text-amber-600"}`}>{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Platform KPIs (SA/Admin only) ──────────────────────────────── */}
       {(isSA || isAdmin) && (

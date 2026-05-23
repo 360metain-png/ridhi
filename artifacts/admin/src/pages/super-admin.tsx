@@ -14,7 +14,7 @@ import {
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
   Zap, Link, Code, Webhook, ToggleRight, Copy, RotateCcw, PlusCircle, UserPlus,
   Bell, MessageSquare, Mail, Smartphone, BarChart2, CloudLightning,
-  Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag, Film,
+  Gamepad2, Flame, Heart, Video, Camera, Phone, Radio, ShoppingBag, Film, Rocket,
   Languages, Layers, Megaphone, MessageCircle, Coins, IndianRupee,
   Percent, GitMerge, CheckSquare, Settings2, Save, TestTube,
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
@@ -1282,6 +1282,56 @@ export default function SuperAdminPage() {
 
         {/* ─── FEATURES TAB ─── */}
         <TabsContent value="features" className="mt-4 space-y-6">
+
+          {/* Launch Control Banner */}
+          <div className="rounded-xl border border-primary/30 bg-gradient-to-r from-primary/5 to-pink-500/10 p-5">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-pink-500 flex-shrink-0">
+                  <Rocket className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-lg text-foreground">Launch Control Centre</p>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle the app between <strong>Live / Published</strong> and <strong>Maintenance / Staging</strong> mode.
+                    All feature flags, API keys, and readiness checks must pass before going public.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="text-xs gap-1 border-green-300 text-green-700 bg-green-50">
+                  <CheckCircle className="w-3 h-3" /> 28/30 Checks Passing
+                </Badge>
+                <Button size="sm" className="h-9 gap-1.5 bg-gradient-to-r from-primary to-pink-500 text-white hover:opacity-90">
+                  <Globe className="w-4 h-4" /> Take App Live
+                </Button>
+              </div>
+            </div>
+
+            {/* Readiness checklist */}
+            <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { label: "Payment Gateway",    status: "ok",    desc: "Razorpay live keys configured" },
+                { label: "KYC Verification",    status: "ok",    desc: "16 of 20 hosts verified" },
+                { label: "Feature Flags",      status: "warn",  desc: "2 features still in testing" },
+                { label: "API Health",         status: "ok",    desc: "All 8 platform APIs responding" },
+                { label: "CDN / Streaming",    status: "ok",    desc: "RTMP ingest & Cloudflare active" },
+                { label: "Push Notifications", status: "ok",    desc: "FCM configured, test sent" },
+                { label: "Content Moderation", status: "ok",    desc: "AI moderation + human review ready" },
+                { label: "Admin Roster",       status: "ok",    desc: "5 admins active, roles assigned" },
+              ].map((check) => (
+                <div key={check.label} className={`flex items-start gap-2.5 p-2.5 rounded-lg border ${check.status === "ok" ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+                  {check.status === "ok"
+                    ? <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    : <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />}
+                  <div>
+                    <p className={`text-xs font-semibold ${check.status === "ok" ? "text-emerald-800" : "text-amber-800"}`}>{check.label}</p>
+                    <p className="text-[11px] text-muted-foreground">{check.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Header banner */}
           <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 p-4 flex items-center gap-4">

@@ -11,6 +11,7 @@ import {
   Search, Radio, Award, Crown, Zap, ShieldCheck,
   XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
   Trash2, ShieldOff, Info, Lock, Network, ChevronRight, UserCheck,
+  Rocket, Wrench,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -331,6 +332,39 @@ export default function HostsPage() {
           {liveCount} Live Now
         </Badge>
       </div>
+
+      {/* ── Go Live / Activation Banner ── */}
+      <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-600 flex-shrink-0">
+                <Rocket className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-amber-900">Activation Readiness</p>
+                <p className="text-xs text-amber-700">
+                  {isSA
+                    ? "Super Admin view · verify all hosts are KYC-verified and live-ready before public launch"
+                    : isAdmin
+                    ? "Your agents' hosts · approve pending hosts and verify KYC before launch"
+                    : "Your hosts · ensure KYC is complete and stream settings are ready"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs gap-1 border-emerald-300 text-emerald-700 bg-white">
+                <CheckCircle className="w-3 h-3" />
+                {scopedHosts.filter(h => h.status === "active").length} Live-Ready
+              </Badge>
+              <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-100"
+                onClick={() => window.location.href = "/admin/kyc"}>
+                <ShieldCheck className="w-3 h-3" /> KYC Queue
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ── Recruitment Chain Banner ── */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-violet-50 to-pink-50 border border-violet-200">
