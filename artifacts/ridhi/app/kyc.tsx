@@ -186,6 +186,9 @@ export default function KYCScreen() {
   const toggleRole = (role: "host" | "agent" | "creator") => {
     setRoles((prev) => {
       if (prev.includes(role)) return prev.filter((r) => r !== role);
+      // Host and Agent are mutually exclusive (conflict of interest)
+      if (role === "host") return prev.filter((r) => r !== "agent").concat("host");
+      if (role === "agent") return prev.filter((r) => r !== "host").concat("agent");
       return [...prev, role];
     });
     setError("");
@@ -326,7 +329,7 @@ export default function KYCScreen() {
           <>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>I want to earn as</Text>
             <Text style={[styles.sectionSub, { color: colors.mutedForeground }]}>
-              Select one or more roles. One verification covers all your earnings.
+              Select one or more roles. Host and Agent cannot be combined.
             </Text>
 
             <View style={{ gap: 12, marginTop: 16 }}>

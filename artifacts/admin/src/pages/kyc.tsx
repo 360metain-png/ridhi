@@ -341,6 +341,11 @@ export default function KYCPage() {
                 <Badge className={`${STATUS_META[selected.reviewStatus]?.bg} ${STATUS_META[selected.reviewStatus]?.color}`}>
                   {STATUS_META[selected.reviewStatus]?.label || selected.reviewStatus}
                 </Badge>
+                {selected.roles.includes("host") && selected.roles.includes("agent") && (
+                  <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700">
+                    <AlertTriangle className="w-3 h-3 mr-1" /> Host + Agent conflict
+                  </Badge>
+                )}
               </div>
 
               {/* Documents */}

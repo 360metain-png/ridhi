@@ -31,6 +31,11 @@ router.post("/kyc/submit", async (req, res) => {
     res.status(400).json({ success: false, error: "Select at least one role (host/agent/creator)" });
     return;
   }
+  // Agent and Host are mutually exclusive (conflict of interest)
+  if (body.roles.includes("host") && body.roles.includes("agent")) {
+    res.status(400).json({ success: false, error: "Host and Agent cannot be selected together" });
+    return;
+  }
 
   try {
     const existing = await db.select().from(kycRecords).where(eq(kycRecords.userId, body.userId)).limit(1);
