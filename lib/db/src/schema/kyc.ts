@@ -6,7 +6,16 @@ export const kycRecords = pgTable("kyc_records", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").notNull().unique(),
 
-  // Aadhaar
+  // Roles applied for (host|agent|creator)
+  roles: text("roles").array().notNull().default([]),
+
+  // Document images (base64 or storage URL)
+  aadhaarFrontImage: text("aadhaar_front_image"),   // base64 / URL
+  aadhaarBackImage: text("aadhaar_back_image"),     // base64 / URL
+  panImage: text("pan_image"),                      // base64 / URL
+  bankProofImage: text("bank_proof_image"),         // passbook / cheque base64 / URL
+
+  // Aadhaar (entered manually for reference)
   aadhaarNumber: varchar("aadhaar_number", { length: 14 }), // masked: XXXX XXXX 1234
   aadhaarVerified: boolean("aadhaar_verified").default(false).notNull(),
   aadhaarVerifiedAt: timestamp("aadhaar_verified_at", { withTimezone: true }),
@@ -30,10 +39,15 @@ export const kycRecords = pgTable("kyc_records", {
   status: varchar("status", { length: 20 }).default("not_started").notNull(),
     // not_started | pending | under_review | approved | rejected
 
-  submittedAt: timestamp("submitted_at", { withTimezone: true }),
+  // Admin review fields
+  reviewStatus: varchar("review_status", { length: 20 }).default("pending").notNull(),
+    // pending | under_review | approved | rejected
+  adminComment: text("admin_comment"),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   reviewedBy: text("reviewed_by"),
   rejectionReason: text("rejection_reason"),
+
+  submittedAt: timestamp("submitted_at", { withTimezone: true }),
 
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

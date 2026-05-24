@@ -83,9 +83,9 @@ function KycGateScreen({ colors }: { colors: any }) {
       </Text>
       <View style={[st.kycInfoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {[
-          { icon: "clock", text: "Verification takes 2–5 minutes" },
-          { icon: "file-text", text: "Aadhaar / PAN / Driving Licence accepted" },
-          { icon: "check-circle", text: "One-time process — withdraw forever after" },
+          { icon: "upload", text: "Upload Aadhaar + PAN + Bank Proof" },
+          { icon: "check-circle", text: "One verification for Host, Agent & Creator" },
+          { icon: "shield", text: "Super Admin review — usually 1-2 days" },
         ].map((item) => (
           <View key={item.text} style={st.kycInfoRow}>
             <View style={[st.kycInfoIcon, { backgroundColor: "#7B2FBE20" }]}>
