@@ -333,6 +333,15 @@ export default function KYCScreen() {
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       <PrivateHead />
 
+      {/* ── Navigation Header ── */}
+      <View style={styles.navHeader}>
+        <Pressable onPress={() => router.back()} style={styles.navBackBtn}>
+          <Feather name="arrow-left" size={22} color={colors.foreground} />
+        </Pressable>
+        <Text style={[styles.navTitle, { color: colors.foreground }]}>E-Verification</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         <StepBar current={step} colors={colors} />
         <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>
@@ -782,6 +791,9 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  navHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12 },
+  navBackBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 12 },
+  navTitle: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
   stepBarWrap: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 12, paddingHorizontal: 20 },
   stepDot: {
     width: 22,
