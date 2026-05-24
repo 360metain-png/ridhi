@@ -332,19 +332,36 @@ export default function KYCScreen() {
               Select one or more roles. Host and Agent cannot be combined.
             </Text>
 
+            {/* Locked banner when resubmitting */}
+            {kycStatus && kycStatus.roles?.length > 0 && (
+              <View style={[styles.reviewCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80030", marginBottom: 12 }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Feather name="lock" size={16} color="#FFB800" />
+                  <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#FFB800" }}>
+                    Roles locked — resubmitting same roles
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.mutedForeground, marginTop: 4 }}>
+                  Roles cannot be changed after first submission. To switch roles, delete your account in Settings and start fresh.
+                </Text>
+              </View>
+            )}
+
             <View style={{ gap: 12, marginTop: 16 }}>
               {ROLE_META.map((role) => {
                 const active = roles.includes(role.key);
+                const locked = kycStatus && kycStatus.roles?.length > 0;
                 return (
                   <Pressable
                     key={role.key}
-                    onPress={() => toggleRole(role.key)}
+                    onPress={() => !locked && toggleRole(role.key)}
                     style={[
                       styles.roleCard,
                       {
                         backgroundColor: active ? role.color + "15" : "rgba(255,255,255,0.04)",
                         borderColor: active ? role.color + "50" : "rgba(255,255,255,0.08)",
                         borderWidth: active ? 1.5 : 1,
+                        opacity: locked ? 0.55 : 1,
                       },
                     ]}
                   >
@@ -368,7 +385,7 @@ export default function KYCScreen() {
                         },
                       ]}
                     >
-                      {active && <Feather name="check" size={12} color="#fff" />}
+                      {active && (locked ? <Feather name="lock" size={10} color="#fff" /> : <Feather name="check" size={12} color="#fff" />)}
                     </View>
                   </Pressable>
                 );
@@ -672,16 +689,29 @@ export default function KYCScreen() {
                 )}
 
                 {kycStatus.reviewStatus === "rejected" && (
-                  <Pressable
-                    onPress={() => {
-                      setStep(1);
-                      setKycStatus(null);
-                    }}
-                    style={[styles.actionBtn, { backgroundColor: colors.primary, marginTop: 16 }]}
-                  >
-                    <Feather name="refresh-cw" size={16} color="#fff" />
-                    <Text style={styles.actionBtnText}>Resubmit KYC</Text>
-                  </Pressable>
+                  <View style={{ marginTop: 16, gap: 12 }}>
+                    <Text style={[styles.sectionSub, { color: colors.mutedForeground, textAlign: "center", fontSize: 12 }]}>
+                      Roles are permanently locked. You may only re-upload corrected documents for the same roles.
+                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        setStep(1);
+                        setKycStatus(null);
+                      }}
+                      style={[styles.actionBtn, { backgroundColor: colors.primary }]}
+                    >
+                      <Feather name="refresh-cw" size={16} color="#fff" />
+                      <Text style={styles.actionBtnText}>Resubmit Documents</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => router.push("/settings" as any)}
+                      style={{ alignItems: "center", paddingVertical: 8 }}
+                    >
+                      <Text style={[styles.sectionSub, { color: colors.primary, fontSize: 12 }]}>
+                        Want different roles? Go to Settings to delete your account and start fresh.
+                      </Text>
+                    </Pressable>
+                  </View>
                 )}
 
                 <Pressable

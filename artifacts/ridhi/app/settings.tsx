@@ -73,7 +73,7 @@ function SectionHeader({ title }: { title: string }) {
 export default function SettingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
   const {
     theme, setTheme, language,
     notificationsEnabled, setNotificationsEnabled,
@@ -251,7 +251,7 @@ export default function SettingsScreen() {
             onPress={() =>
               Alert.alert(
                 "Delete Account",
-                "This will permanently delete your account, posts, matches, and all data. This cannot be undone.",
+                "This will permanently delete your account, E-Verification roles, posts, matches, and all data. If you want different earning roles, account deletion is the only way. This cannot be undone.",
                 [
                   { text: "Cancel", style: "cancel" },
                   {
@@ -263,7 +263,7 @@ export default function SettingsScreen() {
                         "Type your phone number or email to confirm deletion.",
                         [
                           { text: "Cancel", style: "cancel" },
-                          { text: "Yes, Delete Everything", style: "destructive", onPress: logout },
+                          { text: "Yes, Delete Everything", style: "destructive", onPress: deleteAccount },
                         ]
                       ),
                   },

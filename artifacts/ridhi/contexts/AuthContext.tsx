@@ -52,6 +52,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   login: (profile: Partial<UserProfile>) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<boolean>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
   claimDailyReward: () => Promise<boolean>;
@@ -147,6 +148,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     await AsyncStorage.removeItem("ridhi_user");
     setUser(null);
+  }, []);
+
+  const deleteAccount = useCallback(async () => {
+    try {
+      const current = await AsyncStorage.getItem("ridhi_user");
+      if (!current) return false;
+      const u = JSON.parse(current) as UserProfile;
+      await apiFetch<{ success: boolean }>("/api/account", {
+        method: "DELETE",
+        body: JSON.stringify({ userId: u.id }),
+      });
+      await AsyncStorage.removeItem("ridhi_user");
+      setUser(null);
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
   const updateProfile = useCallback(async (updates: Partial<UserProfile>) => {
@@ -251,7 +269,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus }}
     >
       {children}
     </AuthContext.Provider>

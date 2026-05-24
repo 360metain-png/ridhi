@@ -40,6 +40,19 @@ router.post("/kyc/submit", async (req, res) => {
   try {
     const existing = await db.select().from(kycRecords).where(eq(kycRecords.userId, body.userId)).limit(1);
 
+    // Roles are permanently locked on first submission. Changing roles requires deleting the account.
+    if (existing.length > 0 && existing[0].roles?.length > 0) {
+      const submittedRoles = existing[0].roles;
+      const rolesMatch = body.roles.length === submittedRoles.length && body.roles.every((r: string) => submittedRoles.includes(r));
+      if (!rolesMatch) {
+        res.status(400).json({
+          success: false,
+          error: "Roles are permanently locked. Delete your account in Settings to choose different roles."
+        });
+        return;
+      }
+    }
+
     const now = new Date();
     const record: any = {
       userId: body.userId,
