@@ -30,11 +30,11 @@ const ROLE_META: { key: "host" | "agent" | "creator"; label: string; desc: strin
   { key: "creator", label: "Creator", desc: "Monetize content & posts", color: "#FFB800" },
 ];
 
-const DOC_TYPES: { key: string; label: string; sublabel: string; required: boolean }[] = [
-  { key: "aadhaarFront", label: "Aadhaar Card — Front", sublabel: "Upload the front side of your Aadhaar", required: true },
-  { key: "aadhaarBack", label: "Aadhaar Card — Back", sublabel: "Upload the back side of your Aadhaar", required: true },
-  { key: "pan", label: "PAN Card", sublabel: "Upload both sides of your PAN card", required: true },
-  { key: "bankProof", label: "Bank Proof", sublabel: "Passbook page or cancelled cheque", required: true },
+const DOC_TYPES: { key: string; label: string; sublabel: string; required: boolean; mode: "camera" | "gallery" }[] = [
+  { key: "aadhaarFront", label: "Aadhaar Card — Front", sublabel: "Take a live photo of the front side", required: true, mode: "camera" },
+  { key: "aadhaarBack", label: "Aadhaar Card — Back", sublabel: "Take a live photo of the back side", required: true, mode: "camera" },
+  { key: "pan", label: "PAN Card", sublabel: "Take a live photo of your PAN card", required: true, mode: "camera" },
+  { key: "bankProof", label: "Bank Proof", sublabel: "Upload passbook page or cancelled cheque", required: true, mode: "gallery" },
 ];
 
 interface DocImage {
@@ -194,10 +194,32 @@ export default function KYCScreen() {
     setError("");
   };
 
-  const pickImage = async (docKey: string) => {
+  const pickCamera = async (docKey: string) => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission needed", "Allow camera access to take live photos of your documents.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+      base64: true,
+    });
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setDocs((prev) => ({
+        ...prev,
+        [docKey]: { uri: asset.uri, base64: asset.base64 ?? "" },
+      }));
+      setError("");
+    }
+  };
+
+  const pickGallery = async (docKey: string) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow access to your gallery to upload documents.");
+      Alert.alert("Permission needed", "Allow access to your gallery to upload the bank document.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -440,11 +462,13 @@ export default function KYCScreen() {
                       <Image source={{ uri: img.uri }} style={styles.docPreview} resizeMode="cover" />
                     ) : (
                       <Pressable
-                        onPress={() => pickImage(doc.key)}
+                        onPress={() => doc.mode === "camera" ? pickCamera(doc.key) : pickGallery(doc.key)}
                         style={[styles.docUploadBtn, { borderColor: "rgba(255,255,255,0.15)" }]}
                       >
-                        <Feather name="upload" size={22} color={colors.mutedForeground} />
-                        <Text style={[styles.docUploadText, { color: colors.mutedForeground }]}>Tap to upload</Text>
+                        <Feather name={doc.mode === "camera" ? "camera" : "upload"} size={22} color={colors.mutedForeground} />
+                        <Text style={[styles.docUploadText, { color: colors.mutedForeground }]}>
+                          {doc.mode === "camera" ? "Tap to take photo" : "Tap to upload"}
+                        </Text>
                       </Pressable>
                     )}
                   </View>

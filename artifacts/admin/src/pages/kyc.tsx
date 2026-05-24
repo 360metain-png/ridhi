@@ -358,15 +358,20 @@ export default function KYCPage() {
                 ) : documents ? (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { key: "aadhaarFrontImage", label: "Aadhaar Front", has: selected.hasAadhaarFront },
-                      { key: "aadhaarBackImage", label: "Aadhaar Back", has: selected.hasAadhaarBack },
-                      { key: "panImage", label: "PAN Card", has: selected.hasPanImage },
-                      { key: "bankProofImage", label: "Bank Proof", has: selected.hasBankProof },
+                      { key: "aadhaarFrontImage", label: "Aadhaar Front", has: selected.hasAadhaarFront, source: "Live Photo" },
+                      { key: "aadhaarBackImage", label: "Aadhaar Back", has: selected.hasAadhaarBack, source: "Live Photo" },
+                      { key: "panImage", label: "PAN Card", has: selected.hasPanImage, source: "Live Photo" },
+                      { key: "bankProofImage", label: "Bank Proof", has: selected.hasBankProof, source: "Uploaded Document" },
                     ].map((doc) => {
                       const img = (documents as any)[doc.key];
                       return (
                         <div key={doc.key} className={`border rounded-lg p-2 ${doc.has ? "border-green-300 bg-green-50/50" : "border-muted bg-muted/30"}`}>
-                          <p className="text-xs font-medium mb-2">{doc.label}</p>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium">{doc.label}</p>
+                            <p className={`text-[10px] px-1.5 py-0.5 rounded-full ${doc.source === "Live Photo" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                              {doc.source}
+                            </p>
+                          </div>
                           {img ? (
                             <img
                               src={img.startsWith("data:") ? img : `data:image/jpeg;base64,${img}`}
