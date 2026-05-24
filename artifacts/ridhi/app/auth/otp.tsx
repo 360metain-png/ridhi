@@ -166,17 +166,17 @@ export default function OtpScreen() {
               style={[
                 styles.otpCell,
                 {
-                  backgroundColor: error ? "#FF3B3010" : digit ? colors.primary + "15" : "rgba(255,255,255,0.08)",
+                  backgroundColor: error ? "#FF3B3018" : digit ? colors.primary + "18" : "#1A1A30",
                   borderColor: error
                     ? "#FF3B30"
                     : digit
                     ? colors.primary
-                    : "rgba(255,255,255,0.35)",
-                  borderWidth: error || digit ? 2 : 1.5,
+                    : "#555580",
+                  borderWidth: error ? 3 : digit ? 2.5 : 2,
                 },
               ]}
             >
-              <Text style={[styles.otpCellText, { color: digit ? colors.foreground : colors.mutedForeground + "CC" }]}>
+              <Text style={[styles.otpCellText, { color: digit ? "#fff" : "#66668C" }]}>
                 {digit || "\u2014"}
               </Text>
               <TextInput

@@ -145,13 +145,13 @@ function OtpInput({ value, onChange, colors }: { value: string; onChange: (v: st
             style={[
               styles.otpCell,
               {
-                backgroundColor: isActive ? colors.primary + "22" : isFilled ? colors.primary + "15" : "rgba(255,255,255,0.08)",
-                borderColor: isActive ? colors.primary : isFilled ? colors.primary : "rgba(255,255,255,0.35)",
-                borderWidth: isActive ? 2.5 : isFilled ? 2 : 1.5,
+                backgroundColor: isActive ? colors.primary + "28" : isFilled ? colors.primary + "18" : "#1A1A30",
+                borderColor: isActive ? colors.primary : isFilled ? colors.primary : "#555580",
+                borderWidth: isActive ? 3 : isFilled ? 2.5 : 2,
               },
             ]}
           >
-            <Text style={[styles.otpCellText, { color: isFilled ? colors.foreground : colors.mutedForeground + "CC" }]}>
+            <Text style={[styles.otpCellText, { color: isFilled ? "#fff" : "#66668C" }]}>
               {d || "\u2014"}
             </Text>
             {isActive && (
@@ -1289,7 +1289,7 @@ const styles = StyleSheet.create({
 
   otpRow: { flexDirection: "row", gap: 10, justifyContent: "center", paddingVertical: 8 },
   otpHidden: { position: "absolute", opacity: 0, width: 1, height: 1 },
-  otpCell: { width: 48, height: 58, borderRadius: 14, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  otpCell: { width: 52, height: 64, borderRadius: 16, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   otpCellText: { fontSize: 24, fontFamily: "Inter_700Bold", lineHeight: 30 },
   otpCursor: { position: "absolute", bottom: 10, width: 20, height: 2, borderRadius: 1 },
 
