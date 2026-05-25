@@ -1,6 +1,7 @@
 import { useState } from "react";
 import OTPProviderCard from "@/pages/otp-provider-card";
 import PaymentProviderCard from "@/pages/payment-provider-card";
+import RandomCallAdminCard from "@/pages/random-call-admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -639,6 +640,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="search" className="text-xs gap-1.5">
             <Search className="w-3.5 h-3.5" /> Quick Search
+          </TabsTrigger>
+          <TabsTrigger value="calls" className="text-xs gap-1.5">
+            <PhoneCall className="w-3.5 h-3.5" /> Random Calls
           </TabsTrigger>
           <TabsTrigger value="levels" className="text-xs gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" /> Levels & Commissions
@@ -3170,6 +3174,11 @@ export default function SuperAdminPage() {
               })()}
             </div>
           )}
+        </TabsContent>
+
+        {/* ─── RANDOM CALLS TAB ─── */}
+        <TabsContent value="calls" className="mt-4 space-y-6">
+          <RandomCallAdminCard />
         </TabsContent>
 
         {/* ─── LEVELS & COMMISSIONS TAB ─── */}
