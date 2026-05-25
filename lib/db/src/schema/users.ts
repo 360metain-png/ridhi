@@ -1,0 +1,23 @@
+import { pgTable, uuid, text, timestamp, varchar, integer, jsonb } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod/v4";
+
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  phone: varchar("phone", { length: 20 }).notNull().unique(),
+  name: text("name").notNull(),
+  avatar: text("avatar"),
+  bio: text("bio"),
+  city: text("city"),
+  gender: varchar("gender", { length: 10 }).notNull().default("other"),
+  language: varchar("language", { length: 20 }).notNull().default("english"),
+  coins: integer("coins").notNull().default(100),
+  plan: varchar("plan", { length: 20 }).notNull().default("free"),
+  interests: jsonb("interests").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;

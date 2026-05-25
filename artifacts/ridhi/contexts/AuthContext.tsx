@@ -81,7 +81,7 @@ const DEFAULT_USER: UserProfile = {
   followers: 128,
   following: 94,
   posts: 12,
-  plan: "gold" as const,
+  plan: "free" as const,
   isVerified: false,
   createdAt: new Date().toISOString(),
 };

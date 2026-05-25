@@ -7,6 +7,9 @@ import accountRouter from "./account";
 import otpConfigRouter from "./otp-config";
 import paymentConfigRouter from "./payment-config";
 import callsRouter from "./calls";
+import feedRouter from "./feed";
+import usersRouter from "./users";
+import chatRouter from "./chat";
 
 const router: IRouter = Router();
 
@@ -18,5 +21,8 @@ router.use(accountRouter);
 router.use(otpConfigRouter);
 router.use(paymentConfigRouter);
 router.use(callsRouter);
+router.use(feedRouter);
+router.use(usersRouter);
+router.use(chatRouter);
 
 export default router;

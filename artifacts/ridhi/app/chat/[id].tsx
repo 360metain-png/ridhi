@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
-import { CHATS } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 
@@ -32,14 +32,15 @@ interface Message {
   showTranslation?: boolean;
 }
 
-const INITIAL_MESSAGES: Message[] = [
-  { id: "m1", text: "Hey! How are you doing?", type: "text", fromMe: false, time: "3:45 PM" },
-  { id: "m2", text: "I'm great! Just got back from a run 😄", type: "text", fromMe: true, time: "3:46 PM" },
-  { id: "m3", text: "Oh nice! Where do you usually run?", type: "text", fromMe: false, time: "3:47 PM" },
-  { id: "m4", text: "Cubbon Park mostly. The vibe there is amazing in the morning!", type: "text", fromMe: true, time: "3:48 PM" },
-  { id: "m5", type: "voice", duration: "0:12", fromMe: false, time: "3:50 PM" },
-  { id: "m6", text: "That sounds like so much fun! When are you free?", type: "text", fromMe: false, time: "3:51 PM" },
-];
+interface ApiMessage {
+  id: string;
+  content: string;
+  type: string;
+  createdAt: string;
+  senderId: string;
+  senderName: string | null;
+  senderAvatar: string | null;
+}
 
 const QUICK_REPLIES = ["👍 Sounds good!", "😂 Haha", "❤️ Love it!", "🔥 Amazing!", "👋 Hey!"];
 const STICKERS = ["😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎"];
@@ -48,27 +49,65 @@ export default function ChatDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const userId = user?.id;
+
   // Block screenshots & screen recordings for the entire chat session (native only)
   useEffect(() => {
     if (Platform.OS === "web") return;
     ScreenCapture.preventScreenCaptureAsync("ridhi-chat");
     return () => { ScreenCapture.allowScreenCaptureAsync("ridhi-chat"); };
   }, []);
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [showAttach, setShowAttach] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [disappearMode, setDisappearMode] = useState(false);
+  const [otherUser, setOtherUser] = useState<{ name: string; avatar?: string } | null>(null);
   const flatRef = useRef<FlatList>(null);
-
-  const chat = CHATS.find((c) => c.id === id);
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const send = (text?: string, type: Message["type"] = "text") => {
+  useEffect(() => {
+    if (!userId || !id) return;
+    loadMessages();
+  }, [userId, id]);
+
+  async function loadMessages() {
+    try {
+      const res = await fetch(`/api/chat/${id}/messages`, {
+        headers: { "x-user-id": userId! },
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      const apiMsgs: ApiMessage[] = data.messages ?? [];
+
+      const mapped: Message[] = apiMsgs.map((m) => ({
+        id: m.id,
+        text: m.content,
+        type: (m.type as Message["type"]) ?? "text",
+        fromMe: m.senderId === userId,
+        time: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }));
+
+      setMessages(mapped.reverse());
+
+      // Try to get other user's info from first message
+      const firstOther = apiMsgs.find((m) => m.senderId !== userId);
+      if (firstOther) {
+        setOtherUser({ name: firstOther.senderName ?? "Unknown", avatar: firstOther.senderAvatar ?? undefined });
+      }
+    } catch {
+      // keep empty on error
+    }
+  }
+
+  const send = async (text?: string, type: Message["type"] = "text") => {
     const msgText = text ?? input.trim();
     if (type === "text" && !msgText) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     const msg: Message = {
       id: "m" + Date.now(),
       text: type === "text" ? msgText : undefined,
@@ -80,6 +119,19 @@ export default function ChatDetailScreen() {
     setMessages((prev) => [msg, ...prev]);
     setInput("");
     setShowStickers(false);
+
+    // Send to API
+    if (userId && id) {
+      try {
+        await fetch(`/api/chat/${id}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-id": userId },
+          body: JSON.stringify({ content: msgText, type }),
+        });
+      } catch {
+        // silent fail - already shown locally
+      }
+    }
   };
 
   const handleVoiceRecord = () => {
@@ -195,10 +247,10 @@ export default function ChatDetailScreen() {
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </Pressable>
         <View style={styles.headerUser}>
-          <Avatar name={chat?.userName ?? "User"} size={36} />
+          <Avatar name={otherUser?.name ?? "User"} size={36} />
           <View>
             <View style={styles.nameRow}>
-              <Text style={[styles.headerName, { color: colors.foreground }]}>{chat?.userName}</Text>
+              <Text style={[styles.headerName, { color: colors.foreground }]}>{otherUser?.name ?? "Chat"}</Text>
               {disappearMode && (
                 <View style={[styles.disappearBadge, { backgroundColor: colors.primary + "20" }]}>
                   <Feather name="clock" size={10} color={colors.primary} />
@@ -206,8 +258,8 @@ export default function ChatDetailScreen() {
                 </View>
               )}
             </View>
-            <Text style={[styles.headerStatus, { color: chat?.isOnline ? colors.success : colors.mutedForeground }]}>
-              {chat?.isOnline ? "● Online" : "Offline"}
+            <Text style={[styles.headerStatus, { color: colors.mutedForeground }]}>
+              Offline
             </Text>
           </View>
         </View>

@@ -224,9 +224,30 @@ export default function CreatePostScreen() {
 
   const handlePost = async () => {
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user?.id ?? "",
+        },
+        body: JSON.stringify({
+          content: text.trim(),
+          images: mediaUri ? [mediaUri] : [],
+          city: user?.city ?? null,
+          language: user?.language ?? null,
+        }),
+      });
+      if (res.ok) {
+        Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
+      } else {
+        Alert.alert("Error", "Failed to post. Please try again.");
+      }
+    } catch {
+      Alert.alert("Error", "Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Platform,
@@ -12,22 +12,70 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
+
+interface Conversation {
+  id: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  otherUser: {
+    id: string;
+    name: string;
+    avatar: string | null;
+    city: string | null;
+  } | null;
+}
 
 type Tab = "direct" | "groups";
 
 export default function ChatScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<Tab>("direct");
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!user) return;
+    fetchConversations();
+  }, [user]);
+
+  async function fetchConversations() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/chat", {
+        headers: { "x-user-id": user!.id },
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setConversations(data.conversations ?? []);
+    } catch {
+      // fallback to mock
+      setConversations([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : 60;
 
-  const filtered = CHATS.filter((c) =>
+  const chatList = conversations.map((conv) => ({
+    id: conv.id,
+    userId: conv.otherUser?.id ?? "unknown",
+    userName: conv.otherUser?.name ?? "Unknown",
+    userAvatar: conv.otherUser?.avatar ?? undefined,
+    lastMessage: conv.lastMessage ?? "",
+    timeAgo: conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+    unread: 0,
+    isOnline: false,
+  }));
+
+  const filtered = chatList.filter((c) =>
     c.userName.toLowerCase().includes(search.toLowerCase())
   );
 

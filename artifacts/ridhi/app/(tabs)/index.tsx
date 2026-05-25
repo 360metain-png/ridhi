@@ -298,7 +298,8 @@ export default function FeedScreen() {
     }
   }, [recsFadeAnim]);
 
-  const handleLike = useCallback((id: string) => {
+  const handleLike = useCallback(async (id: string) => {
+    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
@@ -306,7 +307,25 @@ export default function FeedScreen() {
           : p
       )
     );
-  }, []);
+    // API call
+    if (user?.id) {
+      try {
+        await fetch(`/api/posts/${id}/like`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-id": user.id },
+        });
+      } catch {
+        // Revert on failure
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === id
+              ? { ...p, isLiked: !p.isLiked, likes: p.isLiked ? p.likes + 1 : p.likes - 1 }
+              : p
+          )
+        );
+      }
+    }
+  }, [user?.id]);
 
   const handleOpenComments = useCallback((postId: string) => {
     setCommentPostId(postId);
@@ -423,9 +442,38 @@ export default function FeedScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setRefreshing(false);
-  }, []);
+    try {
+      const trending = activeTab === "Trending";
+      const res = await fetch(`/api/feed?trending=${trending}&limit=20`, {
+        headers: user?.id ? { "x-user-id": user.id } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const apiPosts = data.posts ?? [];
+        const mapped: Post[] = apiPosts.map((p: any) => ({
+          id: p.id,
+          userId: p.userId,
+          userName: p.userName ?? "User",
+          userCity: p.userCity ?? p.city ?? "",
+          language: p.language ?? "",
+          isVerified: false,
+          vipTier: "free" as const,
+          content: p.content ?? "",
+          imageUri: p.images?.[0] ?? undefined,
+          likes: p.likesCount ?? 0,
+          comments: p.commentsCount ?? 0,
+          shares: p.sharesCount ?? 0,
+          isLiked: p.isLiked ?? false,
+          timeAgo: p.timeAgo ?? "Just now",
+        }));
+        setPosts(mapped);
+      }
+    } catch {
+      // keep existing posts on error
+    } finally {
+      setRefreshing(false);
+    }
+  }, [activeTab, user?.id]);
 
   const getActivePosts = (): Post[] => {
     switch (activeTab) {
