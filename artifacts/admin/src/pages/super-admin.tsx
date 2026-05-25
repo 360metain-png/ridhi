@@ -1,5 +1,6 @@
 import { useState } from "react";
 import OTPProviderCard from "@/pages/otp-provider-card";
+import PaymentProviderCard from "@/pages/payment-provider-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import {
   Languages, Layers, Megaphone, MessageCircle, Coins, IndianRupee,
   Percent, GitMerge, CheckSquare, Settings2, Save, TestTube,
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
-  Banknote, ArrowRightLeft, Sliders,
+  Banknote, ArrowRightLeft, Sliders, Wallet,
   LayoutTemplate, TrendingUp, MousePointer, Pause, Play, Target,
   Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2,
 } from "lucide-react";
@@ -121,8 +122,9 @@ const INTEGRATIONS = [
     bg: "bg-blue-50",
     items: [
       { name: "Razorpay", desc: "Primary payment gateway — UPI, cards, netbanking", icon: CreditCard, status: "active", keyMasked: "rzp_live_••••••••K7xQ", enabled: true },
-      { name: "Google Pay Business", desc: "GPay merchant integration", icon: Smartphone, status: "active", keyMasked: "gpy_••••••••••HJk2", enabled: true },
-      { name: "PhonePe Switch", desc: "PhonePe merchant gateway", icon: CreditCard, status: "maintenance", keyMasked: "ppe_••••••••••3nXp", enabled: false },
+      { name: "Cashfree", desc: "Alternative gateway — low TDR, auto-collect", icon: Wallet, status: "active", keyMasked: "CF_••••••••••••", enabled: true },
+      { name: "PhonePe", desc: "Flipkart-owned — massive UPI market share", icon: Smartphone, status: "active", keyMasked: "ppe_••••••••••3nXp", enabled: true },
+      { name: "Instamojo", desc: "SME-friendly — links, subscriptions, payouts", icon: Globe, status: "active", keyMasked: "IJ_••••••••••••", enabled: true },
     ],
   },
   {
@@ -1885,7 +1887,10 @@ export default function SuperAdminPage() {
                 {/* ─── 1. OTP Provider Switcher ───────────────────────────── */}
                 <OTPProviderCard />
 
-                {/* ─── 2. OTP & SMS (MSG91) ─────────────────────────────────── */}
+                {/* ─── 2. Payment Gateway Provider Switcher ─────────────────── */}
+                <PaymentProviderCard />
+
+                {/* ─── 3. OTP & SMS (MSG91) ─────────────────────────────────── */}
                 <Card>
                   <CardContent className="p-5">
                     <SectionHeader

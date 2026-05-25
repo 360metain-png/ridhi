@@ -30,14 +30,17 @@ async function createOrder(amountInPaise: number, label: string) {
       body:    JSON.stringify({ amount: amountInPaise, notes: { label } }),
     });
     if (!res.ok) return null;
-    return await res.json() as { id: string; amount: number; testMode: boolean; keyId: string };
+    return await res.json() as {
+      id: string; amount: number; testMode: boolean; keyId?: string;
+      provider: string; checkoutUrl?: string;
+    };
   } catch {
     return null;
   }
 }
 
 // ── API helpers (continued) ────────────────────────────────────────────────────
-async function verifyOrder(orderId: string, paymentId: string) {
+async function verifyOrder(orderId: string, paymentId: string, provider?: string) {
   try {
     const res = await fetch(`${API_BASE}/payments/verify`, {
       method:  "POST",
@@ -46,6 +49,7 @@ async function verifyOrder(orderId: string, paymentId: string) {
         razorpay_order_id:   orderId,
         razorpay_payment_id: paymentId,
         razorpay_signature:  "",
+        provider,
       }),
     });
     if (!res.ok) return false;
@@ -191,25 +195,39 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
     setProcStatus(0);
 
     // Try backend order creation first
-    const amountInPaise = total * 100;  // Razorpay uses paise (₹1 = 100 paise)
+    const amountInPaise = total * 100;  // backends use paise (₹1 = 100 paise)
     const order = await createOrder(amountInPaise, label);
+    const provider = order?.provider ?? "razorpay";
 
     if (order && !order.testMode) {
-      // ── Real Razorpay: open backend-hosted checkout in system browser ──────
-      // The checkout page calls /api/payments/verify and records the order as
-      // verified server-side if Razorpay confirms. After the browser closes we
-      // query the server to check whether verification actually succeeded.
+      // Redirect-based providers (Cashfree, PhonePe, Instamojo)
+      if (provider !== "razorpay" && order.checkoutUrl) {
+        await WebBrowser.openBrowserAsync(order.checkoutUrl, {
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+          toolbarColor:      "#E91E8C",
+        });
+        const status = await checkOrderStatus(order.id);
+        if (status.verified && status.paymentId) {
+          setTxnId(status.paymentId.slice(0, 16).toUpperCase());
+          setStep("success");
+        } else {
+          setStep("failed");
+        }
+        return;
+      }
+
+      // Razorpay: open backend-hosted checkout page in system browser
       const checkoutUrl = `${API_BASE}/payments/checkout?` + new URLSearchParams({
-        orderId: order.id,
-        keyId:   order.keyId,
-        amount:  String(order.amount),
-        desc:    label,
+        orderId:  order.id,
+        keyId:    order.keyId || "",
+        amount:   String(order.amount),
+        desc:     label,
+        provider,
       }).toString();
       await WebBrowser.openBrowserAsync(checkoutUrl, {
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
         toolbarColor:      "#E91E8C",
       });
-      // Browser closed — ask the server whether it received a valid verification
       const status = await checkOrderStatus(order.id);
       if (status.verified && status.paymentId) {
         setTxnId(status.paymentId.slice(0, 16).toUpperCase());
@@ -220,10 +238,7 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
       return;
     }
 
-    // ── Test / simulation mode ────────────────────────────────────────────────
-    // Animate through the processing steps for UX, then ask the server to
-    // record a test-mode verification. Only advance to success when the server
-    // confirms; show failure otherwise.
+    // Test / simulation mode
     const simOrderId   = order?.id ?? ("order_sim_" + Date.now());
     const simPaymentId = generateTxnId();
 
@@ -240,7 +255,7 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
       }, 600);
     });
 
-    const verified = await verifyOrder(simOrderId, simPaymentId);
+    const verified = await verifyOrder(simOrderId, simPaymentId, provider);
     if (verified) {
       setTxnId(simPaymentId);
       setStep("success");

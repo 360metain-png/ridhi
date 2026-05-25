@@ -5,6 +5,7 @@ import authRouter from "./auth";
 import kycRouter from "./kyc";
 import accountRouter from "./account";
 import otpConfigRouter from "./otp-config";
+import paymentConfigRouter from "./payment-config";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(authRouter);
 router.use(kycRouter);
 router.use(accountRouter);
 router.use(otpConfigRouter);
+router.use(paymentConfigRouter);
 
 export default router;
