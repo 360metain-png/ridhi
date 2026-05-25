@@ -1,4 +1,5 @@
 import { useState } from "react";
+import OTPProviderCard from "@/pages/otp-provider-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -130,7 +131,8 @@ const INTEGRATIONS = [
     bg: "bg-green-50",
     items: [
       { name: "Firebase Cloud Messaging", desc: "Push notifications (Android & iOS)", icon: Bell, status: "active", keyMasked: "AIza••••••••••••••Mx9", enabled: true },
-      { name: "Twilio SMS", desc: "OTP & transactional SMS delivery", icon: MessageSquare, status: "active", keyMasked: "AC••••••••••••••••9f", enabled: true },
+      { name: "MSG91 SMS", desc: "OTP via MSG91 gateway (India)", icon: MessageSquare, status: "active", keyMasked: "AC••••••••••••••••9f", enabled: true },
+      { name: "Firebase Auth", desc: "OTP via Firebase Phone Auth", icon: Smartphone, status: "active", keyMasked: "Google-managed", enabled: true },
       { name: "SendGrid Email", desc: "Transactional email (OTP, receipts)", icon: Mail, status: "active", keyMasked: "SG.••••••••••••••••Kp", enabled: true },
     ],
   },
@@ -1880,7 +1882,10 @@ export default function SuperAdminPage() {
             return (
               <div className="space-y-5">
 
-                {/* ─── 1. OTP & SMS (MSG91) ─────────────────────────────────── */}
+                {/* ─── 1. OTP Provider Switcher ───────────────────────────── */}
+                <OTPProviderCard />
+
+                {/* ─── 2. OTP & SMS (MSG91) ─────────────────────────────────── */}
                 <Card>
                   <CardContent className="p-5">
                     <SectionHeader

@@ -14,6 +14,11 @@ import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
 import { apiFetch, ApiError } from "@/utils/api";
 import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
+import {
+  verifyFirebaseOtp,
+  getPendingFirebaseConfirmation,
+  clearPendingFirebaseConfirmation,
+} from "@/lib/firebaseAuth";
 
 const OTP_LENGTH = 6;
 
@@ -79,6 +84,26 @@ export default function OtpScreen() {
     setLoading(true);
     setError("");
     try {
+      const confirmation = getPendingFirebaseConfirmation();
+      if (confirmation) {
+        // Firebase flow: verify client-side, then exchange ID token with backend
+        const result = await verifyFirebaseOtp(confirmation, otp.join(""));
+        if (!result.ok) {
+          setError(result.error);
+          setLoading(false);
+          return;
+        }
+        // Exchange Firebase ID token with backend
+        await apiFetch("/api/auth/firebase-verify", {
+          method: "POST",
+          body: JSON.stringify({ idToken: result.idToken, contact }),
+        });
+        clearPendingFirebaseConfirmation();
+        router.replace("/auth/profile-setup");
+        return;
+      }
+
+      // MSG91 / demo flow: verify OTP with backend
       await apiFetch("/api/auth/verify-otp", {
         method: "POST",
         body: JSON.stringify({ contact, type, otp: otp.join("") }),

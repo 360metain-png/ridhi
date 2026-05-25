@@ -58,6 +58,7 @@
   "dependencies": {
     "expo-image-manipulator": "^55.0.16",
     "expo-media-library": "^55.0.17",
-    "expo-screen-capture": "^55.0.14"
+    "expo-screen-capture": "^55.0.14",
+    "firebase": "^12.13.0"
   }
 }

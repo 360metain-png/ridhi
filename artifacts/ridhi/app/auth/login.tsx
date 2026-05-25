@@ -20,6 +20,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendFirebaseOtp, storeFirebaseConfirmation, isFirebaseReady } from "@/lib/firebaseAuth";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 
@@ -150,6 +151,27 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const { apiFetch } = await import("@/utils/api");
+
+      // 1. Ask backend which OTP provider is active
+      const providerResp = await apiFetch("/api/auth/otp-provider") as { provider: string };
+
+      // 2. If Firebase is active and Firebase is ready client-side
+      if (providerResp.provider === "firebase" && isFirebaseReady() && tab === "phone") {
+        const phone = "+91" + value.trim().replace(/\D/g, "");
+        const fbResult = await sendFirebaseOtp(phone);
+        if (!fbResult.ok) {
+          setInputError(fbResult.error || "Failed to send OTP via Firebase");
+          return;
+        }
+        storeFirebaseConfirmation(fbResult.confirmationResult);
+        router.push({
+          pathname: "/auth/otp",
+          params: { contact: value.trim(), type: tab, provider: "firebase" },
+        });
+        return;
+      }
+
+      // 3. MSG91 / demo / auto fallback flow
       const resp = await apiFetch("/api/auth/send-otp", {
         method: "POST",
         body: JSON.stringify({ contact: value.trim(), type: tab }),

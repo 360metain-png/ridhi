@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { verifyFirebaseIdToken } from "../lib/firebaseAdmin";
+import { resolveProvider } from "../lib/otpConfig";
 
 const router = Router();
 
@@ -83,6 +85,13 @@ function fallbackOtp(
   return { success: true, demo: true, otp, message: "OTP generated (demo mode)" };
 }
 
+// ── GET /api/auth/otp-provider ────────────────────────────────────────────────
+// Tells the mobile app which OTP provider is currently active
+router.get("/auth/otp-provider", (_req, res) => {
+  const provider = resolveProvider();
+  res.json({ provider, firebaseConfigured: !!process.env["GOOGLE_APPLICATION_CREDENTIALS"] });
+});
+
 // ── POST /api/auth/send-otp ────────────────────────────────────────────────────
 router.post("/auth/send-otp", async (req, res) => {
   const { contact, type } = req.body as { contact: string; type: "phone" | "email" };
@@ -92,32 +101,51 @@ router.post("/auth/send-otp", async (req, res) => {
     return;
   }
 
-  // Pure demo mode (no credentials at all)
-  if (PURE_DEMO_MODE || type === "email") {
+  const provider = resolveProvider();
+
+  // Email OTP always falls back to local demo (no SMS provider needed)
+  if (type === "email") {
     const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
     res.json(payload);
     return;
   }
 
-  // Live mode — try MSG91, fall back gracefully on any failure
+  // Pure demo mode (no credentials at all)
+  if (PURE_DEMO_MODE && provider === "msg91") {
+    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
+    res.json(payload);
+    return;
+  }
+
+  // Firebase provider: tell client to use Firebase client SDK
+  if (provider === "firebase") {
+    res.json({
+      success: true,
+      provider: "firebase",
+      message: "Use Firebase Phone Auth client SDK to send OTP",
+    });
+    return;
+  }
+
+  // MSG91 provider (or auto-fallback): send via MSG91
   try {
     const mobile = normalisePhone(contact);
     const result = await msg91Send(mobile);
 
     if (result.success) {
-      req.log.info({ mobile }, "OTP sent via MSG91");
-      res.json({ success: true, message: "OTP sent to your mobile number" });
+      req.log.info({ mobile, provider }, "OTP sent via MSG91");
+      res.json({ success: true, provider: "msg91", message: "OTP sent to your mobile number" });
       return;
     }
 
-    // MSG91 rejected (bad template ID, quota exceeded, etc.) → fall back
+    // MSG91 rejected → fall back to demo OTP (graceful degradation)
     req.log.warn({ contact, msg91: result.message }, "MSG91 send failed — falling back to demo OTP");
     const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json(payload);
+    res.json({ ...payload, provider: "demo" });
   } catch (err) {
     req.log.error({ err }, "send-otp network error — falling back to demo OTP");
     const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json(payload);
+    res.json({ ...payload, provider: "demo" });
   }
 });
 
@@ -177,6 +205,38 @@ router.post("/auth/verify-otp", async (req, res) => {
   }
 
   res.status(400).json({ success: false, error: "OTP expired or not found. Please request a new one." });
+});
+
+// ── POST /api/auth/firebase-verify ──────────────────────────────────────────────
+// Client sends Firebase ID token after signInWithPhoneNumber succeeds.
+// Backend verifies it with Firebase Admin SDK.
+router.post("/auth/firebase-verify", async (req, res) => {
+  const { idToken, contact } = req.body as { idToken: string; contact: string };
+
+  if (!idToken) {
+    res.status(400).json({ success: false, error: "idToken is required" });
+    return;
+  }
+
+  const result = await verifyFirebaseIdToken(idToken);
+
+  if (!result.ok) {
+    req.log.warn({ contact, error: result.error }, "Firebase token verification failed");
+    res.status(400).json({ success: false, error: result.error || "Invalid Firebase token" });
+    return;
+  }
+
+  // Validate the phone number matches the contact
+  const normalisedContact = normalisePhone(contact || "");
+  const normalisedPhone = result.phone ? normalisePhone(result.phone) : "";
+  if (normalisedContact && normalisedPhone && normalisedContact !== normalisedPhone) {
+    req.log.warn({ contact, phone: result.phone }, "Firebase phone number mismatch");
+    res.status(400).json({ success: false, error: "Phone number mismatch" });
+    return;
+  }
+
+  req.log.info({ contact, uid: result.uid }, "Firebase OTP verified");
+  res.json({ success: true, provider: "firebase", uid: result.uid, message: "OTP verified via Firebase" });
 });
 
 // ── POST /api/auth/resend-otp ─────────────────────────────────────────────────
