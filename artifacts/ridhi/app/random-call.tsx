@@ -504,10 +504,6 @@ export default function RandomCallScreen() {
                 </Text>
                 <Text style={[styles.onlineBannerSub, { color: colors.mutedForeground }]}>
                   {matchGender === "Any" ? "All genders" : matchGender + " hosts"}
-                  {" · "}
-                  {preferLanguage === "Any Language" ? "Any language" : preferLanguage}
-                  {" · "}
-                  {CALL_CATEGORIES.find((c) => c.id === callCategory)?.label ?? "Any"}
                 </Text>
               </View>
               <View style={[styles.safetyBadge, { backgroundColor: colors.success + "20" }]}>
@@ -726,12 +722,7 @@ export default function RandomCallScreen() {
               {searchPhases[searchPhase]}{searchDots}
             </Text>
             <Text style={[styles.searchSub, { color: colors.mutedForeground }]}>
-              👥 {matchGender === "Any" ? "All genders" : matchGender + " only"}
-              {" · "}
-              {preferLanguage === "Any Language" ? "Any language" : preferLanguage}
-              {" · "}
-              {CALL_CATEGORIES.find((c) => c.id === callCategory)?.emoji}{" "}
-              {CALL_CATEGORIES.find((c) => c.id === callCategory)?.label}
+              Finding someone for you...
             </Text>
 
             {/* Spinning category icons */}
