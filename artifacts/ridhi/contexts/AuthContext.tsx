@@ -2,6 +2,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { apiFetch } from "@/utils/api";
 
+export interface CallPersona {
+  name?: string;
+  city?: string;
+  age?: number;
+  bio?: string;
+  avatar?: string;
+  showAvatar: boolean;
+  showCity: boolean;
+  showAge: boolean;
+  showBio: boolean;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -35,6 +47,8 @@ export interface UserProfile {
   isAgent?: boolean;
   hostRegisteredAt?: string;
   agentRegisteredAt?: string;
+  // Random Call Fake Profile
+  callPersona?: CallPersona;
   // KYC / Identity verification
   kycStatus?: "unverified" | "pending" | "verified" | "rejected";
   aadhaarVerified?: boolean;

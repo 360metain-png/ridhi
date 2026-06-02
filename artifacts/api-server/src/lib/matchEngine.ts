@@ -29,6 +29,8 @@ export interface MatchUser {
   category: CallCategory;
   avatar?: string;
   city?: string;
+  age?: number;
+  bio?: string;
   socketId: string;
   joinedAt: number;
 }
@@ -110,12 +112,10 @@ export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
   const existingIdx = waitingQueue.findIndex((u) => u.id === user.id);
   if (existingIdx >= 0) waitingQueue.splice(existingIdx, 1);
 
-  // Anonymize: override name/avatar/city with alias
+  // Anonymize: if no custom name provided, auto-generate alias
   const anonymized: MatchUser = {
     ...user,
-    name: user.name?.trim() ? user.name : makeAlias(),
-    avatar: undefined,
-    city: undefined,
+    name: user.name?.trim() ? user.name.trim() : makeAlias(),
     joinedAt: Date.now(),
   };
   waitingQueue.push(anonymized);

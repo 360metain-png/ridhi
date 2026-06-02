@@ -218,6 +218,12 @@ export default function SettingsScreen() {
           <SettingRow icon="key" label="Biometric Login" onPress={() => Alert.alert("Biometric Login", "Use Face ID or Fingerprint for faster, secure login.", [{ text: "Cancel", style: "cancel" }, { text: "Enable", onPress: () => Alert.alert("Enabled ✓", "Biometric login is now active on this device.", [{ text: "OK" }]) }])} />
         </View>
 
+        <SectionHeader title="Random Calls" />
+        <View style={[styles.section, { borderColor: colors.border }]}>
+          <SettingRow icon="phone" label="Call Persona" subtitle="Fake name, city, bio for random calls" onPress={() => router.push("/call-persona" as any)} />
+          <SettingRow icon="user-x" label="Call History" subtitle="View & report past calls" onPress={() => Alert.alert("Call History", "Feature coming soon. Reports are always logged to admin.", [{ text: "OK" }])} />
+        </View>
+
         <SectionHeader title="Business" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="volume-2" label="Ads Manager" subtitle="Create & manage ad campaigns" onPress={() => router.push("/ads-manager" as any)} />

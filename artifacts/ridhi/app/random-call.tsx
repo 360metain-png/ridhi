@@ -74,6 +74,8 @@ interface PeerInfo {
   category: string;
   avatar?: string;
   city?: string;
+  age?: number;
+  bio?: string;
 }
 
 // Demo peers — never expose real names, cities, or avatars
@@ -152,18 +154,21 @@ export default function RandomCallScreen() {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        // Send join message — NEVER expose real name, avatar, or city
+        // Send join message — use persona or stay anonymous
+        const p = user?.callPersona;
+        const showName = p?.name?.trim() || false;
         ws.send(JSON.stringify({
           type: "join",
           payload: {
             userId: user?.id ?? "anonymous",
-            // Anonymous alias: Ridhi 1, Ridhi 2, etc. Server assigns
-            name: "",
+            name: showName ? p!.name!.trim() : "",
             gender: user?.gender ?? "other",
             language: preferLanguage === "Any Language" ? "Any" : preferLanguage,
             category: callCategory,
-            avatar: undefined,
-            city: undefined,
+            avatar: p?.showAvatar ? p.avatar : undefined,
+            city: p?.showCity ? p.city : undefined,
+            age: p?.showAge ? p.age : undefined,
+            bio: p?.showBio ? p.bio : undefined,
             callType,
             coinRate: rate,
           },
@@ -757,6 +762,8 @@ export default function RandomCallScreen() {
               </View>
               <Text style={[styles.previewSub, { color: colors.mutedForeground }]}>
                 {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
+                {matched.age ? ` · ${matched.age}` : ""}
+                {matched.bio ? ` · ${matched.bio}` : ""}
               </Text>
               <View style={[styles.costInfoBox, { backgroundColor: colors.muted }]}>
                 <Text style={[styles.costInfoText, { color: colors.mutedForeground }]}>
@@ -831,6 +838,8 @@ export default function RandomCallScreen() {
               </View>
               <Text style={[styles.callSub, { color: colors.mutedForeground }]}>
                 {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
+                {matched.age ? ` · ${matched.age}` : ""}
+                {matched.bio ? ` · ${matched.bio}` : ""}
               </Text>
               {mode === "calling" && (
                 <Text style={[styles.connectingText, { color: colors.mutedForeground }]}>Connecting…</Text>

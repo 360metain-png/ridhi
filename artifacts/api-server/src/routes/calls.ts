@@ -53,7 +53,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
     switch (msg.type) {
       case "join": {
-        const { userId, name, gender, language, category, avatar, city } = msg.payload as {
+        const { userId, name, gender, language, category, avatar, city, age, bio } = msg.payload as {
           userId: string;
           name: string;
           gender: CallGender;
@@ -61,6 +61,8 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           category: CallCategory;
           avatar?: string;
           city?: string;
+          age?: number;
+          bio?: string;
         };
 
         const match = joinQueue({
@@ -71,6 +73,8 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           category,
           avatar,
           city,
+          age,
+          bio,
           socketId,
         });
 
@@ -89,7 +93,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
             joinedAt: Date.now(),
           }, msg.payload.callType ?? "audio", msg.payload.coinRate ?? 10);
 
-          // Anonymize both peers: no real name/avatar/city exposed
+          // Send peer info back to both users. Only expose fields they chose to share.
           const aliasA = match.name?.trim() ? match.name : `Ridhi ${Math.floor(Math.random() * 1000) + 1}`;
           const aliasB = name?.trim() ? name : `Ridhi ${Math.floor(Math.random() * 1000) + 1}`;
 
@@ -97,7 +101,17 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
             type: "matched",
             payload: {
               callId,
-              peer: { id: userId, name: aliasB, gender, language, category, avatar: undefined, city: undefined },
+              peer: {
+                id: userId,
+                name: aliasB,
+                gender,
+                language,
+                category,
+                avatar: avatar || undefined,
+                city: city || undefined,
+                age: msg.payload.age || undefined,
+                bio: msg.payload.bio || undefined,
+              },
               callType: call.type,
               coinRate: call.coinRate,
             },
@@ -107,7 +121,17 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
             type: "matched",
             payload: {
               callId,
-              peer: { id: match.id, name: aliasA, gender: match.gender, language: match.language, category: match.category, avatar: undefined, city: undefined },
+              peer: {
+                id: match.id,
+                name: aliasA,
+                gender: match.gender,
+                language: match.language,
+                category: match.category,
+                avatar: match.avatar || undefined,
+                city: match.city || undefined,
+                age: match.age || undefined,
+                bio: match.bio || undefined,
+              },
               callType: call.type,
               coinRate: call.coinRate,
             },
