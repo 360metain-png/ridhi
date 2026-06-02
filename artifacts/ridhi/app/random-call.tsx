@@ -138,13 +138,9 @@ export default function RandomCallScreen() {
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  // ── Cross-gender enforcement ──────────────────────────────────────
-  // Men always connect to women, women always connect to men
-  const enforcedGender: PreferGender = useCallback(() => {
-    if (user?.gender === "male") return "Female";
-    if (user?.gender === "female") return "Male";
-    return preferGender;
-  }, [user?.gender, preferGender])();
+  // ── Gender preference ─────────────────────────────────────────────
+  // User chooses who they want to talk to (Any, Male, Female)
+  const matchGender = preferGender;
 
   // ── WebSocket ───────────────────────────────────────────────────────────────────────
   const connectWebSocket = useCallback(() => {
@@ -169,6 +165,7 @@ export default function RandomCallScreen() {
             city: p?.showCity ? p.city : undefined,
             age: p?.showAge ? p.age : undefined,
             bio: p?.showBio ? p.bio : undefined,
+            preferGender: matchGender,
             callType,
             coinRate: rate,
           },
@@ -227,6 +224,7 @@ export default function RandomCallScreen() {
                       category: callCategory,
                       avatar: user?.avatar,
                       city: user?.city,
+                      preferGender: matchGender,
                       callType,
                       coinRate: rate,
                     },
@@ -505,7 +503,7 @@ export default function RandomCallScreen() {
                   <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>1,284</Text> online now
                 </Text>
                 <Text style={[styles.onlineBannerSub, { color: colors.mutedForeground }]}>
-                  {enforcedGender === "Any" ? "All genders" : enforcedGender + " hosts"}
+                  {matchGender === "Any" ? "All genders" : matchGender + " hosts"}
                   {" · "}
                   {preferLanguage === "Any Language" ? "Any language" : preferLanguage}
                   {" · "}
@@ -518,15 +516,33 @@ export default function RandomCallScreen() {
               </View>
             </LinearGradient>
 
-            {/* ── Cross-gender notice ── */}
-            {user?.gender && user.gender !== "other" && (
-              <View style={[styles.crossGenderBanner, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
-                <Feather name="users" size={14} color={colors.primary} />
-                <Text style={[styles.crossGenderText, { color: colors.primary }]}>
-                  {user.gender === "male" ? "You'll be matched with women only" : "You'll be matched with men only"}
-                </Text>
-              </View>
-            )}
+            {/* ── Gender preference picker ── */}
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Match Gender</Text>
+            <View style={styles.typeRow}>
+              {(["Any", "Male", "Female"] as PreferGender[]).map((g) => (
+                <Pressable
+                  key={g}
+                  onPress={() => setPreferGender(g)}
+                  style={[
+                    styles.typeBtn,
+                    {
+                      backgroundColor: preferGender === g ? colors.primary : colors.card,
+                      borderColor: preferGender === g ? "transparent" : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 22 }}>
+                    {g === "Any" ? "👥" : g === "Male" ? "👨" : "👩"}
+                  </Text>
+                  <Text style={[styles.typeName, { color: preferGender === g ? "#fff" : colors.foreground }]}>
+                    {g === "Any" ? "Any" : g === "Male" ? "Male" : "Female"}
+                  </Text>
+                  <Text style={[styles.typeSub, { color: preferGender === g ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>
+                    {g === "Any" ? "All hosts" : g + " hosts only"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
 
             {/* ── Call Type ── */}
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Call Type</Text>
@@ -710,7 +726,7 @@ export default function RandomCallScreen() {
               {searchPhases[searchPhase]}{searchDots}
             </Text>
             <Text style={[styles.searchSub, { color: colors.mutedForeground }]}>
-              👥 {enforcedGender === "Any" ? "All genders" : enforcedGender + " only"}
+              👥 {matchGender === "Any" ? "All genders" : matchGender + " only"}
               {" · "}
               {preferLanguage === "Any Language" ? "Any language" : preferLanguage}
               {" · "}

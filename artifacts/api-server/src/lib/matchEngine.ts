@@ -31,6 +31,7 @@ export interface MatchUser {
   city?: string;
   age?: number;
   bio?: string;
+  preferGender?: "Any" | "Male" | "Female";
   socketId: string;
   joinedAt: number;
 }
@@ -83,11 +84,12 @@ const CATEGORY_META: Record<CallCategory, { label: string; emoji: string }> = {
   travel:      { label: "Travel",      emoji: "✈️" },
 };
 
-/** Get opposite gender for cross-gender matching */
-function oppositeGender(g: CallGender): CallGender[] {
-  if (g === "male") return ["female"];
-  if (g === "female") return ["male"];
-  return ["male", "female", "other"];
+/** Get acceptable target genders based on user preference */
+function targetGenders(user: MatchUser): CallGender[] {
+  const pref = user.preferGender ?? "Any";
+  if (pref === "Any") return ["male", "female", "other"];
+  if (pref === "Male") return ["male"];
+  return ["female"];
 }
 
 /** Score how well two users match (higher = better) */
@@ -132,11 +134,15 @@ export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
 
 /** Find the best match for a user from the queue */
 export function findMatch(user: MatchUser): MatchUser | null {
-  const targets = oppositeGender(user.gender);
+  const targets = targetGenders(user);
 
   const candidates = waitingQueue.filter((u) => {
     if (u.id === user.id) return false;
+    // Check user's target gender preference
     if (!targets.includes(u.gender)) return false;
+    // Also check the candidate's preference — mutual respect
+    const candidateTargets = targetGenders(u);
+    if (!candidateTargets.includes(user.gender)) return false;
     // Language filter
     if (user.language !== "Any" && u.language !== "Any" && user.language !== u.language) return false;
     // Category filter

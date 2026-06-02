@@ -53,7 +53,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
     switch (msg.type) {
       case "join": {
-        const { userId, name, gender, language, category, avatar, city, age, bio } = msg.payload as {
+        const { userId, name, gender, language, category, avatar, city, age, bio, preferGender } = msg.payload as {
           userId: string;
           name: string;
           gender: CallGender;
@@ -63,6 +63,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           city?: string;
           age?: number;
           bio?: string;
+          preferGender?: "Any" | "Male" | "Female";
         };
 
         const match = joinQueue({
@@ -75,6 +76,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           city,
           age,
           bio,
+          preferGender,
           socketId,
         });
 
