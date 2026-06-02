@@ -58,6 +58,15 @@ const callHistory: Array<{
   endedBy: string;
 }> = [];
 
+// Anonymous alias counter for "Ridhi 1", "Ridhi 2", etc.
+let aliasCounter = 0;
+
+/** Generate anonymous alias for a caller */
+function makeAlias(): string {
+  aliasCounter = (aliasCounter + 1) % 10000;
+  return `Ridhi ${aliasCounter}`;
+}
+
 const CATEGORY_META: Record<CallCategory, { label: string; emoji: string }> = {
   any:         { label: "Any",         emoji: "🌟" },
   art:         { label: "Art",         emoji: "🎨" },
@@ -101,13 +110,20 @@ export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
   const existingIdx = waitingQueue.findIndex((u) => u.id === user.id);
   if (existingIdx >= 0) waitingQueue.splice(existingIdx, 1);
 
-  const entry: MatchUser = { ...user, joinedAt: Date.now() };
-  waitingQueue.push(entry);
+  // Anonymize: override name/avatar/city with alias
+  const anonymized: MatchUser = {
+    ...user,
+    name: user.name?.trim() ? user.name : makeAlias(),
+    avatar: undefined,
+    city: undefined,
+    joinedAt: Date.now(),
+  };
+  waitingQueue.push(anonymized);
 
   // Try to find a match immediately
-  const match = findMatch(entry);
+  const match = findMatch(anonymized);
   if (match) {
-    removeFromQueue(entry.id);
+    removeFromQueue(anonymized.id);
     removeFromQueue(match.id);
     return match;
   }

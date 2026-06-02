@@ -89,11 +89,15 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
             joinedAt: Date.now(),
           }, msg.payload.callType ?? "audio", msg.payload.coinRate ?? 10);
 
+          // Anonymize both peers: no real name/avatar/city exposed
+          const aliasA = match.name?.trim() ? match.name : `Ridhi ${Math.floor(Math.random() * 1000) + 1}`;
+          const aliasB = name?.trim() ? name : `Ridhi ${Math.floor(Math.random() * 1000) + 1}`;
+
           sendTo(match.socketId, {
             type: "matched",
             payload: {
               callId,
-              peer: { id: userId, name, gender, language, category, avatar, city },
+              peer: { id: userId, name: aliasB, gender, language, category, avatar: undefined, city: undefined },
               callType: call.type,
               coinRate: call.coinRate,
             },
@@ -103,7 +107,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
             type: "matched",
             payload: {
               callId,
-              peer: { id: match.id, name: match.name, gender: match.gender, language: match.language, category: match.category, avatar: match.avatar, city: match.city },
+              peer: { id: match.id, name: aliasA, gender: match.gender, language: match.language, category: match.category, avatar: undefined, city: undefined },
               callType: call.type,
               coinRate: call.coinRate,
             },

@@ -65,7 +65,7 @@ type CallCategory = typeof CALL_CATEGORIES[number]["id"];
 
 const CALL_ACTIVE_MODES: CallMode[] = ["preview", "confirming", "calling", "connected"];
 
-// ── Mock peer data for preview ─────────────────────────────────────────────
+// ── Anonymous peer data for random calls ───────────────────────────────────
 interface PeerInfo {
   id: string;
   name: string;
@@ -76,15 +76,16 @@ interface PeerInfo {
   city?: string;
 }
 
-const MOCK_PEERS: PeerInfo[] = [
-  { id: "p1", name: "Ananya Singh",   gender: "female", language: "Hindi",     category: "songs",     city: "Delhi" },
-  { id: "p2", name: "Priya Mehta",    gender: "female", language: "Marathi",   category: "dance",     city: "Mumbai" },
-  { id: "p3", name: "Kavya Reddy",    gender: "female", language: "Telugu",    category: "romantic",  city: "Hyderabad" },
-  { id: "p4", name: "Rohan Sharma",   gender: "male",   language: "Hindi",     category: "technology",city: "Delhi" },
-  { id: "p5", name: "Arjun Nair",     gender: "male",   language: "Malayalam", category: "art",       city: "Kochi" },
-  { id: "p6", name: "Simran Kaur",    gender: "female", language: "Punjabi",   category: "comedy",    city: "Amritsar" },
-  { id: "p7", name: "Vikram Mehta",   gender: "male",   language: "Hindi",     category: "gaming",    city: "Mumbai" },
-  { id: "p8", name: "Meera Pillai",   gender: "female", language: "Malayalam", category: "poetry",    city: "Kochi" },
+// Demo peers — never expose real names, cities, or avatars
+const DEMO_PEERS: PeerInfo[] = [
+  { id: "p1", name: "Ridhi 1", gender: "female", language: "Hindi",     category: "songs" },
+  { id: "p2", name: "Ridhi 2", gender: "female", language: "Marathi",   category: "dance" },
+  { id: "p3", name: "Ridhi 3", gender: "female", language: "Telugu",    category: "romantic" },
+  { id: "p4", name: "Ridhi 4", gender: "male",   language: "Hindi",     category: "technology" },
+  { id: "p5", name: "Ridhi 5", gender: "male",   language: "Malayalam", category: "art" },
+  { id: "p6", name: "Ridhi 6", gender: "female", language: "Punjabi",   category: "comedy" },
+  { id: "p7", name: "Ridhi 7", gender: "male",   language: "Hindi",     category: "gaming" },
+  { id: "p8", name: "Ridhi 8", gender: "female", language: "Malayalam", category: "poetry" },
 ];
 
 // ── Coin pricing ─────────────────────────────────────────────────────────────────────────
@@ -151,17 +152,18 @@ export default function RandomCallScreen() {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        // Send join message
+        // Send join message — NEVER expose real name, avatar, or city
         ws.send(JSON.stringify({
           type: "join",
           payload: {
             userId: user?.id ?? "anonymous",
-            name: user?.name ?? "Ridhi User",
+            // Anonymous alias: Ridhi 1, Ridhi 2, etc. Server assigns
+            name: "",
             gender: user?.gender ?? "other",
             language: preferLanguage === "Any Language" ? "Any" : preferLanguage,
             category: callCategory,
-            avatar: user?.avatar,
-            city: user?.city,
+            avatar: undefined,
+            city: undefined,
             callType,
             coinRate: rate,
           },
@@ -251,14 +253,14 @@ export default function RandomCallScreen() {
         // Fallback to mock matching for dev/demo
         if (mode === "searching") {
           setTimeout(() => {
-            const pool = MOCK_PEERS.filter((p) => {
+            const pool = DEMO_PEERS.filter((p) => {
               if (user?.gender === "male" && p.gender !== "female") return false;
               if (user?.gender === "female" && p.gender !== "male") return false;
               if (preferLanguage !== "Any Language" && p.language !== preferLanguage) return false;
               if (callCategory !== "any" && p.category !== callCategory) return false;
               return true;
             });
-            const poolToUse = pool.length > 0 ? pool : MOCK_PEERS;
+            const poolToUse = pool.length > 0 ? pool : DEMO_PEERS;
             const peer = poolToUse[Math.floor(Math.random() * poolToUse.length)];
             setMatched(peer);
             setCallId(`mock_${Date.now()}`);
@@ -275,12 +277,12 @@ export default function RandomCallScreen() {
       // Fallback to mock
       if (mode === "searching") {
         setTimeout(() => {
-          const pool = MOCK_PEERS.filter((p) => {
+          const pool = DEMO_PEERS.filter((p) => {
             if (user?.gender === "male" && p.gender !== "female") return false;
             if (user?.gender === "female" && p.gender !== "male") return false;
             return true;
           });
-          const poolToUse = pool.length > 0 ? pool : MOCK_PEERS;
+          const poolToUse = pool.length > 0 ? pool : DEMO_PEERS;
           const peer = poolToUse[Math.floor(Math.random() * poolToUse.length)];
           setMatched(peer);
           setCallId(`mock_${Date.now()}`);
@@ -754,7 +756,7 @@ export default function RandomCallScreen() {
                 <Feather name="check-circle" size={14} color="#2196F3" />
               </View>
               <Text style={[styles.previewSub, { color: colors.mutedForeground }]}>
-                {matched.city} · {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
+                {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
               </Text>
               <View style={[styles.costInfoBox, { backgroundColor: colors.muted }]}>
                 <Text style={[styles.costInfoText, { color: colors.mutedForeground }]}>
@@ -828,7 +830,7 @@ export default function RandomCallScreen() {
                 <Feather name="check-circle" size={15} color="#2196F3" />
               </View>
               <Text style={[styles.callSub, { color: colors.mutedForeground }]}>
-                {matched.city} · {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
+                {matched.language} · {CALL_CATEGORIES.find((c) => c.id === matched.category)?.emoji} {CALL_CATEGORIES.find((c) => c.id === matched.category)?.label}
               </Text>
               {mode === "calling" && (
                 <Text style={[styles.connectingText, { color: colors.mutedForeground }]}>Connecting…</Text>
