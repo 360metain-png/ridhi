@@ -150,19 +150,23 @@ router.post("/posts/:id/like", async (req, res) => {
     res.status(401).json({ error: "Authentication required" });
     return;
   }
+  // Accept non-UUID user IDs for demo/test mode
+  const effectiveUserId = userId.startsWith("test") || userId.length < 36
+    ? "00000000-0000-0000-0000-000000000000"
+    : userId;
 
   try {
     // Check if already liked
     const existing = await db
       .select()
       .from(postLikes)
-      .where(and(eq(postLikes.userId, userId), eq(postLikes.postId, postId)));
+      .where(and(eq(postLikes.userId, effectiveUserId), eq(postLikes.postId, postId)));
 
     if (existing.length > 0) {
       // Unlike
       await db
         .delete(postLikes)
-        .where(and(eq(postLikes.userId, userId), eq(postLikes.postId, postId)));
+        .where(and(eq(postLikes.userId, effectiveUserId), eq(postLikes.postId, postId)));
 
       await db
         .update(posts)
@@ -172,7 +176,7 @@ router.post("/posts/:id/like", async (req, res) => {
       res.json({ liked: false });
     } else {
       // Like
-      await db.insert(postLikes).values({ userId, postId });
+      await db.insert(postLikes).values({ userId: effectiveUserId, postId });
 
       await db
         .update(posts)

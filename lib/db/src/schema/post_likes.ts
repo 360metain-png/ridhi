@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, timestamp, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { users } from "./users";
@@ -9,9 +9,9 @@ export const postLikes = pgTable("post_likes", {
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   postId: uuid("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
-  likeUnique: table.userId && table.postId,
-}));
+}, (table) => [
+  unique("like_unique").on(table.userId, table.postId),
+]);
 
 export const insertPostLikeSchema = createInsertSchema(postLikes).omit({ id: true, createdAt: true });
 export type InsertPostLike = z.infer<typeof insertPostLikeSchema>;
