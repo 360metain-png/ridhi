@@ -138,8 +138,7 @@ export default function RandomCallScreen() {
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  // ── Gender preference ─────────────────────────────────────────────
-  // User chooses who they want to talk to (Any, Male, Female)
+  // ── Gender preference (internal only, not shown to user) ────────────────
   const matchGender = preferGender;
 
   // ── WebSocket ───────────────────────────────────────────────────────────────────────
@@ -502,8 +501,8 @@ export default function RandomCallScreen() {
                 <Text style={[styles.onlineBannerText, { color: colors.foreground }]}>
                   <Text style={{ color: colors.primary, fontFamily: "Inter_700Bold" }}>1,284</Text> online now
                 </Text>
-                <Text style={[styles.onlineBannerSub, { color: colors.mutedForeground }]}>
-                  {matchGender === "Any" ? "All genders" : matchGender + " hosts"}
+                    <Text style={[styles.onlineBannerSub, { color: colors.mutedForeground }]}>
+                  Random calls with anonymous users
                 </Text>
               </View>
               <View style={[styles.safetyBadge, { backgroundColor: colors.success + "20" }]}>
@@ -511,34 +510,6 @@ export default function RandomCallScreen() {
                 <Text style={[styles.safetyText, { color: colors.success }]}>Safe</Text>
               </View>
             </LinearGradient>
-
-            {/* ── Gender preference picker ── */}
-            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Match Gender</Text>
-            <View style={styles.typeRow}>
-              {(["Any", "Male", "Female"] as PreferGender[]).map((g) => (
-                <Pressable
-                  key={g}
-                  onPress={() => setPreferGender(g)}
-                  style={[
-                    styles.typeBtn,
-                    {
-                      backgroundColor: preferGender === g ? colors.primary : colors.card,
-                      borderColor: preferGender === g ? "transparent" : colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={{ fontSize: 22 }}>
-                    {g === "Any" ? "👥" : g === "Male" ? "👨" : "👩"}
-                  </Text>
-                  <Text style={[styles.typeName, { color: preferGender === g ? "#fff" : colors.foreground }]}>
-                    {g === "Any" ? "Any" : g === "Male" ? "Male" : "Female"}
-                  </Text>
-                  <Text style={[styles.typeSub, { color: preferGender === g ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>
-                    {g === "Any" ? "All hosts" : g + " hosts only"}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
 
             {/* ── Call Type ── */}
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Call Type</Text>
