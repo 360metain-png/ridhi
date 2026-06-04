@@ -432,9 +432,7 @@ export default function AudioRoomScreen() {
               <Text style={styles.liveChipText}>LIVE</Text>
             </View>
           </View>
-          <Pressable style={styles.backCircle}>
-            <Feather name="share-2" size={18} color="#fff" />
-          </Pressable>
+          <View style={styles.backCircle} />
         </View>
 
         {/* room info */}

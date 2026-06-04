@@ -440,10 +440,10 @@ export default function ChatroomDetailScreen() {
               style={[styles.infoActionBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}
               onPress={() => setShowInfo(false)}
               accessibilityRole="button"
-              accessibilityLabel="Share room"
+              accessibilityLabel="Close"
             >
-              <Feather name="share" size={16} color={colors.foreground} />
-              <Text style={[styles.infoActionText, { color: colors.foreground }]}>Share</Text>
+              <Feather name="x" size={16} color={colors.foreground} />
+              <Text style={[styles.infoActionText, { color: colors.foreground }]}>Close</Text>
             </Pressable>
           </View>
         </View>
