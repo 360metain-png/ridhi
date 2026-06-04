@@ -123,8 +123,14 @@ export default function CreatePostScreen() {
   const [aiHashtags, setAiHashtags] = useState<string[]>([]);
   const [hashtagTopic, setHashtagTopic] = useState<string>("");
 
+  // ── Scheduling state ──
+  const [isScheduled, setIsScheduled] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState<string>("");
+  const [showSchedulePicker, setShowSchedulePicker] = useState(false);
+
   const captionPanelAnim = useRef(new Animated.Value(0)).current;
   const hashtagPanelAnim = useRef(new Animated.Value(0)).current;
+  const schedulePanelAnim = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -265,16 +271,69 @@ export default function CreatePostScreen() {
     }
   };
 
+  const handleSchedule = () => {
+    setShowSchedulePicker(true);
+    Animated.spring(schedulePanelAnim, { toValue: 1, useNativeDriver: true, tension: 120, friction: 8 }).start();
+  };
+
+  const closeSchedulePicker = () => {
+    Animated.timing(schedulePanelAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setShowSchedulePicker(false));
+  };
+
+  const pickScheduleTime = (hoursFromNow: number) => {
+    const d = new Date(Date.now() + hoursFromNow * 3600 * 1000);
+    setScheduledAt(d.toISOString());
+    setIsScheduled(true);
+    closeSchedulePicker();
+  };
+
+  const executeSchedule = async () => {
+    if (!scheduledAt) return;
+    setLoading(true);
+    try {
+      const scheduledItem = {
+        id: `sch_${Date.now()}`,
+        type: selectedType as any,
+        title: text.trim().slice(0, 50),
+        content: text.trim(),
+        mediaUri: mediaUri ?? undefined,
+        hashtags,
+        scheduledAt,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        audience,
+        location: location ?? undefined,
+        feeling: feeling ?? undefined,
+        taggedPeople,
+        pollOptions: selectedType === "poll" ? ["Option 1", "Option 2"] : undefined,
+        duetWith: params?.duetWith ? { reelId: params.duetWith, reelTitle: params.duetTitle, reelUser: params.duetUser } : undefined,
+        stitchWith: params?.stitchWith ? { reelId: params.stitchWith, reelTitle: params.stitchTitle, reelUser: params.stitchUser, trim: params.stitchTrim } : undefined,
+        soundId: params?.soundId ?? undefined,
+        soundTitle: params?.soundTitle ?? undefined,
+        soundArtist: params?.soundArtist ?? undefined,
+      };
+      // Persist to AsyncStorage
+      const existing = JSON.parse((await import("@react-native-async-storage/async-storage")).default.getItem("ridhi_scheduled") ?? "[]");
+      const updated = [scheduledItem, ...existing];
+      await (await import("@react-native-async-storage/async-storage")).default.setItem("ridhi_scheduled", JSON.stringify(updated));
+      Alert.alert("Scheduled! ⏰", `Your ${selectedType} is set to go live at ${new Date(scheduledAt).toLocaleString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true, month: "short", day: "numeric" })}.`, [{ text: "OK", onPress: () => router.back() }]);
+    } catch {
+      Alert.alert("Error", "Could not schedule. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
           <Feather name="x" size={24} color={colors.foreground} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Create Post</Text>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>{isScheduled ? "Schedule" : "Create"} Post</Text>
         <GradientButton
-          label="Post"
-          onPress={handlePost}
+          label={isScheduled ? "Schedule" : "Post"}
+          onPress={isScheduled ? executeSchedule : handlePost}
           loading={loading}
           disabled={!text.trim() && hashtags.length === 0}
           small
@@ -462,6 +521,19 @@ export default function CreatePostScreen() {
           </View>
         )}
 
+        {/* Schedule indicator */}
+        {isScheduled && scheduledAt && (
+          <View style={[styles.scheduleIndicator, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" }]}>
+            <Feather name="clock" size={14} color={colors.primary} />
+            <Text style={[styles.scheduleText, { color: colors.primary }]}>
+              Scheduled for {new Date(scheduledAt).toLocaleString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true, month: "short", day: "numeric" })}
+            </Text>
+            <Pressable onPress={() => { setIsScheduled(false); setScheduledAt(""); }}>
+              <Feather name="x" size={14} color={colors.primary} />
+            </Pressable>
+          </View>
+        )}
+
         <View style={[styles.toolbarRow, { borderTopColor: colors.border }]}>
           {[
             { icon: "image", label: "Photo", active: !!mediaUri && (selectedType === "photo" || selectedType === "story"), onPress: () => pickMedia("photo") },
@@ -469,6 +541,7 @@ export default function CreatePostScreen() {
             { icon: "map-pin", label: location || "Location", active: !!location, onPress: handleLocationTag },
             { icon: "tag", label: taggedPeople.length > 0 ? `${taggedPeople.length} tagged` : "Tag", active: taggedPeople.length > 0, onPress: handleTagPeople },
             { icon: "smile", label: feeling ? feeling.split(" ")[0] : "Feeling", active: !!feeling, onPress: handleFeelingTag },
+            { icon: "calendar", label: isScheduled ? "Scheduled" : "Schedule", active: isScheduled, onPress: handleSchedule },
           ].map((tool) => (
             <Pressable
               key={tool.icon}
@@ -609,6 +682,54 @@ export default function CreatePostScreen() {
           )}
         </Animated.View>
       )}
+
+      {/* Schedule picker panel */}
+      {showSchedulePicker && (
+        <Animated.View
+          style={[styles.bottomPanel, {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+            transform: [{ translateY: schedulePanelAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }) }],
+          }]}
+        >
+          <View style={styles.panelHandle} />
+          <View style={styles.panelHeader}>
+            <LinearGradient colors={[colors.primary, "#FF6B9D"]} style={styles.panelIcon}>
+              <Feather name="calendar" size={14} color="#fff" />
+            </LinearGradient>
+            <Text style={[styles.panelTitle, { color: colors.foreground }]}>Schedule Publication</Text>
+            <Pressable onPress={closeSchedulePicker}>
+              <Feather name="x" size={20} color={colors.mutedForeground} />
+            </Pressable>
+          </View>
+
+          <Text style={[styles.scheduleNote, { color: colors.mutedForeground }]}>
+            Pick a time for your {selectedType} to go live automatically.
+          </Text>
+
+          <View style={styles.scheduleGrid}>
+            {[
+              { label: "30 min", hours: 0.5 },
+              { label: "1 hour", hours: 1 },
+              { label: "3 hours", hours: 3 },
+              { label: "6 hours", hours: 6 },
+              { label: "12 hours", hours: 12 },
+              { label: "Tomorrow", hours: 24 },
+              { label: "2 days", hours: 48 },
+              { label: "1 week", hours: 168 },
+            ].map((slot) => (
+              <Pressable
+                key={slot.label}
+                onPress={() => pickScheduleTime(slot.hours)}
+                style={[styles.scheduleSlot, { backgroundColor: colors.muted, borderColor: colors.border }]}
+              >
+                <Feather name="clock" size={16} color={colors.primary} />
+                <Text style={[styles.scheduleSlotLabel, { color: colors.foreground }]}>{slot.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -696,4 +817,14 @@ const styles = StyleSheet.create({
   metaTagText: { fontSize: 12, fontFamily: "Inter_500Medium" },
   soundBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
   soundText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
+
+  // Schedule indicator
+  scheduleIndicator: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
+  scheduleText: { fontSize: 13, fontFamily: "Inter_600SemiBold", flex: 1 },
+
+  // Schedule picker
+  scheduleNote: { fontSize: 13, fontFamily: "Inter_400Regular", paddingHorizontal: 16, marginBottom: 12, textAlign: "center" },
+  scheduleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingBottom: 20, justifyContent: "center" },
+  scheduleSlot: { alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, borderWidth: 1, minWidth: 80 },
+  scheduleSlotLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
 });

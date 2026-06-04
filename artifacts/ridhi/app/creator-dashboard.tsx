@@ -312,6 +312,7 @@ export default function CreatorDashboardScreen() {
               { icon: "upload-cloud", label: "Upload Studio",  color: "#E91E8C", route: "/create-post" },
               { icon: "radio",        label: "Go Live",         color: "#FF3B30", route: "/live-stream" },
               { icon: "bar-chart-2",  label: "Analytics",       color: "#4A90E2", route: "/creator-dashboard" },
+              { icon: "calendar",     label: "Scheduled",     color: "#34C759", route: "/scheduled-content" },
               { icon: "users",        label: "Fan Club",         color: "#7B2FBE", route: "/communities" },
               { icon: "user-plus",    label: "Lead Forms",       color: "#2196F3", route: "/lead-form-builder" },
               { icon: "trending-up",  label: "Boost & Ads",      color: "#FF9500", route: "/subscription" },
