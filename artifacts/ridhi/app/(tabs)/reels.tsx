@@ -5,6 +5,7 @@ import {
   FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -21,6 +22,7 @@ import { Avatar } from "@/components/Avatar";
 import { WatermarkBadge } from "@/components/WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
+import { VideoFilter, VIDEO_FILTERS, type FilterDef } from "@/components/VideoFilter";
 
 const REELS = [
   {
@@ -170,6 +172,8 @@ function ReelItem({
   const insets  = useSafeAreaInsets();
   const [liked, setLiked]           = useState(reel.isLiked);
   const [likeCount, setLikeCount]   = useState(reel.likes);
+  const [currentFilter, setFilter] = useState<string>("none");
+  const [showFilterBar, setShowFilterBar] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
 
   // ── Content entry animations ─────────────────────────────────────────────
@@ -237,12 +241,13 @@ function ReelItem({
 
   return (
     <View style={{ width: screenWidth, height: screenHeight, overflow: "hidden" }}>
-      <LinearGradient
-        colors={reel.gradient}
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
+      <VideoFilter filterId={currentFilter} style={StyleSheet.absoluteFill}>
+        <LinearGradient
+          colors={reel.gradient}
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
 
       {/* Centre emoji — pops in when reel becomes active */}
       <View style={styles.reelOverlay}>
@@ -357,14 +362,49 @@ function ReelItem({
             <Text style={{ fontSize: 22 }}>🪟</Text>
             <Text style={styles.reelActionCount}>Stitch</Text>
           </Pressable>
+          <Pressable
+            style={styles.reelAction}
+            onPress={() => { setShowFilterBar((s) => !s); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel="Apply filter"
+          >
+            <Text style={{ fontSize: 22 }}>🎨</Text>
+            <Text style={styles.reelActionCount}>Filter</Text>
+          </Pressable>
           <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="More options">
             <Feather name="more-vertical" size={28} color="#fff" />
           </Pressable>
         </Animated.View>
       </LinearGradient>
 
+      {/* Filter bar */}
+      {showFilterBar && (
+        <View style={[styles.filterBar, { bottom: bottomPad + 160 }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBarInner}>
+            {VIDEO_FILTERS.map((f) => {
+              const active = currentFilter === f.id;
+              return (
+                <Pressable
+                  key={f.id}
+                  onPress={() => { setFilter(f.id); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+                  style={[
+                    styles.filterChip,
+                    active && { backgroundColor: "rgba(255,255,255,0.28)", borderColor: "#fff" },
+                  ]}
+                >
+                  <Text style={styles.filterEmoji}>{f.emoji}</Text>
+                  <Text style={[styles.filterLabel, active && { color: "#fff", fontWeight: "700" }]}>{f.name}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
+
       {/* Stacked swipe-up chevrons — only on first reel */}
       {isFirst && isActive && <SwipeChevrons visible={isActive} />}
+      </VideoFilter>
     </View>
   );
 }
@@ -560,5 +600,38 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     marginTop: 4,
     textTransform: "uppercase",
+  },
+
+  // Filter bar
+  filterBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 25,
+    paddingVertical: 8,
+  },
+  filterBarInner: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+  },
+  filterChip: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    minWidth: 56,
+    gap: 2,
+  },
+  filterEmoji: { fontSize: 20 },
+  filterLabel: {
+    color: "rgba(255,255,255,0.85)",
+    fontSize: 10,
+    fontFamily: "Inter_500Medium",
   },
 });
