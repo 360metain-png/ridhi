@@ -12,7 +12,7 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,6 +28,8 @@ const POST_TYPES = [
   { id: "photo", icon: "image", label: "Photo", desc: "Share a photo from your gallery" },
   { id: "video", icon: "video", label: "Video", desc: "Share a video up to 5 minutes" },
   { id: "reel", icon: "play", label: "Reel", desc: "Create a short vertical video" },
+  { id: "duet", icon: "users", label: "Duet", desc: "Side-by-side with another video" },
+  { id: "stitch", icon: "git-merge", label: "Stitch", desc: "React to a part of another video" },
   { id: "story", icon: "circle", label: "Story", desc: "Visible for 24 hours" },
   { id: "audio", icon: "mic", label: "Audio", desc: "Share a voice note or audio clip" },
   { id: "gif", icon: "film", label: "GIF", desc: "Share an animated GIF" },
@@ -98,7 +100,9 @@ export default function CreatePostScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
 
-  const [selectedType, setSelectedType] = useState<string>("text");
+  const params = useLocalSearchParams<{ soundId?: string; soundTitle?: string; soundArtist?: string; duetWith?: string; duetTitle?: string; duetUser?: string; stitchWith?: string; stitchTitle?: string; stitchUser?: string; stitchTrim?: string; type?: string }>();
+
+  const [selectedType, setSelectedType] = useState<string>(params?.type ?? "text");
   const [text, setText] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [audience, setAudience] = useState<"public" | "followers" | "private">("public");
@@ -225,18 +229,29 @@ export default function CreatePostScreen() {
   const handlePost = async () => {
     setLoading(true);
     try {
+      const body: any = {
+        content: text.trim(),
+        images: mediaUri ? [mediaUri] : [],
+        city: user?.city ?? null,
+        language: user?.language ?? null,
+        type: selectedType,
+      };
+      if (selectedType === "duet" || selectedType === "stitch") {
+        body.duetWith = params?.duetWith ? { reelId: params.duetWith, reelTitle: params.duetTitle, reelUser: params.duetUser } : undefined;
+        body.stitchWith = params?.stitchWith ? { reelId: params.stitchWith, reelTitle: params.stitchTitle, reelUser: params.stitchUser, trim: params.stitchTrim } : undefined;
+      }
+      if (params?.soundId) {
+        body.soundId = params.soundId;
+        body.soundTitle = params.soundTitle;
+        body.soundArtist = params.soundArtist;
+      }
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-user-id": user?.id ?? "",
         },
-        body: JSON.stringify({
-          content: text.trim(),
-          images: mediaUri ? [mediaUri] : [],
-          city: user?.city ?? null,
-          language: user?.language ?? null,
-        }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
@@ -300,6 +315,19 @@ export default function CreatePostScreen() {
           </View>
         </View>
 
+        {/* Selected sound indicator */}
+        {params?.soundTitle && (
+          <View style={[styles.soundBadge, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}>
+            <Feather name="music" size={14} color={colors.primary} />
+            <Text style={[styles.soundText, { color: colors.primary }]} numberOfLines={1}>
+              🎵 {params.soundTitle} • {params.soundArtist}
+            </Text>
+            <Pressable onPress={() => router.setParams({ soundId: undefined, soundTitle: undefined, soundArtist: undefined })}>
+              <Feather name="x" size={14} color={colors.primary} />
+            </Pressable>
+          </View>
+        )}
+
         <TextInput
           style={[styles.textInput, { color: colors.foreground }]}
           placeholder={selectedType === "text" ? "What's on your mind?" : selectedType === "poll" ? "Ask a question..." : "Write a caption..."}
@@ -340,6 +368,16 @@ export default function CreatePostScreen() {
               <Feather name="cpu" size={11} color="#fff" />
             </View>
             <Text style={[styles.aiChipText, { color: "#3B82F6" }]}>AI Assistant</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push("/music-library")}
+            style={[styles.aiChip, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "35" }]}
+          >
+            <View style={[styles.aiChipIcon, { backgroundColor: colors.primary }]}>
+              <Feather name="music" size={11} color="#fff" />
+            </View>
+            <Text style={[styles.aiChipText, { color: colors.primary }]}>Music Library</Text>
           </Pressable>
         </View>
 
@@ -656,4 +694,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   metaTagText: { fontSize: 12, fontFamily: "Inter_500Medium" },
+  soundBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1, marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
+  soundText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
 });

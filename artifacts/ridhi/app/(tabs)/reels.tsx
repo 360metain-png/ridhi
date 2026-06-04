@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { WatermarkBadge } from "@/components/WatermarkBadge";
@@ -335,6 +336,26 @@ function ReelItem({
             <Text style={[styles.reelActionCount, saved && { color: "#34C759" }]}>
               {saving ? "…" : saved ? "Saved" : "Save"}
             </Text>
+          </Pressable>
+          <Pressable
+            style={styles.reelAction}
+            onPress={() => router.push({ pathname: "/duet-record", params: { reelId: reel.id, reelTitle: reel.caption, reelUser: reel.userName } })}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel="Duet with this reel"
+          >
+            <Text style={{ fontSize: 22 }}>🎙️</Text>
+            <Text style={styles.reelActionCount}>Duet</Text>
+          </Pressable>
+          <Pressable
+            style={styles.reelAction}
+            onPress={() => router.push({ pathname: "/stitch-record", params: { reelId: reel.id, reelTitle: reel.caption, reelUser: reel.userName } })}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel="Stitch this reel"
+          >
+            <Text style={{ fontSize: 22 }}>🪟</Text>
+            <Text style={styles.reelActionCount}>Stitch</Text>
           </Pressable>
           <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="More options">
             <Feather name="more-vertical" size={28} color="#fff" />

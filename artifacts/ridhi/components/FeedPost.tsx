@@ -31,6 +31,12 @@ export interface Post {
   hashtags?: string[];
   isBoosted?: boolean;
   boostViews?: number;
+  // Collaboration & sound
+  duetWith?: { reelId: string; reelTitle: string; reelUser: string };
+  stitchWith?: { reelId: string; reelTitle: string; reelUser: string; trim: string };
+  soundId?: string;
+  soundTitle?: string;
+  soundArtist?: string;
 }
 
 interface FeedPostProps {
@@ -208,6 +214,26 @@ export const FeedPost = React.memo(function FeedPost({
           <Text style={[styles.content, { color: colors.foreground }]}>{post.content}</Text>
         ) : null}
 
+        {/* Collaboration badges */}
+        {post.duetWith && (
+          <View style={[styles.collabBadge, { backgroundColor: colors.primary + "12" }]}>
+            <Text style={{ fontSize: 12 }}>🎙️</Text>
+            <Text style={[styles.collabText, { color: colors.primary }]}>Duet with {post.duetWith.reelUser}</Text>
+          </View>
+        )}
+        {post.stitchWith && (
+          <View style={[styles.collabBadge, { backgroundColor: colors.secondary + "12" }]}>
+            <Text style={{ fontSize: 12 }}>🪟</Text>
+            <Text style={[styles.collabText, { color: colors.secondary }]}>Stitch with {post.stitchWith.reelUser}</Text>
+          </View>
+        )}
+        {post.soundTitle && (
+          <View style={[styles.collabBadge, { backgroundColor: colors.primary + "12" }]}>
+            <Text style={{ fontSize: 12 }}>🎵</Text>
+            <Text style={[styles.collabText, { color: colors.primary }]} numberOfLines={1}>{post.soundTitle} • {post.soundArtist}</Text>
+          </View>
+        )}
+
         {post.hashtags && post.hashtags.length > 0 && (
           <View style={styles.hashtagRow}>
             {post.hashtags.slice(0, 3).map((tag) => (
@@ -312,4 +338,6 @@ const styles = StyleSheet.create({
   likeActive:    { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
   likeInactive:  { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
   actionCount:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  collabBadge:   { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginHorizontal: 14, marginBottom: 8, alignSelf: "flex-start" },
+  collabText:    { fontSize: 12, fontFamily: "Inter_500Medium" },
 });
