@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MISSIONS, DAILY_REWARD_STREAK, Mission } from "@/data/coinEconomy";
 import { PrivateHead } from "@/components/PrivateHead";
 
-const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 const { width } = Dimensions.get("window");
 
 const TABS = [

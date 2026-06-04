@@ -350,18 +350,18 @@ export default function PodcastRoomScreen() {
             <Text style={styles.fanPromoSub}>Exclusive rooms · Fan badge · Priority speaking</Text>
           </View>
           <View style={styles.fanPromoPlans}>
-            <View style={[styles.fanPlanChip, { borderColor: "#9E9E9E" }]}>
+            <Pressable style={[styles.fanPlanChip, { borderColor: "#9E9E9E" }]} onPress={() => router.push("/wallet")}>
               <Text style={styles.fanPlanText}>Basic</Text>
-              <CoinAmount amount={99} size={13} fontSize={12} fontFamily="Inter_700Bold" />
-            </View>
-            <View style={[styles.fanPlanChip, { borderColor: "#FFB800" }]}>
+              <CoinAmount amount={99} size={13} fontSize={12} fontFamily="Inter_700Bold" color="#FFB800" />
+            </Pressable>
+            <Pressable style={[styles.fanPlanChip, { borderColor: "#FFB800" }]} onPress={() => router.push("/wallet")}>
               <Text style={styles.fanPlanText}>Premium</Text>
-              <CoinAmount amount={299} size={13} fontSize={12} fontFamily="Inter_700Bold" />
-            </View>
-            <View style={[styles.fanPlanChip, { borderColor: "#E91E8C" }]}>
+              <CoinAmount amount={299} size={13} fontSize={12} fontFamily="Inter_700Bold" color="#FFB800" />
+            </Pressable>
+            <Pressable style={[styles.fanPlanChip, { borderColor: "#E91E8C" }]} onPress={() => router.push("/wallet")}>
               <Text style={styles.fanPlanText}>VIP Fan</Text>
-              <CoinAmount amount={999} size={13} fontSize={12} fontFamily="Inter_700Bold" />
-            </View>
+              <CoinAmount amount={999} size={13} fontSize={12} fontFamily="Inter_700Bold" color="#FFB800" />
+            </Pressable>
           </View>
         </LinearGradient>
       </ScrollView>

@@ -20,7 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PrivateHead } from "@/components/PrivateHead";
 import { GIFTS, GIFT_CATEGORIES, Gift } from "@/data/coinEconomy";
 
-const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 const { width } = Dimensions.get("window");
 
 const RECENT_RECIPIENTS = [

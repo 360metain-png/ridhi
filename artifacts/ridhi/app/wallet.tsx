@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 
-const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

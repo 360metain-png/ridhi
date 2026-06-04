@@ -21,7 +21,7 @@ import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/utils/api";
 
-const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const INR_PER_COIN = 0.5;
 const PLATFORM_FEE_PCT = 30;

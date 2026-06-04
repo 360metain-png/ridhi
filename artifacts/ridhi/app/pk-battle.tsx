@@ -22,7 +22,7 @@ import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { PrivateHead } from "@/components/PrivateHead";
 
-const COIN_IMAGE = require("@/assets/images/ridhi_coin.png");
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 
 const { width } = Dimensions.get("window");
