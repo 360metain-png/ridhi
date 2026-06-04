@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 
-const LOGO = require("@/assets/images/ridhi_logo.png");
+const LOGO = require("../assets/images/ridhi_logo.png");
 
 interface Props {
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";

@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
 const { width } = Dimensions.get("window");
-const LOGO = require("@/assets/images/ridhi_logo.png");
+const LOGO = require("../assets/images/ridhi_logo.png");
 
 const FEATURES = [
   {
