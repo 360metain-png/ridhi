@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
+  Alert,
   FlatList,
   Modal,
   Platform,
@@ -16,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
+import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
 import { CHATROOMS, getDefaultMessages, type RoomMessage } from "@/data/chatrooms";
 import { Avatar } from "@/components/Avatar";
@@ -150,6 +152,13 @@ export default function ChatroomDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
+
+  // Block screenshots during active chatroom session
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    ScreenCapture.preventScreenCaptureAsync("ridhi-chatroom");
+    return () => { ScreenCapture.allowScreenCaptureAsync("ridhi-chatroom"); };
+  }, []);
 
   const room = CHATROOMS.find((r) => r.id === id);
   const [messages, setMessages] = useState<RoomMessage[]>(getDefaultMessages(id ?? ""));
