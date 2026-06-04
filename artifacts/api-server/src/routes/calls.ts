@@ -53,7 +53,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
     switch (msg.type) {
       case "join": {
-        const { userId, name, gender, language, category, avatar, city, age, bio, preferGender } = msg.payload as {
+        const { userId, name, gender, language, category, avatar, city, age, bio, preferGender, acceptAudio, acceptVideo, callType } = msg.payload as {
           userId: string;
           name: string;
           gender: CallGender;
@@ -64,6 +64,9 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           age?: number;
           bio?: string;
           preferGender?: "Any" | "Male" | "Female";
+          acceptAudio?: boolean;
+          acceptVideo?: boolean;
+          callType?: "audio" | "video";
         };
 
         const match = joinQueue({
@@ -77,8 +80,10 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           age,
           bio,
           preferGender,
+          acceptAudio,
+          acceptVideo,
           socketId,
-        });
+        }, callType ?? "audio");
 
         if (match) {
           // We found a match! Notify both users

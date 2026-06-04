@@ -73,7 +73,7 @@ function SectionHeader({ title }: { title: string }) {
 export default function SettingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, logout, deleteAccount, updateProfile } = useAuth();
   const {
     theme, setTheme, language,
     notificationsEnabled, setNotificationsEnabled,
@@ -221,6 +221,8 @@ export default function SettingsScreen() {
         <SectionHeader title="Random Calls" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="phone" label="Call Persona" subtitle="Fake name, city, bio for random calls" onPress={() => router.push("/call-persona" as any)} />
+          <SettingRow icon="mic" label="Accept Audio Calls" subtitle="Users can call you via audio" value={user?.hostCallPrefs?.acceptAudio ?? true} onToggle={(v) => updateProfile({ hostCallPrefs: { ...(user?.hostCallPrefs ?? { acceptAudio: true, acceptVideo: true }), acceptAudio: v } })} />
+          <SettingRow icon="video" label="Accept Video Calls" subtitle="Users can call you with video" value={user?.hostCallPrefs?.acceptVideo ?? true} onToggle={(v) => updateProfile({ hostCallPrefs: { ...(user?.hostCallPrefs ?? { acceptAudio: true, acceptVideo: true }), acceptVideo: v } })} />
           <SettingRow icon="user-x" label="Call History" subtitle="View & report past calls" onPress={() => Alert.alert("Call History", "Feature coming soon. Reports are always logged to admin.", [{ text: "OK" }])} />
         </View>
 

@@ -49,6 +49,11 @@ export interface UserProfile {
   agentRegisteredAt?: string;
   // Random Call Fake Profile
   callPersona?: CallPersona;
+  // Host call preferences (for Random Calls)
+  hostCallPrefs?: {
+    acceptAudio: boolean;
+    acceptVideo: boolean;
+  };
   // KYC / Identity verification
   kycStatus?: "unverified" | "pending" | "verified" | "rejected";
   aadhaarVerified?: boolean;

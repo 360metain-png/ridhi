@@ -32,6 +32,8 @@ export interface MatchUser {
   age?: number;
   bio?: string;
   preferGender?: "Any" | "Male" | "Female";
+  acceptAudio?: boolean;
+  acceptVideo?: boolean;
   socketId: string;
   joinedAt: number;
 }
@@ -108,7 +110,7 @@ function matchScore(a: MatchUser, b: MatchUser): number {
 }
 
 /** Add user to waiting queue and try to find a match */
-export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
+export function joinQueue(user: Omit<MatchUser, "joinedAt">, callType: "audio" | "video" = "audio"): MatchUser | null {
   // Remove if already in queue
   const existingIdx = waitingQueue.findIndex((u) => u.id === user.id);
   if (existingIdx >= 0) waitingQueue.splice(existingIdx, 1);
@@ -122,7 +124,7 @@ export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
   waitingQueue.push(anonymized);
 
   // Try to find a match immediately
-  const match = findMatch(anonymized);
+  const match = findMatch(anonymized, callType);
   if (match) {
     removeFromQueue(anonymized.id);
     removeFromQueue(match.id);
@@ -132,12 +134,15 @@ export function joinQueue(user: Omit<MatchUser, "joinedAt">): MatchUser | null {
 }
 
 /** Find the best match for a user from the queue */
-export function findMatch(user: MatchUser): MatchUser | null {
+export function findMatch(user: MatchUser, callType: "audio" | "video" = "audio"): MatchUser | null {
   const targets = oppositeGender(user.gender);
 
   const candidates = waitingQueue.filter((u) => {
     if (u.id === user.id) return false;
     if (!targets.includes(u.gender)) return false;
+    // Host call type preferences — skip host if they don't accept this call type
+    if (callType === "audio" && u.acceptAudio === false) return false;
+    if (callType === "video" && u.acceptVideo === false) return false;
     // Language filter
     if (user.language !== "Any" && u.language !== "Any" && user.language !== u.language) return false;
     // Category filter
