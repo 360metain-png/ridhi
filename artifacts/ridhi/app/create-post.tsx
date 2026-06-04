@@ -16,6 +16,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -313,9 +314,10 @@ export default function CreatePostScreen() {
         soundArtist: params?.soundArtist ?? undefined,
       };
       // Persist to AsyncStorage
-      const existing = JSON.parse((await import("@react-native-async-storage/async-storage")).default.getItem("ridhi_scheduled") ?? "[]");
+      const raw = await AsyncStorage.getItem("ridhi_scheduled");
+      const existing = raw ? JSON.parse(raw) : [];
       const updated = [scheduledItem, ...existing];
-      await (await import("@react-native-async-storage/async-storage")).default.setItem("ridhi_scheduled", JSON.stringify(updated));
+      await AsyncStorage.setItem("ridhi_scheduled", JSON.stringify(updated));
       Alert.alert("Scheduled! ⏰", `Your ${selectedType} is set to go live at ${new Date(scheduledAt).toLocaleString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true, month: "short", day: "numeric" })}.`, [{ text: "OK", onPress: () => router.back() }]);
     } catch {
       Alert.alert("Error", "Could not schedule. Please try again.");

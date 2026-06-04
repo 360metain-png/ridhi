@@ -682,9 +682,19 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* ── ACCOUNT / LOGOUT ─────────────────────────────────────────────── */}
+      {/* ── ACCOUNT / SCHEDULED / LOGOUT ─────────────────────────────────── */}
       <View style={[styles.section, { marginTop: 4 }]}>
         <View style={[styles.menuGroup, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => router.push("/scheduled-content")}
+            style={[styles.menuRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }]}
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.primary + "18" }]}>
+              <Feather name="calendar" size={17} color={colors.primary} />
+            </View>
+            <Text style={[styles.menuLabel, { color: colors.foreground }]}>Scheduled Content</Text>
+            <Feather name="chevron-right" size={15} color={colors.mutedForeground} />
+          </Pressable>
           <Pressable
             onPress={() => router.push("/settings")}
             style={[styles.menuRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }]}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   FlatList,
   Platform,
@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColors } from "@/hooks/useColors";
 import { PrivateHead } from "@/components/PrivateHead";
 import {
@@ -53,6 +54,16 @@ export default function ScheduledContentScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<"all" | ScheduledStatus>("all");
   const [items, setItems] = useState<ScheduledContent[]>(SCHEDULED_CONTENT_MOCK);
+
+  // Load from AsyncStorage on mount
+  useEffect(() => {
+    AsyncStorage.getItem("ridhi_scheduled").then((raw) => {
+      if (raw) {
+        const stored = JSON.parse(raw) as ScheduledContent[];
+        setItems((prev) => [...stored, ...prev.filter((p) => !stored.find((s) => s.id === p.id))]);
+      }
+    });
+  }, []);
 
   const filtered = items.filter((i) => (activeTab === "all" ? true : i.status === activeTab));
 
@@ -146,7 +157,7 @@ export default function ScheduledContentScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <PrivateHead title="Scheduled Content" />
+      <PrivateHead />
 
       {/* Filter tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
