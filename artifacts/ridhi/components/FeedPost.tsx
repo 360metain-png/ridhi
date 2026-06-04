@@ -8,6 +8,7 @@ import { Avatar } from "./Avatar";
 import { WatermarkBadge } from "./WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
 import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
+import { ShareWithWatermark } from "./ShareWithWatermark";
 
 export interface Post {
   id: string;
@@ -128,6 +129,7 @@ export const FeedPost = React.memo(function FeedPost({
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showBurst, setShowBurst] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardSlide = useRef(new Animated.Value(16)).current;
@@ -286,7 +288,7 @@ export const FeedPost = React.memo(function FeedPost({
             <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>{post.comments}</Text>
           </Pressable>
 
-          <Pressable style={styles.action} accessibilityRole="button">
+          <Pressable style={styles.action} onPress={() => setShowShare(true)} accessibilityRole="button">
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="send" size={14} color={colors.mutedForeground} />
             </View>
@@ -307,6 +309,18 @@ export const FeedPost = React.memo(function FeedPost({
           </Pressable>
         </View>
       </View>
+
+      {/* Share with Watermark */}
+      <ShareWithWatermark
+        visible={showShare}
+        onClose={() => setShowShare(false)}
+        data={{
+          title: post.content ?? "Check this out on Ridhi!",
+          message: `${post.content ?? "Awesome post"} by ${post.userName} from ${post.userCity ?? "India"} 🎨`,
+          url: `https://ridhi.app/post/${post.id}`,
+        }}
+        type={post.type === "video" ? "video" : "post"}
+      />
     </Animated.View>
   );
 });

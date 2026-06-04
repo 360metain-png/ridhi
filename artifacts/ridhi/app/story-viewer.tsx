@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
+import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 
 const { width, height } = Dimensions.get("window");
 
@@ -54,6 +55,7 @@ export default function StoryViewerScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reply, setReply] = useState("");
+  const [showShare, setShowShare] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
   const animRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -180,7 +182,7 @@ export default function StoryViewerScreen() {
               <Pressable style={styles.replyActionBtn}>
                 <Feather name="heart" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
-              <Pressable style={styles.replyActionBtn}>
+              <Pressable style={styles.replyActionBtn} onPress={() => setShowShare(true)}>
                 <Feather name="share" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
             </View>
@@ -188,6 +190,17 @@ export default function StoryViewerScreen() {
         </View>
       </LinearGradient>
     </View>
+
+    <ShareWithWatermark
+      visible={showShare}
+      onClose={() => setShowShare(false)}
+      data={{
+        title: story.text,
+        message: `${story.text} by ${story.user} from ${story.city} 🎨`,
+        url: `https://ridhi.app/story/${story.id}`,
+      }}
+      type="story"
+    />
   </>
   );
 }

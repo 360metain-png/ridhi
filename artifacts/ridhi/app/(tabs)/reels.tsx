@@ -23,6 +23,7 @@ import { WatermarkBadge } from "@/components/WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
 import { VideoFilter, VIDEO_FILTERS, type FilterDef } from "@/components/VideoFilter";
+import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 
 const REELS = [
   {
@@ -174,6 +175,7 @@ function ReelItem({
   const [likeCount, setLikeCount]   = useState(reel.likes);
   const [currentFilter, setFilter] = useState<string>("none");
   const [showFilterBar, setShowFilterBar] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
 
   // ── Content entry animations ─────────────────────────────────────────────
@@ -321,7 +323,7 @@ function ReelItem({
             <Feather name="message-circle" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.comments)}</Text>
           </Pressable>
-          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
+          <Pressable style={styles.reelAction} onPress={() => setShowShare(true)} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
           </Pressable>
@@ -405,6 +407,18 @@ function ReelItem({
       {/* Stacked swipe-up chevrons — only on first reel */}
       {isFirst && isActive && <SwipeChevrons visible={isActive} />}
       </VideoFilter>
+
+      {/* Share modal */}
+      <ShareWithWatermark
+        visible={showShare}
+        onClose={() => setShowShare(false)}
+        data={{
+          title: reel.caption,
+          message: `Watch this reel by ${reel.userName} from ${reel.userCity} on Ridhi!`,
+          url: `https://ridhi.app/reel/${reel.id}`,
+        }}
+        type="reel"
+      />
     </View>
   );
 }

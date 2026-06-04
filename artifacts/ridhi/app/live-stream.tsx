@@ -26,6 +26,7 @@ import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
 import { PrivateHead } from "@/components/PrivateHead";
+import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -145,6 +146,7 @@ export default function LiveStreamScreen() {
   const [isLive, setIsLive] = useState(false);
   const [hostDuration, setHostDuration] = useState(0);
   const [showGifts, setShowGifts] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
   const prevLiveCoins = useRef(0);
 
@@ -400,9 +402,10 @@ export default function LiveStreamScreen() {
     );
   }
 
-  // ── Host ──────────────────────────────────────────────────────────────────
+  // ── Host ───────────────────────────────────────────────────────────
   if (view === "host") {
     return (
+      <>
       <View style={[styles.container, { backgroundColor: "#000" }]}>
         {!isLive ? (
           <View style={[styles.goLiveSetup, { backgroundColor: colors.background }]}>
@@ -469,7 +472,7 @@ export default function LiveStreamScreen() {
                 <Feather name="x" size={20} color="#fff" />
                 <Text style={styles.endLiveText}>End Live</Text>
               </Pressable>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => setShowShare(true)}>
                 <Feather name="share-2" size={22} color={colors.foreground} />
               </Pressable>
               <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
@@ -480,7 +483,18 @@ export default function LiveStreamScreen() {
           </View>
         )}
       </View>
-    );
+
+      <ShareWithWatermark
+        visible={showShare}
+        onClose={() => setShowShare(false)}
+        data={{
+          title: isLive ? hostTitle : selectedRoom?.title ?? "Watch this live on Ridhi!",
+          message: `Join ${isLive ? hostTitle : selectedRoom?.title} on Ridhi Live! 🎥`,
+          url: `https://ridhi.app/live/${isLive ? "host" : selectedRoom?.id ?? "room"}`,
+        }}
+        type="live"
+      />
+    </>);
   }
 
   return null;
