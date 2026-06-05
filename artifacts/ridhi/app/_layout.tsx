@@ -69,6 +69,7 @@ function RootLayoutNav() {
       <Stack.Screen name="coin-store" options={{ presentation: "card" }} />
       <Stack.Screen name="missions" options={{ presentation: "card" }} />
       <Stack.Screen name="scheduled-content" options={{ presentation: "card" }} />
+      <Stack.Screen name="report-history" options={{ presentation: "card" }} />
       <Stack.Screen name="ads-manager" options={{ presentation: "card" }} />
     </Stack>
   );

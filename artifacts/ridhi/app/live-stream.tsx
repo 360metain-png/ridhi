@@ -27,6 +27,7 @@ import { GradientButton } from "@/components/GradientButton";
 import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
+import { ReportSheet } from "@/components/ReportSheet";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -147,6 +148,7 @@ export default function LiveStreamScreen() {
   const [hostDuration, setHostDuration] = useState(0);
   const [showGifts, setShowGifts] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
   const prevLiveCoins = useRef(0);
 
@@ -493,6 +495,15 @@ export default function LiveStreamScreen() {
           url: `https://ridhi.app/live/${isLive ? "host" : selectedRoom?.id ?? "room"}`,
         }}
         type="live"
+      />
+      <ReportSheet
+        visible={showReport}
+        onClose={() => setShowReport(false)}
+        targetId={isLive ? "host" : selectedRoom?.id ?? "live"}
+        targetType="live"
+        targetTitle={isLive ? hostTitle : selectedRoom?.title}
+        targetUser={selectedRoom?.host}
+        reporterId={user?.id ?? "me"}
       />
     </>);
   }

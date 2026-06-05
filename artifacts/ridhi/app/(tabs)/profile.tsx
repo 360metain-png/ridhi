@@ -696,6 +696,16 @@ export default function ProfileScreen() {
             <Feather name="chevron-right" size={15} color={colors.mutedForeground} />
           </Pressable>
           <Pressable
+            onPress={() => router.push("/report-history")}
+            style={[styles.menuRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }]}
+          >
+            <View style={[styles.menuIcon, { backgroundColor: colors.destructive + "18" }]}>
+              <Feather name="flag" size={17} color={colors.destructive} />
+            </View>
+            <Text style={[styles.menuLabel, { color: colors.foreground }]}>My Reports</Text>
+            <Feather name="chevron-right" size={15} color={colors.mutedForeground} />
+          </Pressable>
+          <Pressable
             onPress={() => router.push("/settings")}
             style={[styles.menuRow, { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border }]}
           >
