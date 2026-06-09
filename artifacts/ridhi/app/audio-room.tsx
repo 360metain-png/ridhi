@@ -367,6 +367,7 @@ function MicButton({ muted, onToggle, colors }: { muted: boolean; onToggle: () =
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function AudioRoomScreen() {
+  useTrackScreen("audio_room");
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const { user } = useAuth();

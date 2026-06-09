@@ -18,6 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
@@ -97,6 +98,7 @@ function detectTopic(text: string): string {
 }
 
 export default function CreatePostScreen() {
+  useTrackScreen("create_post");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

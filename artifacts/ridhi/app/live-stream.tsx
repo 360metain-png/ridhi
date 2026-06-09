@@ -28,6 +28,7 @@ import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { ReportSheet } from "@/components/ReportSheet";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -126,6 +127,7 @@ function HostCoinPill({ coins }: { coins: number }) {
 }
 
 export default function LiveStreamScreen() {
+  useTrackScreen("live");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();

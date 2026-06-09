@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 import { Avatar } from "@/components/Avatar";
 
 const { width } = Dimensions.get("window");
@@ -53,6 +54,7 @@ const TRENDING_POSTS = [
 ];
 
 export default function ExploreScreen() {
+  useTrackScreen("explore");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");

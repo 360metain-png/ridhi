@@ -15,6 +15,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 interface Conversation {
   id: string;

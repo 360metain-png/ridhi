@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ScreenCapture from "expo-screen-capture";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
@@ -95,6 +96,7 @@ const AUDIO_RATE = 10;
 const VIDEO_RATE = 25;
 
 export default function RandomCallScreen() {
+  useTrackScreen("random_call");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins, deductCoins } = useAuth();

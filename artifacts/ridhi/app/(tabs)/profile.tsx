@@ -26,6 +26,7 @@ import { Avatar, AvatarPicker } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 import { SubscriptionBadge, VipTier } from "@/components/SubscriptionBadge";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const { width } = Dimensions.get("window");
 
@@ -132,6 +133,7 @@ const MENU_SECTIONS = [
 ];
 
 export default function ProfileScreen() {
+  useTrackScreen("profile");
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const { user, isLoading: authLoading, logout, updateProfile } = useAuth();

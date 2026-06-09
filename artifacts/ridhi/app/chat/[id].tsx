@@ -20,6 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 interface Message {
   id: string;
@@ -46,6 +47,7 @@ const QUICK_REPLIES = ["👍 Sounds good!", "😂 Haha", "❤️ Love it!", "�
 const STICKERS = ["😂", "❤️", "🔥", "💯", "🎉", "😍", "😭", "👏", "🙏", "😎"];
 
 export default function ChatDetailScreen() {
+  useTrackScreen("chat");
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
