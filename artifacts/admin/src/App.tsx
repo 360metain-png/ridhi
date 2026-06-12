@@ -51,6 +51,7 @@ import Downloads          from "@/pages/downloads";
 import Support            from "@/pages/support";
 import Screenshots        from "@/pages/screenshots";
 import ContentEditor      from "@/pages/content-editor";
+import FinancialStatements from "@/pages/financial-statements";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/payouts":      ["super_admin"],
   "/revenue":      ["super_admin"],
   "/monetization": ["super_admin"],
+  "/financial-statements": ["super_admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin"],
   "/levels":       ["super_admin", "admin"],
@@ -207,6 +209,7 @@ function Router() {
       <Route path="/content-assets"    component={() => <RoleRoute component={ContentAssets}    path="/content-assets" />} />
       <Route path="/downloads"         component={() => <RoleRoute component={Downloads}         path="/downloads" />} />
       <Route path="/screenshots"       component={() => <RoleRoute component={Screenshots}       path="/screenshots" />} />
+      <Route path="/financial-statements" component={() => <RoleRoute component={FinancialStatements} path="/financial-statements" />} />
       <Route component={NotFound} />
     </Switch>
   );

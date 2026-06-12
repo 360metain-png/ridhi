@@ -7,6 +7,7 @@ import {
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
   TrendingUp, Globe, Terminal, Sparkles, Download, Monitor, Film, FileText,
+  Landmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -75,6 +76,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Payouts",       href: "/payouts",       icon: IndianRupee, allowedRoles: SA },
       { name: "Revenue & Ads", href: "/revenue",       icon: BarChart3,   allowedRoles: SA },
       { name: "Monetization", href: "/monetization", icon: TrendingUp,   allowedRoles: SA },
+      { name: "Financial Statements", href: "/financial-statements", icon: Landmark, badge: "ITR", allowedRoles: SA },
     ],
   },
   {
