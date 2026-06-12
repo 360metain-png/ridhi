@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { MATCH_PROFILES } from "@/data/mockData";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 
@@ -157,6 +158,8 @@ export default function MatchScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();
+  const { trackMatch } = useAnalytics();
+  useTrackScreen("match");
   const userLanguage = user?.language ?? "Hindi";
 
   // Smart gender default: male users see women, female users see men
@@ -213,6 +216,11 @@ export default function MatchScreen() {
   const swipe = (dir: "left" | "right") => {
     const toX = dir === "right" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    // Track swipe
+    const currentProfile = profiles[0];
+    if (currentProfile) {
+      trackMatch(dir, currentProfile.id);
+    }
     Animated.timing(position, {
       toValue: { x: toX, y: 0 },
       duration: 300,

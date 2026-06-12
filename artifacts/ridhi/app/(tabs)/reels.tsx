@@ -24,6 +24,7 @@ import { useWatermark } from "@/hooks/useWatermark";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
 import { VideoFilter, VIDEO_FILTERS, type FilterDef } from "@/components/VideoFilter";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const REELS = [
   {
@@ -223,16 +224,30 @@ function ReelItem({
     }
   }, [isActive]);
 
+  const { trackLike, trackUnlike, trackShare, trackSave } = useAnalytics();
+
   const handleLike = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLiked((l) => !l);
     setLikeCount((c) => (liked ? c - 1 : c + 1));
-  }, [liked]);
+    if (liked) {
+      trackUnlike(reel.id, "reel");
+    } else {
+      trackLike(reel.id, "reel");
+    }
+  }, [liked, reel.id, trackLike, trackUnlike]);
+
+  const handleShare = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    trackShare(reel.id, "reel");
+    setShowShare(true);
+  }, [reel.id, trackShare]);
 
   const handleSave = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    trackSave(reel.id, "reel");
     saveWithWatermark();
-  }, [saveWithWatermark]);
+  }, [saveWithWatermark, reel.id, trackSave]);
 
   const fmt = useCallback(
     (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
@@ -323,7 +338,7 @@ function ReelItem({
             <Feather name="message-circle" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.comments)}</Text>
           </Pressable>
-          <Pressable style={styles.reelAction} onPress={() => setShowShare(true)} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
+          <Pressable style={styles.reelAction} onPress={handleShare} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
           </Pressable>
@@ -430,6 +445,7 @@ export default function ReelsScreen() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  useTrackScreen("reels");
 
   // ── Screen entry — entire screen slides up from below ─────────────────────
   const screenEntryY       = useRef(new Animated.Value(screenHeight * 0.18)).current;

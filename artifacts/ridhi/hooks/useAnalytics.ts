@@ -23,6 +23,8 @@ import {
   trackMatchSwipe,
   trackMatchMessage,
   trackChatSend,
+  trackDmOpen,
+  trackDmSend,
   trackSearch,
   trackHashtagClick,
   trackCommunityJoin,
@@ -199,6 +201,24 @@ export function useAnalytics() {
     [userId]
   );
 
+  const trackDmOpenEvent = useCallback(
+    async (targetUserId: string) => {
+      const session = await getCurrentSession();
+      if (!session) return;
+      await trackDmOpen(targetUserId, userId, session.id);
+    },
+    [userId]
+  );
+
+  const trackDmSendEvent = useCallback(
+    async (targetUserId: string) => {
+      const session = await getCurrentSession();
+      if (!session) return;
+      await trackDmSend(targetUserId, userId, session.id);
+    },
+    [userId]
+  );
+
   const trackSearchQuery = useCallback(
     async (query: string) => {
       const session = await getCurrentSession();
@@ -263,6 +283,8 @@ export function useAnalytics() {
     trackMatch: trackMatch,
     trackMatchMessage: trackMatchMsg,
     trackChat: trackChat,
+    trackDmOpen: trackDmOpenEvent,
+    trackDmSend: trackDmSendEvent,
     trackSearch: trackSearchQuery,
     trackHashtag: trackHashtag,
     trackCommunity: trackCommunity,

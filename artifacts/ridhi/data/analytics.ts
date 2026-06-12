@@ -13,7 +13,7 @@ export type EventType =
   | "content_like" | "content_unlike" | "content_share" | "content_comment" | "content_save"
   | "post_create" | "reel_create" | "story_create" | "live_start" | "live_join"
   | "match_swipe_right" | "match_swipe_left" | "match_super_like" | "match_message"
-  | "chat_send" | "chat_voice" | "chat_image" | "chat_gif"
+  | "chat_send" | "chat_voice" | "chat_image" | "chat_gif" | "dm_open" | "dm_send"
   | "coin_recharge" | "coin_spent" | "subscription_purchase" | "withdrawal"
   | "follow" | "unfollow" | "block" | "report" | "gift_send"
   | "search" | "hashtag_click" | "community_join" | "community_leave"
@@ -282,6 +282,14 @@ export async function trackMatchMessage(targetUserId: string, userId: string, se
 }
 
 // ── Chat ──
+export async function trackDmOpen(targetUserId: string, userId: string, sessionId: string): Promise<void> {
+  await trackEvent({ type: "dm_open", userId, targetUserId, contentType: "user", sessionId });
+}
+
+export async function trackDmSend(targetUserId: string, userId: string, sessionId: string): Promise<void> {
+  await trackEvent({ type: "dm_send", userId, targetUserId, contentType: "user", sessionId });
+}
+
 export async function trackChatSend(type: "text" | "voice" | "image" | "gif", userId: string, sessionId: string): Promise<void> {
   const eventType = type === "text" ? "chat_send" : type === "voice" ? "chat_voice" : type === "image" ? "chat_image" : "chat_gif";
   await trackEvent({ type: eventType, userId, sessionId });

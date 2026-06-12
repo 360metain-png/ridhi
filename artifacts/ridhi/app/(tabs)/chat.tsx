@@ -15,7 +15,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 interface Conversation {
   id: string;
@@ -35,6 +35,8 @@ export default function ChatScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { trackChat, trackDmOpen } = useAnalytics();
+  useTrackScreen("chat");
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<Tab>("direct");
   const [conversations, setConversations] = useState<Conversation[]>([]);

@@ -33,6 +33,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     items: [
       { name: "Dashboard", href: "/",         icon: LayoutDashboard, allowedRoles: ALL   },
       { name: "Analytics", href: "/analytics", icon: LineChart,       allowedRoles: SA_AA },
+      { name: "User Behavior", href: "/user-behavior", icon: Activity, allowedRoles: SA_AA },
     ],
   },
   {

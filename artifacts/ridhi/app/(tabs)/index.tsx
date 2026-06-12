@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
@@ -155,6 +156,8 @@ export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const { user, deductCoins } = useAuth();
   const { language: appLang } = useApp();
+  const { trackLike, trackUnlike, trackComment, trackShare, trackSave } = useAnalytics();
+  useTrackScreen("home");
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<FeedTab>("For You");
@@ -299,6 +302,14 @@ export default function FeedScreen() {
   }, [recsFadeAnim]);
 
   const handleLike = useCallback(async (id: string) => {
+    const post = postsRef.current.find((p) => p.id === id);
+    const isLiked = post?.isLiked ?? false;
+    // Track event
+    if (isLiked) {
+      trackUnlike(id, "post");
+    } else {
+      trackLike(id, "post");
+    }
     // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) =>
@@ -325,7 +336,7 @@ export default function FeedScreen() {
         );
       }
     }
-  }, [user?.id]);
+  }, [user?.id, trackLike, trackUnlike]);
 
   const handleOpenComments = useCallback((postId: string) => {
     setCommentPostId(postId);

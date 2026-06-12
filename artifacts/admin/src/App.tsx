@@ -16,6 +16,7 @@ import Communities   from "@/pages/communities";
 import Coins         from "@/pages/coins";
 import Payouts       from "@/pages/payouts";
 import Analytics     from "@/pages/analytics";
+import UserBehavior  from "@/pages/user-behavior";
 import Marketing     from "@/pages/marketing";
 import Settings      from "@/pages/settings";
 import LiveStreams    from "@/pages/live-streams";
@@ -60,6 +61,7 @@ export type AdminRole = "super_admin" | "admin";
 export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/":             ["super_admin", "admin"],
   "/analytics":    ["super_admin", "admin"],
+  "/user-behavior": ["super_admin", "admin"],
   "/users":        ["super_admin"],
   "/users/:id":    ["super_admin"],
   "/content":      ["super_admin"],
@@ -173,6 +175,7 @@ function Router() {
       <Route path="/coins"        component={() => <RoleRoute component={Coins}        path="/coins" />} />
       <Route path="/payouts"      component={() => <RoleRoute component={Payouts}      path="/payouts" />} />
       <Route path="/analytics"    component={() => <RoleRoute component={Analytics}    path="/analytics" />} />
+      <Route path="/user-behavior" component={() => <RoleRoute component={UserBehavior} path="/user-behavior" />} />
       <Route path="/marketing"    component={() => <RoleRoute component={Marketing}    path="/marketing" />} />
       <Route path="/settings"     component={() => <RoleRoute component={Settings}     path="/settings" />} />
       <Route path="/live-streams" component={() => <RoleRoute component={LiveStreams}  path="/live-streams" />} />

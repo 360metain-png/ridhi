@@ -28,6 +28,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
 import { USER_CAMPAIGNS, type AdCampaign, type AdCampaignStatus, type AdCampaignFormat, type AdPayMethod } from "@/data/mockData";
 import { PaymentSheet } from "@/components/PaymentSheet";
+import { GstInvoice, type InvoiceData } from "@/components/GstInvoice";
 
 const { width } = Dimensions.get("window");
 
@@ -377,7 +378,7 @@ export default function AdsManagerScreen() {
   const [campaigns, setCampaigns] = useState<AdCampaign[]>(USER_CAMPAIGNS.map((c) => ({ ...c })));
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [showInvoice, setShowInvoice] = useState(false);
+  const [showDetailInvoice, setShowDetailInvoice] = useState(false);
 
   // Create campaign state
   const [step, setStep] = useState<CreateStep>(1);
@@ -396,6 +397,8 @@ export default function AdsManagerScreen() {
   const [payMethod, setPayMethod] = useState<AdPayMethod | null>(null);
   const [showPayment, setShowPayment] = useState(false);
   const [showCoinConfirm, setShowCoinConfirm] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   const coinBalance = user?.coins ?? 2450;
 
@@ -472,6 +475,24 @@ export default function AdsManagerScreen() {
 
   const handlePaySuccess = () => {
     setShowPayment(false);
+    const gstAmount = Math.round(totalCost * GST_RATE);
+    const invoice: InvoiceData = {
+      invoiceNo: `RID-AD-${Date.now()}`,
+      date: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
+      type: "ad_payment",
+      userName: user?.name || "User",
+      userId: user?.id || "-",
+      description: `Ad Campaign: ${headline || "Untitled"} (${format}) · ₹${dailyBudget}/day × ${days} days`,
+      baseAmount: totalCost,
+      gstRate: 18,
+      gstAmount,
+      totalAmount: totalCost + gstAmount,
+      gstin: "29AABCR1234Z1Z",
+      hsnCode: "998311",
+      sacCode: "998311",
+    };
+    setInvoiceData(invoice);
+    setShowInvoice(true);
     submitCampaign();
   };
 
