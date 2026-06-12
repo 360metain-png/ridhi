@@ -12,6 +12,7 @@ import {
   Text,
   TextInput,
   View,
+  Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -22,6 +23,7 @@ import { RidhiCoin } from "@/components/RidhiCoin";
 import { CoinAmount } from "@/components/CoinAmount";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import {
   PODCAST_ROOM_SPEAKERS,
   PODCAST_ROOM_CHAT,

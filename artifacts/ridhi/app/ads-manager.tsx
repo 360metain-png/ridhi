@@ -183,7 +183,6 @@ function InvoiceModal({
                 <Text style={styles.invoiceBrandText}>RIDHI ADS</Text>
               </LinearGradient>
               <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>Ridhi Platforms Pvt. Ltd.</Text>
-              <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>GSTIN: 29AABCR1234Z1Z</Text>
             </View>
 
             {/* Invoice meta */}
@@ -208,14 +207,6 @@ function InvoiceModal({
 
             {/* Cost breakdown */}
             <View style={[styles.invoiceBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <View style={styles.invoiceRow}>
-                <Text style={[styles.invoiceKey, { color: colors.mutedForeground }]}>Subtotal</Text>
-                <Text style={[styles.invoiceValue, { color: colors.foreground }]}>₹{subtotal.toLocaleString("en-IN")}</Text>
-              </View>
-              <View style={styles.invoiceRow}>
-                <Text style={[styles.invoiceKey, { color: colors.mutedForeground }]}>GST (18%)</Text>
-                <Text style={[styles.invoiceValue, { color: colors.foreground }]}>₹{gst.toLocaleString("en-IN")}</Text>
-              </View>
               <View style={[styles.invoiceDivider, { backgroundColor: colors.border }]} />
               <View style={styles.invoiceRow}>
                 <Text style={[styles.invoiceTotalKey, { color: colors.foreground }]}>Total Paid</Text>
@@ -812,8 +803,8 @@ export default function AdsManagerScreen() {
                       <Text style={[styles.costValue, { color: colors.primary }]}>{coinCost.toLocaleString("en-IN")} coins</Text>
                     </View>
                     <View style={styles.costRow}>
-                      <Text style={[styles.costLabel, { color: colors.mutedForeground }]}>GST (if direct)</Text>
-                      <Text style={[styles.costValue, { color: colors.mutedForeground }]}>+₹{Math.round(totalCost * GST_RATE).toLocaleString("en-IN")} (18%)</Text>
+                      <Text style={[styles.costLabel, { color: colors.mutedForeground }]}>Payment method</Text>
+                      <Text style={[styles.costValue, { color: colors.mutedForeground }]}>Coins or Direct</Text>
                     </View>
                   </View>
                 )}
@@ -843,7 +834,7 @@ export default function AdsManagerScreen() {
                   {payMethod === "coins" && (
                     <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
                       <Text style={[styles.payNote, { color: colors.mutedForeground }]}>
-                        No GST applies on coin payments. Coins are non-refundable once the campaign is submitted.
+                        Coins are non-refundable once the campaign is submitted.
                       </Text>
                     </View>
                   )}
@@ -866,7 +857,7 @@ export default function AdsManagerScreen() {
                   {payMethod === "direct" && (
                     <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
                       <Text style={[styles.payNote, { color: colors.mutedForeground }]}>
-                        18% GST applicable. Tax invoice will be available for download after payment.
+                        Tax invoice will be available after payment.
                       </Text>
                     </View>
                   )}
@@ -904,7 +895,7 @@ export default function AdsManagerScreen() {
 
                   <Text style={[styles.reviewSection, { color: colors.foreground }]}>Payment</Text>
                   <Text style={[styles.reviewValue, { color: colors.primary }]}>
-                    {payMethod === "coins" ? `${coinCost.toLocaleString("en-IN")} Ridhi Coins` : `₹${totalCost.toLocaleString("en-IN")} (Direct + GST)`}
+                    {payMethod === "coins" ? `${coinCost.toLocaleString("en-IN")} Ridhi Coins` : `₹${totalCost.toLocaleString("en-IN")} (Direct)`}
                   </Text>
                 </View>
 

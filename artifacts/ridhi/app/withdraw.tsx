@@ -206,7 +206,7 @@ export default function WithdrawScreen() {
         {step === "amount" && (
           <ScrollView contentContainerStyle={st.body}>
             <Text style={[st.stepHeading, { color: colors.foreground }]}>How many coins to withdraw?</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Minimum {MIN_COINS.toLocaleString()} coins · 30% platform fee + 18% GST applies</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Minimum {MIN_COINS.toLocaleString()} coins · 30% platform fee applies</Text>
 
             <View style={[st.amountCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={st.amountInputRow}>
@@ -224,18 +224,6 @@ export default function WithdrawScreen() {
               </View>
               <View style={[st.divider, { backgroundColor: colors.border }]} />
               <View style={st.calcRows}>
-                <View style={st.calcRow}>
-                  <Text style={[st.calcLabel, { color: colors.mutedForeground }]}>Gross value</Text>
-                  <Text style={[st.calcValue, { color: colors.foreground }]}>₹{gross.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
-                </View>
-                <View style={st.calcRow}>
-                  <Text style={[st.calcLabel, { color: colors.mutedForeground }]}>Platform fee (30%)</Text>
-                  <Text style={[st.calcValue, { color: "#F43F5E" }]}>−₹{platformFee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
-                </View>
-                <View style={st.calcRow}>
-                  <Text style={[st.calcLabel, { color: colors.mutedForeground }]}>GST on fee (18%)</Text>
-                  <Text style={[st.calcValue, { color: "#FF8C42" }]}>−₹{gst.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
-                </View>
                 <View style={[st.calcRow, st.calcRowNet]}>
                   <Text style={[st.calcLabel, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>You receive</Text>
                   <Text style={[st.calcValue, { color: "#22C55E", fontSize: 18, fontFamily: "Inter_700Bold" }]}>₹{net.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
@@ -276,7 +264,7 @@ export default function WithdrawScreen() {
         {step === "method" && (
           <ScrollView contentContainerStyle={st.body}>
             <Text style={[st.stepHeading, { color: colors.foreground }]}>Choose payment method</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Select how you want to receive ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} (after 30% fee + 18% GST)</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>Select how you want to receive ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} (after 30% platform fee)</Text>
 
             {(["UPI", "Bank"] as Method[]).map((m) => (
               <Pressable key={m} onPress={() => setMethod(m)} style={[st.methodCard, { backgroundColor: colors.card, borderColor: method === m ? colors.primary : colors.border, borderWidth: method === m ? 2 : 1 }]}>
@@ -314,7 +302,7 @@ export default function WithdrawScreen() {
         {step === "details" && (
           <ScrollView contentContainerStyle={st.body} keyboardShouldPersistTaps="handled">
             <Text style={[st.stepHeading, { color: colors.foreground }]}>{method === "UPI" ? "Enter your UPI ID" : "Enter bank details"}</Text>
-            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>This is where ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} (net of fee + GST) will be sent</Text>
+            <Text style={[st.stepSub, { color: colors.mutedForeground }]}>This is where ₹{net.toLocaleString("en-IN", { maximumFractionDigits: 0 })} will be sent</Text>
 
             {method === "UPI" ? (
               <View style={[st.fieldCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -390,17 +378,10 @@ export default function WithdrawScreen() {
                 </View>
               </View>
               <View style={[st.divider, { backgroundColor: colors.border }]} />
-              {[
-                { label: "Gross Value",          val: `₹${gross.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,       color: colors.foreground },
-                { label: "Platform Fee (30%)",   val: `−₹${platformFee.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,  color: "#F43F5E" },
-                { label: "GST on Fee (18%)",     val: `−₹${gst.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,         color: "#FF8C42" },
-                { label: "Net Payout",           val: `₹${net.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,          color: "#22C55E" },
-              ].map((r) => (
-                <View key={r.label} style={st.reviewRow}>
-                  <Text style={[st.reviewLabel, { color: colors.mutedForeground }]}>{r.label}</Text>
-                  <Text style={[st.reviewVal, { color: r.color }]}>{r.val}</Text>
-                </View>
-              ))}
+              <View style={st.reviewRow}>
+                <Text style={[st.reviewLabel, { color: colors.mutedForeground }]}>You receive</Text>
+                <Text style={[st.reviewVal, { color: "#22C55E" }]}>₹{net.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</Text>
+              </View>
             </View>
 
             <View style={[st.reviewCard, { backgroundColor: colors.card, borderColor: colors.border }]}>

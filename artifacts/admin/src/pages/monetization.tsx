@@ -10,7 +10,8 @@ import {
 import {
   TrendingUp, TrendingDown, Users, Coins, CreditCard, Wallet,
   IndianRupee, ArrowUpRight, ArrowDownRight, Zap, Crown, Gift,
-  Calendar, Download, Filter, ChevronDown, CircleDollarSign
+  Calendar, Download, Filter, ChevronDown, CircleDollarSign,
+  FileText, CheckCircle2, XCircle, Clock
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -86,6 +87,20 @@ const funnelData = [
   { stage: "First Recharge", users: 8500, percentage: 8.5 },
   { stage: "Subscription", users: 3200, percentage: 3.2 },
   { stage: "VIP Upgrade", users: 1200, percentage: 1.2 },
+];
+
+// ─── Transaction log (with GST + actual cost) ───
+const transactionLog = [
+  { id: "TXN-001", user: "Aarav Sharma", type: "Coin Recharge", method: "UPI", amount: 499, gst: 76, total: 575, coins: 6500, status: "completed", date: "12 Jun 2026" },
+  { id: "TXN-002", user: "Priya Patel", type: "Subscription", method: "Card", amount: 1299, gst: 234, total: 1533, plan: "Gold Monthly", status: "completed", date: "12 Jun 2026" },
+  { id: "TXN-003", user: "Rohan Mehta", type: "Coin Recharge", method: "Net Banking", amount: 1999, gst: 360, total: 2359, coins: 30000, status: "completed", date: "11 Jun 2026" },
+  { id: "TXN-004", user: "Ananya Rao", type: "Ad Campaign", method: "Direct", amount: 5000, gst: 900, total: 5900, campaign: "Summer Promo", status: "completed", date: "11 Jun 2026" },
+  { id: "TXN-005", user: "Kavya Iyer", type: "Subscription", method: "UPI", amount: 4999, gst: 900, total: 5899, plan: "Platinum Yearly", status: "completed", date: "10 Jun 2026" },
+  { id: "TXN-006", user: "Vikram Joshi", type: "Coin Recharge", method: "Wallet", amount: 99, gst: 18, total: 117, coins: 1100, status: "failed", date: "10 Jun 2026" },
+  { id: "TXN-007", user: "Neha Gupta", type: "Gift Purchase", method: "Coins", amount: 0, gst: 0, total: 0, coins: 500, gift: "Crown", status: "completed", date: "09 Jun 2026" },
+  { id: "TXN-008", user: "Arjun Nair", type: "Withdrawal", method: "UPI", amount: 3500, platformFee: 1050, gst: 189, net: 2261, status: "pending", date: "09 Jun 2026" },
+  { id: "TXN-009", user: "Devika Shah", type: "Coin Recharge", method: "Card", amount: 4999, gst: 900, total: 5899, coins: 80000, status: "completed", date: "08 Jun 2026" },
+  { id: "TXN-010", user: "Ishaan Reddy", type: "Subscription", method: "UPI", amount: 299, gst: 54, total: 353, plan: "Silver Weekly", status: "completed", date: "08 Jun 2026" },
 ];
 
 // ─── Daily coin transactions ───
@@ -235,6 +250,9 @@ export default function MonetizationPage() {
           </TabsTrigger>
           <TabsTrigger value="spenders" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm">
             <Users className="w-3.5 h-3.5 mr-1.5" /> Top Spenders
+          </TabsTrigger>
+          <TabsTrigger value="transactions" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm">
+            <FileText className="w-3.5 h-3.5 mr-1.5" /> Transactions
           </TabsTrigger>
         </TabsList>
 
@@ -750,6 +768,170 @@ export default function MonetizationPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Transactions Tab */}
+        <TabsContent value="transactions" className="space-y-6 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Summary card */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Transaction Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total Transactions</span>
+                    <span className="font-semibold">{transactionLog.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Completed</span>
+                    <span className="font-semibold text-emerald-500">{transactionLog.filter((t) => t.status === "completed").length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Pending</span>
+                    <span className="font-semibold text-amber-500">{transactionLog.filter((t) => t.status === "pending").length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Failed</span>
+                    <span className="font-semibold text-rose-500">{transactionLog.filter((t) => t.status === "failed").length}</span>
+                  </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Total Base Amount</span>
+                      <span className="font-semibold">₹{transactionLog.reduce((s, t) => s + (t.amount || 0), 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-muted-foreground">Total GST (18%)</span>
+                      <span className="font-semibold text-amber-600">₹{transactionLog.reduce((s, t) => s + (t.gst || 0), 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="font-semibold">Total Collected</span>
+                      <span className="font-bold text-primary">₹{transactionLog.reduce((s, t) => s + (t.total || 0), 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* GST Breakdown */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">GST Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { label: "Coin Recharges", base: 7596, gst: 1367 },
+                    { label: "Subscriptions", base: 6597, gst: 1188 },
+                    { label: "Ad Campaigns", base: 5000, gst: 900 },
+                    { label: "Withdrawals", base: 3500, gst: 189 },
+                    { label: "Gifts (Coins)", base: 0, gst: 0 },
+                  ].map((cat) => (
+                    <div key={cat.label} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{cat.label}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground text-xs">Base ₹{cat.base.toLocaleString()}</span>
+                        <span className="text-amber-600 text-xs">+GST ₹{cat.gst.toLocaleString()}</span>
+                        <span className="font-semibold w-16 text-right">₹{(cat.base + cat.gst).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>Net GST Liability</span>
+                      <span className="text-amber-600">₹{transactionLog.reduce((s, t) => s + (t.gst || 0), 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>GSTIN: 29AABCR1234Z1Z</span>
+                      <span>Monthly Filing</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Platform Fee Breakdown */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Platform Fee Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total Withdrawals</span>
+                    <span className="font-semibold">₹{transactionLog.filter((t) => t.type === "Withdrawal").reduce((s, t) => s + (t.amount || 0), 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Platform Fee (30%)</span>
+                    <span className="font-semibold text-rose-500">₹{transactionLog.filter((t) => t.type === "Withdrawal").reduce((s, t) => s + (t.platformFee || 0), 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">GST on Fee (18%)</span>
+                    <span className="font-semibold text-amber-600">₹{transactionLog.filter((t) => t.type === "Withdrawal").reduce((s, t) => s + (t.gst || 0), 0).toLocaleString()}</span>
+                  </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>Net Paid to Users</span>
+                      <span className="text-emerald-600">₹{transactionLog.filter((t) => t.type === "Withdrawal").reduce((s, t) => s + (t.net || 0), 0).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>TDS: 10% on ₹{transactionLog.filter((t) => t.type === "Withdrawal").reduce((s, t) => s + (t.net || 0), 0).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Transaction Table */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">All Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">ID</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">User</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Type</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Method</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium">Base</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium">GST</th>
+                      <th className="text-right py-2 px-3 text-muted-foreground font-medium">Total</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Status</th>
+                      <th className="text-left py-2 px-3 text-muted-foreground font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactionLog.map((t) => (
+                      <tr key={t.id} className="border-b last:border-0 hover:bg-muted/50">
+                        <td className="py-2 px-3 font-mono text-xs text-muted-foreground">{t.id}</td>
+                        <td className="py-2 px-3 font-medium">{t.user}</td>
+                        <td className="py-2 px-3">
+                          <Badge variant="outline" className="text-xs">
+                            {t.type}
+                          </Badge>
+                        </td>
+                        <td className="py-2 px-3 text-muted-foreground">{t.method}</td>
+                        <td className="py-2 px-3 text-right">₹{t.amount.toLocaleString()}</td>
+                        <td className="py-2 px-3 text-right text-amber-600">+₹{t.gst.toLocaleString()}</td>
+                        <td className="py-2 px-3 text-right font-semibold text-primary">₹{(t.total || 0).toLocaleString()}</td>
+                        <td className="py-2 px-3">
+                          {t.status === "completed" && <span className="inline-flex items-center gap-1 text-emerald-500 text-xs"><CheckCircle2 className="w-3 h-3" /> Done</span>}
+                          {t.status === "pending" && <span className="inline-flex items-center gap-1 text-amber-500 text-xs"><Clock className="w-3 h-3" /> Pending</span>}
+                          {t.status === "failed" && <span className="inline-flex items-center gap-1 text-rose-500 text-xs"><XCircle className="w-3 h-3" /> Failed</span>}
+                        </td>
+                        <td className="py-2 px-3 text-muted-foreground text-xs">{t.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

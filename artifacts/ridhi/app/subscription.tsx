@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Dimensions, Modal, Platform, Pressable, ScrollView,
-  StyleSheet, Text, View,
+  StyleSheet, Text, View, Image,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -1089,7 +1089,7 @@ export default function SubscriptionScreen() {
                 ))}
               </View>
               <Text style={[styles.payNote, { color: colors.mutedForeground }]}>
-                Auto-renews monthly. Cancel anytime. GST included.
+                Auto-renews monthly. Cancel anytime.
               </Text>
             </View>
           </View>

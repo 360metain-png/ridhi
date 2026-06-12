@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
@@ -313,14 +314,8 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
                   {sublabel && <Text style={[styles.amountSub, { color: colors.mutedForeground }]}>{sublabel}</Text>}
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
-                  {!noGst && (
-                    <>
-                      <Text style={[styles.amountLabel, { color: colors.mutedForeground }]}>+ GST (18%)</Text>
-                      <Text style={[styles.gstVal, { color: "#FF8C42" }]}>+₹{gst.toLocaleString("en-IN")}</Text>
-                    </>
-                  )}
                   <View style={[styles.totalPill, { backgroundColor: colors.primary }]}>
-                    <Text style={styles.totalPillText}>Total ₹{total.toLocaleString("en-IN")}</Text>
+                    <Text style={styles.totalPillText}>₹{total.toLocaleString("en-IN")}</Text>
                   </View>
                 </View>
               </View>

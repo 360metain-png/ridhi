@@ -27,6 +27,7 @@ import {
   formatPlays,
   formatDuration,
 } from "@/data/podcastData";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const { width } = Dimensions.get("window");
 const CARD_W = width * 0.72;
