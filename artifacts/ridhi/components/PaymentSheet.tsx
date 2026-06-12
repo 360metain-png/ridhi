@@ -16,6 +16,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { useColors } from "@/hooks/useColors";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 // ── API helpers ────────────────────────────────────────────────────────────────
 const API_BASE = process.env["EXPO_PUBLIC_DOMAIN"]
@@ -471,7 +472,7 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
                   <View style={styles.methodContent}>
                     <View style={[styles.walletCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "30" }]}>
                       <View style={[styles.walletIcon, { backgroundColor: colors.primary + "20" }]}>
-                        <Feather name="star" size={22} color={colors.primary} />
+                        <Image source={COIN_IMAGE} style={{ width: 22, height: 22 }} resizeMode="contain" />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.walletLabel, { color: colors.foreground }]}>Ridhi Wallet</Text>

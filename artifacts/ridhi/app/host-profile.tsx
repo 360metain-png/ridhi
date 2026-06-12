@@ -200,7 +200,7 @@ export default function HostProfileScreen() {
 
             <Animated.View style={{ transform: [{ scale: gateAnim }], alignItems: "center" }}>
               <View style={regStyles.heroIcon}>
-                <Feather name="star" size={36} color="#FFB800" />
+                <Image source={COIN_IMAGE} style={{ width: 36, height: 36 }} resizeMode="contain" />
               </View>
               <Text style={regStyles.heroTitle}>Become a Host</Text>
               <Text style={regStyles.heroSub}>

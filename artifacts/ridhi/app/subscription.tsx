@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import type { VipTier } from "@/components/SubscriptionBadge";
 
 const { width } = Dimensions.get("window");
@@ -958,7 +959,7 @@ export default function SubscriptionScreen() {
 
                   {plan.popular && (
                     <LinearGradient colors={plan.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.popularBanner}>
-                      <Feather name="star" size={11} color="#fff" />
+                      <Image source={COIN_IMAGE} style={{ width: 11, height: 11 }} resizeMode="contain" />
                       <Text style={styles.popularText}>Most Popular</Text>
                     </LinearGradient>
                   )}
@@ -1354,7 +1355,7 @@ export default function SubscriptionScreen() {
             {/* Creator CTA */}
             <LinearGradient colors={["#7B2FBE15", "#E91E8C10"]} style={[styles.creatorCTA, { borderColor: "#7B2FBE30" }]}>
               <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}>
-                <Feather name="star" size={18} color="#fff" />
+                <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={[styles.creatorTitle, { color: colors.foreground }]}>Are you a Creator?</Text>

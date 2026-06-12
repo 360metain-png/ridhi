@@ -254,7 +254,7 @@ export default function LiveStreamScreen() {
                 <Text style={[styles.featuredMetaText, { color: colors.mutedForeground }]}>
                   {LIVE_ROOMS[0].viewers.toLocaleString()} watching
                 </Text>
-                <Feather name="star" size={14} color={colors.gold} style={{ marginLeft: 12 }} />
+                <Image source={COIN_IMAGE} style={{ width: 14, height: 14, marginLeft: 12 }} resizeMode="contain" />
                 <Text style={[styles.featuredMetaText, { color: colors.gold }]}>
                   {LIVE_ROOMS[0].coins.toLocaleString()} coins
                 </Text>
@@ -289,7 +289,7 @@ export default function LiveStreamScreen() {
                   <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}>{room.city}</Text>
                   <Feather name="eye" size={12} color={colors.mutedForeground} style={{ marginLeft: 8 }} />
                   <Text style={[styles.roomMetaText, { color: colors.mutedForeground }]}>{room.viewers.toLocaleString()}</Text>
-                  <Feather name="star" size={12} color={colors.gold} style={{ marginLeft: 8 }} />
+                  <Image source={COIN_IMAGE} style={{ width: 12, height: 12, marginLeft: 8 }} resizeMode="contain" />
                   <Text style={[styles.roomMetaText, { color: colors.gold }]}>{room.coins.toLocaleString()}</Text>
                 </View>
               </View>

@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
 import { PrivateHead } from "@/components/PrivateHead";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const BADGES = [
   { id: "b1", name: "First Post", icon: "edit-3", desc: "Published your first post", earned: true, color: "#E91E8C" },
@@ -105,7 +106,7 @@ export default function ReferralScreen() {
                 </>
               ) : (
                 <>
-                  <Feather name="star" size={16} color="#fff" />
+                  <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
                   <Text style={[styles.claimText, { color: "#fff" }]}>+{10 + streak * 2} coins</Text>
                 </>
               )}
@@ -131,7 +132,7 @@ export default function ReferralScreen() {
               <Text style={[styles.referralSub, { color: colors.mutedForeground }]}>Get 50 coins per verified referral</Text>
             </View>
             <View style={[styles.referralReward, { backgroundColor: colors.primary + "18" }]}>
-              <Feather name="star" size={14} color={colors.primary} />
+              <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
               <Text style={[styles.referralRewardText, { color: colors.primary }]}>50 coins</Text>
             </View>
           </View>
@@ -196,7 +197,7 @@ export default function ReferralScreen() {
               <View style={styles.challengeTop}>
                 <Text style={[styles.challengeTitle, { color: colors.foreground }]}>{ch.title}</Text>
                 <View style={[styles.rewardBadge, { backgroundColor: colors.gold + "20" }]}>
-                  <Feather name="star" size={12} color={colors.gold} />
+                  <Image source={COIN_IMAGE} style={{ width: 12, height: 12 }} resizeMode="contain" />
                   <Text style={[styles.rewardText, { color: colors.gold }]}>{ch.reward}</Text>
                 </View>
               </View>

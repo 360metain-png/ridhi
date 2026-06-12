@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { PODCAST_CATEGORIES, PODCAST_LANGUAGES, PodcastCategory } from "@/data/podcastData";
@@ -530,7 +531,7 @@ export default function PodcastCreateScreen() {
 
                 {isVipRoom && (
                   <View style={[styles.priceRow, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 10 }]}>
-                    <Feather name="star" size={16} color="#FFB800" />
+                    <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
                     <Text style={[styles.scheduleLabel, { color: colors.text, flex: 1 }]}>Entry Fee</Text>
                     <TextInput
                       style={[styles.priceInput, { color: colors.text, width: 70 }]}

@@ -407,7 +407,7 @@ export default function WalletScreen() {
                     <Text style={styles.popularText}>⭐ Best Value</Text>
                   </View>
                 )}
-                <Feather name="star" size={26} color={pack.popular ? "#fff" : colors.gold} />
+                <Image source={COIN_IMAGE} style={{ width: 26, height: 26 }} resizeMode="contain" />
                 <Text style={[styles.packCoins, { color: pack.popular ? "#fff" : colors.foreground }]}>
                   {pack.coins.toLocaleString()}
                 </Text>

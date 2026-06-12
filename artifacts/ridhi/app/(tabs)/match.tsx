@@ -16,6 +16,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+const COIN_IMAGE = require("../../assets/images/ridhi_coin.png");
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { router } from "expo-router";
@@ -404,7 +405,7 @@ export default function MatchScreen() {
             }}
             style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
           >
-            <Feather name="star" size={22} color={colors.gold} />
+            <Image source={COIN_IMAGE} style={{ width: 22, height: 22 }} resizeMode="contain" />
             <Text style={[styles.superCost, { color: colors.gold }]}>5</Text>
           </Pressable>
           <Pressable

@@ -22,6 +22,7 @@ import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useTrackScreen } from "@/hooks/useAnalytics";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const { width: SW } = Dimensions.get("window");
 
@@ -221,7 +222,7 @@ function SpeakerBubble({ speaker, colors }: { speaker: typeof SPEAKERS[0]; color
         )}
         {speaker.isHost && (
           <View style={[styles.hostBadge, { backgroundColor: colors.gold }]}>
-            <Feather name="star" size={9} color="#fff" />
+            <Image source={COIN_IMAGE} style={{ width: 9, height: 9 }} resizeMode="contain" />
           </View>
         )}
       </View>

@@ -279,7 +279,7 @@ export default function PodcastRoomScreen() {
         {/* VIP banner */}
         {IS_VIP && (
           <LinearGradient colors={["#FFB80030", "#FFB80008"]} style={styles.vipBanner}>
-            <Feather name="star" size={14} color="#FFB800" />
+            <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
             <Text style={styles.vipBannerText}>VIP Room · 99 </Text>
             <RidhiCoin size={14} />
             <Text style={styles.vipBannerText}> entry</Text>

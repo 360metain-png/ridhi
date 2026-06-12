@@ -63,7 +63,7 @@ function EpisodeCard({ ep, onPress, wide }: { ep: PodcastEpisode; onPress: () =>
         {ep.isLive && <LiveBadge />}
         {ep.isExclusive && (
           <View style={styles.exclusiveBadge}>
-            <Feather name="star" size={10} color="#FFB800" />
+            <Image source={COIN_IMAGE} style={{ width: 10, height: 10 }} resizeMode="contain" />
             <Text style={styles.exclusiveText}>EXCLUSIVE</Text>
           </View>
         )}

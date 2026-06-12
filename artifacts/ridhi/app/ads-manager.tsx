@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -831,7 +832,7 @@ export default function AdsManagerScreen() {
                 >
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                     <View style={[styles.payIcon, { backgroundColor: "#FFB80020" }]}>
-                      <Feather name="star" size={22} color="#FFB800" />
+                      <Image source={COIN_IMAGE} style={{ width: 22, height: 22 }} resizeMode="contain" />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.payLabel, { color: colors.foreground }]}>Ridhi Coins</Text>
@@ -963,7 +964,7 @@ export default function AdsManagerScreen() {
       <Modal visible={showCoinConfirm} transparent animationType="fade">
         <View style={[styles.confirmOverlay, { backgroundColor: "#00000060" }]}>
           <View style={[styles.confirmSheet, { backgroundColor: colors.background }]}>
-            <Feather name="star" size={40} color="#FFB800" />
+            <Image source={COIN_IMAGE} style={{ width: 40, height: 40 }} resizeMode="contain" />
             <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Confirm Coin Payment</Text>
             <Text style={[styles.confirmBody, { color: colors.mutedForeground }]}>
               You are about to spend {coinCost.toLocaleString("en-IN")} Ridhi Coins for this campaign.

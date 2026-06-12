@@ -787,7 +787,7 @@ export default function RandomCallScreen() {
                 {rate} coins / minute
               </Text>
               <View style={[styles.confirmBalance, { backgroundColor: colors.muted }]}>
-                <Feather name="star" size={14} color={colors.gold} />
+                <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
                 <Text style={[styles.confirmBalText, { color: colors.foreground }]}>
                   Your balance: {(user?.coins ?? 0).toLocaleString()} coins
                 </Text>

@@ -24,6 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getZodiacFromBirthday, ZODIAC_LIST } from "@/utils/zodiac";
 import { Avatar, AvatarPicker } from "@/components/Avatar";
 import { CoinBadge } from "@/components/CoinBadge";
+const COIN_IMAGE = require("../../assets/images/ridhi_coin.png");
 import { GradientButton } from "@/components/GradientButton";
 import { SubscriptionBadge, VipTier } from "@/components/SubscriptionBadge";
 import { useTrackScreen } from "@/hooks/useAnalytics";
@@ -504,7 +505,7 @@ export default function ProfileScreen() {
             style={[styles.earnCard, { backgroundColor: colors.card, borderColor: user.isHost ? "#FFB800" : colors.border }]}
           >
             <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
-              <Feather name="star" size={20} color="#FFB800" />
+              <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
             </View>
             <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Host</Text>
             <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>
