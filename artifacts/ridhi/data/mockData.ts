@@ -1207,13 +1207,13 @@ export const CAMPAIGN_NOTIFICATIONS: CampaignNotification[] = [
 ];
 
 export const COIN_PACKAGES = [
-  { id: "cp1", coins: 60,    price: 49,   popular: false, label: "Starter",    bonus: 0, perCoin: "₹0.82" },
-  { id: "cp2", coins: 130,   price: 99,   popular: false, label: "Basic",      bonus: 0, perCoin: "₹0.76" },
-  { id: "cp3", coins: 280,   price: 199,  popular: false, label: "Popular",    bonus: 0, perCoin: "₹0.71" },
-  { id: "cp4", coins: 750,   price: 499,  popular: false, label: "Value",      bonus: 0, perCoin: "₹0.67" },
-  { id: "cp5", coins: 1600,  price: 999,  popular: true,  label: "Best Value", bonus: 0, perCoin: "₹0.62" },
-  { id: "cp6", coins: 3500,  price: 1999, popular: false, label: "Premium",    bonus: 0, perCoin: "₹0.57" },
-  { id: "cp7", coins: 10000, price: 4999, popular: false, label: "Elite",      bonus: 0, perCoin: "₹0.50" },
+  { id: "cp1", coins: 50,    price: 49,   popular: false, label: "Starter",    bonus: 0, perCoin: "₹0.98" },
+  { id: "cp2", coins: 100,   price: 99,   popular: false, label: "Basic",      bonus: 0, perCoin: "₹0.99" },
+  { id: "cp3", coins: 200,   price: 199,  popular: false, label: "Popular",    bonus: 0, perCoin: "₹0.99" },
+  { id: "cp4", coins: 500,   price: 499,  popular: false, label: "Value",      bonus: 0, perCoin: "₹0.99" },
+  { id: "cp5", coins: 1000,  price: 999,  popular: true,  label: "Best Value", bonus: 0, perCoin: "₹0.99" },
+  { id: "cp6", coins: 2000,  price: 1999, popular: false, label: "Premium",    bonus: 0, perCoin: "₹0.99" },
+  { id: "cp7", coins: 5000,  price: 4999, popular: false, label: "Elite",      bonus: 0, perCoin: "₹0.99" },
 ];
 
 export const COIN_TRANSACTIONS = [

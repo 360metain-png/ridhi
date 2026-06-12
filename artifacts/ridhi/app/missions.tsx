@@ -15,17 +15,29 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
-import { MISSIONS, DAILY_REWARD_STREAK, Mission } from "@/data/coinEconomy";
+import { MISSIONS, DAILY_REWARD_STREAK, AD_REWARDS, Mission } from "@/data/coinEconomy";
 import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 const { width } = Dimensions.get("window");
 
 const TABS = [
+  { id: "ads",      label: "Watch Ads" },
   { id: "daily",    label: "Daily" },
   { id: "weekly",   label: "Weekly" },
   { id: "one_time", label: "One-Time" },
 ];
+
+type AdReward = {
+  id: string;
+  title: string;
+  desc: string;
+  icon: string;
+  reward: number;
+  cooldown: number;
+  type: string;
+  category: string;
+};
 
 function ProgressBar({ progress, total, color }: { progress: number; total: number; color: string }) {
   const pct = Math.min(progress / total, 1);
@@ -92,13 +104,35 @@ function MissionCard({ mission, onClaim }: { mission: Mission; onClaim: (m: Miss
   );
 }
 
+function AdRewardCard({ ad, onWatch }: { ad: AdReward; onWatch: (ad: AdReward) => void }) {
+  const colors = useColors();
+  return (
+    <View style={[styles.mCard, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
+      <View style={[styles.mIcon, { backgroundColor: "#FFB80018" }]}>
+        <Feather name={ad.icon as any} size={20} color="#FFB800" />
+      </View>
+      <View style={{ flex: 1, gap: 5 }}>
+        <Text style={[styles.mTitle, { color: colors.foreground }]}>{ad.title}</Text>
+        <Text style={[styles.mDesc, { color: colors.mutedForeground }]}>{ad.desc}</Text>
+      </View>
+      <Pressable
+        onPress={() => onWatch(ad)}
+        style={[styles.rewardBtn, { backgroundColor: "#FFB800" }]}
+      >
+        <Image source={COIN_IMAGE} style={{ width: 13, height: 13 }} resizeMode="contain" />
+        <Text style={[styles.rewardBtnText, { color: "#fff" }]}>+{ad.reward}</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function MissionsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const [activeTab, setActiveTab] = useState<"daily" | "weekly" | "one_time">("daily");
+  const [activeTab, setActiveTab] = useState<"ads" | "daily" | "weekly" | "one_time">("ads");
   const [missions, setMissions] = useState(MISSIONS);
   const [claimedCoins, setClaimedCoins] = useState(0);
 
@@ -111,6 +145,11 @@ export default function MissionsScreen() {
     addCoins(mission.reward);
     setClaimedCoins((prev) => prev + mission.reward);
     setMissions((prev) => prev.map((m) => m.id === mission.id ? { ...m, completed: true } : m));
+  };
+
+  const handleWatchAd = (ad: AdReward) => {
+    addCoins(ad.reward);
+    setClaimedCoins((prev) => prev + ad.reward);
   };
 
   const currentDay = DAILY_REWARD_STREAK.findIndex((d) => !d.claimed);
@@ -127,7 +166,7 @@ export default function MissionsScreen() {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>Earn Coins</Text>
-            <Text style={styles.headerSub}>Complete missions to earn Ridhi Coins</Text>
+            <Text style={styles.headerSub}>Watch ads or buy coins to get more</Text>
           </View>
           <Pressable onPress={() => router.push("/wallet")} style={styles.walletBtn}>
             <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
@@ -192,7 +231,7 @@ export default function MissionsScreen() {
       <View style={[styles.tabsBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         {TABS.map((t) => {
           const active = activeTab === t.id;
-          const count = missions.filter((m) => m.type === t.id && !m.completed).length;
+          const count = t.id === "ads" ? AD_REWARDS.length : missions.filter((m) => m.type === t.id && !m.completed).length;
           return (
             <Pressable key={t.id} onPress={() => setActiveTab(t.id as any)} style={[styles.tab, { borderBottomColor: active ? colors.primary : "transparent" }]}>
               <Text style={[styles.tabText, { color: active ? colors.primary : colors.mutedForeground }]}>{t.label}</Text>
@@ -207,6 +246,36 @@ export default function MissionsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: insets.bottom + 24 }}>
+        {/* Buy Coins Banner - Always visible */}
+        <Pressable
+          onPress={() => router.push("/wallet")}
+          style={[styles.buyCard, { backgroundColor: colors.primary + "14", borderColor: colors.primary + "40" }]}
+        >
+          <View style={[styles.buyIcon, { backgroundColor: colors.primary + "25" }]}>
+            <Feather name="zap" size={22} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.buyTitle, { color: colors.foreground }]}>Buy Coins — Fast & Easy</Text>
+            <Text style={[styles.buySub, { color: colors.mutedForeground }]}>Start from ₹49 for 50 coins. Best value!</Text>
+          </View>
+          <View style={[styles.buyBtn, { backgroundColor: colors.primary }]}>
+            <Text style={styles.buyBtnText}>Buy</Text>
+          </View>
+        </Pressable>
+
+        {/* Ad Rewards */}
+        {activeTab === "ads" && (
+          <>
+            <View style={[styles.adBanner, { backgroundColor: "#FFB80014", borderColor: "#FFB80040" }]}>
+              <Feather name="play-circle" size={18} color="#FFB800" />
+              <Text style={[styles.adBannerText, { color: colors.foreground }]}>Watch ads to earn coins. Ridhi gets paid by advertisers — you get coins!</Text>
+            </View>
+            {AD_REWARDS.map((ad) => (
+              <AdRewardCard key={ad.id} ad={ad} onWatch={handleWatchAd} />
+            ))}
+          </>
+        )}
+
         {/* Referral bonus card */}
         {activeTab === "one_time" && (
           <Pressable
@@ -218,13 +287,13 @@ export default function MissionsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.referralTitle, { color: colors.foreground }]}>Refer Friends, Earn Big!</Text>
-              <Text style={[styles.referralSub, { color: colors.mutedForeground }]}>Get 100 coins per friend who joins & recharges</Text>
+              <Text style={[styles.referralSub, { color: colors.mutedForeground }]}>Get 25 coins per friend who joins & recharges</Text>
             </View>
             <Feather name="chevron-right" size={18} color={colors.gold} />
           </Pressable>
         )}
 
-        {filtered.map((m) => (
+        {activeTab !== "ads" && filtered.map((m) => (
           <MissionCard key={m.id} mission={m} onClaim={handleClaim} />
         ))}
 
@@ -281,4 +350,12 @@ const styles = StyleSheet.create({
   rewardBtnText: { fontSize: 13, fontFamily: "Inter_700Bold" },
   claimedBanner: { flexDirection: "row", alignItems: "center", gap: 8, padding: 14, borderRadius: 14, borderWidth: 1 },
   claimedText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  buyCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1 },
+  buyIcon: { width: 46, height: 46, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  buyTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  buySub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
+  buyBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },
+  buyBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  adBanner: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 14, borderWidth: 1 },
+  adBannerText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular" },
 });

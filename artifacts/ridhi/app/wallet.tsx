@@ -313,7 +313,7 @@ export default function WalletScreen() {
                 <Feather name="target" size={22} color={colors.primary} />
               </View>
               <Text style={[styles.earnTitle, { color: colors.foreground }]}>Missions</Text>
-              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>Up to 360 coins/day</Text>
+              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>Up to 8 coins/day free</Text>
               <View style={[styles.earnBtn, { backgroundColor: colors.primary }]}>
                 <Text style={styles.earnBtnText}>Go →</Text>
               </View>
@@ -463,7 +463,7 @@ export default function WalletScreen() {
             <Feather name="award" size={20} color={colors.primary} />
             <View style={{ flex: 1 }}>
               <Text style={[styles.vipTitle, { color: colors.foreground }]}>Upgrade to VIP</Text>
-              <Text style={[styles.vipSub, { color: colors.mutedForeground }]}>Get 500 coins/day + exclusive perks</Text>
+              <Text style={[styles.vipSub, { color: colors.mutedForeground }]}>Get 3 coins/day + exclusive perks</Text>
             </View>
             <Feather name="chevron-right" size={18} color={colors.primary} />
           </Pressable>

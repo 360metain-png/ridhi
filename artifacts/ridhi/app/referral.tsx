@@ -56,14 +56,14 @@ export default function ReferralScreen() {
   const shareCode = async () => {
     try {
       await Share.share({
-        message: `Join me on Ridhi — India's coolest social app! Use my referral code ${referralCode} and get 50 free coins. Download: https://ridhi.app`,
+        message: `Join me on Ridhi — India's coolest social app! Use my referral code ${referralCode} and get 25 free coins. Download: https://ridhi.app`,
       });
     } catch {}
   };
 
   const claimDailyBonus = () => {
     if (claimedToday) return;
-    addCoins(10 + streak * 2);
+    addCoins(1 + streak);
     setClaimedToday(true);
   };
 
@@ -108,7 +108,7 @@ export default function ReferralScreen() {
               ) : (
                 <>
                   <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                  <Text style={[styles.claimText, { color: "#fff" }]}>+{10 + streak * 2} coins</Text>
+                  <Text style={[styles.claimText, { color: "#fff" }]}>+{1 + streak} coins</Text>
                 </>
               )}
             </Pressable>
@@ -130,11 +130,11 @@ export default function ReferralScreen() {
           <View style={styles.referralTop}>
             <View>
               <Text style={[styles.referralTitle, { color: colors.foreground }]}>Invite Friends & Earn</Text>
-              <Text style={[styles.referralSub, { color: colors.mutedForeground }]}>Get 50 coins per verified referral</Text>
+              <Text style={[styles.referralSub, { color: colors.mutedForeground }]}>Get 25 coins per verified referral</Text>
             </View>
             <View style={[styles.referralReward, { backgroundColor: colors.primary + "18" }]}>
               <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
-              <Text style={[styles.referralRewardText, { color: colors.primary }]}>50 coins</Text>
+              <Text style={[styles.referralRewardText, { color: colors.primary }]}>25 coins</Text>
             </View>
           </View>
           <View style={[styles.codeBox, { backgroundColor: colors.muted, borderColor: colors.border }]}>

@@ -214,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const lastDate = last ? new Date(last.getFullYear(), last.getMonth(), last.getDate()) : null;
       if (lastDate && lastDate.getTime() >= today.getTime()) return prev; // already claimed today
       claimed = true;
-      const updated = { ...prev, coins: prev.coins + 10, lastDailyRewardAt: now.toISOString() };
+      const updated = { ...prev, coins: prev.coins + 3, lastDailyRewardAt: now.toISOString() };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
