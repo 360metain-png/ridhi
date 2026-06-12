@@ -15,7 +15,7 @@ import {
   Play, Pause, Trash2, Pencil, X, Copy, BarChart3, Layers, Image,
   Star, Clock, Calendar, Target, Sparkles, ArrowRight, Megaphone,
   RefreshCw, CheckCircle, Settings2, Monitor, Smartphone, Upload,
-  Link2, ImageOff,
+  Link2, ImageOff, IndianRupee,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -395,6 +395,8 @@ export default function CommercialBanners() {
   const totalClicks      = banners.reduce((s, b) => s + b.clicks, 0);
   const activeBanners    = banners.filter(b => b.status === "active").length;
   const avgCTR           = totalImpressions ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0.0";
+  const totalSpend       = banners.reduce((s, b) => s + (parseFloat(b.spend.replace(/[^0-9]/g, "")) || 0), 0);
+  const revenue          = Math.round(totalSpend * 0.30);
 
   return (
     <div className="space-y-6">
@@ -422,6 +424,10 @@ export default function CommercialBanners() {
           { label: "Total Impressions", value: fmt(totalImpressions), sub: "all time",      icon: Eye,          color: "text-blue-500",   bg: "bg-blue-500/10"   },
           { label: "Total Clicks",  value: fmt(totalClicks), sub: "all time",               icon: MousePointer, color: "text-emerald-500", bg: "bg-emerald-500/10"},
           { label: "Avg CTR",       value: avgCTR + "%", sub: "across all banners",         icon: TrendingUp,   color: "text-pink-500",   bg: "bg-pink-500/10"   },
+          { label: "Avg CPC",       value: `₹${totalClicks > 0 ? ((totalSpend / totalClicks)).toFixed(2) : "0.00"}`, sub: "cost per click",  icon: Target,     color: "text-teal-500",   bg: "bg-teal-500/10"   },
+          { label: "Avg CPM",       value: `₹${totalImpressions > 0 ? ((totalSpend / totalImpressions) * 1000).toFixed(0) : "0"}`, sub: "cost per 1K impressions", icon: BarChart3, color: "text-rose-500", bg: "bg-rose-500/10"   },
+          { label: "Total Spend",   value: `₹${totalSpend.toLocaleString()}`, sub: "all time",             icon: IndianRupee,  color: "text-amber-500", bg: "bg-amber-500/10"  },
+          { label: "ROAS",          value: `${totalSpend > 0 ? ((revenue / totalSpend) * 100).toFixed(1) : "0.0"}%`, sub: "return on ad spend", icon: Star,       color: "text-orange-500", bg: "bg-orange-500/10" },
         ].map(m => (
           <Card key={m.label}>
             <CardContent className="p-4 flex items-center gap-3">

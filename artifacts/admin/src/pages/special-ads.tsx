@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Plus, Eye, MousePointer, LayoutTemplate, Layers, Users, Star,
   Pencil, Trash2, Play, Pause, X, BarChart3, Zap, Crown, Clock,
-  ImageIcon, Palette, AlignLeft, Target, Calendar,
+  ImageIcon, Palette, AlignLeft, Target, Calendar, TrendingUp, IndianRupee,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -765,6 +765,12 @@ export default function SpecialAdsPage() {
   const totalClicks   = [...INITIAL_BANNERS, ...INITIAL_POPUPS].reduce((s, a) => s + a.clicks, 0);
   const avgCtr        = totalImpr ? ((totalClicks / totalImpr) * 100).toFixed(1) : "0.0";
 
+  const totalSpend = 384000; // approx total from mock client data
+  const platformRevenue = Math.round(totalSpend * 0.30);
+  const avgCpc = totalClicks > 0 ? (totalSpend / totalClicks).toFixed(2) : "0.00";
+  const avgCpm = totalImpr > 0 ? ((totalSpend / totalImpr) * 1000).toFixed(0) : "0";
+  const roas = totalSpend > 0 ? ((platformRevenue / totalSpend) * 100).toFixed(1) : "0.0";
+
   const stats = [
     { label: "Banner Ads",       value: String(totalBanners),                icon: LayoutTemplate, color: "text-violet-400" },
     { label: "Popup Ads",        value: String(totalPopups),                  icon: Layers,         color: "text-pink-400"   },
@@ -772,6 +778,10 @@ export default function SpecialAdsPage() {
     { label: "Total Impressions",value: fmt(totalImpr),                       icon: Eye,            color: "text-blue-400"   },
     { label: "Total Clicks",     value: fmt(totalClicks),                     icon: MousePointer,   color: "text-amber-400"  },
     { label: "Avg CTR",          value: avgCtr + "%",                         icon: BarChart3,      color: "text-cyan-400"   },
+    { label: "Avg CPC",          value: `₹${avgCpc}`,                        icon: TrendingUp,       color: "text-teal-400"   },
+    { label: "Avg CPM",          value: `₹${avgCpm}`,                        icon: Target,           color: "text-rose-400"   },
+    { label: "Revenue",          value: `₹${(platformRevenue/1000).toFixed(1)}K`, icon: IndianRupee,   color: "text-green-400"  },
+    { label: "ROAS",             value: `${roas}%`,                           icon: Star,             color: "text-orange-400" },
     { label: "Special Clients",  value: String(clients.length),               icon: Crown,          color: "text-amber-400"  },
     { label: "Diamond Clients",  value: String(clients.filter((c) => c.tier === "Diamond").length), icon: Star, color: "text-violet-400" },
   ];

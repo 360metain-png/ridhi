@@ -411,6 +411,10 @@ Channels: Push + SMS + Email`);
           { label: "Ridhi Revenue",     val: `₹${ridhiRevenue.toLocaleString()}`,   icon: TrendingUp,    color: "text-green-600",  bg: "bg-green-50 dark:bg-green-950/20 border-green-200" },
           { label: "Total Impressions", val: `${(totalImpr/1000).toFixed(0)}K`,     icon: Eye,           color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/20 border-violet-200"},
           { label: "Total Clicks",      val: totalClicks.toLocaleString(),           icon: MousePointer,  color: "text-amber-600",  bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-200" },
+          { label: "Avg CPC",           val: `₹${totalClicks > 0 ? (totalSpend / totalClicks).toFixed(2) : "0.00"}`, icon: TrendingUp,    color: "text-blue-600",   bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-200"    },
+          { label: "Avg CPM",           val: `₹${totalImpr > 0 ? ((totalSpend / totalImpr) * 1000).toFixed(0) : "0"}`, icon: BarChart3,     color: "text-rose-600",   bg: "bg-rose-50 dark:bg-rose-950/20 border-rose-200"   },
+          { label: "Avg CTR",           val: `${totalImpr > 0 ? ((totalClicks / totalImpr) * 100).toFixed(1) : "0.0"}%`, icon: Target,        color: "text-teal-600",   bg: "bg-teal-50 dark:bg-teal-950/20 border-teal-200"   },
+          { label: "ROAS",              val: `${ridhiRevenue > 0 ? ((ridhiRevenue / totalSpend) * 100).toFixed(1) : "0.0"}%`, icon: Zap,           color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/20 border-orange-200" },
         ].map(({ label, val, icon: Icon, color, bg }) => (
           <Card key={label} className={`border ${bg}`}>
             <CardContent className="p-4 flex items-center gap-3">

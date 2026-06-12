@@ -10,6 +10,7 @@ import {
   X, Pause, Play, AlertTriangle, Clock, Users,
   Target, Zap, Filter, Crown, ChevronDown, ChevronUp,
   ClipboardList, Phone, Mail, MapPin, Download,
+  MousePointer, TrendingUp,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
@@ -427,7 +428,11 @@ export default function Promotions() {
   const totalSpend  = promos.reduce((sum, p) => sum + p.spentSoFar, 0);
   const totalActive = promos.filter(p => p.status === "active").length;
   const totalReach  = promos.reduce((sum, p) => sum + (p.actualReach ?? 0), 0);
+  const totalLeads  = promos.reduce((sum, p) => sum + (p.leads ?? 0), 0);
+  const totalReactions = promos.reduce((sum, p) => sum + (p.reactions ?? 0), 0);
+  const totalConversions = totalLeads + totalReactions;
   const pendingCnt  = promos.filter(p => p.status === "pending").length;
+  const platformRevenue = Math.round(totalSpend * 0.35);
 
   return (
     <div className="space-y-6">
@@ -449,6 +454,10 @@ export default function Promotions() {
           { label: "Active Campaigns",value: totalActive,                       icon: Play,          color: "text-green-600",  bg: "bg-green-50 dark:bg-green-950/20 border-green-200" },
           { label: "Total Reached",   value: `${(totalReach/1000).toFixed(0)}K`,icon: Globe,         color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/20 border-violet-200" },
           { label: "Platform Spend",  value: `₹${totalSpend.toLocaleString()}`, icon: IndianRupee,   color: "text-rose-600",   bg: "bg-rose-50 dark:bg-rose-950/20 border-rose-200" },
+          { label: "Conversions",     value: totalConversions.toLocaleString(), icon: Zap,           color: "text-teal-600",   bg: "bg-teal-50 dark:bg-teal-950/20 border-teal-200"   },
+          { label: "CTC",             value: `₹${totalConversions > 0 ? (totalSpend / totalConversions).toFixed(2) : "0.00"}`, icon: Target,        color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/20 border-orange-200" },
+          { label: "CPC",             value: `₹${totalReach > 0 ? (totalSpend / totalReach).toFixed(2) : "0.00"}`, icon: MousePointer,  color: "text-blue-600",   bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-200"    },
+          { label: "ROAS",            value: `${platformRevenue > 0 ? ((platformRevenue / totalSpend) * 100).toFixed(1) : "0.0"}%`, icon: TrendingUp,    color: "text-pink-600",   bg: "bg-pink-50 dark:bg-pink-950/20 border-pink-200"   },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <Card key={label} className={`border ${bg}`}>
             <CardContent className="p-4 flex items-center gap-3">
