@@ -15,6 +15,7 @@ import {
   ImageIcon, Palette, AlignLeft, Target, Calendar, TrendingUp, IndianRupee,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Tier     = "Diamond" | "Gold" | "Premium";
@@ -810,6 +811,56 @@ export default function SpecialAdsPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* ── Daily Performance Charts ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2"><Eye className="w-4 h-4 text-violet-500" />Daily Impressions & Clicks</p>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={[
+                { date: "12 May", impressions: 42000, clicks: 3100 },
+                { date: "13 May", impressions: 48000, clicks: 3600 },
+                { date: "14 May", impressions: 55000, clicks: 4100 },
+                { date: "15 May", impressions: 52000, clicks: 3800 },
+                { date: "16 May", impressions: 61000, clicks: 4500 },
+                { date: "17 May", impressions: 58000, clicks: 4300 },
+                { date: "18 May", impressions: 65000, clicks: 4900 },
+              ]} barSize={14}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip formatter={(v: number, n: string) => [v.toLocaleString(), n === "impressions" ? "Impressions" : "Clicks"]} />
+                <Bar dataKey="impressions" fill="#7B2FBE" radius={[4, 4, 0, 0]} opacity={0.8} />
+                <Bar dataKey="clicks" fill="#E91E8C" radius={[4, 4, 0, 0]} opacity={0.9} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold mb-3 flex items-center gap-2"><IndianRupee className="w-4 h-4 text-rose-500" />Daily Spend vs Revenue (₹)</p>
+            <ResponsiveContainer width="100%" height={160}>
+              <LineChart data={[
+                { date: "12 May", spend: 42000, revenue: 12600 },
+                { date: "13 May", spend: 48000, revenue: 14400 },
+                { date: "14 May", spend: 55000, revenue: 16500 },
+                { date: "15 May", spend: 52000, revenue: 15600 },
+                { date: "16 May", spend: 61000, revenue: 18300 },
+                { date: "17 May", spend: 58000, revenue: 17400 },
+                { date: "18 May", spend: 65000, revenue: 19500 },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip formatter={(v: number, n: string) => [`₹${v.toLocaleString()}`, n === "spend" ? "Spend" : "Revenue"]} />
+                <Line type="monotone" dataKey="spend" stroke="#E91E8C" strokeWidth={2} dot={{ fill: "#E91E8C", r: 3 }} />
+                <Line type="monotone" dataKey="revenue" stroke="#7B2FBE" strokeWidth={2} dot={{ fill: "#7B2FBE", r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="banners">
