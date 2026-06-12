@@ -18,7 +18,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { CoinAmount } from "@/components/CoinAmount";
 import { Avatar } from "@/components/Avatar";
@@ -152,6 +154,7 @@ function ChatBubble({ msg }: { msg: PodcastChatMsg }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function PodcastRoomScreen() {
+  useTrackScreen("podcasts");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 60 : insets.top + 8;

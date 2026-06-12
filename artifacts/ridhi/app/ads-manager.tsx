@@ -22,7 +22,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
@@ -369,6 +371,7 @@ function DetailItem({ label, value }: { label: string; value: string }) {
 
 // ── Main Screen ────────────────────────────────────────────────────────────────
 export default function AdsManagerScreen() {
+  useTrackScreen("ads_manager");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

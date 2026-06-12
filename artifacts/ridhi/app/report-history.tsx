@@ -12,7 +12,9 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -44,6 +46,7 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 export default function ReportHistoryScreen() {
+  useTrackScreen("report_history");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

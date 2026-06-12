@@ -12,7 +12,9 @@ import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import { Avatar } from "@/components/Avatar";
 
 type Period = "daily" | "weekly" | "monthly";
@@ -84,6 +86,7 @@ const CATEGORY_LABELS: Record<Category, { label: string; icon: string; unit: str
 };
 
 export default function LeaderboardScreen() {
+  useTrackScreen("leaderboard");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<Period>("weekly");

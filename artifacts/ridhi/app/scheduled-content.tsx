@@ -13,7 +13,9 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 import {
   ScheduledContent,
@@ -50,6 +52,7 @@ const STATUS_LABELS: Record<ScheduledStatus, string> = {
 };
 
 export default function ScheduledContentScreen() {
+  useTrackScreen("scheduled_content");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<"all" | ScheduledStatus>("all");

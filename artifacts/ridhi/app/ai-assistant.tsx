@@ -15,7 +15,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 
 const { width } = Dimensions.get("window");
 
@@ -61,6 +63,7 @@ const HISTORY: Msg[] = [
 ];
 
 export default function AIAssistantScreen() {
+  useTrackScreen("ai_assistant");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

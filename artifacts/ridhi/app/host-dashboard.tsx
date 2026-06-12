@@ -12,7 +12,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { useAuth } from "@/contexts/AuthContext";
 import { PrivateHead } from "@/components/PrivateHead";
 
@@ -119,6 +121,7 @@ function StatCard({ icon, label, value, sub, color }: {
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function HostDashboard() {
+  useTrackScreen("host_dashboard");
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const { user } = useAuth();

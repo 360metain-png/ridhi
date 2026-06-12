@@ -13,7 +13,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { GradientButton } from "@/components/GradientButton";
 import { SeoHead } from "@/components/SeoHead";
 
@@ -78,6 +80,7 @@ const PLANS = [
 const TOTAL_STEPS = 4;
 
 export default function BrandRegisterScreen() {
+  useTrackScreen("brand_register");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

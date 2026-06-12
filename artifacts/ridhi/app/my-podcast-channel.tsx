@@ -6,7 +6,9 @@ import {
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPlays, formatDuration } from "@/data/podcastData";
 import { RidhiCoin } from "@/components/RidhiCoin";
@@ -111,6 +113,7 @@ const WEEK_DAYS    = ["M", "T", "W", "T", "F", "S", "S"];
 const MAX_PLAYS    = Math.max(...WEEKLY_PLAYS);
 
 export default function MyPodcastChannelScreen() {
+  useTrackScreen("podcasts");
   const colors = useColors();
   const router  = useRouter();
   const { user } = useAuth();

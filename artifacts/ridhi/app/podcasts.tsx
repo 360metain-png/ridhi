@@ -16,7 +16,9 @@ import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { SeoHead } from "@/components/SeoHead";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import {
   PODCAST_CATEGORIES,
   TRENDING_EPISODES,
@@ -27,6 +29,7 @@ import {
   formatPlays,
   formatDuration,
 } from "@/data/podcastData";
+
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const { width } = Dimensions.get("window");
@@ -111,6 +114,7 @@ function EpisodeCard({ ep, onPress, wide }: { ep: PodcastEpisode; onPress: () =>
 }
 
 export default function PodcastsScreen() {
+  useTrackScreen("podcasts");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [activeCategory, setActiveCategory] = useState<PodcastCategory>("All");

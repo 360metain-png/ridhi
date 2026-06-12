@@ -18,7 +18,9 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as ScreenCapture from "expo-screen-capture";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { CHATROOMS, getDefaultMessages, type RoomMessage } from "@/data/chatrooms";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
@@ -149,6 +151,7 @@ function MessageBubble({
 }
 
 export default function ChatroomDetailScreen() {
+  useTrackScreen("chatroom");
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();

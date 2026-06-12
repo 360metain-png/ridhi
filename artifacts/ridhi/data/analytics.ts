@@ -5,7 +5,15 @@ export type ScreenName =
   | "home" | "reels" | "match" | "chat" | "profile" | "explore"
   | "live" | "audio_room" | "random_call" | "chatroom" | "story"
   | "create_post" | "settings" | "wallet" | "notifications" | "creator_dashboard"
-  | "subscriptions" | "communities" | "report_history" | "scheduled_content";
+  | "subscriptions" | "communities" | "report_history" | "scheduled_content"
+  | "podcasts" | "vibe_stars" | "music_library" | "lead_form" | "gaming"
+  | "pk_battle" | "duet" | "stitch" | "leaderboard" | "missions"
+  | "coin_store" | "ads_manager" | "chatrooms" | "group_chat"
+  | "story_viewer" | "about" | "help_support" | "withdraw"
+  | "creator_marketplace" | "agent_dashboard" | "host_dashboard"
+  | "ai_assistant" | "brand_post_deal" | "brand_register" | "call_persona"
+  | "host_profile" | "kyc" | "my_gifts" | "referral" | "privacy_policy"
+  | "terms" | "not_found" | "onboarding" | "login" | "otp" | "profile_setup";
 
 export type EventType =
   | "session_start" | "session_end"

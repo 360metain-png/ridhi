@@ -13,7 +13,9 @@ import {
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth, CallPersona } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -36,6 +38,7 @@ const SUGGESTED_NAMES_MALE = ["Rahul", "Arjun", "Dev", "Karan", "Rohan", "Amit",
 const SUGGESTED_CITIES = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai", "Kolkata", "Pune", "Jaipur", "Lucknow", "Indore"];
 
 export default function CallPersonaScreen() {
+  useTrackScreen("call_persona");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();

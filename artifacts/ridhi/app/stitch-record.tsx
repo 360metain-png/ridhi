@@ -11,7 +11,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 
 const { width, height } = Dimensions.get("window");
 
@@ -23,6 +25,7 @@ const TRIM_OPTIONS = [
 ] as const;
 
 export default function StitchRecordScreen() {
+  useTrackScreen("stitch");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ reelId: string; reelTitle: string; reelUser: string }>();

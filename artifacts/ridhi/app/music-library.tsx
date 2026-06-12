@@ -14,13 +14,16 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
 // ── Indian music library data ───────────────────────────────────────────────────────
+
 const MUSIC_CATEGORIES = [
   { id: "trending", label: "🔥 Trending", color: "#FF6B35" },
   { id: "bollywood", label: "🎬 Bollywood", color: "#E91E8C" },
@@ -64,6 +67,7 @@ function fmtCount(n: number) {
 }
 
 export default function MusicLibraryScreen() {
+  useTrackScreen("music_library");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

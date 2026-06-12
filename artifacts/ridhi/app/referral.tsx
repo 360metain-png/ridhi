@@ -13,7 +13,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { useAuth } from "@/contexts/AuthContext";
 import { CoinBadge } from "@/components/CoinBadge";
 import { GradientButton } from "@/components/GradientButton";
@@ -44,6 +46,7 @@ const REFERRALS = [
 ];
 
 export default function ReferralScreen() {
+  useTrackScreen("referral");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();

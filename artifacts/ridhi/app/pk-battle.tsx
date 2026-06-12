@@ -16,7 +16,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ScreenCapture from "expo-screen-capture";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
@@ -88,6 +90,7 @@ function FloatingGift({ emoji, side }: { emoji: string; side: "left" | "right" }
 }
 
 export default function PKBattleScreen() {
+  useTrackScreen("pk_battle");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

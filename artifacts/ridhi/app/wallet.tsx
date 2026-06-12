@@ -18,7 +18,9 @@ const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
@@ -115,6 +117,7 @@ function LivePulseDot() {
 }
 
 export default function WalletScreen() {
+  useTrackScreen("wallet");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, addCoins, claimDailyReward } = useAuth();

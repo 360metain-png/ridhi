@@ -7,7 +7,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -82,6 +84,7 @@ const sb = StyleSheet.create({
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 export default function LeadFormBuilderScreen() {
+  useTrackScreen("lead_form");
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const topPad  = Platform.OS === "web" ? 67 : insets.top;

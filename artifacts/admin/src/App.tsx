@@ -52,6 +52,15 @@ import Support            from "@/pages/support";
 import Screenshots        from "@/pages/screenshots";
 import ContentEditor      from "@/pages/content-editor";
 import FinancialStatements from "@/pages/financial-statements";
+import Gaming              from "@/pages/gaming";
+import Marketplace         from "@/pages/marketplace";
+import Podcasts            from "@/pages/podcasts";
+import VibeStars           from "@/pages/vibe-stars";
+import MusicLibrary        from "@/pages/music-library";
+import LeadForms           from "@/pages/lead-forms";
+import Stories             from "@/pages/stories";
+import ChatModeration      from "@/pages/chat-moderation";
+import Dating              from "@/pages/dating";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -72,6 +81,15 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/revenue":      ["super_admin"],
   "/monetization": ["super_admin"],
   "/financial-statements": ["super_admin"],
+  "/gaming":        ["super_admin"],
+  "/marketplace":   ["super_admin"],
+  "/podcasts":      ["super_admin"],
+  "/vibe-stars":    ["super_admin"],
+  "/music-library": ["super_admin"],
+  "/lead-forms":    ["super_admin"],
+  "/stories":       ["super_admin"],
+  "/chat-moderation": ["super_admin"],
+  "/dating":        ["super_admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin"],
   "/levels":       ["super_admin", "admin"],
@@ -210,6 +228,15 @@ function Router() {
       <Route path="/downloads"         component={() => <RoleRoute component={Downloads}         path="/downloads" />} />
       <Route path="/screenshots"       component={() => <RoleRoute component={Screenshots}       path="/screenshots" />} />
       <Route path="/financial-statements" component={() => <RoleRoute component={FinancialStatements} path="/financial-statements" />} />
+      <Route path="/gaming"          component={() => <RoleRoute component={Gaming}          path="/gaming" />} />
+      <Route path="/marketplace"     component={() => <RoleRoute component={Marketplace}     path="/marketplace" />} />
+      <Route path="/podcasts"        component={() => <RoleRoute component={Podcasts}        path="/podcasts" />} />
+      <Route path="/vibe-stars"      component={() => <RoleRoute component={VibeStars}       path="/vibe-stars" />} />
+      <Route path="/music-library"    component={() => <RoleRoute component={MusicLibrary}    path="/music-library" />} />
+      <Route path="/lead-forms"      component={() => <RoleRoute component={LeadForms}        path="/lead-forms" />} />
+      <Route path="/stories"         component={() => <RoleRoute component={Stories}          path="/stories" />} />
+      <Route path="/chat-moderation" component={() => <RoleRoute component={ChatModeration}  path="/chat-moderation" />} />
+      <Route path="/dating"         component={() => <RoleRoute component={Dating}           path="/dating" />} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -5,7 +5,9 @@ import {
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { GIFTS } from "@/data/coinEconomy";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { PrivateHead } from "@/components/PrivateHead";
@@ -59,6 +61,7 @@ const CAT_COLOR: Record<string, string> = {
 };
 
 export default function MyGiftsScreen() {
+  useTrackScreen("my_gifts");
   const colors = useColors();
   const router  = useRouter();
   const [tab, setTab] = useState<Tab>("received");

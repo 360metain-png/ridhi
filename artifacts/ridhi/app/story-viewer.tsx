@@ -13,7 +13,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
@@ -50,6 +52,7 @@ const STORIES = [
 const STORY_DURATION = 5000;
 
 export default function StoryViewerScreen() {
+  useTrackScreen("story_viewer");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const [currentIndex, setCurrentIndex] = useState(0);

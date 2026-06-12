@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import type { VipTier } from "@/components/SubscriptionBadge";
 

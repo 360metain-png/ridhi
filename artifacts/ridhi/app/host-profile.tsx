@@ -17,7 +17,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
@@ -73,6 +75,7 @@ const MONTHLY_BARS = [0.3, 0.45, 0.6, 0.5, 0.72, 0.85, 0.92, 0.78, 0.88, 0.76, 0
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 export default function HostProfileScreen() {
+  useTrackScreen("host_profile");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, updateProfile } = useAuth();

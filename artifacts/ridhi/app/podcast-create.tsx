@@ -18,7 +18,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { GradientButton } from "@/components/GradientButton";
 import { RidhiCoin } from "@/components/RidhiCoin";
@@ -82,6 +84,7 @@ function SectionLabel({ icon, title, colors }: { icon: string; title: string; co
 
 // ── Screen ───────────────────────────────────────────────────────────────────
 export default function PodcastCreateScreen() {
+  useTrackScreen("podcasts");
   const colors = useColors();
   const insets = useSafeAreaInsets();
 

@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const { width } = Dimensions.get("window");
 

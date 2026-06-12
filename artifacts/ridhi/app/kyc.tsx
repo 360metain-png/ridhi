@@ -15,7 +15,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/utils/api";
@@ -129,6 +131,7 @@ function StatusBadge({ status }: { status: string }) {
 // ── Main Screen ────────────────────────────────────────────────────────
 
 export default function KYCScreen() {
+  useTrackScreen("kyc");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();

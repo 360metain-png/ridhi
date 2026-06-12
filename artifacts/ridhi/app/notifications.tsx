@@ -15,7 +15,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import { PrivateHead } from "@/components/PrivateHead";
 import { Avatar } from "@/components/Avatar";
 import { NOTIFICATIONS, MARKETING_NOTIFICATIONS, type MarketingNotification } from "@/data/mockData";
@@ -223,6 +225,7 @@ function PromoCard({
 }
 
 export default function NotificationsScreen() {
+  useTrackScreen("notifications");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

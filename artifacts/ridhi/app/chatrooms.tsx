@@ -15,7 +15,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+
 import { CHATROOMS, ROOM_CATEGORIES, type Chatroom } from "@/data/chatrooms";
 import { SeoHead } from "@/components/SeoHead";
 
@@ -25,6 +27,7 @@ function formatCount(n: number): string {
 }
 
 function RoomCard({ room, onPress }: { room: Chatroom; onPress: () => void }) {
+
   const colors = useColors();
   return (
     <Pressable
@@ -101,6 +104,7 @@ function RoomCard({ room, onPress }: { room: Chatroom; onPress: () => void }) {
 const ROOM_EMOJIS = ["💬", "🎵", "🎮", "🍛", "💪", "📸", "🌍", "🏏", "🌸", "🚀", "💃", "🎨"];
 
 export default function ChatroomsScreen() {
+  useTrackScreen("chatrooms");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

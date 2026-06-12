@@ -3,11 +3,13 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Users, ShieldAlert, UsersRound, Coins, IndianRupee,
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
-  Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen,
+  Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen, Heart,
   Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
   TrendingUp, Globe, Terminal, Sparkles, Download, Monitor, Film, FileText,
   Landmark,
+  Gamepad2, Headphones, Music, PenTool, MessageSquare,
+  Eye, Clapperboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -58,6 +60,12 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
       { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA },
       { name: "Live Streams",       href: "/live-streams", icon: Radio,       allowedRoles: SA },
+      { name: "Gaming",             href: "/gaming",        icon: Gamepad2,    allowedRoles: SA },
+      { name: "Dating",             href: "/dating",        icon: Heart,        allowedRoles: SA },
+      { name: "Podcasts",           href: "/podcasts",      icon: Headphones,  allowedRoles: SA },
+      { name: "Vibe Stars",         href: "/vibe-stars",    icon: Star,        allowedRoles: SA },
+      { name: "Music Library",      href: "/music-library", icon: Music,       allowedRoles: SA },
+      { name: "Stories",            href: "/stories",       icon: Clapperboard,allowedRoles: SA },
     ],
   },
   {
@@ -66,6 +74,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA },
       { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA },
       { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA },
+      { name: "Marketplace",         href: "/marketplace",         icon: ShoppingBag,  badge: "8", allowedRoles: SA },
     ],
   },
   {
@@ -103,6 +112,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Downloads & Reports",href: "/downloads",         icon: Download,      allowedRoles: SA   },
       { name: "App Screenshots",    href: "/screenshots",       icon: Monitor,       allowedRoles: SA   },
       { name: "Content Editor",     href: "/content-editor",    icon: FileText,      allowedRoles: SA   },
+      { name: "Lead Forms",         href: "/lead-forms",        icon: PenTool,       allowedRoles: SA   },
+      { name: "Chat Moderation",    href: "/chat-moderation",   icon: MessageSquare, allowedRoles: SA   },
     ],
   },
 ];

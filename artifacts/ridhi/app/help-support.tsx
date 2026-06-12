@@ -14,7 +14,9 @@ import { SeoHead } from "@/components/SeoHead";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors";
+import { useColors } from "@/hooks/useColors"
+import { useTrackScreen } from "@/hooks/useAnalytics";
+;
 
 type Colors = ReturnType<typeof useColors>;
 
@@ -141,6 +143,7 @@ function FaqItem({ item, colors }: { item: typeof FAQS[0]; colors: Colors }) {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function HelpSupportScreen() {
+  useTrackScreen("help_support");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

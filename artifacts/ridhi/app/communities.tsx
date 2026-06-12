@@ -19,6 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CATEGORIES, COMMUNITIES, Community } from "@/data/communities";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const EMOJIS = ["🎵", "🎮", "💪", "🍛", "🌍", "📸", "💃", "🏏", "🎨", "📚", "🚀", "🌸"];
 const COMMUNITY_CATEGORIES = ["Social", "Gaming", "Fitness", "Food", "Travel", "Fashion", "Music", "Tech"];
@@ -94,6 +95,8 @@ export default function CommunitiesScreen() {
   const [newEmoji, setNewEmoji] = useState("🎵");
   const [newCategory, setNewCategory] = useState("Social");
   const [creating, setCreating] = useState(false);
+
+  useTrackScreen("communities");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
