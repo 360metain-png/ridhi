@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { PrivateHead } from "@/components/PrivateHead";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const { width: SW } = Dimensions.get("window");
 

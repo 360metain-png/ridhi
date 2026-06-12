@@ -73,6 +73,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Coins",         href: "/coins",         icon: Coins,       allowedRoles: SA },
       { name: "Payouts",       href: "/payouts",       icon: IndianRupee, allowedRoles: SA },
       { name: "Revenue & Ads", href: "/revenue",       icon: BarChart3,   allowedRoles: SA },
+      { name: "Monetization", href: "/monetization", icon: TrendingUp,   allowedRoles: SA },
     ],
   },
   {

@@ -20,6 +20,7 @@ import Marketing     from "@/pages/marketing";
 import Settings      from "@/pages/settings";
 import LiveStreams    from "@/pages/live-streams";
 import Revenue       from "@/pages/revenue";
+import Monetization  from "@/pages/monetization";
 import SuperAdmin    from "@/pages/super-admin";
 import PromoCodes    from "@/pages/promo-codes";
 import ReferralProgram    from "@/pages/referral-program";
@@ -66,6 +67,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/coins":        ["super_admin"],
   "/payouts":      ["super_admin"],
   "/revenue":      ["super_admin"],
+  "/monetization": ["super_admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin"],
   "/levels":       ["super_admin", "admin"],
@@ -175,6 +177,7 @@ function Router() {
       <Route path="/settings"     component={() => <RoleRoute component={Settings}     path="/settings" />} />
       <Route path="/live-streams" component={() => <RoleRoute component={LiveStreams}  path="/live-streams" />} />
       <Route path="/revenue"      component={() => <RoleRoute component={Revenue}      path="/revenue" />} />
+      <Route path="/monetization" component={() => <RoleRoute component={Monetization} path="/monetization" />} />
       <Route path="/super-admin"  component={() => <RoleRoute component={SuperAdmin}   path="/super-admin" />} />
       <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}      path="/promo-codes" />} />
       <Route path="/referral"          component={() => <RoleRoute component={ReferralProgram}  path="/referral" />} />
