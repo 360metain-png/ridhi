@@ -1,0 +1,9 @@
+[meta]
+name = "ridhi-video"
+title = "Ridhi Marketing Video"
+kind = "video"
+
+[[services]]
+name = "Ridhi Video"
+paths = ["/ridhi-video"]
+localPort = 5002
