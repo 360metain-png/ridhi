@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const { width } = Dimensions.get("window");
 
@@ -330,6 +331,7 @@ function ContactRow({ icon, label, value, href }: { icon: React.ComponentProps<t
 }
 
 export default function PrivacyPolicyScreen() {
+  useTrackScreen("privacy_policy");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

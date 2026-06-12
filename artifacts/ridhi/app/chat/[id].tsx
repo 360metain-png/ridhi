@@ -20,7 +20,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 interface Message {
   id: string;
@@ -53,6 +53,7 @@ export default function ChatDetailScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const userId = user?.id;
+  const { trackChat } = useAnalytics();
 
   // Block screenshots & screen recordings for the entire chat session (native only)
   useEffect(() => {
@@ -121,6 +122,7 @@ export default function ChatDetailScreen() {
     setMessages((prev) => [msg, ...prev]);
     setInput("");
     setShowStickers(false);
+    trackChat(type);
 
     // Send to API
     if (userId && id) {

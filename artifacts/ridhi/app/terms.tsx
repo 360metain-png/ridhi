@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 type Colors = ReturnType<typeof useColors>;
 
@@ -353,6 +354,7 @@ function SectionCard({ sec, colors }: { sec: SectionDef; colors: Colors }) {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function TermsScreen() {
+  useTrackScreen("terms");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

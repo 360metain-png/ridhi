@@ -3,8 +3,10 @@ import { Platform, StyleSheet, Text, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { SeoHead } from "@/components/SeoHead";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 export default function NotFoundScreen() {
+  useTrackScreen("not_found");
   const colors = useColors();
 
   return (

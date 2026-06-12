@@ -19,7 +19,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { CATEGORIES, COMMUNITIES, Community } from "@/data/communities";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const EMOJIS = ["🎵", "🎮", "💪", "🍛", "🌍", "📸", "💃", "🏏", "🎨", "📚", "🚀", "🌸"];
 const COMMUNITY_CATEGORIES = ["Social", "Gaming", "Fitness", "Food", "Travel", "Fashion", "Music", "Tech"];
@@ -95,6 +95,7 @@ export default function CommunitiesScreen() {
   const [newEmoji, setNewEmoji] = useState("🎵");
   const [newCategory, setNewCategory] = useState("Social");
   const [creating, setCreating] = useState(false);
+  const { trackCommunity } = useAnalytics();
 
   useTrackScreen("communities");
 
@@ -107,9 +108,12 @@ export default function CommunitiesScreen() {
   const joined = communities.filter((c) => c.isJoined);
 
   const handleJoin = (id: string) => {
+    const comm = communities.find((c) => c.id === id);
+    const wasJoined = comm?.isJoined ?? false;
     setCommunities((prev) =>
       prev.map((c) => c.id === id ? { ...c, isJoined: !c.isJoined } : c)
     );
+    trackCommunity(wasJoined ? "leave" : "join", id);
   };
 
   const handleCreate = async () => {

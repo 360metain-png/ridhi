@@ -193,7 +193,7 @@ export function useAnalytics() {
   );
 
   const trackChat = useCallback(
-    async (type: "text" | "voice" | "image" | "gif") => {
+    async (type: "text" | "voice" | "image" | "gif" | "sticker") => {
       const session = await getCurrentSession();
       if (!session) return;
       await trackChatSend(type, userId, session.id);

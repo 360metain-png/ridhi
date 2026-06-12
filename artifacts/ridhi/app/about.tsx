@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useTrackScreen } from "@/hooks/useAnalytics";
 
 const { width } = Dimensions.get("window");
 const LOGO = require("../assets/images/ridhi_logo.png");
@@ -76,6 +77,7 @@ const WHY_US = [
 ];
 
 export default function AboutScreen() {
+  useTrackScreen("about");
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 67 : insets.top;

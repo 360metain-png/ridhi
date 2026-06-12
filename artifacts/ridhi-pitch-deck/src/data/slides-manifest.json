@@ -1,0 +1,122 @@
+[
+  {
+    "id": "ridhi-slide-1",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide1.tsx",
+    "title": "Title Slide",
+    "description": "Ridhi branding, tagline, and investment round overview",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-2",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide2.tsx",
+    "title": "The Problem",
+    "description": "Three core problems: language barrier, fragmented experience, creator monetization",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-3",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide3.tsx",
+    "title": "The Solution",
+    "description": "Ridhi as a super-app combining social, dating, reels, live streaming",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-4",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide4.tsx",
+    "title": "Product Features",
+    "description": "8 core feature areas with language and theme support",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-5",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide5.tsx",
+    "title": "Market Opportunity",
+    "description": "TAM breakdown: $50B+ Indian social media market",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-6",
+    "position": 6,
+    "filepath": "src/pages/slides/Slide6.tsx",
+    "title": "Traction",
+    "description": "Early metrics: downloads, MAU, session duration, retention",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-7",
+    "position": 7,
+    "filepath": "src/pages/slides/Slide7.tsx",
+    "title": "Monetization",
+    "description": "6 revenue streams: VIP, coins, gifts, ads, marketplace, creator plans",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-8",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide8.tsx",
+    "title": "Business Model",
+    "description": "Flywheel: users, creators, brands, revenue, growth, features",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-9",
+    "position": 9,
+    "filepath": "src/pages/slides/Slide9.tsx",
+    "title": "Competitive Landscape",
+    "description": "Feature comparison: Ridhi vs ShareChat, Instagram, Tinder",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-10",
+    "position": 10,
+    "filepath": "src/pages/slides/Slide10.tsx",
+    "title": "Technology",
+    "description": "Tech stack and system architecture diagram",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-11",
+    "position": 11,
+    "filepath": "src/pages/slides/Slide11.tsx",
+    "title": "Team",
+    "description": "Founders with deep India and product expertise",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-12",
+    "position": 12,
+    "filepath": "src/pages/slides/Slide12.tsx",
+    "title": "Go-to-Market",
+    "description": "12-month growth strategy with phases and targets",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-13",
+    "position": 13,
+    "filepath": "src/pages/slides/Slide13.tsx",
+    "title": "Financials",
+    "description": "Revenue projections, unit economics, and breakdown",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-14",
+    "position": 14,
+    "filepath": "src/pages/slides/Slide14.tsx",
+    "title": "The Ask",
+    "description": "$2.5M seed round, use of funds, investment terms",
+    "speakerNotes": ""
+  },
+  {
+    "id": "ridhi-slide-15",
+    "position": 15,
+    "filepath": "src/pages/slides/Slide15.tsx",
+    "title": "Thank You",
+    "description": "Closing slide with contact information and CTA",
+    "speakerNotes": ""
+  }
+]

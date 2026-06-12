@@ -298,7 +298,7 @@ export async function trackDmSend(targetUserId: string, userId: string, sessionI
   await trackEvent({ type: "dm_send", userId, targetUserId, contentType: "user", sessionId });
 }
 
-export async function trackChatSend(type: "text" | "voice" | "image" | "gif", userId: string, sessionId: string): Promise<void> {
+export async function trackChatSend(type: "text" | "voice" | "image" | "gif" | "sticker", userId: string, sessionId: string): Promise<void> {
   const eventType = type === "text" ? "chat_send" : type === "voice" ? "chat_voice" : type === "image" ? "chat_image" : "chat_gif";
   await trackEvent({ type: eventType, userId, sessionId });
 }

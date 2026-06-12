@@ -1,0 +1,17 @@
+kind = "slides"
+previewPath = "/ridhi-pitch-deck/"
+title = "Ridhi Investor Pitch Deck"
+version = "1.0.0"
+id = "ridhi-pitch-deck"
+
+[[services]]
+name = "slides"
+paths = ["/ridhi-pitch-deck/"]
+localPort = 26095
+
+[services.development]
+run = "pnpm --filter @workspace/ridhi-pitch-deck run dev"
+
+[services.env]
+PORT = "26095"
+BASE_PATH = "/ridhi-pitch-deck/"

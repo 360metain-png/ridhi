@@ -28,7 +28,7 @@ import { CoinFountainOverlay, useCoinToasts } from "@/components/CoinFountain";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { ReportSheet } from "@/components/ReportSheet";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const LIVE_GIFTS = [
   { id: "g1", emoji: "🌹", name: "Rose", cost: 10, color: "#FF3B6F" },
@@ -132,6 +132,7 @@ export default function LiveStreamScreen() {
   const insets = useSafeAreaInsets();
   const { user, addCoins } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
+  const { trackChat } = useAnalytics();
   // Block screenshots & screen recordings during live streams (native only)
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -216,6 +217,7 @@ export default function LiveStreamScreen() {
     };
     setMessages((prev) => [...prev, newMsg]);
     setShowGifts(false);
+    trackChat("text");
 
     // Debit toast for user
     fire({ type: "debit", amount: gift.cost, label: `${gift.emoji} ${gift.name}`, sublabel: "Gift Sent", large: gift.cost >= 1000, bottom: 150 });

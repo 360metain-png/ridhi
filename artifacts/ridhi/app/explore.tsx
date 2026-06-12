@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { Avatar } from "@/components/Avatar";
 
 const { width } = Dimensions.get("window");
@@ -60,6 +60,7 @@ export default function ExploreScreen() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"trending" | "people" | "hashtags">("trending");
   const [users, setUsers] = useState(INITIAL_USERS);
+  const { trackFollow, trackSearch } = useAnalytics();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const tabs = ["trending", "people", "hashtags"] as const;
@@ -83,11 +84,16 @@ export default function ExploreScreen() {
     : TRENDING_HASHTAGS;
 
   const toggleFollow = (id: string) => {
+    const target = users.find((u) => u.id === id);
+    const isFollowing = target?.isFollowing ?? false;
     setUsers((prev) =>
       prev.map((u) =>
         u.id === id ? { ...u, isFollowing: !u.isFollowing } : u
       )
     );
+    if (!isFollowing) {
+      trackFollow(id);
+    }
   };
 
   return (
