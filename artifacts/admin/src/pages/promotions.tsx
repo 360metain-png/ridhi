@@ -439,8 +439,30 @@ export default function Promotions() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("promotions_report.csv", rows);
+          const rows = PROMOTIONS.map((p) => ({
+            id: p.id,
+            user: p.user,
+            city: p.userCity,
+            plan: p.plan,
+            target: p.target,
+            objective: p.objective,
+            gender: p.gender,
+            age: p.age,
+            target_city: p.city,
+            budget_per_day: p.budgetPerDay,
+            duration_days: p.durationDays,
+            total_budget: p.totalBudget,
+            est_reach: p.estReach,
+            actual_reach: p.actualReach ?? 0,
+            leads: p.leads ?? 0,
+            reactions: p.reactions ?? 0,
+            spent_sofar: p.spentSoFar,
+            start_date: p.startDate ?? "",
+            end_date: p.endDate ?? "",
+            status: p.status,
+            submitted_at: p.submittedAt,
+          }));
+          downloadCSV("promotions-report.csv", rows);
         }}>
           <Download className="w-3 h-3" /> Export CSV
         </Button>

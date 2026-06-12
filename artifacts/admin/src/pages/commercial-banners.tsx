@@ -407,8 +407,21 @@ export default function CommercialBanners() {
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-            const rows: Record<string, string | number>[] = [];
-            downloadCSV("commercial-banners_report.csv", rows);
+            const rows = INITIAL_BANNERS.map((b) => ({
+              id: b.id,
+              title: b.title,
+              advertiser: b.advertiser,
+              headline: b.headline,
+              style_preset: b.stylePreset,
+              placements: b.placement.join("|"),
+              start_date: b.startDate,
+              end_date: b.endDate,
+              status: b.status,
+              impressions: b.impressions,
+              clicks: b.clicks,
+              spend: b.spend,
+            }));
+            downloadCSV("commercial-banners-report.csv", rows);
           }}>
             <Download className="w-3 h-3" /> Export CSV
           </Button>

@@ -384,8 +384,28 @@ Channels: Push + SMS + Email`);
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("business-ads_report.csv", rows);
+          const rows = CAMPAIGNS.map((c) => ({
+            id: c.id,
+            business: c.bizName,
+            headline: c.headline,
+            format: c.format,
+            objective: c.objective,
+            budget_type: c.budgetType,
+            daily_budget: c.dailyBudget,
+            total_budget: c.totalBudget,
+            spent: c.spent,
+            impressions: c.impressions,
+            clicks: c.clicks,
+            ctr: c.ctr,
+            target_city: c.targetCity,
+            target_age: c.targetAge,
+            target_gender: c.targetGender,
+            start_date: c.startDate,
+            end_date: c.endDate,
+            status: c.status,
+            submitted_at: c.submittedAt,
+          }));
+          downloadCSV("business-ads-report.csv", rows);
         }}>
           <Download className="w-3 h-3" /> Export CSV
         </Button>

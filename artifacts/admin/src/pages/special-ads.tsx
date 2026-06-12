@@ -791,8 +791,35 @@ export default function SpecialAdsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("special-ads_report.csv", rows);
+          const rows = [
+            ...INITIAL_BANNERS.map((b) => ({
+              id: b.id,
+              type: "Banner",
+              title: b.title,
+              headline: b.headline,
+              client_id: b.clientId,
+              position: b.position,
+              start_date: b.startDate,
+              end_date: b.endDate,
+              status: b.status,
+              impressions: b.impressions,
+              clicks: b.clicks,
+            })),
+            ...INITIAL_POPUPS.map((p) => ({
+              id: p.id,
+              type: "Popup",
+              title: p.title,
+              headline: p.headline,
+              client_id: p.clientId,
+              position: p.popupType,
+              start_date: p.startDate,
+              end_date: p.endDate,
+              status: p.status,
+              impressions: p.impressions,
+              clicks: p.clicks,
+            })),
+          ];
+          downloadCSV("special-ads-report.csv", rows);
         }}>
           <Download className="w-3 h-3" /> Export CSV
         </Button>
