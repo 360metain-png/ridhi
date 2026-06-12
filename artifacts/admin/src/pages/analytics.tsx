@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, PieChart, Pie
 } from "recharts";
-import { TrendingUp, Users, FileText, IndianRupee, MapPin } from "lucide-react";
+import { TrendingUp, Users, FileText, IndianRupee, MapPin, Download} from "lucide-react";
+import { downloadCSV } from "@/lib/utils";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -140,6 +142,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("analytics_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
         <p className="text-muted-foreground text-sm mt-1">Platform-wide insights across users, content, and revenue</p>

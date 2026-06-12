@@ -7,12 +7,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { downloadCSV } from "@/lib/utils";
 import {
   Search, Film, Upload, AlertTriangle, CheckCircle, Eye,
   ThumbsUp, MessageSquare, Share2, Flag, Trash2, Shield,
   TrendingUp, TrendingDown, ChevronLeft, ChevronRight, Filter,
-  Clock, User, Languages, FileVideo, ImageIcon, BarChart3,
-} from "lucide-react";
+  Clock, User, Languages, FileVideo, ImageIcon, BarChart3, Download} from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -181,6 +181,14 @@ export default function VideoUploadsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("video-uploads_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>

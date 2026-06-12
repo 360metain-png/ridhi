@@ -7,14 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { downloadCSV } from "@/lib/utils";
 import {
   UserPlus, Edit2, Trash2, ShieldCheck, Users, CheckCircle, XCircle,
   Clock, Search, Eye, EyeOff, Copy, MoreVertical, LayoutDashboard,
   ShieldAlert, UsersRound, Coins, IndianRupee, LineChart, Megaphone,
   Radio, BarChart3, Gamepad2, Briefcase, Star, Phone, Cpu, ScanFace,
   BookOpen, Zap, Crown, LayoutTemplate, Ticket, Share2, Plug, FolderOpen,
-  Lock, Mail, Key, UserCheck, UserX, AlertTriangle,
-} from "lucide-react";
+  Lock, Mail, Key, UserCheck, UserX, AlertTriangle, Download} from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type AdminStatus = "active" | "inactive" | "suspended";
@@ -240,6 +240,14 @@ export default function AdminManagementPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("admin-management_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="flex items-center justify-between">

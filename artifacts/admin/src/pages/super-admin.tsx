@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { downloadCSV } from "@/lib/utils";
 import {
   Shield, Users, Server, Activity, AlertTriangle, CheckCircle, XCircle,
   RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye, EyeOff,
@@ -23,8 +24,7 @@ import {
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
   Banknote, ArrowRightLeft, Sliders, Wallet,
   LayoutTemplate, TrendingUp, MousePointer, Pause, Play, Target,
-  Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2,
-} from "lucide-react";
+  Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2, Download} from "lucide-react";
 
 const ADMIN_ROLES = [
   { id: 1, name: "Arjun Mehta", email: "arjun@ridhi.app", role: "Super Admin", status: "active", lastLogin: "2 min ago", permissions: "all" },
@@ -562,6 +562,14 @@ export default function SuperAdminPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("super-admin_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -2449,6 +2457,14 @@ export default function SuperAdminPage() {
 
             return (
               <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("super-admin_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
                 {/* KPI Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

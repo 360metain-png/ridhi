@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { downloadCSV } from "@/lib/utils";
 
 const BASE = import.meta.env.BASE_URL;
 const LAST_UPDATED = "2026-05-21";

@@ -6,13 +6,13 @@ import {
   Users, UserPlus, FileText, Coins, IndianRupee, TrendingUp, Radio,
   Zap, Heart, Star, Award, Briefcase, Shield, Crown,
   ArrowUpRight, CheckCircle, Clock, AlertTriangle,
-  Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power,
-} from "lucide-react";
+  Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power, Download} from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import type { AdminRole } from "@/App";
+import { downloadCSV } from "@/lib/utils";
 
 const dauData = [
   { name: "1",  dau: 4000,  mau: 18000 }, { name: "5",  dau: 3000,  mau: 17500 },
@@ -173,6 +173,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("dashboard_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">

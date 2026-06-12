@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -16,8 +17,7 @@ import {
   Tag, Plus, Search, Copy, CheckCircle, XCircle, Clock, Trash2,
   Coins, Crown, Briefcase, Zap, Star, TrendingUp, Users, IndianRupee,
   ToggleLeft, ToggleRight, Eye, Edit2, AlertTriangle, Percent,
-  Gift, Ticket, ShieldCheck, BarChart2, Calendar, RefreshCw,
-} from "lucide-react";
+  Gift, Ticket, ShieldCheck, BarChart2, Calendar, RefreshCw, Download} from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line,
@@ -262,6 +262,14 @@ export default function PromoCodesPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("promo-codes_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between">

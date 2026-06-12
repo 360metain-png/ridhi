@@ -12,10 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Plus, Eye, MousePointer, LayoutTemplate, Layers, Users, Star,
   Pencil, Trash2, Play, Pause, X, BarChart3, Zap, Crown, Clock,
-  ImageIcon, Palette, AlignLeft, Target, Calendar, TrendingUp, IndianRupee,
-} from "lucide-react";
+  ImageIcon, Palette, AlignLeft, Target, Calendar, TrendingUp, IndianRupee, Download} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Tier     = "Diamond" | "Gold" | "Premium";
@@ -789,6 +789,14 @@ export default function SpecialAdsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("special-ads_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Special Client Ads</h1>

@@ -4,7 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Eye, Ban, Trash2, CheckCircle } from "lucide-react";
+import { Search, Eye, Ban, Trash2, CheckCircle, Download} from "lucide-react";
+import { downloadCSV } from "@/lib/utils";
 
 export default function Communities() {
   const [search, setSearch] = useState("");
@@ -20,6 +21,14 @@ export default function Communities() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("communities_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card p-4 rounded-xl border">
           <div className="text-sm text-muted-foreground">Total Communities</div>

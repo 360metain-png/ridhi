@@ -10,9 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   TrendingUp, Clock, CheckCircle, XCircle, IndianRupee, Search,
   ChevronLeft, ChevronRight, ShieldCheck, Users, Star, Briefcase,
-  Coins, CreditCard, Smartphone, AlertTriangle, ExternalLink,
+  Coins, CreditCard, Smartphone, AlertTriangle, ExternalLink, Download,
 } from "lucide-react";
 import { mockCoinWithdrawals, type CoinWithdrawal } from "@/data/mock-data";
+import { downloadCSV } from "@/lib/utils";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending:  "bg-amber-500/15 text-amber-400 border-amber-500/20",
@@ -103,6 +104,14 @@ export default function PayoutsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("payouts_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground">Coin Withdrawals & Payouts</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage withdrawal requests from Users, Hosts, and Agents</p>

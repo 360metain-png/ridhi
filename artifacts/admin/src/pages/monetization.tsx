@@ -14,6 +14,7 @@ import {
   FileText, CheckCircle2, XCircle, Clock
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { downloadCSV } from "@/lib/utils";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -140,6 +141,14 @@ export default function MonetizationPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("monetization_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Monetization Analytics</h1>

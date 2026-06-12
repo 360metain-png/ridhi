@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   Headphones, Mic, Play, Pause, TrendingUp, Users, Clock, Search,
-  Podcast, Star, Heart, Share2, MessageCircle, MapPin,
+  Podcast, Star, Heart, Share2, MessageCircle, MapPin, Download,
 } from "lucide-react";
 
 const PODCASTS = [
@@ -39,6 +40,14 @@ export default function PodcastsPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("podcasts_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Headphones className="w-6 h-6 text-rose-500" />
@@ -173,6 +182,14 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("podcasts_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
           <div>
             <p className="text-xs text-muted-foreground">{label}</p>
             <div className="text-lg font-bold mt-1">{value}</div>

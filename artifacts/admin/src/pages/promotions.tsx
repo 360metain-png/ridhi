@@ -13,6 +13,7 @@ import {
   MousePointer, TrendingUp,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Objective = "reach" | "leads" | "reactions";
@@ -436,6 +437,14 @@ export default function Promotions() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("promotions_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>

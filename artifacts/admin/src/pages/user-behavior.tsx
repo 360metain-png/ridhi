@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { downloadCSV } from "@/lib/utils";
 import {
   USER_BEHAVIOR_ANALYTICS,
   COHORT_DATA,
@@ -97,6 +98,14 @@ export default function UserBehavior() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("user-behavior_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

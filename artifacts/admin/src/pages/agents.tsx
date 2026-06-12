@@ -12,9 +12,10 @@ import {
   Search, Award, Plus, CheckCircle, XCircle, Clock,
   Phone, MapPin, ShieldAlert, ArrowRight, Info, Trash2,
   ShieldOff, UserCheck, ChevronRight, Network, UserPlus,
-  Crown, Lock, Rocket, Wrench,
+  Crown, Lock, Rocket, Wrench, Download,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -263,6 +264,14 @@ export default function AgentsPage() {
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("agents_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Briefcase className="w-6 h-6 text-primary" />

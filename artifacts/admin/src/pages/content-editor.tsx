@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { downloadCSV } from "@/lib/utils";
 import {
   Save, RotateCcw, FileText, Shield, Info, HelpCircle,
-  CheckCircle, AlertTriangle, ExternalLink
+  CheckCircle, AlertTriangle, ExternalLink, Download
 } from "lucide-react";
 
 // ── Default content templates ──
@@ -152,6 +153,14 @@ export default function ContentEditor() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("content-editor_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>

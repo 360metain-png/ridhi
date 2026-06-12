@@ -1,11 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { IndianRupee, TrendingUp, TrendingDown, CreditCard, Users, Megaphone, Percent } from "lucide-react";
+import { IndianRupee, TrendingUp, TrendingDown, CreditCard, Users, Megaphone, Percent, Download} from "lucide-react";
+import { downloadCSV } from "@/lib/utils";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -92,6 +94,14 @@ export default function RevenuePage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("revenue_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Revenue & Ads</h1>
         <p className="text-muted-foreground text-sm mt-1">Platform revenue breakdown, ad performance, and subscription reports</p>

@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Settings2, Shield, Bell, CreditCard, Sliders, Globe, Server,
   Lock, Mail, MessageSquare, AlertTriangle, CheckCircle, Smartphone,
-  Users, ToggleLeft, Zap, Database, Eye, EyeOff, FileText, Save, RefreshCw, KeyRound,
-} from "lucide-react";
+  Users, ToggleLeft, Zap, Database, Eye, EyeOff, FileText, Save, RefreshCw, KeyRound, Download} from "lucide-react";
 import { getCredentials, saveCredentials } from "@/config/credentials";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Toggle row helper ─────────────────────────────────────────────────────────
 function ToggleRow({ label, desc, defaultOn = true, badge }: { label: string; desc: string; defaultOn?: boolean; badge?: string }) {

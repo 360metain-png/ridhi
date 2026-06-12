@@ -7,11 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { downloadCSV } from "@/lib/utils";
 import {
   Globe, Shield, Server, Zap, RefreshCw, Plus, Trash2,
   CheckCircle2, AlertTriangle, Clock, Copy, ExternalLink,
-  CloudCog, Lock, Activity, HardDrive, Wifi,
-} from "lucide-react";
+  CloudCog, Lock, Activity, HardDrive, Wifi, Download} from "lucide-react";
 
 const domains = [
   { id: 1, domain: "ridhi.app",          type: "Primary",    ssl: "Active",   expires: "2026-08-12", dns: "Propagated", cdn: true,  status: "active"  },
@@ -63,6 +63,14 @@ export default function DomainHosting() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("domain-hosting_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>

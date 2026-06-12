@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { downloadCSV } from "@/lib/utils";
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from "@/components/ui/tabs";
@@ -16,7 +17,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Gift, Sticker, Award, Camera, Plus, Pencil, Trash2, Eye, EyeOff,
+  Gift, Sticker, Award, Camera, Plus, Pencil, Trash2, Eye, EyeOff, Download,
   Search, Filter, Coins, Star, Sparkles, Heart, Zap, Crown,
   ChevronDown, ChevronUp, ShieldCheck, ImageIcon,
 } from "lucide-react";
@@ -251,6 +252,14 @@ export default function ContentAssets() {
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("content-assets_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-purple-500" /> Creative Assets
@@ -304,6 +313,14 @@ export default function ContentAssets() {
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500" />
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("content-assets_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-50 to-purple-50 border flex items-center justify-center text-2xl">{g.emoji}</div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => toggleGift(g.id)} className="p-1.5 rounded-lg hover:bg-muted transition-colors" title={g.enabled ? "Hide" : "Show"}>
@@ -428,6 +445,14 @@ export default function ContentAssets() {
                 <Card key={b.id} className={`transition-opacity ${!b.enabled ? "opacity-60" : ""}`}>
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("content-assets_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
                       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${typeColor} border-2 flex items-center justify-center text-3xl`}>{b.emoji}</div>
                       <div className="flex items-center gap-1">
                         <button onClick={() => toggleBadge(b.id)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
@@ -492,6 +517,14 @@ export default function ContentAssets() {
                 <Card key={f.id} className={`transition-opacity ${!f.enabled ? "opacity-60" : ""}`}>
                   <CardContent className="p-4 space-y-3">
                     <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("content-assets_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
                       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${typeColor} border flex items-center justify-center text-3xl`}>{f.emoji}</div>
                       <div className="flex items-center gap-1">
                         <button onClick={() => toggleFilter(f.id)} className="p-1.5 rounded-lg hover:bg-muted transition-colors">

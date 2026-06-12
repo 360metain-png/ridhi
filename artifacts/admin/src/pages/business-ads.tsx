@@ -5,13 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { downloadCSV } from "@/lib/utils";
 import {
   Check, X, Clock, MapPin, Eye, Users, Zap, IndianRupee,
   Search, Filter, AlertTriangle, TrendingUp, MousePointer,
   Layout, Circle, Video, Minus, ShoppingBag, Heart,
   ExternalLink, ChevronDown, ChevronUp, Play, Pause,
-  BarChart3, Target, Globe, Megaphone,
-} from "lucide-react";
+  BarChart3, Target, Globe, Megaphone, Download} from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell,
@@ -382,6 +382,14 @@ Channels: Push + SMS + Email`);
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("business-ads_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>

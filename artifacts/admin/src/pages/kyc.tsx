@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { downloadCSV } from "@/lib/utils";
 import {
   Shield, Clock, CheckCircle, XCircle, AlertTriangle, Search,
-  RefreshCw, Eye, MessageSquare, User, CreditCard, Building2,
-} from "lucide-react";
+  RefreshCw, Eye, MessageSquare, User, CreditCard, Building2, Download} from "lucide-react";
 
 interface KycSubmission {
   id: string;
@@ -166,6 +166,14 @@ export default function KYCPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("kyc_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>

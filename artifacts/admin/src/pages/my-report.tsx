@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   CheckCircle, Clock, AlertTriangle, Zap, BarChart2, Star,
   TrendingUp, Users, ShieldAlert, Coins, IndianRupee, ScanFace,
@@ -106,6 +107,14 @@ export default function MyReportPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("my-report_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* Header */}
       <div className="flex items-center justify-between">

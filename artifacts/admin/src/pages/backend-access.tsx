@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { downloadCSV } from "@/lib/utils";
 import {
   Terminal, Database, Server, Key, RefreshCw, Play,
   CheckCircle2, AlertTriangle, Clock, Copy, Trash2,
   Activity, Shield, Lock, Eye, EyeOff, HardDrive,
-  Cpu, MemoryStick, Wifi, FileText,
-} from "lucide-react";
+  Cpu, MemoryStick, Wifi, FileText, Download} from "lucide-react";
 
 const envVars = [
   { key: "DATABASE_URL",              category: "Database",  secret: true,  value: "postgresql://ridhi:••••@db.ridhi.app:5432/ridhi_prod" },
@@ -100,6 +100,14 @@ export default function BackendAccess() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("backend-access_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>

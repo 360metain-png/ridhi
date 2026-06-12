@@ -9,9 +9,9 @@ import {
   CheckCircle, Clock, Target, Users, IndianRupee, Radio, Crown,
   Lightbulb, Rocket, Shield, Gift, Calendar, BarChart2, Info,
   ChevronRight, Heart, MessageCircle, Share2, AlertTriangle, XCircle,
-  Flame, TrendingDown, Bell, Pause, Ban, FileText,
-} from "lucide-react";
+  Flame, TrendingDown, Bell, Pause, Ban, FileText, Download} from "lucide-react";
 import { RadialBarChart, RadialBar, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Level definitions ─────────────────────────────────────────────────────────
 
@@ -492,6 +492,14 @@ const agentProgressionChartData = AGENT_LEVELS.map(l => ({
 export default function LevelsPage() {
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("levels_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* Header */}
       <div>

@@ -2,11 +2,12 @@ import { useParams, Link } from "wouter";
 import { mockUsers, mockPosts } from "@/data/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Mail, Phone, ShieldCheck, Ban, AlertTriangle, Trash2, Globe } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Mail, Phone, ShieldCheck, Ban, AlertTriangle, Trash2, Globe, Download} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getUserAnalytics } from "@/data/analytics-mock";
+import { downloadCSV } from "@/lib/utils";
 
 export default function UserDetail() {
   const params = useParams();
@@ -26,6 +27,14 @@ export default function UserDetail() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("user-detail_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center gap-4">
         <Link href="/users">
           <Button variant="outline" size="icon"><ArrowLeft className="w-4 h-4" /></Button>

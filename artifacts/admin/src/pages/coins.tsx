@@ -12,7 +12,7 @@ import {
   TrendingUp, TrendingDown, Coins, ArrowUpRight, ArrowDownRight,
   Search, ChevronLeft, ChevronRight, ShieldCheck, Lock, CheckCircle2,
   XCircle, Plus, Minus, Edit2, Save, X, RefreshCw, AlertTriangle,
-  IndianRupee, Star, Clock, Settings2, Wallet, BarChart3,
+  IndianRupee, Star, Clock, Settings2, Wallet, BarChart3, Download,
 } from "lucide-react";
 import {
   mockTransactions, mockUsers,
@@ -21,6 +21,7 @@ import {
   type Transaction, type CoinRequest, type CoinPackageConfig, type CoinValueConfig, type ManualCoinLog,
 } from "@/data/mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { downloadCSV } from "@/lib/utils";
 
 const COIN_IMG = "/ridhi_coin.png";
 
@@ -941,6 +942,14 @@ export default function CoinsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("coins_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <img src={COIN_IMG} alt="Ridhi Coin" className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />

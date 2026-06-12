@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { downloadCSV } from "@/lib/utils";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -12,8 +13,7 @@ import {
 import {
   Cpu, Zap, Hash, Globe, Shield, AlertTriangle, Mic,
   TrendingUp, CheckCircle2, XCircle, Clock, Activity,
-  RefreshCw, Settings2, Eye, Flag,
-} from "lucide-react";
+  RefreshCw, Settings2, Eye, Flag, Download} from "lucide-react";
 
 const AI_SYSTEMS = [
   {
@@ -148,6 +148,14 @@ export default function AIHubPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("ai-hub_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2">

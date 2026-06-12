@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   BookOpen, Smartphone, Shield, ChevronDown, ChevronRight,
   Star, Briefcase, Radio, Video, MessageSquare, IndianRupee,
@@ -11,8 +12,7 @@ import {
   FileText, HelpCircle, Award, Sparkles, TrendingUp,
   Crown, Gift, Users, ToggleRight, Globe, Settings,
   Key, Webhook, AlertTriangle, Lock, CreditCard,
-  UsersRound, ClipboardList, Percent, DollarSign,
-} from "lucide-react";
+  UsersRound, ClipboardList, Percent, DollarSign, Download} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

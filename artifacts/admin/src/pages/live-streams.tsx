@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Radio, Eye, Coins, TrendingUp, TrendingDown, Search, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { Radio, Eye, Coins, TrendingUp, TrendingDown, Search, ChevronLeft, ChevronRight, AlertTriangle, Download} from "lucide-react";
+import { downloadCSV } from "@/lib/utils";
 
 const LANGUAGES = ["Hindi", "English", "Telugu", "Tamil", "Bengali", "Marathi", "Malayalam", "Kannada", "Gujarati", "Punjabi"];
 
@@ -65,6 +66,14 @@ export default function LiveStreamsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("live-streams_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Live Streams</h1>
         <p className="text-muted-foreground text-sm mt-1">Monitor active and historical live streams across the platform</p>

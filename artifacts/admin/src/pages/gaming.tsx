@@ -6,9 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import {
   Gamepad2, Trophy, Coins, Users, Shield, TrendingUp, AlertTriangle,
-  Eye, Ban, Play, RefreshCw, Search, Filter, Award, Zap,
-} from "lucide-react";
+  Eye, Ban, Play, RefreshCw, Search, Filter, Award, Zap, Download} from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 const ROOM_TYPES = [
   { tier: "Beginner", entry: 50, active: 284, coin_vol: 42600, fraud_flag: 0, color: "#4CAF50" },
@@ -109,6 +109,14 @@ export default function GamingManagement() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("gaming_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">

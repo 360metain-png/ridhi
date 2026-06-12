@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { downloadCSV } from "@/lib/utils";
 import {
   AlertTriangle, Check, Trash2, Ban, ShieldAlert, MessageSquareWarning,
-  FileText, User, Radio, Phone, Video, Clock, ChevronDown, ChevronUp
-} from "lucide-react";
+  FileText, User, Radio, Phone, Video, Clock, ChevronDown, ChevronUp, Download} from "lucide-react";
 
 type ReportCategory = "post" | "user" | "audio-call" | "video-call";
 type ReportStatus   = "pending" | "reviewed" | "removed";
@@ -170,6 +170,14 @@ export default function ContentModeration() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("content_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>

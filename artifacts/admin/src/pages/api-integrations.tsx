@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   CheckCircle, XCircle, AlertTriangle, Eye, EyeOff, Copy, RefreshCw,
   Zap, CreditCard, MessageSquare, Bell, Cloud, Mail, Cpu, Map,
   BarChart2, Radio, Phone, Video, ShieldCheck, Settings2, Save,
   TestTube, Plug, Activity, Lock, Smartphone, Globe, Wifi,
-  Key, Play, PauseCircle, ExternalLink, ChevronDown, ChevronUp,
-} from "lucide-react";
+  Key, Play, PauseCircle, ExternalLink, ChevronDown, ChevronUp, Download} from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type ConnStatus = "connected" | "error" | "disconnected" | "testing";
@@ -570,6 +570,14 @@ export default function ApiIntegrationsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("api-integrations_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between">

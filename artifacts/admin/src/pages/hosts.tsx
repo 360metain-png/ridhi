@@ -11,9 +11,10 @@ import {
   Search, Radio, Award, Crown, Zap, ShieldCheck,
   XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
   Trash2, ShieldOff, Info, Lock, Network, ChevronRight, UserCheck,
-  Rocket, Wrench,
+  Rocket, Wrench, Download,
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -310,6 +311,14 @@ export default function HostsPage() {
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("hosts_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Star className="w-6 h-6 text-primary" />

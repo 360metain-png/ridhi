@@ -6,9 +6,9 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import {
   Phone, Video, IndianRupee, Users, TrendingUp, Shield, AlertTriangle,
-  Eye, Ban, Mic, Star, CheckCircle, Search, Clock, Coins,
-} from "lucide-react";
+  Eye, Ban, Mic, Star, CheckCircle, Search, Clock, Coins, Download} from "lucide-react";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 
 const HOST_TIERS = [
   { id: "new",       label: "New Host",  badge: "🌱", audioRate: 10,  videoRate: 25,  color: "#4CAF50" },
@@ -72,6 +72,14 @@ export default function CallsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("calls_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -161,6 +169,14 @@ export default function CallsPage() {
 
       {tab === "overview" && (
         <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("calls_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>

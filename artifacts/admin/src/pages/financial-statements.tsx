@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { downloadCSV } from "@/lib/utils";
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, PieChart, Pie,
@@ -36,17 +37,6 @@ function fmt(n: number) {
 
 function fmtK(n: number) {
   return `₹${(n / 1000).toFixed(1)}K`;
-}
-
-function downloadCSV(filename: string, rows: string[][]) {
-  const csv = rows.map((r) => r.join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 function downloadJSON(filename: string, data: any) {
@@ -130,8 +120,8 @@ export default function FinancialStatementsPage() {
           </Button>
           <Button variant="outline" size="sm" className="gap-1" onClick={() => {
             const rows = [
-              ["Line", "Description", "Amount", "Notes"],
-              ...itr.map((r) => [r.line, r.description, r.amount.toString(), r.notes]),
+              { line: "Line", description: "Description", amount: "Amount", notes: "Notes" },
+              ...itr.map((r) => ({ line: r.line, description: r.description, amount: r.amount, notes: r.notes })),
             ];
             downloadCSV(`ridhi-itr-schedule-${FY}.csv`, rows);
           }}>
@@ -140,8 +130,8 @@ export default function FinancialStatementsPage() {
           </Button>
           <Button variant="outline" size="sm" className="gap-1" onClick={() => {
             const rows = [
-              ["Month", "Gross Revenue", "Net Revenue", "Total Expenses", "Gross Profit", "Net Profit", "Profit Margin %", "Tax Provision", "Retained Earnings"],
-              ...PL_DATA.map((p) => [p.monthLabel, p.grossRevenue.toString(), p.netRevenueAfterGST.toString(), p.totalExpenses.toString(), p.grossProfit.toString(), p.netProfit.toString(), p.profitMargin.toString(), p.taxProvision.toString(), p.retainedEarnings.toString()]),
+              { month: "Month", gross_revenue: "Gross Revenue", net_revenue: "Net Revenue", total_expenses: "Total Expenses", gross_profit: "Gross Profit", net_profit: "Net Profit", profit_margin: "Profit Margin %", tax_provision: "Tax Provision", retained_earnings: "Retained Earnings" },
+              ...PL_DATA.map((p) => ({ month: p.monthLabel, gross_revenue: p.grossRevenue, net_revenue: p.netRevenueAfterGST, total_expenses: p.totalExpenses, gross_profit: p.grossProfit, net_profit: p.netProfit, profit_margin: p.profitMargin, tax_provision: p.taxProvision, retained_earnings: p.retainedEarnings })),
             ];
             downloadCSV(`ridhi-pnl-${FY}.csv`, rows);
           }}>

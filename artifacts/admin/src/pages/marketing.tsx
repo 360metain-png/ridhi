@@ -13,10 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Bell, Megaphone, Send, Clock, Users, Eye, CheckCircle2, Plus,
   MessageSquare, Mail, Smartphone, BarChart2,
-  Target, TrendingUp, AlertCircle, Tag, X, Pencil, Trash2, Play, Pause,
-} from "lucide-react";
+  Target, TrendingUp, AlertCircle, Tag, X, Pencil, Trash2, Play, Pause, Download} from "lucide-react";
 import { mockCampaigns, type Campaign } from "@/data/mock-data";
 import { useToast } from "@/hooks/use-toast";
+import { downloadCSV } from "@/lib/utils";
 
 const CAMPAIGN_STATUS: Record<string, string> = {
   Draft: "bg-muted/60 text-muted-foreground border-border",
@@ -839,6 +839,14 @@ export default function MarketingPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("marketing_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Marketing & Campaigns</h1>
         <p className="text-muted-foreground text-sm mt-1">Send Push, SMS, WhatsApp & Email broadcasts to all users. Full Super Admin access.</p>

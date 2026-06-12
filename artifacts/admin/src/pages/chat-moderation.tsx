@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { downloadCSV } from "@/lib/utils";
 import {
   MessageSquare, Shield, AlertTriangle, Eye, Ban, CheckCircle,
   Search, Users, Clock, MessageCircle, Image, Mic, Flag,
-  TrendingUp, ArrowUpRight,
+  TrendingUp, ArrowUpRight, Download,
 } from "lucide-react";
 
 const CHATS = [
@@ -52,6 +53,14 @@ export default function ChatModerationPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("chat-moderation_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MessageSquare className="w-6 h-6 text-blue-500" />
@@ -205,6 +214,14 @@ function KpiCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("chat-moderation_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
           <div>
             <p className="text-xs text-muted-foreground">{label}</p>
             <div className="text-lg font-bold mt-1">{value}</div>

@@ -6,11 +6,11 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { downloadCSV } from "@/lib/utils";
 import {
   PhoneCall, Users, Clock, Coins, Activity, Wifi,
   CheckCircle, XCircle, RefreshCw, Radio, Zap,
-  Filter, Globe, Heart, ShieldCheck, Save,
-} from "lucide-react";
+  Filter, Globe, Heart, ShieldCheck, Save, Download} from "lucide-react";
 
 const API_BASE = "/api";
 
@@ -190,6 +190,14 @@ export default function RandomCallAdminCard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+          const rows: Record<string, string | number>[] = [];
+          downloadCSV("random-call-admin_report.csv", rows);
+        }}>
+          <Download className="w-3 h-3" /> Export CSV
+        </Button>
+      </div>
 
       {/* ── Header + Refresh ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

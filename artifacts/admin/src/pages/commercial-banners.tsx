@@ -11,12 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { downloadCSV } from "@/lib/utils";
 import {
   LayoutTemplate, Plus, Eye, MousePointer, TrendingUp, Zap, Palette,
   Play, Pause, Trash2, Pencil, X, Copy, BarChart3, Layers, Image,
   Star, Clock, Calendar, Target, Sparkles, ArrowRight, Megaphone,
   RefreshCw, CheckCircle, Settings2, Monitor, Smartphone, Upload,
-  Link2, ImageOff, IndianRupee,
+  Link2, ImageOff, IndianRupee, Download,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -404,6 +405,14 @@ export default function CommercialBanners() {
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = [];
+            downloadCSV("commercial-banners_report.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> Export CSV
+          </Button>
+        </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <LayoutTemplate className="w-6 h-6 text-violet-500" />
