@@ -10,6 +10,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -250,16 +251,19 @@ function CampaignDetailModal({
   campaign,
   onClose,
   onShowInvoice,
+  onDownloadReport,
 }: {
   visible: boolean;
   campaign: AdCampaign | null;
   onClose: () => void;
   onShowInvoice: () => void;
+  onDownloadReport: () => void;
 }) {
   const colors = useColors();
   if (!campaign) return null;
   const meta = STATUS_META[campaign.status];
   const isDirect = campaign.payMethod === "direct";
+  const isCompleted = campaign.status === "completed";
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -342,6 +346,15 @@ function CampaignDetailModal({
                 <Feather name="file-text" size={18} color={colors.primary} />
                 <Text style={[styles.invoiceTriggerText, { color: colors.primary }]}>Download Tax Invoice</Text>
                 <Feather name="chevron-right" size={16} color={colors.primary} />
+              </TouchableOpacity>
+            )}
+
+            {/* Performance Report for completed campaigns */}
+            {isCompleted && (
+              <TouchableOpacity onPress={onDownloadReport} style={[styles.invoiceTrigger, { backgroundColor: colors.success + "12", borderColor: colors.success + "30" }]}>
+                <Feather name="download" size={18} color={colors.success} />
+                <Text style={[styles.invoiceTriggerText, { color: colors.success }]}>Download Performance Report</Text>
+                <Feather name="chevron-right" size={16} color={colors.success} />
               </TouchableOpacity>
             )}
 
@@ -968,6 +981,59 @@ export default function AdsManagerScreen() {
         campaign={selectedCampaign}
         onClose={() => setShowDetail(false)}
         onShowInvoice={() => { setShowDetail(false); setShowInvoice(true); }}
+        onDownloadReport={() => {
+          if (!selectedCampaign) return;
+          const c = selectedCampaign;
+          const cpm = c.impressions ? ((c.spent / c.impressions) * 1000).toFixed(0) : "0";
+          const cpc = c.clicks ? (c.spent / c.clicks).toFixed(2) : "0";
+          const report = `
+RIDHI AD PERFORMANCE REPORT
+=============================
+Campaign: ${c.headline}
+ID: ${c.id}
+Status: Completed
+
+BUDGET
+------
+Total Budget: ₹${c.totalCost}
+Spent: ₹${c.spent}
+Daily Budget: ₹${c.dailyBudget}
+Duration: ${c.days} days
+
+TARGETING
+---------
+City: ${c.targetCity}
+Age: ${c.targetAge}
+Gender: ${c.targetGender}
+Interests: ${c.targetInterests}
+
+PERFORMANCE
+-----------
+Impressions: ${c.impressions.toLocaleString("en-IN")}
+Clicks: ${c.clicks.toLocaleString("en-IN")}
+CTR: ${c.ctr}%
+CPM: ₹${cpm}
+CPC: ₹${cpc}
+ROAS: ${c.ctr > 2 ? "Good" : c.ctr > 1 ? "Average" : "Needs Improvement"}
+
+Generated on ${new Date().toLocaleString("en-IN")}
+`.trim();
+
+          if (Platform.OS === "web") {
+            const blob = new Blob([report], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `Ridhi_Ad_Report_${c.id}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } else {
+            Share.share({
+              message: report,
+              title: `Ridhi Ad Report - ${c.headline}`,
+            });
+          }
+        }}
       />
       <InvoiceModal
         visible={showInvoice}
