@@ -1,0 +1,145 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Ridhi App — robots.txt
+# Personal data of Users, Hosts, Agents is NEVER allowed to be indexed.
+# Only public marketing / legal pages are open to crawlers.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Block all AI / LLM training bots ──────────────────────────────────────────
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# ── Standard search engines — allow only public pages ─────────────────────────
+User-agent: *
+
+# Auth & onboarding — user credentials and profile data
+Disallow: /auth/
+Disallow: /auth/onboarding
+Disallow: /auth/login
+Disallow: /auth/otp
+Disallow: /auth/profile-setup
+
+# Personal profile & social data
+Disallow: /profile
+Disallow: /host-profile
+Disallow: /match
+
+# Private communications
+Disallow: /chat
+Disallow: /chat/
+Disallow: /chatrooms
+Disallow: /chatroom/
+Disallow: /group-chat
+Disallow: /random-call
+Disallow: /audio-room
+
+# Financial & wallet data
+Disallow: /wallet
+Disallow: /coin-store
+Disallow: /withdraw
+Disallow: /subscription
+Disallow: /my-gifts
+Disallow: /missions
+
+# Creator & professional private data
+Disallow: /creator-dashboard
+Disallow: /creator-marketplace
+Disallow: /host-dashboard
+Disallow: /agent-dashboard
+Disallow: /brand-post-deal
+Disallow: /brand-register
+Disallow: /lead-form-builder
+Disallow: /lead-form-fill
+
+# Identity & KYC documents — strictly private
+Disallow: /kyc
+Disallow: /referral
+
+# Content creation (drafts, unpublished)
+Disallow: /create-post
+Disallow: /podcast-create
+Disallow: /podcast-room
+Disallow: /my-podcast-channel
+
+# Live & interactive sessions (user-generated, not for indexing)
+Disallow: /live-stream
+Disallow: /pk-battle
+Disallow: /vibe-stars
+Disallow: /story-viewer
+
+# Personal tools
+Disallow: /settings
+Disallow: /notifications
+Disallow: /ai-assistant
+
+# Allow public pages
+Allow: /
+Allow: /explore
+Allow: /communities
+Allow: /leaderboard
+Allow: /podcasts
+Allow: /privacy-policy
+Allow: /terms
+Allow: /help-support
+Allow: /about
+
+Sitemap: https://ridhi.app/sitemap.xml

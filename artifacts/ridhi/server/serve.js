@@ -115,6 +115,10 @@ const server = http.createServer((req, res) => {
     pathname = pathname.slice(basePath.length) || "/";
   }
 
+  if (pathname === "/status") {
+    return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ status: "ok" }));
+  }
+
   if (pathname === "/" || pathname === "/manifest") {
     const platform = req.headers["expo-platform"];
     if (platform === "ios" || platform === "android") {
