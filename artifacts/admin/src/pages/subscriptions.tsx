@@ -220,7 +220,7 @@ function OverviewTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creato
               <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Secondary</p>
               {[
                 { label: "Gaming Arena",        rank: 1, color: "bg-cyan-500"    },
-                { label: "Brand Marketplace",   rank: 2, color: "bg-orange-500"  },
+                { label: "Creator Deals",   rank: 2, color: "bg-orange-500"  },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3 py-1.5 border-b last:border-0">
                   <span className={`w-5 h-5 rounded-full ${s.color} text-white text-xs flex items-center justify-center font-bold flex-shrink-0`}>{s.rank}</span>

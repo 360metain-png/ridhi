@@ -93,7 +93,7 @@ const INITIAL_CODES: PromoCode[] = [
     totalSavings: 226720,
   },
   {
-    id: "p4", code: "PITCH25", type: "pitch_discount", title: "Creator Marketplace Launch",
+    id: "p4", code: "PITCH25", type: "pitch_discount", title: "Creator Deals Launch",
     description: "25% off on pitch fee (75 coins instead of 100)",
     value: 25, usageLimit: 10000, usedCount: 10000, perUserLimit: 3,
     validFrom: "2025-03-01", validUntil: "2025-03-31", status: "expired",

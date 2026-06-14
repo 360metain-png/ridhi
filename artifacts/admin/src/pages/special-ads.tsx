@@ -102,8 +102,8 @@ const INITIAL_BANNERS: BannerAd[] = [
   },
   {
     id: "b2", title: "Priya Fashion Week Banner",
-    headline: "🛍️ Flat 50% Off — Fashion Week Sale!", body: "Shop the hottest Indian fashion brands on Ridhi Marketplace. Free delivery included.",
-    ctaText: "Shop Now", ctaLink: "/marketplace",
+    headline: "🛍️ Flat 50% Off — Fashion Week Sale!", body: "Shop the hottest Indian fashion brands on our partner stores.",
+    ctaText: "Shop Now", ctaLink: "#",
     bgType: "gradient", gradient: ["#FF6B35", "#F7C59F"], bgColor: "#FF6B35", imageUrl: "",
     textColor: "white", clientId: "sc2", position: "feed",
     startDate: "2025-05-15", endDate: "2025-05-31", status: "active",
@@ -112,7 +112,7 @@ const INITIAL_BANNERS: BannerAd[] = [
   {
     id: "b3", title: "Nisha Shah — New Year Special",
     headline: "🎉 New Year New You — Special Member Deals", body: "Exclusive deals curated just for our premium members. Limited slots available.",
-    ctaText: "Explore Deals", ctaLink: "/marketplace",
+    ctaText: "Explore Deals", ctaLink: "#",
     bgType: "gradient", gradient: ["#1D4ED8", "#06B6D4"], bgColor: "#1D4ED8", imageUrl: "",
     textColor: "white", clientId: "sc3", position: "feed",
     startDate: "2025-05-10", endDate: "2025-06-15", status: "paused",
@@ -323,7 +323,7 @@ function AdFormModal({
               </div>
               <div className="space-y-1.5">
                 <Label className="text-sm font-medium">CTA Link / Route</Label>
-                <Input placeholder="/wallet or /marketplace" className="bg-background border-border font-mono text-sm" value={ctaLink} onChange={(e) => setCtaLink(e.target.value)} />
+                <Input placeholder="/wallet or /creator-deals" className="bg-background border-border font-mono text-sm" value={ctaLink} onChange={(e) => setCtaLink(e.target.value)} />
               </div>
             </div>
 

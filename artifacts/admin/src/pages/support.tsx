@@ -314,7 +314,7 @@ const orgSchema = {
     height: 512,
   },
   description:
-    "Ridhi is India's #1 social networking and dating app — live streams, voice rooms, dating & match, coin economy, reels, and brand marketplace.",
+    "Ridhi is India's #1 social networking and dating app — live streams, voice rooms, dating & match, coin economy, reels, and creator brand deals.",
   sameAs: ["https://instagram.com/ridhiapp"],
   contactPoint: {
     "@type": "ContactPoint",

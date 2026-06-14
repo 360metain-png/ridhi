@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, ShieldAlert, UsersRound, Coins, IndianRupee,
   LineChart, Megaphone, Settings, LogOut, Radio, BarChart3, ShieldCheck,
   Briefcase, Star, Bell, Phone, Cpu, ScanFace, BookOpen, Heart,
-  Lock, ChevronDown, ChevronRight, FolderOpen, Zap, ShoppingBag, Crown,
+  Lock, ChevronDown, ChevronRight, FolderOpen, Zap, Crown,
   LayoutTemplate, Ticket, Share2, Plug, Activity, ClipboardList, UserPlus,
   TrendingUp, Globe, Terminal, Sparkles, Download, Monitor, Film, FileText,
   Landmark,
@@ -79,7 +79,6 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA },
       { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA },
       { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA },
-      { name: "Marketplace",         href: "/marketplace",         icon: ShoppingBag,  badge: "8", allowedRoles: SA },
     ],
   },
   {

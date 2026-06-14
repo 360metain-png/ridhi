@@ -55,7 +55,7 @@ function SlideOnboarding() {
             { emoji: "❤️",  label: "Dating & Match" },
             { emoji: "🪙", label: "Coin Economy" },
             { emoji: "🎬", label: "Reels & Shorts" },
-            { emoji: "💼", label: "Brand Marketplace" },
+            { emoji: "💼", label: "Creator Deals" },
           ].map(({ emoji, label }) => (
             <div key={label} className="flex items-center gap-2 rounded-xl px-3 py-2.5"
               style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
