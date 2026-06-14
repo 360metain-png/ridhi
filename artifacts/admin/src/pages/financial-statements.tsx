@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, PieChart, Pie,
@@ -18,7 +20,7 @@ import {
 import {
   REVENUE_DATA, EXPENSE_DATA, PL_DATA, GST_DATA, WITHDRAWAL_DETAILS,
   GSTIN, SAC_CODE, COMPANY_NAME, PAN,
-  getAggregatedRevenue, getAggregatedExpenses, getAggregatedGST, getAggregatedPL, getITRSchedule,
+  type RevenueLine, type ExpenseLine, type PLStatement, type GSTSummary,
 } from "@/data/financial-mock";
 
 const PURPLE = "#7B2FBE";
@@ -49,13 +51,107 @@ function downloadJSON(filename: string, data: any) {
   URL.revokeObjectURL(url);
 }
 
+function aggregateRevenue(data: RevenueLine[]) {
+  return {
+    total: data.reduce((s, r) => s + r.totalRevenue, 0),
+    coinRecharges: data.reduce((s, r) => s + r.coinRecharges, 0),
+    subscriptions: data.reduce((s, r) => s + r.subscriptions, 0),
+    adRevenue: data.reduce((s, r) => s + r.adRevenue, 0),
+    giftRevenue: data.reduce((s, r) => s + r.giftRevenue, 0),
+    commercialBanner: data.reduce((s, r) => s + r.commercialBanner, 0),
+    specialAds: data.reduce((s, r) => s + r.specialAds, 0),
+    gstCollected: data.reduce((s, r) => s + r.gstCollected, 0),
+  };
+}
+
+function aggregateExpenses(data: ExpenseLine[]) {
+  return {
+    total: data.reduce((s, e) => s + e.totalExpenses, 0),
+    creatorPayouts: data.reduce((s, e) => s + e.creatorPayouts, 0),
+    hostPayouts: data.reduce((s, e) => s + e.hostPayouts, 0),
+    userWithdrawals: data.reduce((s, e) => s + e.userWithdrawals, 0),
+    refunds: data.reduce((s, e) => s + e.refunds, 0),
+    paymentGatewayFees: data.reduce((s, e) => s + e.paymentGatewayFees, 0),
+    serverCosts: data.reduce((s, e) => s + e.serverCosts, 0),
+    gstPaid: data.reduce((s, e) => s + e.gstPaid, 0),
+    marketing: data.reduce((s, e) => s + e.marketing, 0),
+    employeeSalaries: data.reduce((s, e) => s + e.employeeSalaries, 0),
+    officeRent: data.reduce((s, e) => s + e.officeRent, 0),
+    legalCompliance: data.reduce((s, e) => s + e.legalCompliance, 0),
+  };
+}
+
+function aggregateGST(data: GSTSummary[]) {
+  return {
+    totalOutputGST: data.reduce((s, g) => s + g.totalOutputGST, 0),
+    totalInputGST: data.reduce((s, g) => s + g.totalInputGST, 0),
+    gstPayable: data.reduce((s, g) => s + g.gstPayable, 0),
+    gstITC: data.reduce((s, g) => s + g.gstITC, 0),
+    igst: data.reduce((s, g) => s + g.igst, 0),
+    cgst: data.reduce((s, g) => s + g.cgst, 0),
+    sgst: data.reduce((s, g) => s + g.sgst, 0),
+  };
+}
+
+function aggregatePL(data: PLStatement[]) {
+  return {
+    grossRevenue: data.reduce((s, p) => s + p.grossRevenue, 0),
+    netRevenue: data.reduce((s, p) => s + p.netRevenueAfterGST, 0),
+    totalExpenses: data.reduce((s, p) => s + p.totalExpenses, 0),
+    grossProfit: data.reduce((s, p) => s + p.grossProfit, 0),
+    netProfit: data.reduce((s, p) => s + p.netProfit, 0),
+    taxProvision: data.reduce((s, p) => s + p.taxProvision, 0),
+    retainedEarnings: data.reduce((s, p) => s + p.retainedEarnings, 0),
+    avgProfitMargin: data.length ? data.reduce((s, p) => s + p.profitMargin, 0) / data.length : 0,
+  };
+}
+
+function buildITR(revenue: RevenueLine[], expenses: ExpenseLine[]) {
+  const totalRevenue = revenue.reduce((s, r) => s + r.totalRevenue, 0);
+  const totalGST = revenue.reduce((s, r) => s + r.gstCollected, 0);
+  const totalExpenses = expenses.reduce((s, e) => s + e.totalExpenses, 0);
+  const grossProfit = totalRevenue - totalGST - totalExpenses;
+  const tax = Math.max(0, Math.round(grossProfit * 0.22));
+  return [
+    { line: "A1", description: "Gross Revenue from Operations", amount: totalRevenue, notes: "Coin recharges + Subscriptions + Ads + Gifts + Banners" },
+    { line: "A2", description: "Less: GST Collected (Output Tax)", amount: -totalGST, notes: "18% GST on all revenue streams" },
+    { line: "A3", description: "Net Revenue (Excl. GST)", amount: totalRevenue - totalGST, notes: "Revenue after GST" },
+    { line: "B1", description: "Cost of Operations (Payouts)", amount: -revenue.reduce((s, r) => s + expenses.find((e) => e.month === r.month)!.creatorPayouts + expenses.find((e) => e.month === r.month)!.hostPayouts + expenses.find((e) => e.month === r.month)!.userWithdrawals, 0), notes: "Creator, Host & User payouts" },
+    { line: "B2", description: "Payment Gateway Charges", amount: -expenses.reduce((s, e) => s + e.paymentGatewayFees, 0), notes: "Razorpay + UPI charges" },
+    { line: "B3", description: "Server & Infrastructure", amount: -expenses.reduce((s, e) => s + e.serverCosts, 0), notes: "AWS, CDN, DB hosting" },
+    { line: "B4", description: "Employee Salaries & Benefits", amount: -expenses.reduce((s, e) => s + e.employeeSalaries, 0), notes: "All FTE salaries" },
+    { line: "B5", description: "Marketing & Advertising", amount: -expenses.reduce((s, e) => s + e.marketing, 0), notes: "Digital marketing, influencer spend" },
+    { line: "B6", description: "Office Rent & Utilities", amount: -expenses.reduce((s, e) => s + e.officeRent, 0), notes: "Bangalore office" },
+    { line: "B7", description: "Refunds & Chargebacks", amount: -expenses.reduce((s, e) => s + e.refunds, 0), notes: "User refunds" },
+    { line: "B8", description: "Legal & Compliance", amount: -expenses.reduce((s, e) => s + e.legalCompliance, 0), notes: "GST filing, ROC, legal fees" },
+    { line: "B9", description: "GST Paid (Input Tax Credit)", amount: -expenses.reduce((s, e) => s + e.gstPaid, 0), notes: "ITC on expenses" },
+    { line: "C", description: "Total Expenses", amount: -totalExpenses, notes: "Sum of all expense heads" },
+    { line: "D", description: "Profit Before Tax (PBT)", amount: grossProfit, notes: "Net Revenue - Total Expenses" },
+    { line: "E", description: "Income Tax Provision (22%)", amount: -tax, notes: "Corporate tax @ 22% (Section 115BAA)" },
+    { line: "F", description: "Net Profit After Tax", amount: grossProfit - tax, notes: "Retained earnings" },
+  ];
+}
+
+const defaultRange: DateRange = {
+  from: new Date(2025, 3, 1),
+  to: new Date(),
+};
+
 export default function FinancialStatementsPage() {
   const [tab, setTab] = useState("overview");
-  const revenue = getAggregatedRevenue(FY);
-  const expenses = getAggregatedExpenses(FY);
-  const gst = getAggregatedGST(FY);
-  const pl = getAggregatedPL(FY);
-  const itr = getITRSchedule(FY);
+  const [dateRange, setDateRange] = useState<DateRange>(defaultRange);
+
+  const filteredRevenue = useMemo(() => filterByDateRange(REVENUE_DATA, dateRange, "month"), [dateRange]);
+  const filteredExpenses = useMemo(() => filterByDateRange(EXPENSE_DATA, dateRange, "month"), [dateRange]);
+  const filteredPL = useMemo(() => filterByDateRange(PL_DATA, dateRange, "month"), [dateRange]);
+  const filteredGST = useMemo(() => filterByDateRange(GST_DATA, dateRange, "month"), [dateRange]);
+  const filteredWithdrawals = useMemo(() => filterByDateRange(WITHDRAWAL_DETAILS, dateRange, "date"), [dateRange]);
+
+  const revenue = useMemo(() => aggregateRevenue(filteredRevenue), [filteredRevenue]);
+  const expenses = useMemo(() => aggregateExpenses(filteredExpenses), [filteredExpenses]);
+  const gst = useMemo(() => aggregateGST(filteredGST), [filteredGST]);
+  const pl = useMemo(() => aggregatePL(filteredPL), [filteredPL]);
+  const itr = useMemo(() => buildITR(filteredRevenue, filteredExpenses), [filteredRevenue, filteredExpenses]);
 
   const revenueBreakdown = [
     { name: "Coin Recharges", value: revenue.coinRecharges, color: PURPLE, icon: Coins },
@@ -79,17 +175,121 @@ export default function FinancialStatementsPage() {
     { name: "Legal & GST", value: expenses.gstPaid + expenses.legalCompliance, color: "#475569" },
   ];
 
+  const exportData = useMemo(() => {
+    const rows: Record<string, string | number>[] = [];
+    if (tab === "revenue") {
+      filteredRevenue.forEach((r) => {
+        rows.push({
+          month: r.monthLabel,
+          coin_recharges: r.coinRecharges,
+          subscriptions: r.subscriptions,
+          ad_revenue: r.adRevenue,
+          gift_revenue: r.giftRevenue,
+          commercial_banners: r.commercialBanner,
+          special_ads: r.specialAds,
+          total_revenue: r.totalRevenue,
+          gst_collected: r.gstCollected,
+          net_revenue: r.netRevenue,
+        });
+      });
+    } else if (tab === "expenses") {
+      filteredExpenses.forEach((e) => {
+        rows.push({
+          month: e.monthLabel,
+          creator_payouts: e.creatorPayouts,
+          host_payouts: e.hostPayouts,
+          user_withdrawals: e.userWithdrawals,
+          refunds: e.refunds,
+          payment_gateway_fees: e.paymentGatewayFees,
+          server_costs: e.serverCosts,
+          gst_paid: e.gstPaid,
+          marketing: e.marketing,
+          employee_salaries: e.employeeSalaries,
+          office_rent: e.officeRent,
+          legal_compliance: e.legalCompliance,
+          total_expenses: e.totalExpenses,
+        });
+      });
+    } else if (tab === "pnl") {
+      filteredPL.forEach((p) => {
+        rows.push({
+          month: p.monthLabel,
+          gross_revenue: p.grossRevenue,
+          net_revenue: p.netRevenueAfterGST,
+          total_expenses: p.totalExpenses,
+          gross_profit: p.grossProfit,
+          net_profit: p.netProfit,
+          profit_margin: `${p.profitMargin}%`,
+          tax_provision: p.taxProvision,
+          retained_earnings: p.retainedEarnings,
+        });
+      });
+    } else if (tab === "gst") {
+      filteredGST.forEach((g) => {
+        rows.push({
+          month: g.monthLabel,
+          gst_on_ads: g.gstOnAdPayments,
+          gst_on_platform: g.gstOnPlatformFees,
+          gst_on_subscriptions: g.gstOnSubscriptions,
+          gst_on_coins: g.gstOnCoins,
+          gst_on_gifts: g.gstOnGifts,
+          total_output_gst: g.totalOutputGST,
+          total_input_gst: g.totalInputGST,
+          gst_payable: g.gstPayable,
+          igst: g.igst,
+          cgst: g.cgst,
+          sgst: g.sgst,
+        });
+      });
+    } else if (tab === "withdrawals") {
+      filteredWithdrawals.forEach((w) => {
+        rows.push({
+          id: w.id,
+          user_name: w.userName,
+          user_role: w.userRole,
+          amount: w.amount,
+          platform_fee: w.platformFee,
+          gst_on_fee: w.gstOnFee,
+          net_payout: w.netPayout,
+          status: w.status,
+          paid_at: w.paidAt,
+        });
+      });
+    } else if (tab === "overview") {
+      rows.push({
+        gross_revenue: revenue.total,
+        net_revenue: revenue.total - revenue.gstCollected,
+        total_expenses: expenses.total,
+        gross_profit: pl.grossProfit,
+        net_profit: pl.netProfit,
+        tax_provision: pl.taxProvision,
+        retained_earnings: pl.retainedEarnings,
+        gst_payable: gst.gstPayable,
+      });
+    } else if (tab === "itr") {
+      itr.forEach((r) => {
+        rows.push({
+          line: r.line,
+          description: r.description,
+          amount: r.amount,
+          notes: r.notes,
+        });
+      });
+    }
+    return rows;
+  }, [tab, filteredRevenue, filteredExpenses, filteredPL, filteredGST, filteredWithdrawals, revenue, expenses, pl, gst, itr]);
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <FileText className="w-6 h-6 text-purple-500" />
             Financial Statements
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Income Tax, GST, P&L, and full financial structure for FY {FY}
+            Income Tax, GST, P&L, and full financial structure
           </p>
           <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
             <Badge variant="outline" className="gap-1">
@@ -112,34 +312,24 @@ export default function FinancialStatementsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1" onClick={() => {
-            const data = { revenue: REVENUE_DATA, expenses: EXPENSE_DATA, pl: PL_DATA, gst: GST_DATA, itr, withdrawals: WITHDRAWAL_DETAILS };
+            const data = { revenue: filteredRevenue, expenses: filteredExpenses, pl: filteredPL, gst: filteredGST, itr, withdrawals: filteredWithdrawals };
             downloadJSON(`ridhi-financial-statements-${FY}.json`, data);
           }}>
             <Download className="w-4 h-4" />
             JSON
           </Button>
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => {
-            const rows = [
-              { line: "Line", description: "Description", amount: "Amount", notes: "Notes" },
-              ...itr.map((r) => ({ line: r.line, description: r.description, amount: r.amount, notes: r.notes })),
-            ];
-            downloadCSV(`ridhi-itr-schedule-${FY}.csv`, rows);
-          }}>
-            <Download className="w-4 h-4" />
-            ITR CSV
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1" onClick={() => {
-            const rows = [
-              { month: "Month", gross_revenue: "Gross Revenue", net_revenue: "Net Revenue", total_expenses: "Total Expenses", gross_profit: "Gross Profit", net_profit: "Net Profit", profit_margin: "Profit Margin %", tax_provision: "Tax Provision", retained_earnings: "Retained Earnings" },
-              ...PL_DATA.map((p) => ({ month: p.monthLabel, gross_revenue: p.grossRevenue, net_revenue: p.netRevenueAfterGST, total_expenses: p.totalExpenses, gross_profit: p.grossProfit, net_profit: p.netProfit, profit_margin: p.profitMargin, tax_provision: p.taxProvision, retained_earnings: p.retainedEarnings })),
-            ];
-            downloadCSV(`ridhi-pnl-${FY}.csv`, rows);
-          }}>
-            <Download className="w-4 h-4" />
-            P&L CSV
-          </Button>
         </div>
       </div>
+
+      {/* Date Range Filter */}
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        label="Report Period"
+        exportFilename={`ridhi-financial-${tab}.csv`}
+        exportData={exportData}
+        exportLabel="Export CSV"
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -148,7 +338,7 @@ export default function FinancialStatementsPage() {
         <KpiCard icon={Receipt} label="Net Revenue" value={fmt(revenue.total - revenue.gstCollected)} trend={8.2} color={TEAL} />
         <KpiCard icon={Wallet} label="Total Expenses" value={fmt(expenses.total)} trend={-3.1} color={ROSE} />
         <KpiCard icon={TrendingUp} label="Net Profit" value={fmt(pl.netProfit)} trend={12.4} color={EMERALD} />
-        <KpiCard icon={Activity} label="Profit Margin" value={`${pl.avgProfitMargin}%`} trend={4.2} color={AMBER} />
+        <KpiCard icon={Activity} label="Profit Margin" value={`${pl.avgProfitMargin.toFixed(1)}%`} trend={4.2} color={AMBER} />
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>

@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 import {
   Users, IndianRupee, TrendingUp, Crown, Star, Zap, Video,
   Shield, Award, Layers, CheckCircle, XCircle, Search,
@@ -588,20 +590,22 @@ function RevenueTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creator
 
 export default function SubscriptionsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
-  const activeCount   = VIP_SUBS.filter(s => s.status === "active").length;
-  const expiredCount  = VIP_SUBS.filter(s => s.status === "cancelled").length;
+  const dateFilteredVIP = useMemo(() => filterByDateRange(VIP_SUBS, dateRange, "since"), [dateRange]);
+  const dateFilteredCreator = useMemo(() => filterByDateRange(CREATOR_SUBS, dateRange, "since"), [dateRange]);
+
+  const activeCount   = dateFilteredVIP.filter(s => s.status === "active").length;
+  const expiredCount  = dateFilteredVIP.filter(s => s.status === "cancelled").length;
+
+  const exportData = useMemo(() => {
+    const vipRows = dateFilteredVIP.map((s) => ({ id: s.id, name: s.name, tier: s.tier, billing: s.billing, amount: s.amount, since: s.since, status: s.status }));
+    const creRows = dateFilteredCreator.map((s) => ({ id: s.id, name: s.name, tier: s.tier, amount: s.amount, since: s.since, status: s.status }));
+    return [...vipRows, ...creRows] as Record<string, string | number>[];
+  }, [dateFilteredVIP, dateFilteredCreator]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("subscriptions_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
-      </div>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -625,6 +629,13 @@ export default function SubscriptionsPage() {
         </div>
       </div>
 
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename={`subscriptions_${activeTab}.csv`}
+        exportData={exportData}
+      />
+
       {/* Tabs */}
       <div className="flex gap-1 border-b overflow-x-auto">
         {TABS.map((tab) => (
@@ -642,11 +653,11 @@ export default function SubscriptionsPage() {
         ))}
       </div>
 
-      {activeTab === "Overview"          && <OverviewTab      vip={VIP_SUBS}         creators={CREATOR_SUBS} />}
-      {activeTab === "VIP Subscribers"   && <VIPSubscribersTab subscribers={VIP_SUBS} />}
-      {activeTab === "Creator Plans"     && <CreatorPlansTab   subscribers={CREATOR_SUBS} />}
+      {activeTab === "Overview"          && <OverviewTab      vip={dateFilteredVIP}         creators={dateFilteredCreator} />}
+      {activeTab === "VIP Subscribers"   && <VIPSubscribersTab subscribers={dateFilteredVIP} />}
+      {activeTab === "Creator Plans"     && <CreatorPlansTab   subscribers={dateFilteredCreator} />}
       {activeTab === "Plan Config"       && <PlanConfigTab />}
-      {activeTab === "Revenue"           && <RevenueTab        vip={VIP_SUBS}         creators={CREATOR_SUBS} />}
+      {activeTab === "Revenue"           && <RevenueTab        vip={dateFilteredVIP}         creators={dateFilteredCreator} />}
     </div>
   );
 }

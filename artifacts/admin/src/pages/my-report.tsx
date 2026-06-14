@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 import {
   CheckCircle, Clock, AlertTriangle, Zap, BarChart2, Star,
   TrendingUp, Users, ShieldAlert, Coins, IndianRupee, ScanFace,
@@ -32,6 +34,7 @@ interface WorkTask {
   priority: TaskPriority;
   count?: number;
   notes?: string;
+  date: string; // ISO date for filtering
 }
 
 // ── Mock data — scoped to logged-in admin ─────────────────────────────────
@@ -44,16 +47,16 @@ const currentAdmin = {
 };
 
 const MY_TASKS: WorkTask[] = [
-  { id: "t1",  title: "Review 47 flagged posts",           module: "Content Moderation", moduleIcon: ShieldAlert, assignedBy: "Super Admin", assignedAt: "Today 9:00 AM",  dueDate: "Today 6:00 PM",    status: "in_progress", priority: "high",   count: 47  },
-  { id: "t2",  title: "Approve 12 KYC submissions",        module: "E-KYC Verification", moduleIcon: ScanFace,   assignedBy: "Super Admin", assignedAt: "Today 9:00 AM",  dueDate: "Today 5:00 PM",    status: "pending",     priority: "high",   count: 12  },
-  { id: "t3",  title: "Handle 8 user support tickets",     module: "Users",              moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "Today 10:30 AM", dueDate: "Today 4:00 PM",    status: "pending",     priority: "medium", count: 8   },
-  { id: "t4",  title: "Audit 6 community violations",      module: "Communities",        moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "Yesterday",      dueDate: "Today 12:00 PM",   status: "completed",   priority: "high",   count: 6   },
-  { id: "t5",  title: "Review 23 live stream recordings",  module: "Recordings",         moduleIcon: Phone,      assignedBy: "Super Admin", assignedAt: "Today 8:00 AM",  dueDate: "Tomorrow 9:00 AM", status: "pending",     priority: "low",    count: 23  },
-  { id: "t6",  title: "Approve 4 host upgrade requests",   module: "Hosts",              moduleIcon: Star,       assignedBy: "Super Admin", assignedAt: "Today 11:00 AM", dueDate: "Today 3:00 PM",    status: "in_progress", priority: "medium", count: 4   },
-  { id: "t7",  title: "Respond to 3 escalated complaints", module: "Users",              moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "2h ago",         dueDate: "Today 2:00 PM",    status: "escalated",   priority: "high",   count: 3   },
-  { id: "t8",  title: "Validate 18 sponsored post labels", module: "Promotions & Ads",   moduleIcon: Zap,        assignedBy: "Super Admin", assignedAt: "Yesterday",      dueDate: "Tomorrow",         status: "completed",   priority: "medium", count: 18  },
-  { id: "t9",  title: "Review 9 reported comments",        module: "Content Moderation", moduleIcon: ShieldAlert,assignedBy: "Super Admin", assignedAt: "Today 7:00 AM",  dueDate: "Today 1:00 PM",    status: "completed",   priority: "medium", count: 9   },
-  { id: "t10", title: "Quarterly content audit report",    module: "Analytics",          moduleIcon: BarChart2,  assignedBy: "Super Admin", assignedAt: "May 18",         dueDate: "May 25",           status: "in_progress", priority: "low"        },
+  { id: "t1",  title: "Review 47 flagged posts",           module: "Content Moderation", moduleIcon: ShieldAlert, assignedBy: "Super Admin", assignedAt: "Today 9:00 AM",  dueDate: "Today 6:00 PM",    status: "in_progress", priority: "high",   count: 47,  date: "2025-06-14" },
+  { id: "t2",  title: "Approve 12 KYC submissions",        module: "E-KYC Verification", moduleIcon: ScanFace,   assignedBy: "Super Admin", assignedAt: "Today 9:00 AM",  dueDate: "Today 5:00 PM",    status: "pending",     priority: "high",   count: 12,  date: "2025-06-14" },
+  { id: "t3",  title: "Handle 8 user support tickets",     module: "Users",              moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "Today 10:30 AM", dueDate: "Today 4:00 PM",    status: "pending",     priority: "medium", count: 8,   date: "2025-06-14" },
+  { id: "t4",  title: "Audit 6 community violations",      module: "Communities",        moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "Yesterday",      dueDate: "Today 12:00 PM",   status: "completed",   priority: "high",   count: 6,   date: "2025-06-13" },
+  { id: "t5",  title: "Review 23 live stream recordings",  module: "Recordings",         moduleIcon: Phone,      assignedBy: "Super Admin", assignedAt: "Today 8:00 AM",  dueDate: "Tomorrow 9:00 AM", status: "pending",     priority: "low",    count: 23,  date: "2025-06-14" },
+  { id: "t6",  title: "Approve 4 host upgrade requests",   module: "Hosts",              moduleIcon: Star,       assignedBy: "Super Admin", assignedAt: "Today 11:00 AM", dueDate: "Today 3:00 PM",    status: "in_progress", priority: "medium", count: 4,   date: "2025-06-14" },
+  { id: "t7",  title: "Respond to 3 escalated complaints", module: "Users",              moduleIcon: Users,      assignedBy: "Super Admin", assignedAt: "2h ago",         dueDate: "Today 2:00 PM",    status: "escalated",   priority: "high",   count: 3,   date: "2025-06-14" },
+  { id: "t8",  title: "Validate 18 sponsored post labels", module: "Promotions & Ads",   moduleIcon: Zap,        assignedBy: "Super Admin", assignedAt: "Yesterday",      dueDate: "Tomorrow",         status: "completed",   priority: "medium", count: 18,  date: "2025-06-13" },
+  { id: "t9",  title: "Review 9 reported comments",        module: "Content Moderation", moduleIcon: ShieldAlert,assignedBy: "Super Admin", assignedAt: "Today 7:00 AM",  dueDate: "Today 1:00 PM",    status: "completed",   priority: "medium", count: 9,   date: "2025-06-14" },
+  { id: "t10", title: "Quarterly content audit report",    module: "Analytics",          moduleIcon: BarChart2,  assignedBy: "Super Admin", assignedAt: "May 18",         dueDate: "May 25",           status: "in_progress", priority: "low",              date: "2025-05-18" },
 ];
 
 const weeklyData = [
@@ -96,25 +99,30 @@ const PRIORITY_STYLE: Record<TaskPriority, string> = {
 
 export default function MyReportPage() {
   const [filter, setFilter] = useState<"all" | TaskStatus>("all");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
-  const filtered = filter === "all" ? MY_TASKS : MY_TASKS.filter((t) => t.status === filter);
+  const dateFiltered = useMemo(() => filterByDateRange(MY_TASKS, dateRange, "date"), [dateRange]);
 
-  const completed   = MY_TASKS.filter((t) => t.status === "completed").length;
-  const pending     = MY_TASKS.filter((t) => t.status === "pending").length;
-  const inProgress  = MY_TASKS.filter((t) => t.status === "in_progress").length;
-  const escalated   = MY_TASKS.filter((t) => t.status === "escalated").length;
-  const completionRate = Math.round(completed / MY_TASKS.length * 100);
+  const filtered = filter === "all" ? dateFiltered : dateFiltered.filter((t) => t.status === filter);
+
+  const completed   = dateFiltered.filter((t) => t.status === "completed").length;
+  const pending     = dateFiltered.filter((t) => t.status === "pending").length;
+  const inProgress  = dateFiltered.filter((t) => t.status === "in_progress").length;
+  const escalated   = dateFiltered.filter((t) => t.status === "escalated").length;
+  const completionRate = Math.round((dateFiltered.length ? completed / dateFiltered.length : 0) * 100);
+
+  const exportData = useMemo(() => filtered.map((t) => ({
+    id: t.id, title: t.title, module: t.module, status: t.status, priority: t.priority, assignedAt: t.assignedAt, dueDate: t.dueDate, date: t.date,
+  })), [filtered]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("my-report_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
-      </div>
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename="my-report.csv"
+        exportData={exportData as Record<string, string | number>[]}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -126,9 +134,6 @@ export default function MyReportPage() {
             Your assigned tasks, completion metrics, and performance score
           </p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
-          <Download className="w-3.5 h-3.5" /> Export Report
-        </Button>
       </div>
 
       {/* Admin identity card */}
@@ -195,7 +200,7 @@ export default function MyReportPage() {
                   filter === f ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border hover:bg-muted"
                 }`}
               >
-                {f === "all" ? `All (${MY_TASKS.length})` : f.replace("_", " ") + ` (${MY_TASKS.filter((t) => t.status === f).length})`}
+                {f === "all" ? `All (${dateFiltered.length})` : f.replace("_", " ") + ` (${dateFiltered.filter((t) => t.status === f).length})`}
               </button>
             ))}
           </div>

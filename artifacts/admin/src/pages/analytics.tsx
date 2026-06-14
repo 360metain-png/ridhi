@@ -7,25 +7,39 @@ import {
 } from "recharts";
 import { TrendingUp, Users, FileText, IndianRupee, MapPin, Download, FileDown } from "lucide-react";
 import { downloadCSV, downloadPDF } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRangeDaily } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
+import { useState, useMemo } from "react";
+import { format, subDays } from "date-fns";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
 const TEAL = "#06B6D4";
 const AMBER = "#F59E0B";
 
+const today = new Date();
+
 // 30-day DAU/MAU data
-const dauData = Array.from({ length: 30 }, (_, i) => ({
-  day: `${i + 1}`,
-  DAU: Math.floor(18000 + Math.random() * 8000),
-  MAU: Math.floor(120000 + Math.random() * 20000),
-}));
+const dauData = Array.from({ length: 30 }, (_, i) => {
+  const d = subDays(today, 29 - i);
+  return {
+    day: `${i + 1}`,
+    date: format(d, "yyyy-MM-dd"),
+    DAU: Math.floor(18000 + Math.random() * 8000),
+    MAU: Math.floor(120000 + Math.random() * 20000),
+  };
+});
 
 // New registrations per day
-const regData = Array.from({ length: 14 }, (_, i) => ({
-  day: `Apr ${i + 8}`,
-  Registrations: Math.floor(800 + Math.random() * 600),
-  Churned: Math.floor(100 + Math.random() * 150),
-}));
+const regData = Array.from({ length: 14 }, (_, i) => {
+  const d = subDays(today, 13 - i);
+  return {
+    day: `${d.getDate()}`,
+    date: format(d, "yyyy-MM-dd"),
+    Registrations: Math.floor(800 + Math.random() * 600),
+    Churned: Math.floor(100 + Math.random() * 150),
+  };
+});
 
 // Revenue breakdown by source
 const revenueSourceData = [
@@ -37,11 +51,15 @@ const revenueSourceData = [
 const SOURCE_COLORS = [PURPLE, MAGENTA, TEAL, AMBER];
 
 // Revenue 30 days
-const revenueData = Array.from({ length: 30 }, (_, i) => ({
-  day: `${i + 1}`,
-  Revenue: Math.floor(40000 + Math.random() * 30000),
-  MRR: Math.floor(380000 + i * 3000 + Math.random() * 10000),
-}));
+const revenueData = Array.from({ length: 30 }, (_, i) => {
+  const d = subDays(today, 29 - i);
+  return {
+    day: `${i + 1}`,
+    date: format(d, "yyyy-MM-dd"),
+    Revenue: Math.floor(40000 + Math.random() * 30000),
+    MRR: Math.floor(380000 + i * 3000 + Math.random() * 10000),
+  };
+});
 
 // Top cities
 const cityData = [
@@ -56,12 +74,16 @@ const cityData = [
 ];
 
 // Content by day
-const contentData = Array.from({ length: 14 }, (_, i) => ({
-  day: `Apr ${i + 8}`,
-  Posts: Math.floor(2000 + Math.random() * 1500),
-  Reels: Math.floor(800 + Math.random() * 600),
-  Stories: Math.floor(1500 + Math.random() * 1000),
-}));
+const contentData = Array.from({ length: 14 }, (_, i) => {
+  const d = subDays(today, 13 - i);
+  return {
+    day: `${d.getDate()}`,
+    date: format(d, "yyyy-MM-dd"),
+    Posts: Math.floor(2000 + Math.random() * 1500),
+    Reels: Math.floor(800 + Math.random() * 600),
+    Stories: Math.floor(1500 + Math.random() * 1000),
+  };
+});
 
 // Top hashtags
 const hashtagData = [
@@ -140,30 +162,36 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function AnalyticsPage() {
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
+  const [activeTab, setActiveTab] = useState("users");
+
+  const filteredDau = useMemo(() => filterByDateRangeDaily(dauData, dateRange), [dateRange]);
+  const filteredReg = useMemo(() => filterByDateRangeDaily(regData, dateRange), [dateRange]);
+  const filteredRevenue = useMemo(() => filterByDateRangeDaily(revenueData, dateRange), [dateRange]);
+  const filteredContent = useMemo(() => filterByDateRangeDaily(contentData, dateRange), [dateRange]);
+
+  const exportData = useMemo(() => {
+    if (activeTab === "users") return filteredDau.map((d) => ({ date: d.date, dau: d.DAU, mau: d.MAU }));
+    if (activeTab === "content") return filteredContent.map((d) => ({ date: d.date, posts: d.Posts, reels: d.Reels, stories: d.Stories }));
+    if (activeTab === "revenue") return filteredRevenue.map((d) => ({ date: d.date, revenue: d.Revenue, mrr: d.MRR }));
+    return filteredReg.map((d) => ({ date: d.date, registrations: d.Registrations, churned: d.Churned }));
+  }, [activeTab, filteredDau, filteredReg, filteredRevenue, filteredContent]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={async () => {
-            const rows: Record<string, string | number>[] = dauData.map((d) => ({ day: d.day, dau: d.DAU, mau: d.MAU }));
-            await downloadPDF("analytics_users.pdf", "Users Analytics", rows);
-          }}>
-            <FileDown className="w-3 h-3" /> PDF
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-            const rows: Record<string, string | number>[] = dauData.map((d) => ({ day: d.day, dau: d.DAU, mau: d.MAU }));
-            downloadCSV("analytics_users.csv", rows);
-          }}>
-            <Download className="w-3 h-3" /> CSV
-          </Button>
-        </div>
-      </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
         <p className="text-muted-foreground text-sm mt-1">Platform-wide insights across users, content, and revenue</p>
       </div>
 
-      <Tabs defaultValue="users">
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename={`analytics_${activeTab}.csv`}
+        exportData={exportData as Record<string, string | number>[]}
+      />
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/50 border border-border">
           <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm">
             <Users className="w-3.5 h-3.5 mr-1.5" /> Users
@@ -179,11 +207,11 @@ export default function AnalyticsPage() {
         <TabsContent value="users" className="space-y-4 mt-4">
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">DAU / MAU — Last 30 Days</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">DAU / MAU — Filtered Range</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={dauData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={filteredDau} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="dauGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.3} />
@@ -246,7 +274,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={regData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <BarChart data={filteredReg} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} />
                   <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -267,7 +295,7 @@ export default function AnalyticsPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={contentData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={filteredContent} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
                     {[PURPLE, MAGENTA, TEAL].map((c, i) => (
                       <linearGradient key={i} id={`cg${i}`} x1="0" y1="0" x2="0" y2="1">
@@ -321,7 +349,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={280}>
-                  <AreaChart data={revenueData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={filteredRevenue} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={MAGENTA} stopOpacity={0.3} />

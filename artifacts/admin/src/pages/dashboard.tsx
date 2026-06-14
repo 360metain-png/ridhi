@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,21 +13,29 @@ import {
 } from "recharts";
 import type { AdminRole } from "@/App";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
+import { format, subDays } from "date-fns";
 
-const dauData = [
-  { name: "1",  dau: 4000,  mau: 18000 }, { name: "5",  dau: 3000,  mau: 17500 },
-  { name: "10", dau: 5000,  mau: 19000 }, { name: "15", dau: 4500,  mau: 19800 },
-  { name: "20", dau: 6000,  mau: 21000 }, { name: "25", dau: 5500,  mau: 22000 },
-  { name: "30", dau: 7000,  mau: 23400 },
-];
+const today = new Date();
+
+const dauData = Array.from({ length: 30 }, (_, i) => {
+  const d = subDays(today, 29 - i);
+  return {
+    name: `${d.getDate()}`,
+    date: format(d, "yyyy-MM-dd"),
+    dau: Math.floor(4000 + Math.random() * 3000),
+    mau: Math.floor(18000 + Math.random() * 6000),
+  };
+});
 
 const revenueData = [
-  { name: "Jul", coins: 820000,  subscriptions: 240000, ads: 180000 },
-  { name: "Aug", coins: 940000,  subscriptions: 280000, ads: 210000 },
-  { name: "Sep", coins: 1100000, subscriptions: 320000, ads: 250000 },
-  { name: "Oct", coins: 1280000, subscriptions: 380000, ads: 290000 },
-  { name: "Nov", coins: 1480000, subscriptions: 420000, ads: 310000 },
-  { name: "Dec", coins: 1720000, subscriptions: 480000, ads: 340000 },
+  { name: "Jul", month: "2024-07", coins: 820000,  subscriptions: 240000, ads: 180000 },
+  { name: "Aug", month: "2024-08", coins: 940000,  subscriptions: 280000, ads: 210000 },
+  { name: "Sep", month: "2024-09", coins: 1100000, subscriptions: 320000, ads: 250000 },
+  { name: "Oct", month: "2024-10", coins: 1280000, subscriptions: 380000, ads: 290000 },
+  { name: "Nov", month: "2024-11", coins: 1480000, subscriptions: 420000, ads: 310000 },
+  { name: "Dec", month: "2024-12", coins: 1720000, subscriptions: 480000, ads: 340000 },
 ];
 
 const registrationsData = [
@@ -35,7 +43,6 @@ const registrationsData = [
   { name: "Thu", value: 1400 }, { name: "Fri", value: 2000 }, { name: "Sat", value: 2500 },
   { name: "Sun", value: 3000 },
 ];
-
 
 const agentPerformanceData = [
   { name: "Vikram R", hosts: 312, active: 278, earnings: "₹1.2L", level: "A5" },
@@ -154,6 +161,7 @@ const roleLabel: Record<AdminRole, string> = {
 
 export default function Dashboard() {
   const [role, setRole] = useState<AdminRole>("super_admin");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
   useEffect(() => {
     const stored = localStorage.getItem("ridhi_admin_role") as AdminRole | null;
@@ -166,6 +174,9 @@ export default function Dashboard() {
   const networkStats = isSA ? NETWORK_SA : NETWORK_ADMIN;
   const activityFeed = isSA ? RECENT_ACTIVITY_SA : RECENT_ACTIVITY_ADMIN;
 
+  const filteredDau = useMemo(() => filterByDateRange(dauData, dateRange, "date"), [dateRange]);
+  const filteredRevenue = useMemo(() => filterByDateRange(revenueData, dateRange, "month"), [dateRange]);
+
   const subtitles: Record<AdminRole, string> = {
     super_admin: "Full platform overview — SA view",
     admin:       "Your network: agents + hosts under your management",
@@ -173,15 +184,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("dashboard_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
-      </div>
-
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
@@ -189,6 +191,14 @@ export default function Dashboard() {
             Platform Overview
           </h2>
           <p className="text-muted-foreground text-sm mt-1">{subtitles[role]}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <DateRangeFilter
+            value={dateRange}
+            onChange={setDateRange}
+            exportFilename="dashboard.csv"
+            exportData={filteredDau.map((d) => ({ date: d.date, dau: d.dau, mau: d.mau })) as Record<string, string | number>[]}
+          />
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-xs">
@@ -350,7 +360,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="h-[240px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={dauData}>
+                  <AreaChart data={filteredDau}>
                     <defs>
                       <linearGradient id="dauGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%"  stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -374,7 +384,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="h-[240px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={revenueData}>
+                  <BarChart data={filteredRevenue}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`} />

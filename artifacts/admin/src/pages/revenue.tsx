@@ -8,6 +8,10 @@ import {
 } from "recharts";
 import { IndianRupee, TrendingUp, TrendingDown, CreditCard, Users, Megaphone, Percent, Download} from "lucide-react";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange, filterByDateRangeDaily } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
+import { useState, useMemo } from "react";
+import { format, subDays } from "date-fns";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -15,27 +19,37 @@ const TEAL = "#06B6D4";
 const AMBER = "#F59E0B";
 const GREEN = "#22C55E";
 
-const revenueDaily = Array.from({ length: 30 }, (_, i) => ({
-  day: `${i + 1}`,
-  "Coin Recharge": Math.floor(35000 + Math.random() * 25000),
-  "Subscriptions": Math.floor(18000 + Math.random() * 12000),
-  "Ad Revenue": Math.floor(12000 + Math.random() * 8000),
-  "Live Gifts": Math.floor(8000 + Math.random() * 10000),
-}));
+const today = new Date();
 
-const adPerformance = Array.from({ length: 14 }, (_, i) => ({
-  day: `Apr ${i + 8}`,
-  Impressions: Math.floor(200000 + Math.random() * 100000),
-  Clicks: Math.floor(8000 + Math.random() * 5000),
-  Revenue: Math.floor(12000 + Math.random() * 8000),
-}));
+const revenueDaily = Array.from({ length: 30 }, (_, i) => {
+  const d = subDays(today, 29 - i);
+  return {
+    day: `${i + 1}`,
+    date: format(d, "yyyy-MM-dd"),
+    "Coin Recharge": Math.floor(35000 + Math.random() * 25000),
+    "Subscriptions": Math.floor(18000 + Math.random() * 12000),
+    "Ad Revenue": Math.floor(12000 + Math.random() * 8000),
+    "Live Gifts": Math.floor(8000 + Math.random() * 10000),
+  };
+});
+
+const adPerformance = Array.from({ length: 14 }, (_, i) => {
+  const d = subDays(today, 13 - i);
+  return {
+    day: `${d.getDate()}`,
+    date: format(d, "yyyy-MM-dd"),
+    Impressions: Math.floor(200000 + Math.random() * 100000),
+    Clicks: Math.floor(8000 + Math.random() * 5000),
+    Revenue: Math.floor(12000 + Math.random() * 8000),
+  };
+});
 
 const subscriptionData = [
-  { month: "Jan", Basic: 1200, Premium: 480, VIP: 120 },
-  { month: "Feb", Basic: 1450, Premium: 560, VIP: 145 },
-  { month: "Mar", Basic: 1680, Premium: 640, VIP: 178 },
-  { month: "Apr", Basic: 1920, Premium: 740, VIP: 210 },
-  { month: "May", Basic: 2180, Premium: 860, VIP: 248 },
+  { month: "2025-01", Basic: 1200, Premium: 480, VIP: 120 },
+  { month: "2025-02", Basic: 1450, Premium: 560, VIP: 145 },
+  { month: "2025-03", Basic: 1680, Premium: 640, VIP: 178 },
+  { month: "2025-04", Basic: 1920, Premium: 740, VIP: 210 },
+  { month: "2025-05", Basic: 2180, Premium: 860, VIP: 248 },
 ];
 
 const revenueSplit = [
@@ -80,32 +94,56 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const GST_RATE = 0.18;
 
 export default function RevenuePage() {
-  const totalMRR = SUBSCRIPTION_PLANS.reduce((s, p) => s + p.mrr, 0);
-  const totalRevenue = revenueSplit.reduce((s, r) => s + r.amount, 0);
-  const gstCollected = Math.round(totalRevenue * GST_RATE);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const summaryStats = [
-    { label: "Total Revenue (MTD)", value: `₹${(totalRevenue / 100000).toFixed(1)}L`, icon: IndianRupee, change: "+22.4%", up: true, color: "text-violet-400" },
+  const filteredDaily = useMemo(() => filterByDateRangeDaily(revenueDaily, dateRange), [dateRange]);
+  const filteredAds = useMemo(() => filterByDateRangeDaily(adPerformance, dateRange), [dateRange]);
+  const filteredSubs = useMemo(() => filterByDateRange(subscriptionData, dateRange, "month"), [dateRange]);
+
+  const totalMRR = useMemo(() => SUBSCRIPTION_PLANS.reduce((s, p) => s + p.mrr, 0), []);
+  const filteredRevenue = useMemo(() => {
+    const rev = filteredDaily.reduce((s, d) => s + d["Coin Recharge"] + d["Subscriptions"] + d["Ad Revenue"] + d["Live Gifts"], 0);
+    return rev;
+  }, [filteredDaily]);
+  const gstCollected = useMemo(() => Math.round(filteredRevenue * GST_RATE), [filteredRevenue]);
+  const adRevenue = useMemo(() => filteredAds.reduce((s, d) => s + d.Revenue, 0), [filteredAds]);
+
+  const summaryStats = useMemo(() => [
+    { label: "Total Revenue", value: `₹${(filteredRevenue / 100000).toFixed(1)}L`, icon: IndianRupee, change: "+22.4%", up: true, color: "text-violet-400" },
     { label: "MRR (Subscriptions)", value: `₹${(totalMRR / 1000).toFixed(0)}K`, icon: CreditCard, change: "+11.2%", up: true, color: "text-emerald-400" },
-    { label: "Ad Revenue (MTD)", value: `₹${(580200 / 1000).toFixed(0)}K`, icon: Megaphone, change: "+8.7%", up: true, color: "text-blue-400" },
+    { label: "Ad Revenue", value: `₹${(adRevenue / 1000).toFixed(0)}K`, icon: Megaphone, change: "+8.7%", up: true, color: "text-blue-400" },
     { label: "Paying Users", value: "3,288", icon: Users, change: "+14.6%", up: true, color: "text-pink-400" },
     { label: "GST Collected (18%)", value: `₹${(gstCollected / 100000).toFixed(1)}L`, icon: Percent, change: "+22.4%", up: true, color: "text-amber-400" },
-  ];
+  ], [filteredRevenue, totalMRR, adRevenue, gstCollected]);
+
+  const exportData = useMemo(() => {
+    if (activeTab === "overview") {
+      return filteredDaily.map((d) => ({
+        date: d.date, coin_recharge: d["Coin Recharge"], subscriptions: d["Subscriptions"], ad_revenue: d["Ad Revenue"], live_gifts: d["Live Gifts"],
+      }));
+    }
+    if (activeTab === "ads") {
+      return filteredAds.map((d) => ({ date: d.date, impressions: d.Impressions, clicks: d.Clicks, revenue: d.Revenue }));
+    }
+    return filteredSubs.map((d) => ({ month: d.month, basic: d.Basic, premium: d.Premium, vip: d.VIP }));
+  }, [activeTab, filteredDaily, filteredAds, filteredSubs]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("revenue_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Revenue & Ads</h1>
+          <p className="text-muted-foreground text-sm mt-1">Platform revenue breakdown, ad performance, and subscription reports</p>
+        </div>
       </div>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Revenue & Ads</h1>
-        <p className="text-muted-foreground text-sm mt-1">Platform revenue breakdown, ad performance, and subscription reports</p>
-      </div>
+
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename={`revenue_${activeTab}.csv`}
+        exportData={exportData as Record<string, string | number>[]}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {summaryStats.map((s) => (
@@ -125,7 +163,7 @@ export default function RevenuePage() {
         ))}
       </div>
 
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/50 border border-border">
           <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm">Overview</TabsTrigger>
           <TabsTrigger value="ads" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-sm">Advertising</TabsTrigger>
@@ -136,11 +174,11 @@ export default function RevenuePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card className="bg-card border-border lg:col-span-2">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-foreground">Revenue by Source — Last 30 Days</CardTitle>
+                <CardTitle className="text-sm font-semibold text-foreground">Revenue by Source — Filtered Range</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={280}>
-                  <AreaChart data={revenueDaily} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                  <AreaChart data={filteredDaily} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       {[PURPLE, MAGENTA, TEAL, AMBER].map((c, i) => (
                         <linearGradient key={i} id={`rg${i}`} x1="0" y1="0" x2="0" y2="1">
@@ -199,11 +237,11 @@ export default function RevenuePage() {
         <TabsContent value="ads" className="space-y-4 mt-4">
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">Ad Performance — Last 14 Days</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">Ad Performance — Filtered Range</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={adPerformance} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <BarChart data={filteredAds} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} />
                   <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} axisLine={false} yAxisId="left" />
@@ -283,11 +321,11 @@ export default function RevenuePage() {
 
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">Subscription Growth — Last 5 Months</CardTitle>
+              <CardTitle className="text-sm font-semibold text-foreground">Subscription Growth — Filtered</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={subscriptionData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+                <BarChart data={filteredSubs} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} />
                   <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} axisLine={false} />

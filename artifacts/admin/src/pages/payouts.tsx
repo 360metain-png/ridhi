@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { mockCoinWithdrawals, type CoinWithdrawal } from "@/data/mock-data";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 
 const STATUS_COLORS: Record<string, string> = {
   Pending:  "bg-amber-500/15 text-amber-400 border-amber-500/20",
@@ -44,8 +46,11 @@ export default function PayoutsPage() {
   const [page, setPage] = useState(1);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
-  const filtered = withdrawals.filter((w) => {
+  const dateFiltered = useMemo(() => filterByDateRange(withdrawals, dateRange, "requestedAt"), [withdrawals, dateRange]);
+
+  const filtered = dateFiltered.filter((w) => {
     const matchSearch = w.userName.toLowerCase().includes(search.toLowerCase()) ||
       w.userPhone.includes(search) ||
       (w.upiId?.toLowerCase().includes(search.toLowerCase()) ?? false);
@@ -57,15 +62,15 @@ export default function PayoutsPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const pending  = withdrawals.filter((w) => w.status === "Pending");
-  const approved = withdrawals.filter((w) => w.status === "Approved");
-  const paid     = withdrawals.filter((w) => w.status === "Paid");
-  const rejected = withdrawals.filter((w) => w.status === "Rejected");
+  const pending  = dateFiltered.filter((w) => w.status === "Pending");
+  const approved = dateFiltered.filter((w) => w.status === "Approved");
+  const paid     = dateFiltered.filter((w) => w.status === "Paid");
+  const rejected = dateFiltered.filter((w) => w.status === "Rejected");
 
   const pendingInr  = pending.reduce((s, w) => s + w.netAmountInr, 0);
   const approvedInr = approved.reduce((s, w) => s + w.netAmountInr, 0);
   const paidInr     = paid.reduce((s, w) => s + w.netAmountInr, 0);
-  const totalCoins  = withdrawals.reduce((s, w) => s + w.coinsRequested, 0);
+  const totalCoins  = dateFiltered.reduce((s, w) => s + w.coinsRequested, 0);
 
   const approve = (id: string) => {
     setWithdrawals((prev) => prev.map((w) => w.id === id
@@ -97,21 +102,18 @@ export default function PayoutsPage() {
 
   const roleSplit = (["User", "Host", "Agent"] as const).map((r) => ({
     role: r,
-    count: withdrawals.filter((w) => w.userRole === r).length,
-    inr:   withdrawals.filter((w) => w.userRole === r && w.status === "Paid").reduce((s, w) => s + w.netAmountInr, 0),
+    count: dateFiltered.filter((w) => w.userRole === r).length,
+    inr:   dateFiltered.filter((w) => w.userRole === r && w.status === "Paid").reduce((s, w) => s + w.netAmountInr, 0),
   }));
+
+  const exportData = useMemo(() => filtered.map((w) => ({
+    id: w.id, userName: w.userName, role: w.userRole, status: w.status,
+    coins: w.coinsRequested, netAmount: w.netAmountInr, requestedAt: w.requestedAt,
+  })), [filtered]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-            const rows: Record<string, string | number>[] = [];
-            downloadCSV("payouts_report.csv", rows);
-          }}>
-            <Download className="w-3 h-3" /> Export CSV
-          </Button>
-        </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground">Coin Withdrawals & Payouts</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage withdrawal requests from Users, Hosts, and Agents</p>
@@ -123,6 +125,13 @@ export default function PayoutsPage() {
           </Badge>
         )}
       </div>
+
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename="payouts.csv"
+        exportData={exportData as Record<string, string | number>[]}
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

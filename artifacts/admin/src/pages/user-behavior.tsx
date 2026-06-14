@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { downloadCSV, downloadPDF } from "@/lib/utils";
 import { FileDown } from "lucide-react";
+import DateRangeFilter, { filterByDateRange, filterByDateRangeDaily } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 import {
   USER_BEHAVIOR_ANALYTICS,
   COHORT_DATA,
@@ -42,6 +44,8 @@ const COLORS = [PURPLE, MAGENTA, TEAL, AMBER, EMERALD, ROSE, "#8B5CF6", "#F97316
 export default function UserBehavior() {
   const [period, setPeriod] = useState("30d");
   const [userFilter, setUserFilter] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
+  const [activeTab, setActiveTab] = useState("overview");
   const agg = getAggregatedAnalytics();
   const users = USER_BEHAVIOR_ANALYTICS;
   const topUsers = [...users].sort((a, b) => b.engagementScore - a.engagementScore).slice(0, 10);
@@ -55,6 +59,15 @@ export default function UserBehavior() {
     : userFilter === "casual"
     ? users.filter((u) => u.engagementScore >= 20 && u.engagementScore < 40)
     : users.filter((u) => u.engagementScore < 20);
+
+  const filteredDau = useMemo(() => filterByDateRangeDaily(DAU_DATA, dateRange), [dateRange]);
+  const filteredCohort = useMemo(() => filterByDateRangeDaily(COHORT_DATA, dateRange), [dateRange]);
+
+  const exportData = useMemo(() => {
+    if (activeTab === "overview") return filteredDau.map((d) => ({ date: d.date, dau: d.dau, newUsers: d.newUsers }));
+    if (activeTab === "retention") return filteredCohort.map((d) => ({ cohortDate: d.cohortDate, users: d.users }));
+    return filteredDau.map((d) => ({ date: d.date, dau: d.dau }));
+  }, [activeTab, filteredDau, filteredCohort]);
 
   // Top screens
   const topScreens = Object.entries(agg.screenTotals)
@@ -99,60 +112,6 @@ export default function UserBehavior() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={async () => {
-            const rows: Record<string, string | number>[] = users.map((u) => {
-              const topScreen = Object.entries(u.screenVisits).sort((a, b) => b[1].visits - a[1].visits)[0]?.[0] ?? "";
-              const topFeature = Object.entries(u.featureUsage).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
-              return {
-                user_id: u.userId,
-                user_name: u.userName,
-                total_sessions: u.totalSessions,
-                total_duration_min: u.totalDurationMinutes,
-                avg_session_min: u.avgSessionMinutes,
-                engagement_score: u.engagementScore,
-                last_active: u.lastActive,
-                top_screen: topScreen,
-                top_feature: topFeature,
-                likes: u.contentInteractions.likes,
-                comments: u.contentInteractions.comments,
-                shares: u.contentInteractions.shares,
-                posts_created: u.contentInteractions.postsCreated,
-                platform: u.deviceInfo.platform,
-              };
-            });
-            await downloadPDF("user_behavior.pdf", "User Behavior Analytics", rows);
-          }}>
-            <FileDown className="w-3 h-3" /> PDF
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-            const rows: Record<string, string | number>[] = users.map((u) => {
-              const topScreen = Object.entries(u.screenVisits).sort((a, b) => b[1].visits - a[1].visits)[0]?.[0] ?? "";
-              const topFeature = Object.entries(u.featureUsage).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
-              return {
-                user_id: u.userId,
-                user_name: u.userName,
-                total_sessions: u.totalSessions,
-                total_duration_min: u.totalDurationMinutes,
-                avg_session_min: u.avgSessionMinutes,
-                engagement_score: u.engagementScore,
-                last_active: u.lastActive,
-                top_screen: topScreen,
-                top_feature: topFeature,
-                likes: u.contentInteractions.likes,
-                comments: u.contentInteractions.comments,
-                shares: u.contentInteractions.shares,
-                posts_created: u.contentInteractions.postsCreated,
-                platform: u.deviceInfo.platform,
-              };
-            });
-            downloadCSV("user_behavior.csv", rows);
-          }}>
-            <Download className="w-3 h-3" /> CSV
-          </Button>
-        </div>
-      </div>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -161,6 +120,16 @@ export default function UserBehavior() {
             Session data, engagement, content interactions, and feature usage across all users
           </p>
         </div>
+      </div>
+
+      <DateRangeFilter
+        value={dateRange}
+        onChange={setDateRange}
+        exportFilename={`user_behavior_${activeTab}.csv`}
+        exportData={exportData as Record<string, string | number>[]}
+      />
+
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-32">
@@ -184,7 +153,6 @@ export default function UserBehavior() {
               <SelectItem value="inactive">Inactive Users</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon"><Download className="w-4 h-4" /></Button>
         </div>
       </div>
 
@@ -225,7 +193,7 @@ export default function UserBehavior() {
       </div>
 
       {/* Main Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
@@ -248,7 +216,7 @@ export default function UserBehavior() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={260}>
-                  <AreaChart data={DAU_DATA}>
+                  <AreaChart data={filteredDau}>
                     <defs>
                       <linearGradient id="dauGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={PURPLE} stopOpacity={0.3} />
@@ -256,7 +224,7 @@ export default function UserBehavior() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
                     <Area type="monotone" dataKey="dau" stroke={PURPLE} fill="url(#dauGrad)" strokeWidth={2} />
@@ -710,7 +678,7 @@ export default function UserBehavior() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={COHORT_DATA}>
+                  <LineChart data={filteredCohort}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="cohortDate" tick={{ fontSize: 10 }} angle={-30} textAnchor="end" height={60} />
                     <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} />

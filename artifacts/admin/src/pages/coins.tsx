@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ import {
 } from "@/data/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { downloadCSV } from "@/lib/utils";
+import DateRangeFilter, { filterByDateRange } from "@/components/DateRangeFilter";
+import type { DateRange } from "@/components/DateRangeFilter";
 
 const COIN_IMG = "/ridhi_coin.png";
 
@@ -665,7 +667,7 @@ function AdjustCoinsTab() {
 }
 
 // ─── Pending Requests Tab ─────────────────────────────────────────────────────
-function PendingRequestsTab() {
+function PendingRequestsTab({ dateRange }: { dateRange: DateRange }) {
   const { toast } = useToast();
   const [requests, setRequests] = useState<CoinRequest[]>(mockCoinRequests);
   const [filter, setFilter] = useState("Pending");
@@ -673,13 +675,15 @@ function PendingRequestsTab() {
   const [declineNoteFor, setDeclineNoteFor] = useState<string | null>(null);
   const [declineNote, setDeclineNote] = useState("");
 
-  const filtered = requests.filter((r) => {
+  const dateFiltered = useMemo(() => filterByDateRange(requests, dateRange, "requestedAt"), [requests, dateRange]);
+
+  const filtered = dateFiltered.filter((r) => {
     const matchStatus = filter === "all" || r.status === filter;
     const matchSearch = r.userName.toLowerCase().includes(search.toLowerCase()) || r.type.toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
 
-  const pendingCount = requests.filter((r) => r.status === "Pending").length;
+  const pendingCount = dateFiltered.filter((r) => r.status === "Pending").length;
 
   const handleApprove = (id: string) => {
     setRequests((prev) => prev.map((r) => r.id === id
@@ -845,12 +849,14 @@ function PendingRequestsTab() {
 }
 
 // ─── Ledger Tab ───────────────────────────────────────────────────────────────
-function LedgerTab() {
+function LedgerTab({ dateRange }: { dateRange: DateRange }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
 
-  const filtered = mockTransactions.filter((t) => {
+  const dateFiltered = useMemo(() => filterByDateRange(mockTransactions, dateRange, "createdAt"), [dateRange]);
+
+  const filtered = dateFiltered.filter((t) => {
     const matchSearch = t.userName.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
     const matchType = typeFilter === "all" || t.type === typeFilter;
     return matchSearch && matchType;
@@ -931,6 +937,7 @@ function LedgerTab() {
 export default function CoinsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [isSuperAdmin, setIsSuperAdmin] = useState(true);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
   useEffect(() => {
     const role = localStorage.getItem("ridhi_admin_role");
@@ -942,14 +949,6 @@ export default function CoinsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-            const rows: Record<string, string | number>[] = [];
-            downloadCSV("coins_report.csv", rows);
-          }}>
-            <Download className="w-3 h-3" /> Export CSV
-          </Button>
-        </div>
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <img src={COIN_IMG} alt="Ridhi Coin" className="w-8 h-8 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
@@ -964,6 +963,14 @@ export default function CoinsPage() {
           </Badge>
         )}
       </div>
+
+      {activeTab !== "overview" && activeTab !== "values" && (
+        <DateRangeFilter
+          value={dateRange}
+          onChange={setDateRange}
+          exportFilename={`coins_${activeTab}.csv`}
+        />
+      )}
 
       {/* Tab Bar */}
       <div className="flex items-center gap-1 border-b border-border pb-0 overflow-x-auto">
@@ -995,8 +1002,8 @@ export default function CoinsPage() {
       {activeTab === "overview"  && <OverviewTab />}
       {activeTab === "values"    && (isSuperAdmin ? <CoinValuesTab />   : <SuperAdminGate />)}
       {activeTab === "adjust"    && (isSuperAdmin ? <AdjustCoinsTab />  : <SuperAdminGate />)}
-      {activeTab === "requests"  && (isSuperAdmin ? <PendingRequestsTab /> : <SuperAdminGate />)}
-      {activeTab === "ledger"    && <LedgerTab />}
+      {activeTab === "requests"  && (isSuperAdmin ? <PendingRequestsTab dateRange={dateRange} /> : <SuperAdminGate />)}
+      {activeTab === "ledger"    && <LedgerTab dateRange={dateRange} />}
     </div>
   );
 }

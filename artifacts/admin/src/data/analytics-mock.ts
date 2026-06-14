@@ -414,7 +414,8 @@ export const DAU_DATA = Array.from({ length: 30 }, (_, i) => {
   const baseDau = 18000 + Math.sin(i / 5) * 3000;
   const weekendBoost = (d.getDay() === 0 || d.getDay() === 6) ? 1.15 : 1;
   return {
-    date: d.toISOString().split("T")[0].slice(5),
+    date: d.toISOString().split("T")[0],
+    label: d.toISOString().split("T")[0].slice(5),
     dau: Math.round(baseDau * weekendBoost + rand(-500, 500)),
     newUsers: Math.round(baseDau * 0.04 * weekendBoost + rand(-50, 100)),
     returning: Math.round(baseDau * 0.96 * weekendBoost + rand(-200, 200)),
