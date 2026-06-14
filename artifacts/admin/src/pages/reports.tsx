@@ -356,13 +356,14 @@ function AudienceSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="demographics">Demographics</TabsTrigger>
           <TabsTrigger value="technology">Technology</TabsTrigger>
           <TabsTrigger value="location">Location</TabsTrigger>
           <TabsTrigger value="language">Language</TabsTrigger>
           <TabsTrigger value="retention">Retention</TabsTrigger>
+          <TabsTrigger value="userflow">User Flow</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
@@ -627,6 +628,49 @@ function AudienceSection({ dateRange }: { dateRange: DateRange }) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="userflow" className="space-y-4 mt-4">
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">User Flow — Top Paths</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-muted-foreground text-xs font-semibold">Path</TableHead>
+                    <TableHead className="text-muted-foreground text-xs font-semibold text-right">Sessions</TableHead>
+                    <TableHead className="text-muted-foreground text-xs font-semibold text-right">Drop-off</TableHead>
+                    <TableHead className="text-muted-foreground text-xs font-semibold">Flow</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[
+                    { path: "Home → Reels → Profile", sessions: 12400, dropoff: 18 },
+                    { path: "Home → Match → Chat", sessions: 9800, dropoff: 32 },
+                    { path: "Home → Live → Gift", sessions: 7200, dropoff: 45 },
+                    { path: "Reels → Profile → Chat", sessions: 6400, dropoff: 28 },
+                    { path: "Match → Chat → Call", sessions: 4200, dropoff: 52 },
+                    { path: "Home → Wallet → Coin Store", sessions: 3800, dropoff: 12 },
+                    { path: "Profile → Settings → KYC", sessions: 2100, dropoff: 35 },
+                    { path: "Home → Explore → Community", sessions: 1800, dropoff: 22 },
+                  ].map((p) => (
+                    <TableRow key={p.path} className="border-border hover:bg-muted/30">
+                      <TableCell className="text-sm font-medium text-foreground">{p.path}</TableCell>
+                      <TableCell className="text-sm text-right">{p.sessions.toLocaleString()}</TableCell>
+                      <TableCell className="text-sm text-right text-rose-400">{p.dropoff}%</TableCell>
+                      <TableCell className="w-32">
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-500 rounded-full" style={{ width: `${Math.min((p.sessions / 12400) * 100, 100)}%` }} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -644,10 +688,11 @@ function AcquisitionSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="channels">Channels</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="referrals">Referrals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
@@ -757,6 +802,71 @@ function AcquisitionSection({ dateRange }: { dateRange: DateRange }) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="referrals" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Top Referrers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border hover:bg-transparent">
+                      <TableHead className="text-muted-foreground text-xs font-semibold">User</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Referrals</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Conversions</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Earnings</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { user: "Vikram R", refs: 124, conv: 42, earnings: 6200 },
+                      { user: "Priya S", refs: 98, conv: 31, earnings: 4800 },
+                      { user: "Ananya K", refs: 87, conv: 28, earnings: 4200 },
+                      { user: "Rahul M", refs: 76, conv: 22, earnings: 3400 },
+                      { user: "Sneha P", refs: 64, conv: 19, earnings: 2900 },
+                      { user: "Karan D", refs: 52, conv: 15, earnings: 2300 },
+                      { user: "Meera N", refs: 48, conv: 14, earnings: 2100 },
+                      { user: "Arjun V", refs: 41, conv: 11, earnings: 1700 },
+                    ].map((r) => (
+                      <TableRow key={r.user} className="border-border hover:bg-muted/30">
+                        <TableCell className="text-sm font-medium text-foreground">{r.user}</TableCell>
+                        <TableCell className="text-sm text-right">{r.refs}</TableCell>
+                        <TableCell className="text-sm text-right">{r.conv}</TableCell>
+                        <TableCell className="text-sm text-right font-medium">{`₹${r.earnings.toLocaleString()}`}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Referral Program Performance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { label: "Total Referral Users", value: "12,400", change: 18.2 },
+                  { label: "Referral Conversion Rate", value: "34.2%", change: 2.4 },
+                  { label: "Avg Referral Earnings", value: "₹340", change: 8.1 },
+                  { label: "Referral Revenue", value: "₹4.2L", change: 12.6 },
+                ].map((m) => (
+                  <div key={m.label} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.label}</p>
+                      <p className={`text-xs ${m.change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {m.change >= 0 ? "+" : ""}{m.change}% vs last month
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-foreground">{m.value}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -774,9 +884,12 @@ function EngagementSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="screenviews">Screen Views</TabsTrigger>
+          <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="userjourney">User Journey</TabsTrigger>
           <TabsTrigger value="funnel">Funnel</TabsTrigger>
         </TabsList>
 
@@ -888,6 +1001,135 @@ function EngagementSection({ dateRange }: { dateRange: DateRange }) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="screenviews" className="space-y-4 mt-4">
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Screen Views — Top 10</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {TOP_SCREENS.map((s, i) => {
+                const pct = (s.views / 12400) * 100;
+                return (
+                  <div key={s.name} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-5 font-medium">{i + 1}</span>
+                    <span className="text-sm text-foreground flex-1">{s.name}</span>
+                    <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden max-w-[180px]">
+                      <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs font-medium w-20 text-right">{s.views.toLocaleString()}</span>
+                    <span className="text-xs text-muted-foreground w-14 text-right">{s.avgTime}</span>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Content Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border hover:bg-transparent">
+                      <TableHead className="text-muted-foreground text-xs font-semibold">Type</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Created</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Views</TableHead>
+                      <TableHead className="text-muted-foreground text-xs font-semibold text-right">Engagement</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { type: "Posts", created: 12400, views: 892000, engagement: "4.2%" },
+                      { type: "Reels", created: 8200, views: 2100000, engagement: "8.7%" },
+                      { type: "Stories", created: 48000, views: 1240000, engagement: "12.1%" },
+                      { type: "Live Streams", created: 420, views: 680000, engagement: "18.4%" },
+                      { type: "Audio Rooms", created: 180, views: 124000, engagement: "6.2%" },
+                      { type: "Podcasts", created: 64, views: 42000, engagement: "9.1%" },
+                    ].map((c) => (
+                      <TableRow key={c.type} className="border-border hover:bg-muted/30">
+                        <TableCell className="text-sm font-medium text-foreground">{c.type}</TableCell>
+                        <TableCell className="text-sm text-right">{c.created.toLocaleString()}</TableCell>
+                        <TableCell className="text-sm text-right">{c.views.toLocaleString()}</TableCell>
+                        <TableCell className="text-sm text-right font-medium">{c.engagement}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Content Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={[{ name: "Posts", value: 40 }, { name: "Reels", value: 32 }, { name: "Stories", value: 18 }, { name: "Audio", value: 10 }]} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label>
+                        <Cell fill="#E91E8C" />
+                        <Cell fill="#7B2FBE" />
+                        <Cell fill="#FFB800" />
+                        <Cell fill="#00BCD4" />
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="userjourney" className="space-y-4 mt-4">
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">User Journey — Step-by-Step Drop-off</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                { step: "App Open", users: 10000, drop: 0, label: "Entry" },
+                { step: "Home Feed View", users: 9200, drop: 8, label: "Browse" },
+                { step: "Engage with Content", users: 6800, drop: 26, label: "Engage" },
+                { step: "Visit Profile", users: 4200, drop: 38, label: "Profile" },
+                { step: "Initiate Match/Chat", users: 2800, drop: 33, label: "Connect" },
+                { step: "Join Live/Call", users: 1400, drop: 50, label: "Interact" },
+                { step: "Make Purchase", users: 720, drop: 49, label: "Monetize" },
+                { step: "Return Next Day", users: 480, drop: 33, label: "Retain" },
+              ].map((j, i) => {
+                const pct = (j.users / 10000) * 100;
+                return (
+                  <div key={j.step} className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 flex-shrink-0">
+                      {i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">{j.step}</span>
+                        <span className="text-xs text-muted-foreground">{j.users.toLocaleString()} ({pct.toFixed(1)}%)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-500 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                        {j.drop > 0 && (
+                          <span className="text-xs text-rose-400 font-medium flex-shrink-0">-{j.drop}%</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">{j.label}</span>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -904,8 +1146,10 @@ function RetentionSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="cohorts">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="cohorts">Cohort Analysis</TabsTrigger>
+          <TabsTrigger value="churn">Churn Rate</TabsTrigger>
+          <TabsTrigger value="returning">Returning vs New</TabsTrigger>
           <TabsTrigger value="ltv">Lifetime Value</TabsTrigger>
         </TabsList>
 
@@ -1010,6 +1254,88 @@ function RetentionSection({ dateRange }: { dateRange: DateRange }) {
             </Card>
           </div>
         </TabsContent>
+        <TabsContent value="churn" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Churn Rate Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={[{ day: "W1", rate: 22 }, { day: "W2", rate: 20 }, { day: "W3", rate: 19 }, { day: "W4", rate: 18 }, { day: "W5", rate: 18 }, { day: "W6", rate: 17 }, { day: "W7", rate: 18 }, { day: "W8", rate: 16 }, { day: "W9", rate: 17 }, { day: "W10", rate: 16 }, { day: "W11", rate: 15 }, { day: "W12", rate: 16 }]}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="rate" stroke={ROSE} fill={ROSE} fillOpacity={0.15} strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Churn Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { label: "Daily Churn", value: "2.1%", change: -0.3 },
+                  { label: "Weekly Churn", value: "8.4%", change: -0.8 },
+                  { label: "Monthly Churn", value: "16.2%", change: -1.2 },
+                  { label: "Quarterly Churn", value: "28.4%", change: -2.1 },
+                ].map((m) => (
+                  <div key={m.label} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.label}</p>
+                      <p className={`text-xs ${m.change >= 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                        {m.change >= 0 ? "+" : ""}{m.change}% vs last period
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-foreground">{m.value}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="returning" className="space-y-4 mt-4">
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold">Returning vs New Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[{ day: "Mon", new: 1200, returning: 4200 }, { day: "Tue", new: 1500, returning: 4800 }, { day: "Wed", new: 1800, returning: 5100 }, { day: "Thu", new: 1400, returning: 4900 }, { day: "Fri", new: 2000, returning: 5400 }, { day: "Sat", new: 2500, returning: 6200 }, { day: "Sun", new: 3000, returning: 6800 }]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 10 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Area type="monotone" dataKey="new" stackId="1" name="New Users" stroke={EMERALD} fill={EMERALD} />
+                    <Area type="monotone" dataKey="returning" stackId="1" name="Returning Users" stroke={PURPLE} fill={PURPLE} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {[
+                  { label: "New Users (7d)", value: "13,400", pct: 24 },
+                  { label: "Returning Users (7d)", value: "42,100", pct: 76 },
+                  { label: "Returning Ratio", value: "3.1x", pct: 100 },
+                ].map((m) => (
+                  <div key={m.label} className="text-center p-3 rounded-lg bg-muted/30">
+                    <p className="text-lg font-bold text-foreground">{m.value}</p>
+                    <p className="text-xs text-muted-foreground">{m.label}</p>
+                    <p className="text-xs text-purple-500 mt-1">{m.pct}%</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -1028,8 +1354,9 @@ function MonetizationSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="overview">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="coins">Coin Purchases</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
           <TabsTrigger value="ads">Ad Revenue</TabsTrigger>
@@ -1168,6 +1495,57 @@ function MonetizationSection({ dateRange }: { dateRange: DateRange }) {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Transaction Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { label: "Total Transactions", value: "42,800", change: 12.4 },
+                  { label: "Avg Order Value", value: "₹480", change: 5.2 },
+                  { label: "Success Rate", value: "94.2%", change: 1.8 },
+                  { label: "Failed Transactions", value: "2,480", change: -3.1 },
+                ].map((m) => (
+                  <div key={m.label} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{m.label}</p>
+                      <p className={`text-xs ${m.change >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {m.change >= 0 ? "+" : ""}{m.change}% vs last month
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-foreground">{m.value}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Payment Method Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={[{ name: "UPI", value: 48 }, { name: "Cards", value: 28 }, { name: "Wallets", value: 14 }, { name: "Net Banking", value: 8 }, { name: "COD", value: 2 }]} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label>
+                        <Cell fill="#7B2FBE" />
+                        <Cell fill="#E91E8C" />
+                        <Cell fill="#06B6D4" />
+                        <Cell fill="#F59E0B" />
+                        <Cell fill="#10B981" />
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -1184,10 +1562,11 @@ function ConversionsSection({ dateRange }: { dateRange: DateRange }) {
       </div>
 
       <Tabs defaultValue="goals">
-        <TabsList className="bg-muted">
+        <TabsList className="bg-muted flex-wrap h-auto py-1 gap-1">
           <TabsTrigger value="goals">Goals</TabsTrigger>
           <TabsTrigger value="funnel">Funnel</TabsTrigger>
           <TabsTrigger value="attribution">Attribution</TabsTrigger>
+          <TabsTrigger value="conversion-rate">Conversion Rate</TabsTrigger>
         </TabsList>
 
         <TabsContent value="goals" className="space-y-4 mt-4">
@@ -1305,6 +1684,47 @@ function ConversionsSection({ dateRange }: { dateRange: DateRange }) {
                       <YAxis dataKey="channel" type="category" tick={{ fontSize: 10 }} width={100} />
                       <Tooltip />
                       <Bar dataKey="conv" name="Conversion %" fill={PURPLE} radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        <TabsContent value="conversion-rate" className="space-y-4 mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Conversion Rate by Channel</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={CHANNEL_DATA.map((c) => ({ ...c, conv: c.conversion }))} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 10 }} />
+                      <YAxis dataKey="channel" type="category" tick={{ fontSize: 10 }} width={100} />
+                      <Tooltip />
+                      <Bar dataKey="conv" name="Conversion %" fill={PURPLE} radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card border-border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold">Conversion Rate by Cohort</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={COHORT_DATA.map((c) => ({ month: c.month, rate: c.d30 / 100 * 3.2 }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Bar dataKey="rate" name="Conv Rate %" fill={TEAL} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

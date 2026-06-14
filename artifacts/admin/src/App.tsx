@@ -28,9 +28,6 @@ import PromoCodes    from "@/pages/promo-codes";
 import ReferralProgram    from "@/pages/referral-program";
 import ApiIntegrations   from "@/pages/api-integrations";
 import VideoUploads      from "@/pages/video-uploads";
-import AdminManagement  from "@/pages/admin-management";
-import MyReport         from "@/pages/my-report";
-import AdminActivity    from "@/pages/admin-activity";
 import Agents        from "@/pages/agents";
 import Hosts         from "@/pages/hosts";
 import Levels        from "@/pages/levels";
@@ -44,23 +41,16 @@ import Handbook      from "@/pages/handbook";
 import SpecialAds          from "@/pages/special-ads";
 import CommercialBanners   from "@/pages/commercial-banners";
 import Subscriptions       from "@/pages/subscriptions";
-import DomainHosting       from "@/pages/domain-hosting";
-import BackendAccess       from "@/pages/backend-access";
 import ContentAssets       from "@/pages/content-assets";
 import PortalLogin         from "@/pages/portal-login";
-import Downloads          from "@/pages/downloads";
 import Support            from "@/pages/support";
-import Screenshots        from "@/pages/screenshots";
-import ContentEditor      from "@/pages/content-editor";
 import FinancialStatements from "@/pages/financial-statements";
 import Podcasts            from "@/pages/podcasts";
 import VibeStars           from "@/pages/vibe-stars";
 import MusicLibrary        from "@/pages/music-library";
 import LeadForms           from "@/pages/lead-forms";
 import Stories             from "@/pages/stories";
-import ChatModeration      from "@/pages/chat-moderation";
 import Dating              from "@/pages/dating";
-import AppStore            from "@/pages/app-store";
 import CRM                 from "@/pages/crm";
 import AdminLayout         from "@/components/layout/admin-layout";
 
@@ -88,9 +78,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/music-library": ["super_admin"],
   "/lead-forms":    ["super_admin"],
   "/stories":       ["super_admin"],
-  "/chat-moderation": ["super_admin"],
   "/dating":        ["super_admin"],
-  "/app-store":     ["super_admin"],
   "/crm":           ["super_admin", "admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin"],
@@ -111,17 +99,10 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/promo-codes":  ["super_admin"],
   "/referral":          ["super_admin", "admin"],
   "/api-integrations":  ["super_admin"],
-  "/domain-hosting":    ["super_admin"],
-  "/backend-access":    ["super_admin"],
   "/content-assets":    ["super_admin"],
-  "/admin-management":  ["super_admin"],
-  "/admin-activity":    ["super_admin"],
   "/my-report":         ["super_admin", "admin"],
   "/video-uploads":     ["super_admin"],
-  "/downloads":         ["super_admin"],
-  "/screenshots":       ["super_admin"],
   "/handbook":     ["super_admin", "admin"],
-  "/content-editor": ["super_admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -184,7 +165,6 @@ function RoleRoute({ component: Component, path }: { component: React.ComponentT
 function Router() {
   return (
     <Switch>
-      <Route path="/content-editor" component={() => <RoleRoute component={ContentEditor} path="/content-editor" />} />
       <Route path="/support"             component={Support} />
       <Route path="/login"               component={Login} />
       <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
@@ -208,9 +188,6 @@ function Router() {
       <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}      path="/promo-codes" />} />
       <Route path="/referral"          component={() => <RoleRoute component={ReferralProgram}  path="/referral" />} />
       <Route path="/api-integrations"  component={() => <RoleRoute component={ApiIntegrations}  path="/api-integrations"  />} />
-      <Route path="/admin-management"  component={() => <RoleRoute component={AdminManagement}  path="/admin-management"  />} />
-      <Route path="/admin-activity"    component={() => <RoleRoute component={AdminActivity}    path="/admin-activity"    />} />
-      <Route path="/my-report"         component={() => <RoleRoute component={MyReport}         path="/my-report"         />} />
       <Route path="/video-uploads"     component={() => <RoleRoute component={VideoUploads}     path="/video-uploads"     />} />
       <Route path="/agents"       component={() => <RoleRoute component={Agents}       path="/agents" />} />
       <Route path="/hosts"        component={() => <RoleRoute component={Hosts}        path="/hosts" />} />
@@ -225,20 +202,14 @@ function Router() {
       <Route path="/special-ads"        component={() => <RoleRoute component={SpecialAds}        path="/special-ads" />} />
       <Route path="/commercial-banners" component={() => <RoleRoute component={CommercialBanners} path="/commercial-banners" />} />
       <Route path="/subscriptions"      component={() => <RoleRoute component={Subscriptions}      path="/subscriptions" />} />
-      <Route path="/domain-hosting"    component={() => <RoleRoute component={DomainHosting}    path="/domain-hosting" />} />
-      <Route path="/backend-access"    component={() => <RoleRoute component={BackendAccess}    path="/backend-access" />} />
       <Route path="/content-assets"    component={() => <RoleRoute component={ContentAssets}    path="/content-assets" />} />
-      <Route path="/downloads"         component={() => <RoleRoute component={Downloads}         path="/downloads" />} />
-      <Route path="/screenshots"       component={() => <RoleRoute component={Screenshots}       path="/screenshots" />} />
       <Route path="/financial-statements" component={() => <RoleRoute component={FinancialStatements} path="/financial-statements" />} />
       <Route path="/podcasts"        component={() => <RoleRoute component={Podcasts}        path="/podcasts" />} />
       <Route path="/vibe-stars"      component={() => <RoleRoute component={VibeStars}       path="/vibe-stars" />} />
       <Route path="/music-library"    component={() => <RoleRoute component={MusicLibrary}    path="/music-library" />} />
       <Route path="/lead-forms"      component={() => <RoleRoute component={LeadForms}        path="/lead-forms" />} />
       <Route path="/stories"         component={() => <RoleRoute component={Stories}          path="/stories" />} />
-      <Route path="/chat-moderation" component={() => <RoleRoute component={ChatModeration}  path="/chat-moderation" />} />
       <Route path="/dating"         component={() => <RoleRoute component={Dating}           path="/dating" />} />
-      <Route path="/app-store"       component={() => <RoleRoute component={AppStore}         path="/app-store" />} />
       <Route path="/crm"             component={() => <RoleRoute component={CRM}               path="/crm" />} />
       <Route component={NotFound} />
     </Switch>

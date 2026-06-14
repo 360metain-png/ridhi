@@ -251,7 +251,7 @@ export default function Dashboard() {
               { label: "KYC Verified",    value: "16/20",   ok: true,  icon: CheckCircle },
               { label: "Agents Active",   value: "5/5",     ok: true,  icon: CheckCircle },
               { label: "Hosts Live-Ready",value: "8/10",    ok: false, icon: AlertTriangle },
-              { label: "Features Enabled", value: "28/30",  ok: false, icon: Wrench },
+              { label: "Features Enabled", value: "31/42",  ok: false, icon: Wrench },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2 text-xs">
                 <item.icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.ok ? "text-emerald-500" : "text-amber-500"}`} />
