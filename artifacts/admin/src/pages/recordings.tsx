@@ -244,20 +244,29 @@ export default function Recordings() {
 
   const [search,      setSearch]      = useState("");
   const [statusFilter,setStatusFilter]= useState<"all" | RecordingStatus>("all");
+  const [showProblematicOnly, setShowProblematicOnly] = useState(true);
   const [recordings,  setRecordings]  = useState<CallRecording[]>(CALL_RECORDINGS);
   const [rooms,       setRooms]       = useState<RoomActivity[]>(ROOM_ACTIVITIES);
 
   const deleteRecording = (id: string) => setRecordings(prev => prev.filter(r => r.id !== id));
   const deleteRoom      = (id: string) => setRooms(prev => prev.filter(r => r.id !== id));
 
-  const filterRec = (list: CallRecording[]) => list.filter(r =>
-    (statusFilter === "all" || r.status === statusFilter) &&
-    (search === "" || r.host.toLowerCase().includes(search.toLowerCase()) || r.caller.toLowerCase().includes(search.toLowerCase()))
-  );
-  const filterRoom = (list: RoomActivity[]) => list.filter(r =>
-    (statusFilter === "all" || r.status === statusFilter) &&
-    (search === "" || r.roomName.toLowerCase().includes(search.toLowerCase()) || r.host.toLowerCase().includes(search.toLowerCase()))
-  );
+  // Admin only sees problematic (flagged) recordings by default.
+  // Switching to "All" shows clean recordings too.
+  const isProblematic = (r: CallRecording | RoomActivity) => r.status === "flagged";
+
+  const filterRec = (list: CallRecording[]) => list.filter(r => {
+    const matchStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchProblematic = !showProblematicOnly || isProblematic(r);
+    const matchSearch = search === "" || r.host.toLowerCase().includes(search.toLowerCase()) || r.caller.toLowerCase().includes(search.toLowerCase());
+    return matchStatus && matchProblematic && matchSearch;
+  });
+  const filterRoom = (list: RoomActivity[]) => list.filter(r => {
+    const matchStatus = statusFilter === "all" || r.status === statusFilter;
+    const matchProblematic = !showProblematicOnly || isProblematic(r);
+    const matchSearch = search === "" || r.roomName.toLowerCase().includes(search.toLowerCase()) || r.host.toLowerCase().includes(search.toLowerCase());
+    return matchStatus && matchProblematic && matchSearch;
+  });
 
   const audioCalls = filterRec(recordings.filter(r => r.type === "audio-call"));
   const videoCalls = filterRec(recordings.filter(r => r.type === "video-call"));
@@ -265,6 +274,8 @@ export default function Recordings() {
 
   const flaggedRecs  = recordings.filter(r => r.status === "flagged").length;
   const flaggedRooms = rooms.filter(r => r.status === "flagged").length;
+  const totalRecs    = recordings.length;
+  const totalRooms   = rooms.length;
 
   return (
     <div className="space-y-6">
@@ -279,12 +290,36 @@ export default function Recordings() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Call Recordings & Room Activity</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {showProblematicOnly ? "Reported / Problematic Calls" : "All Call Recordings"}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Access audio/video recordings and audio room logs
+            {showProblematicOnly
+              ? "Only AI-flagged and user-reported audio/video calls are shown."
+              : "All recordings including clean sessions."}
           </p>
         </div>
         <RoleTag isSuperAdmin={isSuperAdmin} />
+      </div>
+
+      {/* ── View toggle ── */}
+      <div className="flex items-center gap-2 p-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+        <div className="flex-1 text-sm">
+          <span className="font-medium text-amber-800 dark:text-amber-300">
+            {showProblematicOnly ? "Viewing: Reported & Flagged Only" : "Viewing: All Recordings"}
+          </span>
+          <span className="text-muted-foreground"> — {showProblematicOnly ? `${flaggedRecs + flaggedRooms} flagged items` : `${totalRecs + totalRooms} total items`}
+          </span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-xs h-7"
+          onClick={() => setShowProblematicOnly(v => !v)}
+        >
+          {showProblematicOnly ? "Show All" : "Reported Only"}
+        </Button>
       </div>
 
       {/* ── Permission banner (admin only) ── */}
