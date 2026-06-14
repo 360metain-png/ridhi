@@ -1,18 +1,17 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { downloadCSV } from "@/lib/utils";
 import {
   CheckCircle, XCircle, AlertTriangle, Eye, EyeOff, Copy, RefreshCw,
   Zap, CreditCard, MessageSquare, Bell, Cloud, Mail, Cpu, Map,
-  BarChart2, Radio, Phone, Video, ShieldCheck, Settings2, Save,
-  TestTube, Plug, Activity, Lock, Smartphone, Globe, Wifi,
-  Key, Play, PauseCircle, ExternalLink, ChevronDown, ChevronUp, Download} from "lucide-react";
+  BarChart2, Video, ShieldCheck, Save, TestTube, Plug, Activity, Smartphone,
+  ExternalLink, ChevronDown, ChevronUp, Download, Search, CircleDot,
+} from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type ConnStatus = "connected" | "error" | "disconnected" | "testing";
@@ -50,7 +49,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Agora RTC",
     provider: "Agora",
     category: "live",
-    description: "Real-time audio & video calling — used for 1:1 calls, group calls, and live streams",
+    description: "Real-time audio & video calling",
     docsUrl: "https://docs.agora.io",
     status: "connected",
     env: "production",
@@ -72,7 +71,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "ZEGOCLOUD",
     provider: "ZEGOCLOUD",
     category: "live",
-    description: "Live streaming infrastructure — used for public live room broadcasts",
+    description: "Live streaming infrastructure",
     docsUrl: "https://docs.zegocloud.com",
     status: "connected",
     env: "production",
@@ -110,7 +109,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "100ms",
     provider: "100ms",
     category: "live",
-    description: "Live streaming, audio/video calls, and real-time interactive rooms — WebRTC-based with India-optimized edge nodes",
+    description: "WebRTC live streaming rooms",
     docsUrl: "https://www.100ms.live/docs",
     status: "connected",
     env: "production",
@@ -134,7 +133,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Razorpay",
     provider: "Razorpay",
     category: "payments",
-    description: "Primary payment gateway — UPI, cards, net banking, wallets, EMI (India)",
+    description: "UPI, cards, net banking, wallets (India)",
     docsUrl: "https://razorpay.com/docs",
     status: "connected",
     env: "production",
@@ -158,7 +157,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Cashfree Payments",
     provider: "Cashfree",
     category: "payments",
-    description: "Alternate gateway for payouts, split payments, and VPA verification",
+    description: "Alternate payouts & VPA verification",
     docsUrl: "https://docs.cashfree.com",
     status: "connected",
     env: "production",
@@ -177,7 +176,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Stripe",
     provider: "Stripe",
     category: "payments",
-    description: "International payments for non-Indian users (USD, EUR, etc.)",
+    description: "International payments (USD, EUR)",
     docsUrl: "https://stripe.com/docs",
     status: "disconnected",
     env: "sandbox",
@@ -196,7 +195,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "MSG91",
     provider: "MSG91",
     category: "sms",
-    description: "OTP delivery, transactional SMS, and WhatsApp messaging (India)",
+    description: "OTP, SMS & WhatsApp (India)",
     docsUrl: "https://docs.msg91.com",
     status: "connected",
     env: "production",
@@ -206,7 +205,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
       { key: "authKey",           label: "Auth Key",           placeholder: "Auth key…",         secret: true,  value: "msg91_••••••••••••••••" },
       { key: "otpTemplateId",     label: "OTP Template ID",    placeholder: "Template ID…",      secret: false, value: "6456••••••••••3412" },
       { key: "promoTemplateId",   label: "Promo Template ID",  placeholder: "Template ID…",      secret: false, value: "7891••••••••••5634",
-        hint: "Used for promotional bulk SMS campaigns" },
+        hint: "Promotional bulk SMS" },
       { key: "senderId",          label: "Sender ID",          placeholder: "RIDHI",             secret: false, value: "RIDHI" },
     ],
     extraSettings: [
@@ -221,7 +220,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Twilio SMS",
     provider: "Twilio",
     category: "sms",
-    description: "International SMS fallback for non-Indian phone numbers",
+    description: "International SMS fallback",
     docsUrl: "https://www.twilio.com/docs/sms",
     status: "connected",
     env: "production",
@@ -237,10 +236,10 @@ const INITIAL_SERVICES: ServiceConfig[] = [
   // ── WHATSAPP ─────────────────────────────────────────────────────────
   {
     id: "whatsapp-msg91",
-    name: "WhatsApp Business (MSG91)",
+    name: "WhatsApp Business",
     provider: "MSG91",
     category: "whatsapp",
-    description: "WhatsApp OTP, referral messages, promo broadcasts via MSG91 integrated number",
+    description: "WhatsApp OTP & promo via MSG91",
     docsUrl: "https://msg91.com/whatsapp",
     status: "connected",
     env: "production",
@@ -249,7 +248,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     fields: [
       { key: "integratedNumber",  label: "Integrated Number",  placeholder: "+91…",            secret: false, value: "+91 9876••••••" },
       { key: "authKey",           label: "Auth Key",           placeholder: "Same as MSG91…",  secret: true,  value: "msg91_••••••••••••••••",
-        hint: "Same MSG91 auth key — reuse from SMS config" },
+        hint: "Reuse from SMS config" },
       { key: "otpTemplateId",     label: "WA OTP Template",    placeholder: "Template ID…",    secret: false, value: "wa_otp_••••••••" },
       { key: "promoTemplateId",   label: "WA Promo Template",  placeholder: "Template ID…",    secret: false, value: "wa_promo_••••" },
     ],
@@ -259,10 +258,10 @@ const INITIAL_SERVICES: ServiceConfig[] = [
   },
   {
     id: "whatsapp-meta",
-    name: "WhatsApp Business API (Meta)",
+    name: "WhatsApp Business API",
     provider: "Meta",
     category: "whatsapp",
-    description: "Direct Meta Cloud API — for high-volume or custom template messaging",
+    description: "Direct Meta Cloud API",
     docsUrl: "https://developers.facebook.com/docs/whatsapp",
     status: "disconnected",
     env: "sandbox",
@@ -282,7 +281,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Firebase Cloud Messaging",
     provider: "Google Firebase",
     category: "push",
-    description: "Push notifications for Android & iOS — feeds, likes, new matches, messages",
+    description: "Push notifications for Android & iOS",
     docsUrl: "https://firebase.google.com/docs/cloud-messaging",
     status: "connected",
     env: "production",
@@ -304,7 +303,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "OneSignal",
     provider: "OneSignal",
     category: "push",
-    description: "Backup push notification service with advanced segmentation & A/B testing",
+    description: "Backup push with segmentation & A/B",
     docsUrl: "https://documentation.onesignal.com",
     status: "disconnected",
     env: "sandbox",
@@ -322,7 +321,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "AWS S3 + CloudFront",
     provider: "Amazon Web Services",
     category: "storage",
-    description: "Media storage — profile photos, post images, video uploads, audio files",
+    description: "Media storage & CDN",
     docsUrl: "https://aws.amazon.com/s3",
     status: "connected",
     env: "production",
@@ -346,7 +345,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Cloudinary",
     provider: "Cloudinary",
     category: "storage",
-    description: "Image transformation and video delivery optimization",
+    description: "Image & video optimization",
     docsUrl: "https://cloudinary.com/documentation",
     status: "connected",
     env: "production",
@@ -365,7 +364,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "SendGrid",
     provider: "Twilio SendGrid",
     category: "email",
-    description: "Transactional email — OTP fallback, welcome emails, receipts, alerts",
+    description: "Transactional email",
     docsUrl: "https://docs.sendgrid.com",
     status: "connected",
     env: "production",
@@ -388,14 +387,14 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "OpenAI",
     provider: "OpenAI",
     category: "ai",
-    description: "AI content moderation, smart matching suggestions, chat auto-replies",
+    description: "AI moderation & matching",
     docsUrl: "https://platform.openai.com/docs",
     status: "connected",
     env: "production",
     enabled: true,
     lastTested: "45 sec ago",
     fields: [
-      { key: "apiKey", label: "API Key", placeholder: "sk-…", secret: true, value: "sk-••••••••••••••••••••••••" },
+      { key: "apiKey", label: "API Key", placeholder: "sk-…", secret: true, value: "sk-•••••••••••••••••••••••••••••••" },
       { key: "orgId",  label: "Org ID",  placeholder: "org-…",secret: false, value: "org-ridhi-••••••••" },
     ],
     extraSettings: [
@@ -409,7 +408,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "AWS Rekognition",
     provider: "Amazon Web Services",
     category: "ai",
-    description: "Image & video content moderation — nudity, violence, unsafe content detection",
+    description: "Image & video moderation",
     docsUrl: "https://aws.amazon.com/rekognition",
     status: "connected",
     env: "production",
@@ -422,7 +421,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     ],
     extraSettings: [
       { key: "minConfidence",  label: "Min. Confidence %", type: "text",   value: "75" },
-      { key: "autoRemove",     label: "Auto-remove Flagged Content", type: "toggle", value: false },
+      { key: "autoRemove",     label: "Auto-remove Flagged", type: "toggle", value: false },
     ],
   },
 
@@ -432,7 +431,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Google Maps",
     provider: "Google",
     category: "maps",
-    description: "Location-based features — nearby users, city search, dating meet-up spots",
+    description: "Nearby users & city search",
     docsUrl: "https://developers.google.com/maps",
     status: "connected",
     env: "production",
@@ -454,7 +453,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Firebase Analytics",
     provider: "Google Firebase",
     category: "analytics",
-    description: "User behaviour analytics — screen views, events, funnels, retention",
+    description: "Screen views, events, funnels",
     docsUrl: "https://firebase.google.com/docs/analytics",
     status: "connected",
     env: "production",
@@ -474,7 +473,7 @@ const INITIAL_SERVICES: ServiceConfig[] = [
     name: "Mixpanel",
     provider: "Mixpanel",
     category: "analytics",
-    description: "Product analytics — cohort analysis, feature adoption, A/B test results",
+    description: "Cohorts & feature adoption",
     docsUrl: "https://developer.mixpanel.com",
     status: "disconnected",
     env: "sandbox",
@@ -489,156 +488,164 @@ const INITIAL_SERVICES: ServiceConfig[] = [
 
 // ── Category definitions ──────────────────────────────────────────────────
 const CATEGORIES = [
-  { id: "all",       label: "All Services",     icon: Plug },
+  { id: "all",       label: "All",               icon: Plug },
   { id: "live",      label: "Live / RTC",        icon: Video  },
   { id: "payments",  label: "Payments",          icon: CreditCard },
   { id: "sms",       label: "SMS / OTP",         icon: MessageSquare },
   { id: "whatsapp",  label: "WhatsApp",          icon: Smartphone },
-  { id: "push",      label: "Push Notifications",icon: Bell },
-  { id: "storage",   label: "Storage / CDN",     icon: Cloud },
+  { id: "push",      label: "Push",              icon: Bell },
+  { id: "storage",   label: "Storage",           icon: Cloud },
   { id: "email",     label: "Email",             icon: Mail },
-  { id: "ai",        label: "AI & Moderation",   icon: Cpu },
+  { id: "ai",        label: "AI / Moderation",   icon: Cpu },
   { id: "maps",      label: "Maps",              icon: Map },
   { id: "analytics", label: "Analytics",         icon: BarChart2 },
 ];
 
-const STATUS_STYLE: Record<ConnStatus, string> = {
-  connected:    "bg-green-100  text-green-700  border-green-200",
-  error:        "bg-red-100    text-red-700    border-red-200",
-  disconnected: "bg-muted      text-muted-foreground",
-  testing:      "bg-blue-100   text-blue-700   border-blue-200",
-};
-const STATUS_ICON: Record<ConnStatus, React.ComponentType<{className?:string}>> = {
-  connected:    CheckCircle,
-  error:        XCircle,
-  disconnected: PauseCircle,
-  testing:      RefreshCw,
+const STATUS_META: Record<ConnStatus, { label: string; color: string; bg: string; dot: string }> = {
+  connected:    { label: "Connected", color: "text-green-700",  bg: "bg-green-50",  dot: "#22c55e" },
+  error:        { label: "Error",     color: "text-red-700",    bg: "bg-red-50",    dot: "#ef4444" },
+  disconnected: { label: "Offline",   color: "text-slate-600",  bg: "bg-slate-100", dot: "#94a3b8" },
+  testing:      { label: "Testing", color: "text-blue-700",   bg: "bg-blue-50",   dot: "#3b82f6" },
 };
 
-// ── Component ─────────────────────────────────────────────────────────────
+const ENV_META: Record<Env, { label: string; color: string; bg: string }> = {
+  production: { label: "Production", color: "text-orange-700", bg: "bg-orange-50" },
+  sandbox:    { label: "Sandbox",    color: "text-blue-700",   bg: "bg-blue-50" },
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function useHiddenFields() {
+  const [hidden, setHidden] = useState<Record<string, boolean>>({});
+  const toggle = (fieldKey: string) => setHidden((h) => ({ ...h, [fieldKey]: !h[fieldKey] }));
+  return { hidden, toggle };
+}
+
 export default function ApiIntegrationsPage() {
   const [services, setServices] = useState<ServiceConfig[]>(INITIAL_SERVICES);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [expandedId, setExpandedId] = useState<string | null>("agora");
-  const [visible, setVisible] = useState<Record<string, boolean>>({});
-  const [copied, setCopied] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const { hidden, toggle } = useHiddenFields();
 
-  const filtered = activeCategory === "all"
-    ? services
-    : services.filter((s) => s.category === activeCategory);
+  const filtered = useMemo(() => services.filter((svc) => {
+    const matchCat = activeCategory === "all" || svc.category === activeCategory;
+    const matchSearch = !search ||
+      svc.name.toLowerCase().includes(search.toLowerCase()) ||
+      svc.provider.toLowerCase().includes(search.toLowerCase()) ||
+      svc.description.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  }), [services, activeCategory, search]);
 
-  const connected    = services.filter((s) => s.status === "connected").length;
-  const disconnected = services.filter((s) => s.status === "disconnected").length;
-  const errored      = services.filter((s) => s.status === "error").length;
-  const enabled      = services.filter((s) => s.enabled).length;
+  const stats = useMemo(() => ({
+    connected: services.filter((s) => s.status === "connected").length,
+    enabled: services.filter((s) => s.enabled).length,
+    disconnected: services.filter((s) => s.status === "disconnected").length,
+    errored: services.filter((s) => s.status === "error").length,
+  }), [services]);
 
-  const updateField = (serviceId: string, fieldKey: string, value: string) =>
-    setServices((prev) => prev.map((s) =>
-      s.id !== serviceId ? s : {
-        ...s,
-        fields: s.fields.map((f) => f.key === fieldKey ? { ...f, value } : f),
-      }
-    ));
-
-  const updateSetting = (serviceId: string, settingKey: string, value: string | boolean) =>
-    setServices((prev) => prev.map((s) =>
-      s.id !== serviceId ? s : {
-        ...s,
-        extraSettings: (s.extraSettings ?? []).map((st) =>
-          st.key === settingKey ? { ...st, value } : st
-        ),
-      }
-    ));
-
-  const toggleEnabled = (serviceId: string) =>
-    setServices((prev) => prev.map((s) =>
-      s.id === serviceId ? { ...s, enabled: !s.enabled } : s
-    ));
-
-  const toggleEnv = (serviceId: string) =>
-    setServices((prev) => prev.map((s) =>
-      s.id === serviceId
-        ? { ...s, env: s.env === "production" ? "sandbox" : "production" }
-        : s
-    ));
-
-  const testConnection = (serviceId: string) => {
-    setTesting(serviceId);
-    setServices((prev) => prev.map((s) =>
-      s.id === serviceId ? { ...s, status: "testing" } : s
-    ));
-    setTimeout(() => {
-      setTesting(null);
-      setServices((prev) => prev.map((s) =>
-        s.id === serviceId
-          ? { ...s, status: "connected", lastTested: "Just now" }
-          : s
-      ));
-    }, 2000);
-  };
-
-  const saveService = (serviceId: string) => {
-    setSavedId(serviceId);
+  function toggleEnabled(id: string) {
+    setServices((prev) => prev.map((s) => s.id === id ? { ...s, enabled: !s.enabled } : s));
+  }
+  function toggleEnv(id: string) {
+    setServices((prev) => prev.map((s) => s.id === id ? { ...s, env: s.env === "production" ? "sandbox" : "production" } : s));
+  }
+  function updateField(id: string, fieldKey: string, value: string) {
+    setServices((prev) => prev.map((s) => s.id === id ? { ...s, fields: s.fields.map((f) => f.key === fieldKey ? { ...f, value } : f) } : s));
+  }
+  function updateSetting(id: string, key: string, value: string | boolean) {
+    setServices((prev) => prev.map((s) => s.id === id ? { ...s, extraSettings: s.extraSettings?.map((st) => st.key === key ? { ...st, value } : st) } : s));
+  }
+  function testConnection(id: string) {
+    setTesting(id);
+    setTimeout(() => setTesting(null), 1500);
+  }
+  function saveService(id: string) {
+    setSavedId(id);
     setTimeout(() => setSavedId(null), 2000);
-  };
-
-  const copyValue = (key: string, value: string) => {
-    navigator.clipboard.writeText(value).catch(() => {});
-    setCopied(key);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  }
+  function exportCSV() {
+    const rows = services.map((s) => ({
+      Name: s.name,
+      Provider: s.provider,
+      Category: s.category,
+      Status: s.status,
+      Environment: s.env,
+      Enabled: s.enabled ? "Yes" : "No",
+      "Last Tested": s.lastTested,
+    }));
+    downloadCSV("ridhi-api-integrations.csv", rows);
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("api-integrations_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
+    <div className="space-y-5 p-4 md:p-6">
+      {/* ══════════════════════════════════════════════════════════════
+          HEADER — clean, stacked, mobile-first
+          ══════════════════════════════════════════════════════════════ */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Plug className="w-6 h-6 text-purple-600" />
+            API Integrations
+          </h1>
+          <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs gap-1">
+            <ShieldCheck className="w-3 h-3" /> Super Admin
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Configure keys, credentials, and settings for all external integrations.
+        </p>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          SEARCH + EXPORT — full-width bar, large touch
+          ══════════════════════════════════════════════════════════════ */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search services..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full text-sm border rounded-lg pl-9 pr-3 py-2.5 bg-background focus:outline-none focus:ring-2 focus:ring-purple-200"
+          />
+        </div>
+        <Button variant="outline" size="sm" className="gap-1 h-10 px-3" onClick={exportCSV}>
+          <Download className="w-4 h-4" />
+          <span className="hidden sm:inline">Export</span>
         </Button>
       </div>
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Plug className="w-6 h-6 text-primary" />
-            3rd Party API Integrations
-          </h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Super Admin · Configure API keys, credentials, and service settings for every external integration
-          </p>
-        </div>
-        <Badge className="gap-1.5 bg-purple-100 text-purple-700 border border-purple-200 text-xs">
-          <ShieldCheck className="w-3 h-3" /> Super Admin Only
-        </Badge>
-      </div>
-
-      {/* ── Health overview ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* ══════════════════════════════════════════════════════════════
+          HEALTH OVERVIEW — 2x2 grid, large cards
+          ══════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Connected",    value: connected,    icon: CheckCircle, color: "text-green-600 bg-green-50"  },
-          { label: "Enabled",      value: enabled,      icon: Zap,         color: "text-purple-600 bg-purple-50"},
-          { label: "Disconnected", value: disconnected, icon: PauseCircle, color: "text-muted-foreground bg-muted"},
-          { label: "Errors",       value: errored,      icon: XCircle,     color: "text-red-600 bg-red-50"      },
+          { label: "Connected",    value: stats.connected,    icon: CheckCircle, color: "text-green-600", bg: "bg-green-50" },
+          { label: "Enabled",      value: stats.enabled,      icon: Zap,         color: "text-purple-600", bg: "bg-purple-50" },
+          { label: "Offline",      value: stats.disconnected, icon: XCircle,     color: "text-slate-500", bg: "bg-slate-100" },
+          { label: "Errors",       value: stats.errored,      icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50" },
         ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${s.color}`}><s.icon className="w-5 h-5" /></div>
+          <Card key={s.label} className="border">
+            <div className="p-4 flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl ${s.bg}`}>
+                <s.icon className={`w-5 h-5 ${s.color}`} />
+              </div>
               <div>
                 <p className="text-2xl font-bold">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label} services</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
-            </CardContent>
+            </div>
           </Card>
         ))}
       </div>
 
-      {/* ── Category filter pills ── */}
-      <div className="flex flex-wrap gap-2">
+      {/* ══════════════════════════════════════════════════════════════
+          CATEGORY FILTERS — horizontal scroll, large pills
+          ══════════════════════════════════════════════════════════════ */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
         {CATEGORIES.map((cat) => {
           const Icon = cat.icon;
           const count = cat.id === "all"
@@ -648,15 +655,15 @@ export default function ApiIntegrationsPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium border whitespace-nowrap flex-shrink-0 transition-colors min-h-[44px] ${
                 activeCategory === cat.id
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background border-border hover:bg-muted"
+                  ? "bg-purple-600 text-white border-purple-600"
+                  : "bg-white border-gray-200 text-slate-700 hover:bg-gray-50"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <Icon className="w-4 h-4" />
               {cat.label}
-              <span className={`ml-0.5 font-bold ${activeCategory === cat.id ? "opacity-80" : "text-muted-foreground"}`}>
+              <span className={`text-xs font-bold ml-0.5 ${activeCategory === cat.id ? "text-purple-200" : "text-slate-400"}`}>
                 {count}
               </span>
             </button>
@@ -664,147 +671,141 @@ export default function ApiIntegrationsPage() {
         })}
       </div>
 
-      {/* ── Service cards ── */}
+      {/* ══════════════════════════════════════════════════════════════
+          SERVICE CARDS — mobile-first stack layout
+          ══════════════════════════════════════════════════════════════ */}
       <div className="space-y-3">
         {filtered.map((svc) => {
           const isExpanded = expandedId === svc.id;
-          const SIcon = STATUS_ICON[svc.status];
+          const status = STATUS_META[svc.status];
+          const env = ENV_META[svc.env];
           const catMeta = CATEGORIES.find((c) => c.id === svc.category);
           const CatIcon = catMeta?.icon ?? Plug;
 
           return (
-            <Card key={svc.id} className={`border transition-all ${svc.status === "error" ? "border-red-300" : ""}`}>
+            <Card key={svc.id} className={`border overflow-hidden ${svc.status === "error" ? "border-red-300" : ""}`}>
 
-              {/* ── Service header row (always visible) ── */}
+              {/* ── Card Header (stacked on mobile, row on desktop) ── */}
               <div
-                className="flex items-center gap-3 p-4 cursor-pointer select-none"
+                className="cursor-pointer select-none"
                 onClick={() => setExpandedId(isExpanded ? null : svc.id)}
               >
-                {/* Icon */}
-                <div className={`p-2.5 rounded-xl border flex-shrink-0 ${
-                  svc.status === "connected" ? "bg-green-50 border-green-200" :
-                  svc.status === "error"     ? "bg-red-50 border-red-200"     :
-                  "bg-muted border-border"
-                }`}>
-                  <CatIcon className={`w-5 h-5 ${
-                    svc.status === "connected" ? "text-green-700" :
-                    svc.status === "error"     ? "text-red-700"   :
-                    "text-muted-foreground"
-                  }`} />
-                </div>
-
-                {/* Name + desc */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-sm">{svc.name}</span>
-                    <Badge variant="outline" className="text-[10px] px-1.5 h-4 text-muted-foreground">{svc.provider}</Badge>
-                    <Badge variant="outline" className={`text-[10px] px-1.5 h-4 gap-1 border ${STATUS_STYLE[svc.status]}`}>
-                      <SIcon className="w-2.5 h-2.5" />
-                      {svc.status === "testing" ? "testing…" : svc.status}
-                    </Badge>
-                    <Badge variant="outline" className={`text-[10px] px-1.5 h-4 border ${
-                      svc.env === "production"
-                        ? "bg-orange-50 text-orange-700 border-orange-200"
-                        : "bg-blue-50 text-blue-700 border-blue-200"
-                    }`}>
-                      {svc.env}
-                    </Badge>
+                {/* Mobile: stacked */}
+                <div className="flex items-start gap-3 p-4 md:items-center md:gap-4">
+                  {/* Icon */}
+                  <div className={`p-2.5 rounded-xl border flex-shrink-0 ${status.bg}`}>
+                    <CatIcon className={`w-5 h-5 ${status.color}`} />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{svc.description}</p>
-                </div>
 
-                {/* Controls */}
-                <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <span className="text-xs text-muted-foreground hidden md:block">Tested: {svc.lastTested}</span>
-                  <Switch checked={svc.enabled} onCheckedChange={() => toggleEnabled(svc.id)} />
-                  {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">{svc.name}</span>
+                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${env.bg} ${env.color}`}>
+                        <CircleDot className="w-2 h-2" style={{ color: env.color.replace("text-", "") === "orange-700" ? "#f97316" : "#3b82f6" }} />
+                        {env.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{svc.description}</p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className={`inline-flex items-center gap-1 text-xs`}>
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.dot }} />
+                        <span className={status.color}>{status.label}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">· Tested {svc.lastTested}</span>
+                    </div>
+                  </div>
+
+                  {/* Right side toggle */}
+                  <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <Switch checked={svc.enabled} onCheckedChange={() => toggleEnabled(svc.id)} />
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                  </div>
                 </div>
               </div>
 
-              {/* ── Expanded config panel ── */}
+              {/* ── Expanded panel ── */}
               {isExpanded && (
-                <div className="border-t mx-4 mb-4 pt-4 space-y-5">
+                <div className="border-t px-4 py-5 space-y-6">
 
-                  {/* Env toggle + docs link */}
+                  {/* Environment toggle */}
                   <div className="flex items-center gap-3 flex-wrap">
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/60 border">
-                      <span className={`text-xs font-semibold ${svc.env === "sandbox" ? "text-blue-600" : "text-muted-foreground"}`}>Sandbox</span>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/60 border">
+                      <span className={`text-sm font-semibold ${svc.env === "sandbox" ? "text-blue-600" : "text-muted-foreground"}`}>Sandbox</span>
                       <Switch
                         checked={svc.env === "production"}
                         onCheckedChange={() => toggleEnv(svc.id)}
                       />
-                      <span className={`text-xs font-semibold ${svc.env === "production" ? "text-orange-600" : "text-muted-foreground"}`}>Production</span>
+                      <span className={`text-sm font-semibold ${svc.env === "production" ? "text-orange-600" : "text-muted-foreground"}`}>Production</span>
                     </div>
                     {svc.env === "production" && (
-                      <Badge variant="outline" className="text-xs bg-orange-50 border-orange-200 text-orange-700 gap-1">
-                        <AlertTriangle className="w-3 h-3" /> Live keys — changes are immediate
-                      </Badge>
+                      <span className="inline-flex items-center gap-1 text-xs text-orange-700 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">
+                        <AlertTriangle className="w-3 h-3" /> Live keys
+                      </span>
                     )}
                     <a
                       href={svc.docsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-auto flex items-center gap-1 text-xs text-primary hover:underline"
+                      className="ml-auto flex items-center gap-1 text-sm text-purple-600 hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <ExternalLink className="w-3 h-3" /> {svc.provider} Docs
+                      <ExternalLink className="w-3.5 h-3.5" /> Docs
                     </a>
                   </div>
 
-                  {/* API key fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {svc.fields.map((field) => {
-                      const visKey = `${svc.id}_${field.key}`;
-                      const isVisible = visible[visKey] ?? false;
-                      return (
-                        <div key={field.key} className="space-y-1.5">
-                          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1">
-                            {field.label}
-                            {field.secret && <Lock className="w-3 h-3 text-muted-foreground" />}
-                          </Label>
-                          <div className="flex items-center gap-1.5">
+                  {/* API Credentials */}
+                  <div className="space-y-4">
+                    <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">API Credentials</p>
+                    <div className="space-y-4">
+                      {svc.fields.map((field) => (
+                        <div key={field.key}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <Label className="text-sm font-medium">{field.label}</Label>
+                            {field.hint && (
+                              <span className="text-xs text-muted-foreground">{field.hint}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
                             <Input
-                              type={field.secret && !isVisible ? "password" : "text"}
-                              placeholder={field.placeholder}
+                              type={hidden[field.key] ? "text" : (field.secret ? "password" : "text")}
                               value={field.value}
+                              placeholder={field.placeholder}
                               onChange={(e) => updateField(svc.id, field.key, e.target.value)}
-                              className="font-mono text-xs flex-1"
+                              className="text-sm h-10 flex-1"
                             />
                             {field.secret && (
                               <Button
-                                variant="outline" size="sm"
-                                className="h-9 w-9 p-0 flex-shrink-0"
-                                onClick={() => setVisible((v) => ({ ...v, [visKey]: !isVisible }))}
+                                variant="outline"
+                                size="icon"
+                                className="h-10 w-10 flex-shrink-0"
+                                onClick={() => toggle(field.key)}
                               >
-                                {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                {hidden[field.key] ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                               </Button>
                             )}
                             <Button
-                              variant="outline" size="sm"
-                              className="h-9 w-9 p-0 flex-shrink-0"
-                              onClick={() => copyValue(visKey, field.value)}
+                              variant="outline"
+                              size="icon"
+                              className="h-10 w-10 flex-shrink-0"
+                              onClick={() => navigator.clipboard?.writeText(field.value)}
                             >
-                              {copied === visKey
-                                ? <CheckCircle className="w-3.5 h-3.5 text-green-600" />
-                                : <Copy className="w-3.5 h-3.5" />}
+                              <Copy className="w-4 h-4" />
                             </Button>
                           </div>
-                          {field.hint && <p className="text-[11px] text-muted-foreground">{field.hint}</p>}
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Extra settings */}
+                  {/* Service Settings */}
                   {svc.extraSettings && svc.extraSettings.length > 0 && (
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Service Settings</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-4">
+                      <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Service Settings</p>
+                      <div className="space-y-3">
                         {svc.extraSettings.map((setting) => (
-                          <div key={setting.key} className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border">
-                            <div>
-                              <p className="text-sm font-medium">{setting.label}</p>
-                            </div>
+                          <div key={setting.key} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border">
+                            <span className="text-sm font-medium">{setting.label}</span>
                             {setting.type === "toggle" && (
                               <Switch
                                 checked={setting.value as boolean}
@@ -813,7 +814,7 @@ export default function ApiIntegrationsPage() {
                             )}
                             {setting.type === "text" && (
                               <Input
-                                className="w-24 h-8 text-sm text-right"
+                                className="w-28 h-9 text-sm text-right"
                                 value={setting.value as string}
                                 onChange={(e) => updateSetting(svc.id, setting.key, e.target.value)}
                               />
@@ -822,7 +823,7 @@ export default function ApiIntegrationsPage() {
                               <select
                                 value={setting.value as string}
                                 onChange={(e) => updateSetting(svc.id, setting.key, e.target.value)}
-                                className="h-8 border rounded-md px-2 text-sm bg-background"
+                                className="h-9 border rounded-lg px-3 text-sm bg-background"
                               >
                                 {setting.options?.map((opt) => (
                                   <option key={opt} value={opt}>{opt}</option>
@@ -835,31 +836,31 @@ export default function ApiIntegrationsPage() {
                     </div>
                   )}
 
-                  {/* Action row */}
-                  <div className="flex items-center gap-3 pt-2 border-t flex-wrap">
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-3 pt-3 border-t flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`h-8 gap-1.5 text-xs ${testing === svc.id ? "text-blue-600 border-blue-200" : ""}`}
+                      className={`h-10 gap-1.5 text-sm ${testing === svc.id ? "text-blue-600 border-blue-200" : ""}`}
                       disabled={testing === svc.id}
                       onClick={() => testConnection(svc.id)}
                     >
                       {testing === svc.id
-                        ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" />Testing…</>
-                        : <><TestTube className="w-3.5 h-3.5" />Test Connection</>}
+                        ? <><RefreshCw className="w-4 h-4 animate-spin" /> Testing…</>
+                        : <><TestTube className="w-4 h-4" /> Test Connection</>}
                     </Button>
                     <Button
                       size="sm"
-                      className={`h-8 gap-1.5 text-xs ${savedId === svc.id ? "bg-green-600 hover:bg-green-700" : "bg-gradient-to-r from-purple-600 to-pink-500 border-0"} text-white`}
+                      className={`h-10 gap-1.5 text-sm ${savedId === svc.id ? "bg-green-600 hover:bg-green-700" : "bg-purple-600 hover:bg-purple-700"} text-white`}
                       onClick={() => saveService(svc.id)}
                     >
                       {savedId === svc.id
-                        ? <><CheckCircle className="w-3.5 h-3.5" />Saved!</>
-                        : <><Save className="w-3.5 h-3.5" />Save Changes</>}
+                        ? <><CheckCircle className="w-4 h-4" /> Saved!</>
+                        : <><Save className="w-4 h-4" /> Save Changes</>}
                     </Button>
-                    <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Activity className="w-3.5 h-3.5" />
-                      Last tested: {svc.lastTested}
+                    <div className="ml-auto flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Activity className="w-4 h-4" />
+                      {svc.lastTested}
                     </div>
                   </div>
                 </div>
