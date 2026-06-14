@@ -5,6 +5,7 @@ import {
   Inbox, Users, MessageSquareText, BarChart3, Clock, AlertTriangle,
   CheckCircle, Star, Search, ChevronLeft, ChevronRight, Send, Wand2,
   Phone, Mail, MapPin, ThumbsUp, ThumbsDown, Meh, Reply, Shield, User,
+  Download, FileSpreadsheet,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { downloadCSV } from "@/lib/utils";
 
 import {
   mockTickets, mockContacts, mockMacros, mockAgentPerformance,
@@ -81,6 +83,87 @@ function KPICard({ title, value, icon: Icon, color, alert }: {
       </CardContent>
     </Card>
   );
+}
+
+function exportTicketsCSV(tickets: MockTicket[]) {
+  const rows = tickets.map((t) => ({
+    ticket_number: t.ticketNumber,
+    subject: t.subject,
+    status: t.status,
+    priority: t.priority,
+    category: t.category,
+    requester_type: t.requesterType,
+    requester_name: t.requesterName,
+    requester_email: t.requesterEmail,
+    requester_phone: t.requesterPhone,
+    assigned_to: t.assignedTo || "Unassigned",
+    assigned_team: t.assignedTeam,
+    source: t.source,
+    sentiment: t.sentiment,
+    sla_breached: t.slaBreached ? "Yes" : "No",
+    satisfaction_rating: t.satisfactionRating ?? "",
+    reopen_count: t.reopenCount,
+    created_at: t.createdAt,
+    updated_at: t.updatedAt,
+    resolved_at: t.resolvedAt || "",
+    closed_at: t.closedAt || "",
+    tags: t.tags.join("; "),
+    comments_count: t.comments.length,
+  }));
+  downloadCSV(`ridhi_crm_tickets_${new Date().toISOString().split("T")[0]}.csv`, rows);
+}
+
+function exportContactsCSV(contacts: MockContact[]) {
+  const rows = contacts.map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    phone: c.phone,
+    type: c.type,
+    city: c.city,
+    state: c.state,
+    status: c.status,
+    lifecycle_stage: c.lifecycleStage,
+    segment: c.segment,
+    support_tier: c.supportTier,
+    total_tickets: c.totalTickets,
+    open_tickets: c.openTickets,
+    avg_satisfaction: c.avgSatisfaction ?? "",
+    total_revenue: c.totalRevenue,
+    subscription_plan: c.subscriptionPlan || "",
+    assigned_agent: c.assignedAgent || "",
+    last_contact_at: c.lastContactAt || "",
+    tags: c.tags.join("; "),
+  }));
+  downloadCSV(`ridhi_crm_contacts_${new Date().toISOString().split("T")[0]}.csv`, rows);
+}
+
+function exportMacrosCSV(macros: typeof mockMacros) {
+  const rows = macros.map((m) => ({
+    id: m.id,
+    name: m.name,
+    category: m.category,
+    body: m.body,
+    tags: m.tags.join("; "),
+    use_count: m.useCount,
+    is_active: m.isActive ? "Yes" : "No",
+  }));
+  downloadCSV(`ridhi_crm_macros_${new Date().toISOString().split("T")[0]}.csv`, rows);
+}
+
+function exportTeamCSV(agents: typeof mockAgentPerformance) {
+  const rows = agents.map((a) => ({
+    agent_id: a.agentId,
+    agent_name: a.agentName,
+    tickets_resolved: a.ticketsResolved,
+    tickets_escalated: a.ticketsEscalated,
+    avg_resolution_time_min: a.avgResolutionTime,
+    avg_first_response_time_min: a.avgFirstResponseTime,
+    sla_compliance_pct: a.slaCompliance,
+    avg_satisfaction: a.avgSatisfaction,
+    quality_score: a.qualityScore,
+  }));
+  downloadCSV(`ridhi_crm_team_performance_${new Date().toISOString().split("T")[0]}.csv`, rows);
 }
 
 export default function CRMPage() {
@@ -151,6 +234,9 @@ export default function CRMPage() {
           <p className="text-sm text-muted-foreground">Ticketing, contacts, macros, and team performance</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => exportTicketsCSV(mockTickets)}>
+            <FileSpreadsheet className="w-3.5 h-3.5" /> Export Tickets
+          </Button>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Inbox className="w-3.5 h-3.5" /> New Ticket
           </Button>
@@ -315,6 +401,9 @@ export default function CRMPage() {
                 </Button>
               ))}
             </div>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => exportTicketsCSV(filteredTickets)}>
+              <Download className="w-3 h-3" /> Export CSV
+            </Button>
             <div className="ml-auto text-xs text-muted-foreground">{filteredTickets.length} tickets</div>
           </div>
 
@@ -459,6 +548,9 @@ export default function CRMPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search contacts..." value={contactSearch} onChange={(e) => { setContactSearch(e.target.value); setContactPage(0); }} className="pl-9" />
             </div>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => exportContactsCSV(filteredContacts)}>
+              <Download className="w-3 h-3" /> Export CSV
+            </Button>
             <div className="ml-auto text-xs text-muted-foreground">{filteredContacts.length} contacts</div>
           </div>
 
@@ -563,6 +655,9 @@ export default function CRMPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search macros..." value={macroSearch} onChange={(e) => setMacroSearch(e.target.value)} className="pl-9" />
             </div>
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => exportMacrosCSV(filteredMacros)}>
+              <Download className="w-3 h-3" /> Export CSV
+            </Button>
             <Button variant="outline" size="sm" className="gap-1.5"><Wand2 className="w-3.5 h-3.5" /> New Macro</Button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -595,6 +690,11 @@ export default function CRMPage() {
 
         {/* Team */}
         <TabsContent value="team" className="space-y-4">
+          <div className="flex items-center justify-end">
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => exportTeamCSV(mockAgentPerformance)}>
+              <Download className="w-3 h-3" /> Export CSV
+            </Button>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
