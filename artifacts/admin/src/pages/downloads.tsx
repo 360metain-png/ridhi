@@ -6,8 +6,10 @@ import {
   Download, FileText, Users, IndianRupee, ShieldAlert, Star,
   Briefcase, Coins, Megaphone, Activity, ScanFace, Radio,
   BarChart3, Crown, Phone, Zap, Package, CheckCircle2, Clock,
-  FileSpreadsheet, Globe,
+  FileSpreadsheet, Globe, FileDown,
 } from "lucide-react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // ── CSV generator ──────────────────────────────────────────────────────────
 function toCSV(rows: Record<string, string | number>[]): string {
@@ -27,6 +29,58 @@ function downloadCSV(filename: string, rows: Record<string, string | number>[]) 
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// ── PDF generator ──────────────────────────────────────────────────────────
+function downloadPDF(filename: string, title: string, rows: Record<string, string | number>[]) {
+  if (!rows.length) return;
+  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Header
+  doc.setFillColor(123, 47, 190);
+  doc.rect(0, 0, pageWidth, 48, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("Ridhi", 28, 30);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text("Admin Dashboard Report", 28 + doc.getTextWidth("Ridhi") + 10, 30);
+
+  doc.setTextColor(60, 60, 60);
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, 28, 74);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth - 28, 74, { align: "right" });
+
+  // Table
+  const headers = Object.keys(rows[0]);
+  const body = rows.map((r) => headers.map((h) => String(r[h])));
+  autoTable(doc, {
+    head: [headers.map((h) => h.replace(/_/g, " ").toUpperCase())],
+    body,
+    startY: 88,
+    theme: "grid",
+    styles: { fontSize: 7, cellPadding: 3, overflow: "linebreak" },
+    headStyles: { fillColor: [123, 47, 190], textColor: [255, 255, 255], fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [250, 250, 252] },
+    margin: { left: 28, right: 28 },
+  });
+
+  // Footer
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth - 28, doc.internal.pageSize.getHeight() - 18, { align: "right" });
+    doc.text("Ridhi Admin Dashboard  Confidential", 28, doc.internal.pageSize.getHeight() - 18);
+  }
+
+  doc.save(filename);
 }
 
 // ── Mock data generators ───────────────────────────────────────────────────
@@ -255,12 +309,14 @@ function genPlatformSummary(): Record<string, string | number>[] {
 }
 
 // ── Report catalogue ───────────────────────────────────────────────────────
+type ReportFormat = "CSV" | "PDF";
+
 interface Report {
   id:       string;
   title:    string;
   desc:     string;
   rows:     string;
-  format:   "CSV";
+  format:   ReportFormat;
   icon:     React.ComponentType<{ className?: string }>;
   color:    string;
   generate: () => Record<string, string | number>[];
@@ -423,22 +479,32 @@ export default function DownloadsPage() {
   const [downloading, setDownloading] = useState<Record<string, boolean>>({});
   const [done,        setDone]        = useState<Record<string, boolean>>({});
 
-  function handleDownload(report: Report) {
+  function handleDownload(report: Report, format: ReportFormat = "CSV") {
     if (downloading[report.id]) return;
     setDownloading((p) => ({ ...p, [report.id]: true }));
     setTimeout(() => {
-      downloadCSV(report.filename(), report.generate());
+      const rows = report.generate();
+      if (format === "PDF") {
+        downloadPDF(report.filename().replace(".csv", ".pdf"), report.title, rows);
+      } else {
+        downloadCSV(report.filename(), rows);
+      }
       setDownloading((p) => ({ ...p, [report.id]: false }));
       setDone((p) => ({ ...p, [report.id]: true }));
       setTimeout(() => setDone((p) => ({ ...p, [report.id]: false })), 3000);
     }, 600);
   }
 
-  function handleDownloadAll() {
+  function handleDownloadAll(format: ReportFormat = "CSV") {
     REPORTS.forEach((section) => {
       section.reports.forEach((report, i) => {
         setTimeout(() => {
-          downloadCSV(report.filename(), report.generate());
+          const rows = report.generate();
+          if (format === "PDF") {
+            downloadPDF(report.filename().replace(".csv", ".pdf"), report.title, rows);
+          } else {
+            downloadCSV(report.filename(), rows);
+          }
         }, i * 300);
       });
     });
@@ -456,16 +522,26 @@ export default function DownloadsPage() {
             <Download className="w-6 h-6 text-primary" /> Downloads & Reports
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Export any platform data as CSV — users, finance, creators, content, marketing, admins.
+            Export any platform data as CSV or PDF — users, finance, creators, content, marketing, admins.
           </p>
         </div>
-        <Button
-          onClick={handleDownloadAll}
-          className="gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90 shrink-0"
-        >
-          <Package className="w-4 h-4" />
-          Download All Reports ({totalReports} files)
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            onClick={() => handleDownloadAll("PDF")}
+            className="gap-2 h-9 text-xs"
+          >
+            <FileDown className="w-4 h-4" />
+            Download All as PDF ({totalReports} files)
+          </Button>
+          <Button
+            onClick={() => handleDownloadAll("CSV")}
+            className="gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90 h-9 text-xs"
+          >
+            <Package className="w-4 h-4" />
+            Download All as CSV ({totalReports} files)
+          </Button>
+        </div>
       </div>
 
       {/* Info strip */}
@@ -473,6 +549,7 @@ export default function DownloadsPage() {
         {[
           { icon: FileText,      label: `${totalReports} Report Types` },
           { icon: FileSpreadsheet, label: "CSV Format"              },
+          { icon: FileDown,       label: "PDF Format"              },
           { icon: CheckCircle2,  label: "SA-Only Access"             },
           { icon: Clock,         label: "Real-time Data"             },
         ].map(({ icon: Icon, label }) => (
@@ -516,29 +593,42 @@ export default function DownloadsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="text-[10px] px-2">{report.rows}</Badge>
-                        <Badge variant="outline"   className="text-[10px] px-2 text-green-700 border-green-300 bg-green-50">
-                          <FileSpreadsheet className="w-2.5 h-2.5 mr-1" />
-                          {report.format}
+                        <Badge variant="outline" className="text-[10px] px-2 text-green-700 border-green-300 bg-green-50">
+                          <FileSpreadsheet className="w-2.5 h-2.5 mr-1" /> CSV
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] px-2 text-rose-700 border-rose-300 bg-rose-50">
+                          <FileDown className="w-2.5 h-2.5 mr-1" /> PDF
                         </Badge>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => handleDownload(report)}
-                        disabled={isLoading}
-                        className={`h-7 text-xs gap-1.5 transition-all ${
-                          isDone
-                            ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-primary hover:bg-primary/90 text-white"
-                        }`}
-                      >
-                        {isDone ? (
-                          <><CheckCircle2 className="w-3 h-3" /> Downloaded</>
-                        ) : isLoading ? (
-                          <><Clock className="w-3 h-3 animate-spin" /> Preparing…</>
-                        ) : (
-                          <><Download className="w-3 h-3" /> Download</>
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDownload(report, "PDF")}
+                          disabled={isLoading}
+                          className="h-7 text-xs gap-1 px-2"
+                        >
+                          <FileDown className="w-3 h-3" /> PDF
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleDownload(report, "CSV")}
+                          disabled={isLoading}
+                          className={`h-7 text-xs gap-1.5 transition-all ${
+                            isDone
+                              ? "bg-green-600 hover:bg-green-700 text-white"
+                              : "bg-primary hover:bg-primary/90 text-white"
+                          }`}
+                        >
+                          {isDone ? (
+                            <><CheckCircle2 className="w-3 h-3" /> Downloaded</>
+                          ) : isLoading ? (
+                            <><Clock className="w-3 h-3 animate-spin" /> Preparing…</>
+                          ) : (
+                            <><Download className="w-3 h-3" /> CSV</>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

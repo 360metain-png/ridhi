@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { downloadCSV } from "@/lib/utils";
+import { downloadCSV, downloadPDF } from "@/lib/utils";
+import { FileDown } from "lucide-react";
 import {
   USER_BEHAVIOR_ANALYTICS,
   COHORT_DATA,
@@ -99,12 +100,58 @@ export default function UserBehavior() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("user-behavior_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={async () => {
+            const rows: Record<string, string | number>[] = users.map((u) => {
+              const topScreen = Object.entries(u.screenVisits).sort((a, b) => b[1].visits - a[1].visits)[0]?.[0] ?? "";
+              const topFeature = Object.entries(u.featureUsage).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+              return {
+                user_id: u.userId,
+                user_name: u.userName,
+                total_sessions: u.totalSessions,
+                total_duration_min: u.totalDurationMinutes,
+                avg_session_min: u.avgSessionMinutes,
+                engagement_score: u.engagementScore,
+                last_active: u.lastActive,
+                top_screen: topScreen,
+                top_feature: topFeature,
+                likes: u.contentInteractions.likes,
+                comments: u.contentInteractions.comments,
+                shares: u.contentInteractions.shares,
+                posts_created: u.contentInteractions.postsCreated,
+                platform: u.deviceInfo.platform,
+              };
+            });
+            await downloadPDF("user_behavior.pdf", "User Behavior Analytics", rows);
+          }}>
+            <FileDown className="w-3 h-3" /> PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = users.map((u) => {
+              const topScreen = Object.entries(u.screenVisits).sort((a, b) => b[1].visits - a[1].visits)[0]?.[0] ?? "";
+              const topFeature = Object.entries(u.featureUsage).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+              return {
+                user_id: u.userId,
+                user_name: u.userName,
+                total_sessions: u.totalSessions,
+                total_duration_min: u.totalDurationMinutes,
+                avg_session_min: u.avgSessionMinutes,
+                engagement_score: u.engagementScore,
+                last_active: u.lastActive,
+                top_screen: topScreen,
+                top_feature: topFeature,
+                likes: u.contentInteractions.likes,
+                comments: u.contentInteractions.comments,
+                shares: u.contentInteractions.shares,
+                posts_created: u.contentInteractions.postsCreated,
+                platform: u.deviceInfo.platform,
+              };
+            });
+            downloadCSV("user_behavior.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> CSV
+          </Button>
+        </div>
       </div>
       {/* Header */}
       <div className="flex items-center justify-between">

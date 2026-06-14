@@ -78,6 +78,9 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "react-helmet-async": "^3.0.0"
   }
 }

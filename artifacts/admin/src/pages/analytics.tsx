@@ -5,8 +5,8 @@ import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, PieChart, Pie
 } from "recharts";
-import { TrendingUp, Users, FileText, IndianRupee, MapPin, Download} from "lucide-react";
-import { downloadCSV } from "@/lib/utils";
+import { TrendingUp, Users, FileText, IndianRupee, MapPin, Download, FileDown } from "lucide-react";
+import { downloadCSV, downloadPDF } from "@/lib/utils";
 
 const PURPLE = "#7B2FBE";
 const MAGENTA = "#E91E8C";
@@ -143,12 +143,20 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
-          const rows: Record<string, string | number>[] = [];
-          downloadCSV("analytics_report.csv", rows);
-        }}>
-          <Download className="w-3 h-3" /> Export CSV
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={async () => {
+            const rows: Record<string, string | number>[] = dauData.map((d) => ({ day: d.day, dau: d.DAU, mau: d.MAU }));
+            await downloadPDF("analytics_users.pdf", "Users Analytics", rows);
+          }}>
+            <FileDown className="w-3 h-3" /> PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => {
+            const rows: Record<string, string | number>[] = dauData.map((d) => ({ day: d.day, dau: d.DAU, mau: d.MAU }));
+            downloadCSV("analytics_users.csv", rows);
+          }}>
+            <Download className="w-3 h-3" /> CSV
+          </Button>
+        </div>
       </div>
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
