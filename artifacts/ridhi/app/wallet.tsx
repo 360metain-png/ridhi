@@ -19,7 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors"
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
@@ -182,11 +182,14 @@ export default function WalletScreen() {
     setShowPayment(true);
   };
 
+  const { trackCoinRecharge } = useAnalytics();
+
   const handlePaySuccess = () => {
     if (!pendingPack) return;
     const total = pendingPack.coins + ((pendingPack as any).bonus ?? 0);
     addCoins(total);
     fire({ type: "credit", amount: total, label: "Recharge", sublabel: pendingPack.label, large: total >= 500, bottom: 200 });
+    trackCoinRecharge(total);
     setPendingPack(null);
   };
 

@@ -27,7 +27,7 @@ import { CoinBadge } from "@/components/CoinBadge";
 const COIN_IMAGE = require("../../assets/images/ridhi_coin.png");
 import { GradientButton } from "@/components/GradientButton";
 import { SubscriptionBadge, VipTier } from "@/components/SubscriptionBadge";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const { width } = Dimensions.get("window");
 
@@ -155,8 +155,14 @@ export default function ProfileScreen() {
   const [avatarSheet,  setAvatarSheet]  = useState(false);
   const [showAvatarGrid, setShowAvatarGrid] = useState(false);
 
-  const toggleFollow = (id: string) =>
+  const { trackFollow, trackUnfollow } = useAnalytics();
+
+  const toggleFollow = (id: string) => {
+    const isFollowing = followStates[id];
     setFollowStates((prev) => ({ ...prev, [id]: !prev[id] }));
+    if (!isFollowing) trackFollow(id);
+    else trackUnfollow(id);
+  };
 
   if (!user) {
     return (

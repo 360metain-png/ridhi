@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import type { VipTier } from "@/components/SubscriptionBadge";
 
@@ -793,6 +793,8 @@ export default function SubscriptionScreen() {
   const creatorPlanId   = user?.creatorPlan;
   const creatorExpiry   = user?.creatorPlanExpiresAt;
 
+  const { trackSubscription } = useAnalytics();
+
   const handlePlanSuccess = async (txnId: string) => {
     await subscribePlan(pendingPlanId, pendingBilling, pendingBonus);
     const planName = pendingPlanId.startsWith("creator_")
@@ -801,6 +803,7 @@ export default function SubscriptionScreen() {
     setActivatedPlan(planName);
     setShowPayment(false);
     setShowSuccess(true);
+    trackSubscription(planName);
   };
 
   return (

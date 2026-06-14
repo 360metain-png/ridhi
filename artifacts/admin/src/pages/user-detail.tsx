@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getUserAnalytics } from "@/data/analytics-mock";
 import { downloadCSV } from "@/lib/utils";
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
 
 export default function UserDetail() {
   const params = useParams();
@@ -278,6 +281,66 @@ export default function UserDetail() {
                       </CardContent>
                     </Card>
                   </div>
+
+                  {/* Feature Usage */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Feature Usage</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {Object.entries(analytics.featureUsage)
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 8)
+                          .map(([feat, count]) => (
+                            <div key={feat} className="flex items-center gap-3">
+                              <span className="text-sm capitalize w-32">{feat.replace(/_/g, " ")}</span>
+                              <Progress value={Math.min(100, (count / (Math.max(...Object.values(analytics.featureUsage)))) * 100)} className="flex-1 h-2" />
+                              <span className="text-sm text-muted-foreground w-12 text-right">{count}</span>
+                            </div>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Daily Activity (last 7 days) */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Daily Activity (Last 7 Days)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={analytics.dailyActivity.slice(-7).map((d) => ({ ...d, label: d.date.slice(5) }))}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                            <YAxis tick={{ fontSize: 12 }} />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="sessions" stroke="#7B2FBE" strokeWidth={2} dot={{ r: 3 }} name="Sessions" />
+                            <Line type="monotone" dataKey="likes" stroke="#E91E8C" strokeWidth={2} dot={{ r: 3 }} name="Likes" />
+                            <Line type="monotone" dataKey="events" stroke="#06B6D4" strokeWidth={2} dot={{ r: 3 }} name="Events" />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Retention Heatmap */}
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Retention (Last 7 Days)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-2">
+                        {Object.entries(analytics.retention).map(([date, active]) => (
+                          <div key={date} className="flex flex-col items-center gap-1">
+                            <div className={`w-8 h-8 rounded-md ${active ? "bg-green-500" : "bg-gray-200"}`} />
+                            <span className="text-[10px] text-muted-foreground">{date.slice(5)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   {/* Chat Activity */}
                   <Card>

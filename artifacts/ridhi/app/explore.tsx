@@ -60,7 +60,7 @@ export default function ExploreScreen() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"trending" | "people" | "hashtags">("trending");
   const [users, setUsers] = useState(INITIAL_USERS);
-  const { trackFollow, trackSearch } = useAnalytics();
+  const { trackFollow, trackSearch, trackHashtag } = useAnalytics();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const tabs = ["trending", "people", "hashtags"] as const;
@@ -120,6 +120,7 @@ export default function ExploreScreen() {
             placeholderTextColor={colors.mutedForeground}
             value={query}
             onChangeText={setQuery}
+            onSubmitEditing={() => { if (query.trim()) trackSearch(query.trim()); }}
             autoFocus
             returnKeyType="search"
           />

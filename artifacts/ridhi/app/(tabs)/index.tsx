@@ -427,6 +427,7 @@ export default function FeedScreen() {
     setPosts((prev) =>
       prev.map((p) => p.id === commentPostId ? { ...p, comments: p.comments + 1 } : p)
     );
+    trackComment(commentPostId, "post");
     setCommentText("");
   };
 

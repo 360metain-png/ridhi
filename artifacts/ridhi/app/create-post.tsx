@@ -18,7 +18,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColors } from "@/hooks/useColors";
-import { useTrackScreen } from "@/hooks/useAnalytics";
+import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
@@ -235,6 +235,8 @@ export default function CreatePostScreen() {
     ]);
   };
 
+  const { trackCreate } = useAnalytics();
+
   const handlePost = async () => {
     setLoading(true);
     try {
@@ -264,6 +266,7 @@ export default function CreatePostScreen() {
       });
       if (res.ok) {
         Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
+        trackCreate(selectedType as "post" | "reel" | "story" | "live");
       } else {
         Alert.alert("Error", "Failed to post. Please try again.");
       }

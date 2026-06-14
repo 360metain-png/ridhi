@@ -9,6 +9,7 @@ import { WatermarkBadge } from "./WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
 import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
 import { ShareWithWatermark } from "./ShareWithWatermark";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export interface Post {
   id: string;
@@ -128,6 +129,7 @@ export const FeedPost = React.memo(function FeedPost({
 }: FeedPostProps) {
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
+  const { trackShare, trackSave } = useAnalytics();
   const [showBurst, setShowBurst] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
@@ -288,7 +290,7 @@ export const FeedPost = React.memo(function FeedPost({
             <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>{post.comments}</Text>
           </Pressable>
 
-          <Pressable style={styles.action} onPress={() => setShowShare(true)} accessibilityRole="button">
+          <Pressable style={styles.action} onPress={() => { trackShare(post.id, "post"); setShowShare(true); }} accessibilityRole="button">
             <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
               <Feather name="send" size={14} color={colors.mutedForeground} />
             </View>
@@ -298,7 +300,7 @@ export const FeedPost = React.memo(function FeedPost({
           <View style={{ flex: 1 }} />
 
           <Pressable
-            onPress={() => saveWithWatermark(post.imageUri)}
+            onPress={() => { trackSave(post.id, "post"); saveWithWatermark(post.imageUri); }}
             disabled={saving}
             accessibilityRole="button"
             accessibilityLabel={saved ? "Saved" : "Save to gallery"}
