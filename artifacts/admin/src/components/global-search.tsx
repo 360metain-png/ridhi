@@ -97,6 +97,7 @@ const PAGE_RESULTS: SearchResult[] = [
   { id: "p-chat-moderation", title: "Chat Moderation", subtitle: "Moderate Chats", icon: MessageSquare, href: "/chat-moderation", category: "Pages" },
   { id: "p-content-assets", title: "Creative Assets", subtitle: "Asset Library", icon: Sparkles, href: "/content-assets", category: "Pages" },
   { id: "p-app-store", title: "App Store Analytics", subtitle: "Installs, Reviews, Devices", icon: Smartphone, href: "/app-store", category: "Pages" },
+  { id: "p-crm", title: "CRM & Support", subtitle: "120 tickets, Ticketing & Contacts", icon: MessageSquare, href: "/crm", category: "Pages", badge: "120", badgeClass: "bg-destructive" },
 ];
 
 /* ── Quick Actions ─────────────────────────────────────────────── */
@@ -110,6 +111,7 @@ const QUICK_ACTIONS: SearchResult[] = [
   { id: "qa-analytics", title: "View Analytics", subtitle: "Platform insights", icon: BarChart2, href: "/analytics", category: "Quick Actions" },
   { id: "qa-behavior", title: "User Behavior", subtitle: "Engagement data", icon: Activity, href: "/user-behavior", category: "Quick Actions" },
   { id: "qa-settings", title: "Platform Settings", subtitle: "Configure Ridhi", icon: Settings, href: "/settings", category: "Quick Actions" },
+  { id: "qa-crm", title: "CRM & Support", subtitle: "120 tickets, 20 contacts", icon: MessageSquare, href: "/crm", category: "Quick Actions", badge: "120", badgeClass: "bg-destructive" },
 ];
 
 /* ── Helper: fuzzy match ────────────────────────────────────────── */

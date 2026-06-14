@@ -62,6 +62,7 @@ import Stories             from "@/pages/stories";
 import ChatModeration      from "@/pages/chat-moderation";
 import Dating              from "@/pages/dating";
 import AppStore            from "@/pages/app-store";
+import CRM                 from "@/pages/crm";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/chat-moderation": ["super_admin"],
   "/dating":        ["super_admin"],
   "/app-store":     ["super_admin"],
+  "/crm":           ["super_admin", "admin"],
   "/agents":       ["super_admin", "admin"],
   "/hosts":        ["super_admin", "admin"],
   "/levels":       ["super_admin", "admin"],
@@ -240,6 +242,7 @@ function Router() {
       <Route path="/chat-moderation" component={() => <RoleRoute component={ChatModeration}  path="/chat-moderation" />} />
       <Route path="/dating"         component={() => <RoleRoute component={Dating}           path="/dating" />} />
       <Route path="/app-store"       component={() => <RoleRoute component={AppStore}         path="/app-store" />} />
+      <Route path="/crm"             component={() => <RoleRoute component={CRM}               path="/crm" />} />
       <Route component={NotFound} />
     </Switch>
   );
