@@ -63,7 +63,6 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
       { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA },
       { name: "Live Streams",       href: "/live-streams", icon: Radio,       allowedRoles: SA },
-      { name: "Gaming",             href: "/gaming",        icon: Gamepad2,    allowedRoles: SA },
       { name: "Dating",             href: "/dating",        icon: Heart,        allowedRoles: SA },
       { name: "App Store",          href: "/app-store",     icon: Smartphone,   allowedRoles: SA },
       { name: "CRM & Support",      href: "/crm",           icon: MessagesSquare, badge: "120", allowedRoles: SA_A },

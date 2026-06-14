@@ -61,7 +61,6 @@ const PAGE_RESULTS: SearchResult[] = [
   { id: "p-recordings", title: "Recordings", subtitle: "Call Recordings", icon: FolderOpen, href: "/recordings", category: "Pages" },
   { id: "p-promotions", title: "Promotions & Ads", subtitle: "User Promotions", icon: Zap, href: "/promotions", category: "Pages" },
   { id: "p-live-streams", title: "Live Streams", subtitle: "Live Stream Management", icon: Radio, href: "/live-streams", category: "Pages" },
-  { id: "p-gaming", title: "Gaming", subtitle: "Gaming Section", icon: Gamepad2, href: "/gaming", category: "Pages" },
   { id: "p-dating", title: "Dating", subtitle: "Dating Profiles", icon: Heart, href: "/dating", category: "Pages" },
   { id: "p-podcasts", title: "Podcasts", subtitle: "Podcast Library", icon: Headphones, href: "/podcasts", category: "Pages" },
   { id: "p-vibe-stars", title: "Vibe Stars", subtitle: "Star Rankings", icon: Star, href: "/vibe-stars", category: "Pages" },

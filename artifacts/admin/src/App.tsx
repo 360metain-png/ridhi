@@ -53,7 +53,6 @@ import Support            from "@/pages/support";
 import Screenshots        from "@/pages/screenshots";
 import ContentEditor      from "@/pages/content-editor";
 import FinancialStatements from "@/pages/financial-statements";
-import Gaming              from "@/pages/gaming";
 import Podcasts            from "@/pages/podcasts";
 import VibeStars           from "@/pages/vibe-stars";
 import MusicLibrary        from "@/pages/music-library";
@@ -84,7 +83,6 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/revenue":      ["super_admin"],
   "/monetization": ["super_admin"],
   "/financial-statements": ["super_admin"],
-  "/gaming":        ["super_admin"],
   "/podcasts":      ["super_admin"],
   "/vibe-stars":    ["super_admin"],
   "/music-library": ["super_admin"],
@@ -233,7 +231,6 @@ function Router() {
       <Route path="/downloads"         component={() => <RoleRoute component={Downloads}         path="/downloads" />} />
       <Route path="/screenshots"       component={() => <RoleRoute component={Screenshots}       path="/screenshots" />} />
       <Route path="/financial-statements" component={() => <RoleRoute component={FinancialStatements} path="/financial-statements" />} />
-      <Route path="/gaming"          component={() => <RoleRoute component={Gaming}          path="/gaming" />} />
       <Route path="/podcasts"        component={() => <RoleRoute component={Podcasts}        path="/podcasts" />} />
       <Route path="/vibe-stars"      component={() => <RoleRoute component={VibeStars}       path="/vibe-stars" />} />
       <Route path="/music-library"    component={() => <RoleRoute component={MusicLibrary}    path="/music-library" />} />

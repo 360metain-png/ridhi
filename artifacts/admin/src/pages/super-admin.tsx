@@ -111,7 +111,7 @@ const PLATFORM_APIS = [
   { id: "search", name: "Search & Explore API", path: "/api/search", category: "Content", status: "active", version: "v1", calls: "33K/h", latency: "74ms", enabled: true },
   { id: "admin", name: "Admin API", path: "/api/admin", category: "Core", status: "active", version: "v1", calls: "4.1K/h", latency: "48ms", enabled: true },
   { id: "live", name: "Live Stream API", path: "/api/live", category: "Social", status: "active", version: "v1", calls: "1.8K/h", latency: "330ms", enabled: true },
-  { id: "games", name: "Gaming API", path: "/api/games", category: "Platform", status: "active", version: "v1", calls: "7.2K/h", latency: "62ms", enabled: true },
+  { id: "games", name: "Gaming API", path: "/api/games", category: "Platform", status: "inactive", version: "v1", calls: "0/h", latency: "—", enabled: false },
   { id: "ai", name: "AI & Moderation API", path: "/api/ai", category: "AI", status: "active", version: "v1", calls: "9.5K/h", latency: "340ms", enabled: true },
   { id: "analytics", name: "Analytics API", path: "/api/analytics", category: "AI", status: "active", version: "v1", calls: "2.1K/h", latency: "88ms", enabled: true },
 ];
@@ -225,10 +225,10 @@ const FEATURE_FLAGS: FeatureCategory[] = [
   },
   {
     id: "gaming", category: "In-App Gaming",
-    icon: Gamepad2, color: "text-green-600", bg: "bg-green-50", borderColor: "border-green-200",
+    icon: Gamepad2, color: "text-gray-500", bg: "bg-gray-50", borderColor: "border-gray-200",
     features: [
-      { id: "ludo",         name: "Ludo Board Game",         desc: "Classic Ludo — up to 4 players, playable inside chat or gaming hub",          phase: "2", audience: "All Users",      status: "live",  enabled: true  },
-      { id: "ludo-tourney", name: "Ludo Tournaments",        desc: "Bracket-based Ludo competitions with prize pools and live leaderboards",     phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "ludo",         name: "Ludo Board Game",         desc: "Not available in app — planned for Phase 3",                               phase: "3", audience: "All Users",      status: "disabled", enabled: false },
+      { id: "ludo-tourney", name: "Ludo Tournaments",        desc: "Not available in app — planned for Phase 3",                               phase: "3", audience: "All Users",      status: "disabled", enabled: false },
       { id: "spin-wheel",   name: "Lucky Spin Wheel",        desc: "Daily spin for bonus coins and prizes (planned)",                            phase: "3", audience: "All Users",      status: "testing", enabled: false },
       { id: "quiz",         name: "Live Quiz Battles",       desc: "Real-time quiz competition with coin wagering (planned)",                    phase: "3", audience: "All Users",      status: "testing", enabled: false },
     ],
@@ -897,7 +897,6 @@ export default function SuperAdminPage() {
                       { name: "Host Management",          sa: true, host: false, agent: true  },
                       { name: "Agent Management",         sa: true, host: false, agent: false },
                       { name: "Audio/Video Calls",        sa: true, host: true,  agent: true  },
-                      { name: "Gaming Management",        sa: true, host: false, agent: false },
                       { name: "Live Streams",             sa: true, host: true,  agent: true  },
                       { name: "Coin Economy",             sa: true, host: true,  agent: true  },
                       { name: "Payouts & Revenue",        sa: true, host: false, agent: true  },

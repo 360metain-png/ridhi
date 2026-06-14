@@ -985,7 +985,7 @@ const SA_SECTIONS: Section[] = [
     title: "API Integrations",
     subtitle: "Manage all platform APIs, third-party service keys, and webhooks",
     features: [
-      "Platform APIs (18 total): Feed, Auth, Match, Posts, Reels, Stories, Chat, Calls, Coins, Payouts, Notifications, KYC, Search, Admin, Live, Gaming, AI, Analytics — toggle each on/off",
+      "Platform APIs (17 total): Feed, Auth, Match, Posts, Reels, Stories, Chat, Calls, Coins, Payouts, Notifications, KYC, Search, Admin, Live, AI, Analytics — toggle each on/off",
       "Third-party integrations:",
       "  → Payments: Razorpay, Google Pay Business, PhonePe (masked API keys, rotate key button)",
       "  → Messaging: Firebase FCM (push), MSG91 SMS (OTP), SendGrid (email)",

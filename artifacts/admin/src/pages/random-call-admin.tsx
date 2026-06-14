@@ -120,7 +120,7 @@ const DEFAULT_CATEGORIES: CategoryItem[] = [
   { id: "technology", label: "Technology", emoji: "\ud83d\udcbb", enabled: true },
   { id: "comedy", label: "Comedy", emoji: "\ud83d\ude02", enabled: true },
   { id: "poetry", label: "Poetry", emoji: "\u270d\ufe0f", enabled: true },
-  { id: "gaming", label: "Gaming", emoji: "\ud83c\udfae", enabled: true },
+  { id: "gaming", label: "Gaming", emoji: "\ud83c\udfae", enabled: false },
   { id: "food", label: "Food", emoji: "\ud83c\udf5c", enabled: true },
   { id: "travel", label: "Travel", emoji: "\u2708\ufe0f", enabled: true },
 ];
