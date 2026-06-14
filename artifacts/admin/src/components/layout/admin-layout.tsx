@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
 import { type AdminRole, ROUTE_ROLES } from "@/App";
+import GlobalSearch from "@/components/global-search";
 
 interface AdminLayoutProps { children: ReactNode }
 
@@ -375,6 +376,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </Badge>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
+            <GlobalSearch />
             <Badge variant="outline" className="hidden sm:flex gap-1.5 text-green-600 border-green-200 bg-green-50 text-xs">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
               All Systems OK
