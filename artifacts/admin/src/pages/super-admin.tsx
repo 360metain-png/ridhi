@@ -335,6 +335,8 @@ export default function SuperAdminPage() {
     agoraVideoRate:       "25",
     zegoAppId:            "",
     zegoCert:             "",
+    hmsAppId:             "",
+    hmsToken:             "",
     streamingCdnUrl:      "https://rtmp.ridhi.app/live",
     streamingSecret:      "stream_secret_secured",
     fcmServerKey:         "FCM_SERVER_KEY_SECURED",
@@ -2085,6 +2087,16 @@ export default function SuperAdminPage() {
                       <KeyField label="Zego App Certificate" field="zegoCert"
                         placeholder="e.g. zego_cert_..."
                         hint="Zego app secret for token generation" />
+                    </div>
+                    <Separator className="my-4" />
+                    <p className="text-xs font-semibold text-foreground mb-3">Backup SDK — 100ms (optional)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <KeyField label="100ms App ID" field="hmsAppId"
+                        placeholder="e.g. 64f8a2b3c4d5e6f7a8b9c0d1"
+                        hint="100ms dashboard → Developer → App ID" />
+                      <KeyField label="100ms Management Token" field="hmsToken"
+                        placeholder="e.g. HMSToken_..."
+                        hint="100ms dashboard → Developer → Management Token" />
                     </div>
                   </CardContent>
                 </Card>

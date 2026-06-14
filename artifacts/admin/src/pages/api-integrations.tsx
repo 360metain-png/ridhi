@@ -105,6 +105,28 @@ const INITIAL_SERVICES: ServiceConfig[] = [
       { key: "apiSecret",  label: "API Key Secret",placeholder: "Secret…",secret: true,  value: "" },
     ],
   },
+  {
+    id: "100ms",
+    name: "100ms",
+    provider: "100ms",
+    category: "live",
+    description: "Live streaming, audio/video calls, and real-time interactive rooms — WebRTC-based with India-optimized edge nodes",
+    docsUrl: "https://www.100ms.live/docs",
+    status: "disconnected",
+    env: "sandbox",
+    enabled: false,
+    lastTested: "Never",
+    fields: [
+      { key: "appId",     label: "App ID",         placeholder: "HM…",       secret: false, value: "" },
+      { key: "appToken",  label: "Management Token",placeholder: "Secret…",  secret: true,  value: "" },
+      { key: "authToken", label: "Auth Token",      placeholder: "Token…",   secret: true,  value: "" },
+    ],
+    extraSettings: [
+      { key: "maxPeers",      label: "Max Peers / Room",     type: "text",   value: "100" },
+      { key: "enableScreenshare", label: "Screen Sharing",   type: "toggle", value: true },
+      { key: "enableRecording",   label: "Cloud Recording",  type: "toggle", value: true },
+    ],
+  },
 
   // ── PAYMENTS ─────────────────────────────────────────────────────────
   {
