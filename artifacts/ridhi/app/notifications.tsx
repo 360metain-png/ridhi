@@ -56,6 +56,12 @@ const SOCIAL_ICONS: Record<string, { icon: string; color: string }> = {
   campaign_live:     { icon: "volume-2", color: "#22C55E" },
   campaign_rejected: { icon: "alert-circle", color: "#EF4444" },
   campaign_completed:{ icon: "check-circle", color: "#3B82F6" },
+  pitch_received:    { icon: "send",       color: "#7B2FBE" },
+  pitch_shortlisted: { icon: "check-circle", color: "#22C55E" },
+  pitch_rejected:    { icon: "x-circle",   color: "#EF4444" },
+  deal_new:          { icon: "briefcase",  color: "#E91E8C" },
+  deal_expiring:     { icon: "clock",      color: "#FF9500" },
+  connect_unlocked:  { icon: "unlock",     color: "#22C55E" },
 };
 
 function getNavTarget(type: string): string {
@@ -68,6 +74,12 @@ function getNavTarget(type: string): string {
     case "campaign_live":
     case "campaign_rejected":
     case "campaign_completed": return "/ads-manager";
+    case "pitch_received":
+    case "pitch_shortlisted":
+    case "pitch_rejected":
+    case "connect_unlocked":  return "/creator-marketplace";
+    case "deal_new":
+    case "deal_expiring":     return "/creator-marketplace";
     default:        return "/(tabs)";
   }
 }
@@ -111,7 +123,10 @@ function SocialNotifCard({
              item.type === "match"            ? "See Match →" :
              item.type === "coin"             ? "Open Wallet →" :
              item.type === "comment"          ? "View Post →" :
-             item.type.startsWith("campaign") ? "Ads Manager →" : "View →"}
+             item.type.startsWith("campaign") ? "Ads Manager →" :
+             item.type.startsWith("pitch")    ? "My Pitches →" :
+             item.type.startsWith("deal")     ? "Marketplace →" :
+             item.type === "connect_unlocked" ? "Creator Hub →" : "View →"}
           </Text>
         </View>
       </View>

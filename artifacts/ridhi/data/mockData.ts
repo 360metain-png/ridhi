@@ -781,6 +781,12 @@ export const NOTIFICATIONS = [
   { id: "n8", type: "match",   actor: "Pooja Nair",    content: "you have a new match!",             timeAgo: "1d",  read: true  },
   { id: "n9", type: "like",    actor: "Meera Patel",   content: "liked your post",                   timeAgo: "1d",  read: true  },
   { id: "n10", type: "coin",   actor: "System",        content: "Referral reward: +50 coins added",  timeAgo: "2d",  read: true  },
+  // ── Creator Marketplace notifications ──
+  { id: "n11", type: "pitch_received",    actor: "boAt Lifestyle", content: "sent a pitch to your deal \"Earbuds Unboxing Reel\" — review now", timeAgo: "30m", read: false },
+  { id: "n12", type: "pitch_shortlisted", actor: "Nykaa",         content: "shortlisted your pitch! Unlock contact for ₹1,000 coins", timeAgo: "2h", read: false },
+  { id: "n13", type: "deal_new",          actor: "MakeMyTrip",    content: "posted a new deal: \"Travel Vlog – ₹10K–₹40K\" — 3 slots left", timeAgo: "1h", read: false },
+  { id: "n14", type: "deal_expiring",     actor: "Campus Sutra",  content: "deal \"Campus OOTD\" expires in 24 hours — pitch now before slots fill", timeAgo: "3h", read: true },
+  { id: "n15", type: "connect_unlocked",  actor: "Mamaearth",     content: "contact unlocked! Brand will reach out within 48 hours", timeAgo: "1d", read: true },
 ];
 
 export interface MarketingNotification {
