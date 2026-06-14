@@ -12,7 +12,7 @@ import {
   Gamepad2, Headphones, Music, PenTool, MessageSquare, Eye, Clapperboard,
   Hash, Wallet, CreditCard, Gift, Receipt, Target, AlertTriangle,
   CheckCircle, User, FileText as FileIcon, MessageCircle, Play,
-  BarChart2, Clock, ArrowUpRight,
+  BarChart2, Clock, ArrowUpRight, Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +96,7 @@ const PAGE_RESULTS: SearchResult[] = [
   { id: "p-lead-forms", title: "Lead Forms", subtitle: "Lead Management", icon: PenTool, href: "/lead-forms", category: "Pages" },
   { id: "p-chat-moderation", title: "Chat Moderation", subtitle: "Moderate Chats", icon: MessageSquare, href: "/chat-moderation", category: "Pages" },
   { id: "p-content-assets", title: "Creative Assets", subtitle: "Asset Library", icon: Sparkles, href: "/content-assets", category: "Pages" },
+  { id: "p-app-store", title: "App Store Analytics", subtitle: "Installs, Reviews, Devices", icon: Smartphone, href: "/app-store", category: "Pages" },
 ];
 
 /* ── Quick Actions ─────────────────────────────────────────────── */

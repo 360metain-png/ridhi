@@ -9,7 +9,7 @@ import {
   TrendingUp, Globe, Terminal, Sparkles, Download, Monitor, Film, FileText,
   Landmark,
   Gamepad2, Headphones, Music, PenTool, MessageSquare,
-  Eye, Clapperboard, Menu, X,
+  Eye, Clapperboard, Menu, X, Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -63,6 +63,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Live Streams",       href: "/live-streams", icon: Radio,       allowedRoles: SA },
       { name: "Gaming",             href: "/gaming",        icon: Gamepad2,    allowedRoles: SA },
       { name: "Dating",             href: "/dating",        icon: Heart,        allowedRoles: SA },
+      { name: "App Store",          href: "/app-store",     icon: Smartphone,   allowedRoles: SA },
       { name: "Podcasts",           href: "/podcasts",      icon: Headphones,  allowedRoles: SA },
       { name: "Vibe Stars",         href: "/vibe-stars",    icon: Star,        allowedRoles: SA },
       { name: "Music Library",      href: "/music-library", icon: Music,       allowedRoles: SA },
@@ -203,6 +204,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/admin-activity":    "Admin Activity Monitor",
     "/my-report":         "My Work Report",
     "/content-editor":    "Content Management",
+    "/app-store":         "App Store Analytics",
   };
 
   // Sidebar content shared between desktop and mobile drawer
