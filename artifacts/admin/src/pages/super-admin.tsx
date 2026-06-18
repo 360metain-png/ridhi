@@ -1103,7 +1103,7 @@ export default function SuperAdminPage() {
                 <Button
                   size="sm"
                   className="w-full gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90"
-                  onClick={() => window.location.href = "/admin/admin-management"}
+                  onClick={() => window.location.href = "/admins/admin-management"}
                 >
                   Open Admin Management <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
@@ -1128,7 +1128,7 @@ export default function SuperAdminPage() {
                   size="sm"
                   variant="outline"
                   className="w-full gap-1.5 border-purple-300 text-purple-700 hover:bg-purple-50"
-                  onClick={() => window.location.href = "/admin/admin-activity"}
+                  onClick={() => window.location.href = "/admins/admin-activity"}
                 >
                   View Activity Logs <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
@@ -2681,7 +2681,7 @@ export default function SuperAdminPage() {
                     </div>
                   </div>
                   <Button size="sm" variant="outline" className="gap-1.5 border-violet-500/40 text-violet-600 hover:bg-violet-500/10"
-                    onClick={() => window.location.href = "/admin/commercial-banners"}>
+                    onClick={() => window.location.href = "/admins/commercial-banners"}>
                     Open Manager <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </div>

@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/admin/"
+previewPath = "/admins/"
 title = "Ridhi Admin Dashboard"
 version = "1.0.0"
 id = "artifacts/admin"
@@ -11,7 +11,7 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/admin/" ]
+paths = [ "/admins/" ]
 localPort = 23744
 
 [services.development]
@@ -28,4 +28,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "23744"
-BASE_PATH = "/admin/"
+BASE_PATH = "/admins/"

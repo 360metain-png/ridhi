@@ -278,7 +278,7 @@ const speakableSchema = {
     cssSelector: ["h1", ".faq-question", ".faq-answer"],
   },
   name: "Ridhi Help & Support",
-  url: "https://ridhi.app/admin/support",
+  url: "https://ridhi.app/admins/support",
 };
 
 /* BreadcrumbList schema (SERP UX / navigation) */
@@ -296,7 +296,7 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 2,
       name: "Support",
-      item: "https://ridhi.app/admin/support",
+      item: "https://ridhi.app/admins/support",
     },
   ],
 };
@@ -340,7 +340,7 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Ridhi Help & Support",
-  url: "https://ridhi.app/admin/support",
+  url: "https://ridhi.app/admins/support",
   publisher: {
     "@type": "Organization",
     name: "Ridhi",
@@ -427,7 +427,7 @@ export default function SupportPage() {
         <meta property="og:title"       content="Ridhi Help &amp; Support — 27 Expert-Verified FAQs" />
         <meta property="og:description" content="Get help with Ridhi — India's social networking and dating app. Expert-verified answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
         <meta property="og:type"        content="website" />
-        <meta property="og:url"         content="https://ridhi.app/admin/support" />
+        <meta property="og:url"         content="https://ridhi.app/admins/support" />
         <meta property="og:site_name"   content="Ridhi" />
         <meta property="og:image"       content="https://ridhi.app/opengraph.jpg" />
         <meta property="og:locale"      content="en_IN" />
@@ -441,9 +441,9 @@ export default function SupportPage() {
         <meta name="twitter:creator"     content="@ridhiapp" />
 
         {/* ── Canonical + Language ── */}
-        <link rel="canonical" href="https://ridhi.app/admin/support" />
-        <link rel="alternate" href="https://ridhi.app/admin/support" hrefLang="en-in" />
-        <link rel="alternate" href="https://ridhi.app/admin/support" hrefLang="x-default" />
+        <link rel="canonical" href="https://ridhi.app/admins/support" />
+        <link rel="alternate" href="https://ridhi.app/admins/support" hrefLang="en-in" />
+        <link rel="alternate" href="https://ridhi.app/admins/support" hrefLang="x-default" />
 
         {/* ── JSON-LD: FAQPage ── */}
         <script type="application/ld+json">{JSON.stringify(buildFaqSchema())}</script>

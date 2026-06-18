@@ -345,7 +345,7 @@ export default function AgentsPage() {
                 {scopedAgents.filter(a => a.status === "active").length} Ready
               </Badge>
               <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                onClick={() => window.location.href = "/admin/hosts"}>
+                onClick={() => window.location.href = "/admins/hosts"}>
                 <Eye className="w-3 h-3" /> Review Hosts
               </Button>
             </div>

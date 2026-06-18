@@ -367,7 +367,7 @@ export default function HostsPage() {
                 {scopedHosts.filter(h => h.status === "active").length} Live-Ready
               </Badge>
               <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-100"
-                onClick={() => window.location.href = "/admin/kyc"}>
+                onClick={() => window.location.href = "/admins/kyc"}>
                 <ShieldCheck className="w-3 h-3" /> KYC Queue
               </Button>
             </div>

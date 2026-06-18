@@ -231,16 +231,16 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 flex-wrap">
               {isSA && (
                 <Button size="sm" className="h-8 text-xs gap-1.5 bg-gradient-to-r from-primary to-pink-500 text-white hover:opacity-90"
-                  onClick={() => window.location.href = "/admin/super-admin"}>
+                  onClick={() => window.location.href = "/admins/super-admin"}>
                   <Settings className="w-3.5 h-3.5" /> Open Launch Control
                 </Button>
               )}
               <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                onClick={() => window.location.href = "/admin/kyc"}>
+                onClick={() => window.location.href = "/admins/kyc"}>
                 <Shield className="w-3.5 h-3.5" /> Review KYC
               </Button>
               <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-border"
-                onClick={() => window.location.href = "/admin/hosts"}>
+                onClick={() => window.location.href = "/admins/hosts"}>
                 <Users className="w-3.5 h-3.5" /> Hosts
               </Button>
             </div>

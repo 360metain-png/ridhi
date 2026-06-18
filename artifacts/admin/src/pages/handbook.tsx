@@ -539,9 +539,9 @@ const ADMIN_SECTIONS: Section[] = [
     color: "text-purple-600",
     bg: "bg-purple-50",
     title: "Admin Login",
-    subtitle: "Access the Ridhi Admin Dashboard — web panel only (ridhi.app/admin)",
+    subtitle: "Access the Ridhi Admin Dashboard — web panel only (ridhi.app/admins)",
     steps: [
-      { text: "Open the Admin Dashboard URL (ridhi.app/admin)." },
+      { text: "Open the Admin Dashboard URL (ridhi.app/admins)." },
       { text: "On the Portal Selection screen you will see two cards: Super Admin and Admin. Click the Admin card." },
       { text: "Enter your email address and password on the Admin login screen. Click Login." },
       { text: "You land on the Dashboard overview with live KPIs and your role badge — Admin — shown in the header." },
@@ -763,7 +763,7 @@ const SA_SECTIONS: Section[] = [
     title: "Super Admin Login",
     subtitle: "Full platform access — all sections and all financial operations",
     steps: [
-      { text: "Open the Admin Dashboard URL (ridhi.app/admin)." },
+      { text: "Open the Admin Dashboard URL (ridhi.app/admins)." },
       { text: "On the Portal Selection screen, click the Super Admin card." },
       { text: "Enter your Super Admin email and password. Click Login." },
       { text: "You land on the Dashboard with the Super Admin badge in the sidebar header — all sections are visible." },
