@@ -19,8 +19,16 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { SplashAnimation } from "@/components/SplashAnimation";
+import { configureIap } from "@/lib/iap";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
 SplashScreen.preventAutoHideAsync();
+
+/* Initialize IAP and ATT once at app startup */
+if (Platform.OS !== "web") {
+  configureIap();
+  requestTrackingPermissionsAsync().catch(() => {});
+}
 
 const queryClient = new QueryClient();
 

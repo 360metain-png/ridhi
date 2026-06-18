@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendFirebaseOtp, storeFirebaseConfirmation, isFirebaseReady } from "@/lib/firebaseAuth";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
 
@@ -189,16 +190,54 @@ export default function LoginScreen() {
 
   const handleSocialLogin = useCallback(async (provider: string) => {
     setSocialLoading(provider);
-    await new Promise((r) => setTimeout(r, 1000));
-    setSocialLoading(null);
-    login({
-      id: "social_" + Date.now(),
-      name: provider === "google" ? "Rahul Sharma" : provider === "apple" ? "Priya Singh" : "Arjun Kumar",
-      phone: "", email: provider + "@ridhi.app", avatar: "",
-      city: "Mumbai", age: 25, gender: "other", interests: [],
-      coins: 100, followers: 0, following: 0, posts: 0,
-    });
-    router.replace("/(tabs)");
+    try {
+      if (provider === "apple" && Platform.OS === "ios") {
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+          ],
+        });
+        const name = credential.fullName?.givenName
+          ? `${credential.fullName.givenName} ${credential.fullName.familyName || ""}`.trim()
+          : "Ridhi User";
+        login({
+          id: credential.user,
+          name,
+          phone: "",
+          email: credential.email || `${credential.user}@ridhi.app`,
+          avatar: "",
+          city: "Mumbai",
+          age: 25,
+          gender: "other",
+          interests: [],
+          coins: 100,
+          followers: 0,
+          following: 0,
+          posts: 0,
+        });
+        router.replace("/(tabs)");
+        return;
+      }
+      // Google / Facebook / other — mock fallback for now
+      await new Promise((r) => setTimeout(r, 1000));
+      login({
+        id: "social_" + Date.now(),
+        name: provider === "google" ? "Rahul Sharma" : "Arjun Kumar",
+        phone: "", email: provider + "@ridhi.app", avatar: "",
+        city: "Mumbai", age: 25, gender: "other", interests: [],
+        coins: 100, followers: 0, following: 0, posts: 0,
+      });
+      router.replace("/(tabs)");
+    } catch (err: any) {
+      if (err.code === "ERR_REQUEST_CANCELED") {
+        // User cancelled — do nothing
+      } else {
+        setInputError("Apple Sign-In failed. Please try again.");
+      }
+    } finally {
+      setSocialLoading(null);
+    }
   }, [login]);
 
   const handleGuestAccess = useCallback(async () => {

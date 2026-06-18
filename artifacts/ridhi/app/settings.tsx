@@ -238,7 +238,6 @@ export default function SettingsScreen() {
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />
-          <SettingRow icon="link" label="Linked Accounts" subtitle="Google, Facebook" onPress={() => Alert.alert("Linked Accounts", "Link your Google or Facebook account for one-tap login.\n\n• Google — Tap to connect\n• Facebook — Tap to connect", [{ text: "Connect Google", onPress: () => Alert.alert("Google Login", "Google sign-in will be available in the next update.", [{ text: "OK" }]) }, { text: "Close", style: "cancel" }])} />
           <SettingRow icon="download" label="Download My Data" onPress={() => Alert.alert("Download My Data", "Your full data export includes posts, chats, matches, and settings.", [{ text: "Cancel", style: "cancel" }, { text: "Request Export", onPress: () => Alert.alert("Export Requested ✓", "You'll receive a download link within 24 hours.", [{ text: "OK" }]) }])} />
         </View>
 

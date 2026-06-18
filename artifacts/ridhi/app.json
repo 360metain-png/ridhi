@@ -33,8 +33,10 @@
         "NSFaceIDUsageDescription": "Ridhi uses Face ID to keep your account secure.",
         "NSUserTrackingUsageDescription": "Ridhi uses data to personalise your feed, show relevant content, and improve your experience.",
         "NSCalendarsUsageDescription": "Ridhi accesses your calendar to let you schedule and add events.",
-        "ITSAppUsesNonExemptEncryption": false
-      }
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["fetch", "remote-notification"]
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.ridhi.app",
@@ -74,6 +76,8 @@
       ],
       "expo-font",
       "expo-web-browser",
+      "expo-apple-authentication",
+      "expo-tracking-transparency",
       [
         "expo-location",
         {
