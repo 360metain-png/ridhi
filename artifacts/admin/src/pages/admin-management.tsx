@@ -219,7 +219,7 @@ export default function AdminManagementPage() {
         a.id === editId ? { ...a, name: form.name, email: form.email, phone: form.phone, role: form.role, city: form.city, permissions: form.permissions } : a
       );
       setAdmins(updated);
-      setSharedAdmins(updated);
+      setSharedAdmins(updated as SharedAdmin[]);
     } else {
       const newAdmin: AdminAccount = {
         id: `adm-${Date.now()}`, name: form.name, email: form.email, phone: form.phone,
@@ -228,17 +228,17 @@ export default function AdminManagementPage() {
       };
       const updated = [newAdmin, ...admins];
       setAdmins(updated);
-      setSharedAdmins(updated);
+      setSharedAdmins(updated as SharedAdmin[]);
     }
     setShowDialog(false);
   };
 
   const toggleStatus = (id: string) => {
     const updated = admins.map((a) =>
-      a.id === id ? { ...a, status: a.status === "active" ? "inactive" : "active" } : a
+      a.id === id ? { ...a, status: (a.status === "active" ? "inactive" : "active") as AdminStatus } : a
     );
     setAdmins(updated);
-    setSharedAdmins(updated);
+    setSharedAdmins(updated as SharedAdmin[]);
   };
 
   const deleteAdmin = (id: string) => {
@@ -251,7 +251,7 @@ export default function AdminManagementPage() {
     if (!window.confirm(`Are you sure you want to permanently delete ${admin.name}'s admin account? This action cannot be undone.`)) return;
     const updated = admins.filter((a) => a.id !== id);
     setAdmins(updated);
-    setSharedAdmins(updated);
+    setSharedAdmins(updated as SharedAdmin[]);
   };
 
   const permCount = (a: AdminAccount) => Object.values(a.permissions).filter(Boolean).length;

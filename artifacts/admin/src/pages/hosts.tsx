@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { downloadCSV } from "@/lib/utils";
+import { getSharedAdmins, useSharedAdmins } from "@/lib/admin-store";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -42,11 +44,11 @@ interface Host {
 
 // ── Shared constants matching agents.tsx ──────────────────────────────────────
 
-const ADMINS = [
-  { id: "adm1", name: "Priya Sharma",  email: "priya@ridhi.app"  },
-  { id: "adm2", name: "Rahul Mehta",   email: "rahul@ridhi.app"  },
-  { id: "adm3", name: "Neha Gupta",    email: "neha@ridhi.app"   },
-];
+function getLiveAdmins() {
+  return getSharedAdmins()
+    .filter((a) => a.status === "active")
+    .map((a) => ({ id: a.id, name: a.name, email: a.email }));
+}
 
 const AGENTS_META = [
   { id: "a1", name: "Vikram Rao",   level: "A5", adminId: "adm1" },
@@ -97,7 +99,7 @@ const hostEarningsData = [
 
 const levelOf    = (l: string) => HOST_LEVELS.find(h => h.level === l);
 const agentName  = (id: string) => AGENTS_META.find(a => a.id === id)?.name ?? "—";
-const adminName  = (id: string) => ADMINS.find(a => a.id === id)?.name ?? "—";
+const adminName  = (id: string) => getLiveAdmins().find(a => a.id === id)?.name ?? "—";
 
 const STATUS_META: Record<HostStatus, { label: string; cls: string; dot: string }> = {
   active:    { label: "Active",    cls: "text-green-600", dot: "bg-green-500"  },
@@ -131,6 +133,88 @@ function RemoveDialog({
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
           <Button size="sm" variant="destructive" onClick={onConfirm}>Remove Host</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Assign Host to Agent Dialog ─────────────────────────────────────────────────
+
+function AssignHostDialog({
+  host, agents, open, onClose, onAssign,
+}: {
+  host: Host | null;
+  agents: { id: string; name: string; level: string; adminId: string }[];
+  open: boolean;
+  onClose: () => void;
+  onAssign: (hostId: string, agentId: string) => void;
+}) {
+  const [pick, setPick] = useState("");
+  const [pickAdmin, setPickAdmin] = useState("");
+  if (!host) return null;
+  const filteredAgents = pickAdmin ? agents.filter(a => a.adminId === pickAdmin) : agents;
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserCheck className="w-5 h-5 text-violet-500" /> Assign Host to Agent
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          <div className="flex items-center gap-3 bg-muted rounded-xl p-3">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm flex-shrink-0" style={{ backgroundColor: (levelOf(host.level)?.color ?? "#888") + "20" }}>
+              {levelOf(host.level)?.badge}
+            </div>
+            <div>
+              <p className="font-semibold text-sm">{host.name}</p>
+              <p className="text-xs text-muted-foreground">{host.city} · {host.language} · {host.followers.toLocaleString()} followers</p>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">Current: {agentName(host.agentId)} → {adminName(host.adminId)}</p>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">Step 1: Select Admin</p>
+            <Select value={pickAdmin} onValueChange={setPickAdmin}>
+              <SelectTrigger><SelectValue placeholder="Select admin…" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Admins</SelectItem>
+                {getLiveAdmins().map(a => (
+                  <SelectItem key={a.id} value={a.id}>
+                    <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-violet-500" /> {a.name}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground">Step 2: Select Agent</p>
+            <Select value={pick || host.agentId} onValueChange={setPick}>
+              <SelectTrigger><SelectValue placeholder="Select agent…" /></SelectTrigger>
+              <SelectContent>
+                {filteredAgents.map(a => (
+                  <SelectItem key={a.id} value={a.id}>
+                    <span className="flex items-center gap-2"><Briefcase className="w-3.5 h-3.5 text-pink-500" /> {a.name} <span className="text-xs text-muted-foreground">({a.level})</span></span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {(pick && pick !== host.agentId) && (
+            <div className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              This will move <strong>{host.name}</strong> from <strong>{agentName(host.agentId)}</strong> to <strong>{agentName(pick)}</strong>.
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white"
+            disabled={!pick || pick === host.agentId}
+            onClick={() => { onAssign(host.id, pick); onClose(); }}>
+            Confirm Assignment
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -238,8 +322,12 @@ export default function HostsPage() {
   const isAdmin = role === "admin";
   const isAgent = role === "agent";
 
+  // Live admins from shared store
+  const liveAdmins = getLiveAdmins();
+  const _useShared = useSharedAdmins(); // re-trigger when admins change
+
   // Resolve current viewer's ID
-  const myAdminId = isAdmin ? (ADMINS.find(a => a.email === myEmail)?.id ?? "adm1") : null;
+  const myAdminId = isAdmin ? (liveAdmins.find(a => a.email === myEmail)?.id ?? liveAdmins[0]?.id ?? "adm1") : null;
   // For agent role — derive their agent ID from email (mock: use first agent of first admin)
   const myAgentId = isAgent ? "a5" : null; // demo: Rajan Pillai
 
@@ -252,6 +340,7 @@ export default function HostsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [detailHost, setDetailHost]  = useState<Host | null>(null);
   const [removeTarget, setRemoveTarget] = useState<Host | null>(null);
+  const [assignTarget, setAssignTarget] = useState<Host | null>(null);
 
   // ── Role-based data scoping ──────────────────────────────────────────────
   const scopedHosts = (() => {
@@ -296,6 +385,13 @@ export default function HostsPage() {
     setHosts(prev => prev.map(h => h.id === removeTarget.id ? { ...h, status: "removed" } : h));
     toast({ title: "Host removed", description: `${removeTarget.name} has been removed.`, variant: "destructive" });
     setRemoveTarget(null);
+  };
+
+  const handleAssign = (hostId: string, agentId: string) => {
+    const agent = AGENTS_META.find(a => a.id === agentId);
+    setHosts(prev => prev.map(h => h.id === hostId ? { ...h, agentId, adminId: agent?.adminId ?? h.adminId } : h));
+    const host = hosts.find(x => x.id === hostId)!;
+    toast({ title: "Host reassigned", description: `${host.name} assigned to ${agent?.name ?? agentId}` });
   };
 
   const liveCount     = scopedHosts.filter(h => h.isLive).length;
@@ -512,7 +608,7 @@ export default function HostsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {ADMINS.map(adm => {
+              {getLiveAdmins().map(adm => {
                 const admHosts = scopedHosts.filter(h => h.adminId === adm.id);
                 const admAgents = AGENTS_META.filter(a => a.adminId === adm.id);
                 return (
@@ -601,7 +697,7 @@ export default function HostsPage() {
                   <SelectTrigger className="h-8 w-40 text-xs"><SelectValue placeholder="Filter Admin" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Admins</SelectItem>
-                    {ADMINS.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                    {getLiveAdmins().map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               )}
@@ -727,6 +823,10 @@ export default function HostsPage() {
                           )}
                           {isSA && (
                             <>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs px-2 gap-1 text-violet-600 hover:text-violet-700"
+                                onClick={() => setAssignTarget(h)}>
+                                <UserCheck className="w-3 h-3" /> Assign
+                              </Button>
                               <Button variant="ghost" size="sm"
                                 className={`h-7 text-xs px-2 gap-1 ${h.status === "suspended" ? "text-green-600" : "text-amber-600"}`}
                                 onClick={() => handleSuspend(h.id)}>
@@ -807,6 +907,10 @@ export default function HostsPage() {
       <RemoveDialog
         host={removeTarget} open={!!removeTarget}
         onClose={() => setRemoveTarget(null)} onConfirm={handleRemove}
+      />
+      <AssignHostDialog
+        host={assignTarget} agents={AGENTS_META} open={!!assignTarget}
+        onClose={() => setAssignTarget(null)} onAssign={handleAssign}
       />
     </div>
   );
