@@ -26,12 +26,17 @@ export function GstInvoice({ invoice, onClose }: { invoice: InvoiceData; onClose
 
   const downloadInvoice = async () => {
     const text = `
-RIDHI DIGITAL PRIVATE LIMITED
+KRILO DIGITECH PVT LTD
 GST Invoice
 
 Invoice No: ${invoice.invoiceNo}
 Date: ${invoice.date}
-GSTIN: ${invoice.gstin}
+GSTIN: 33AAMCK0376J1ZD
+
+SELLER:
+Krilo Digitech Pvt Ltd
+P.NO.10 & 11-F-3, Subash Nagar, 200 Feet Ring Rd,
+Madhavaram, Ponniammanmedu, Chennai, Tamil Nadu 600099.
 
 BILL TO:
 ${invoice.userName}
@@ -53,7 +58,7 @@ HSN Code: ${invoice.hsnCode}
 SAC Code: ${invoice.sacCode}
 
 This is a computer-generated invoice and does not require a signature.
-For queries: support@ridhi.app
+For queries: accounts@krilodigitech.com
 `.trim();
 
     if (Platform.OS === "web") {
@@ -77,7 +82,7 @@ For queries: support@ridhi.app
       <View style={[styles.invoiceCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {/* Header */}
         <View style={[styles.header, { backgroundColor: colors.primary }]}>
-          <Text style={styles.headerTitle}>RIDHI DIGITAL PVT LTD</Text>
+          <Text style={styles.headerTitle}>KRILO DIGITECH PVT LTD</Text>
           <Text style={styles.headerSub}>GST Invoice</Text>
         </View>
 
@@ -93,8 +98,22 @@ For queries: support@ridhi.app
           </View>
           <View style={styles.row}>
             <Text style={[styles.label, { color: colors.mutedForeground }]}>GSTIN</Text>
-            <Text style={[styles.value, { color: colors.foreground }]}>{invoice.gstin}</Text>
+            <Text style={[styles.value, { color: colors.foreground }]}>33AAMCK0376J1ZD</Text>
           </View>
+        </View>
+
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        {/* Seller Address */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Seller</Text>
+          <Text style={[styles.billText, { color: colors.foreground }]}>Krilo Digitech Pvt Ltd</Text>
+          <Text style={[styles.billText, { color: colors.mutedForeground }]}>
+            P.NO.10 & 11-F-3, Subash Nagar, 200 Feet Ring Rd,
+          </Text>
+          <Text style={[styles.billText, { color: colors.mutedForeground }]}>
+            Madhavaram, Ponniammanmedu, Chennai, Tamil Nadu 600099.
+          </Text>
         </View>
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -162,7 +181,7 @@ For queries: support@ridhi.app
         {/* Footer */}
         <Text style={[styles.footer, { color: colors.mutedForeground }]}>
           This is a computer-generated invoice and does not require a signature.
-          For queries: support@ridhi.app
+          For queries: accounts@krilodigitech.com
         </Text>
 
         {/* Actions */}

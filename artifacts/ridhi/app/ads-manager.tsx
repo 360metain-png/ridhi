@@ -31,7 +31,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
 import { USER_CAMPAIGNS, type AdCampaign, type AdCampaignStatus, type AdCampaignFormat, type AdPayMethod } from "@/data/mockData";
 import { PaymentSheet } from "@/components/PaymentSheet";
-import { GstInvoice, type InvoiceData } from "@/components/GstInvoice";
+import type { InvoiceData } from "@/components/GstInvoice";
 
 const { width } = Dimensions.get("window");
 
@@ -186,7 +186,9 @@ function InvoiceModal({
               <LinearGradient colors={["#7B2FBE", "#E91E8C"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.invoiceBrandBadge}>
                 <Text style={styles.invoiceBrandText}>RIDHI ADS</Text>
               </LinearGradient>
-              <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>Ridhi Platforms Pvt. Ltd.</Text>
+              <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>Krilo Digitech Pvt Ltd</Text>
+              <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>GSTIN: 33AAMCK0376J1ZD</Text>
+              <Text style={[styles.invoiceSub, { color: colors.mutedForeground }]}>Chennai, Tamil Nadu 600099</Text>
             </View>
 
             {/* Invoice meta */}
@@ -219,7 +221,9 @@ function InvoiceModal({
             </View>
 
             <Text style={[styles.invoiceNote, { color: colors.mutedForeground }]}>
-              This is a computer-generated invoice and does not require a signature. For queries, contact hello@ridhi.app.
+              This is a computer-generated invoice and does not require a signature.
+              Seller: Krilo Digitech Pvt Ltd, GSTIN: 33AAMCK0376J1ZD, Chennai, Tamil Nadu 600099.
+              For queries, contact accounts@krilodigitech.com.
             </Text>
           </ScrollView>
 
@@ -387,7 +391,7 @@ export default function AdsManagerScreen() {
   useTrackScreen("ads_manager");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [tab, setTab] = useState<TabKey>("campaigns");
@@ -503,12 +507,16 @@ export default function AdsManagerScreen() {
       gstRate: 18,
       gstAmount,
       totalAmount: totalCost + gstAmount,
-      gstin: "29AABCR1234Z1Z",
+      gstin: "33AAMCK0376J1ZD",
       hsnCode: "998311",
       sacCode: "998311",
     };
     setInvoiceData(invoice);
     setShowInvoice(true);
+    // Mark user as ad user so they can download invoices in the future
+    if (user && !user.isAdUser) {
+      updateProfile({ isAdUser: true });
+    }
     submitCampaign();
   };
 
