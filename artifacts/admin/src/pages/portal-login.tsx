@@ -4,9 +4,10 @@ import { Button }    from "@/components/ui/button";
 import { Input }     from "@/components/ui/input";
 import { Label }     from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, UserCog, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Shield, UserCog, Eye, EyeOff, ChevronRight, ArrowLeft, Check, X, AlertCircle, Lock, KeyRound, Mail } from "lucide-react";
 import type { AdminRole } from "@/App";
-import { validateLogin, getDefaultEmail } from "@/config/credentials";
+import { validateLogin, getDefaultEmail, validateSuperAdminOnly, resetPassword } from "@/config/credentials";
 
 type PortalConfig = {
   role:         AdminRole;
@@ -68,6 +69,16 @@ export default function PortalLogin({ role }: PortalLoginProps) {
   const [error,    setError]    = useState("");
   const [, setLocation]         = useLocation();
 
+  // ── Forgot Password Dialog ────────────────────────────────────────
+  const [showForgot, setShowForgot] = useState(false);
+  const [saEmail, setSaEmail] = useState("");
+  const [saPass, setSaPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { setError("Please enter email and password."); return; }
@@ -79,6 +90,37 @@ export default function PortalLogin({ role }: PortalLoginProps) {
     localStorage.setItem("ridhi_admin_role",      role);
     localStorage.setItem("ridhi_admin_email",     email.trim().toLowerCase());
     setLocation("/");
+  };
+
+  const handleReset = (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError("");
+    setResetSuccess("");
+
+    if (role === "admin") {
+      setResetError("Contact your Super Admin to reset the Admin password.");
+      return;
+    }
+
+    if (!saEmail || !saPass || !newPass || !confirmPass) {
+      setResetError("Please fill all fields.");
+      return;
+    }
+    if (!validateSuperAdminOnly(saEmail, saPass)) {
+      setResetError("Invalid Super Admin credentials.");
+      return;
+    }
+    if (newPass.length < 8) {
+      setResetError("Password must be at least 8 characters.");
+      return;
+    }
+    if (newPass !== confirmPass) {
+      setResetError("New passwords do not match.");
+      return;
+    }
+    resetPassword(role, newPass);
+    setResetSuccess("Password reset successfully. Sign in with your new password.");
+    setTimeout(() => setShowForgot(false), 2500);
   };
 
   return (
@@ -142,7 +184,16 @@ export default function PortalLogin({ role }: PortalLoginProps) {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgot(true)}
+                    className="text-[11px] font-medium text-purple-600 hover:text-purple-800 transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
                 <div className="relative">
                   <Input
                     id="password"
@@ -185,6 +236,120 @@ export default function PortalLogin({ role }: PortalLoginProps) {
           Ridhi Control Panel · India's #1 Social App
         </p>
       </div>
+
+      {/* ── Forgot Password Dialog ── */}
+      <Dialog open={showForgot} onOpenChange={setShowForgot}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <KeyRound className="w-4 h-4 text-purple-600" /> Reset Password
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleReset} className="space-y-4 py-1">
+            {role === "admin" ? (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                <p className="font-medium">Contact Super Admin</p>
+                <p className="text-xs mt-1 text-amber-700">
+                  Admin passwords can only be reset by the Super Admin via the <strong>Admin Management</strong> panel.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  Enter your current Super Admin credentials, then set a new password.
+                </p>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Super Admin Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="arjun@ridhi.app"
+                      value={saEmail}
+                      onChange={(e) => { setSaEmail(e.target.value); setResetError(""); }}
+                      className="h-9 pl-9"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Current Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      type={showPass ? "text" : "password"}
+                      value={saPass}
+                      onChange={(e) => { setSaPass(e.target.value); setResetError(""); }}
+                      className="h-9 pl-9"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">New Password</Label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      type={showNewPass ? "text" : "password"}
+                      value={newPass}
+                      onChange={(e) => { setNewPass(e.target.value); setResetError(""); }}
+                      className="h-9 pl-9"
+                      placeholder="Min 8 characters"
+                      required
+                    />
+                    <button type="button" onClick={() => setShowNewPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                      {showNewPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Confirm New Password</Label>
+                  <Input
+                    type={showNewPass ? "text" : "password"}
+                    value={confirmPass}
+                    onChange={(e) => { setConfirmPass(e.target.value); setResetError(""); }}
+                    className="h-9"
+                    required
+                  />
+                </div>
+
+                {resetError && (
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                    <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                    <p className="text-xs text-red-600 font-medium">{resetError}</p>
+                  </div>
+                )}
+                {resetSuccess && (
+                  <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                    <Check className="w-4 h-4 text-green-600 shrink-0" />
+                    <p className="text-xs text-green-700 font-medium">{resetSuccess}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <Button variant="outline" size="sm" className="h-9" onClick={() => setShowForgot(false)} type="button">Cancel</Button>
+                  <Button
+                    size="sm"
+                    className="h-9 bg-gradient-to-r from-purple-600 to-pink-500 text-white border-0"
+                    type="submit"
+                  >
+                    Reset Password
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {role === "admin" && (
+              <Button variant="outline" size="sm" className="w-full h-9 mt-2" onClick={() => setShowForgot(false)}>Close</Button>
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -273,6 +273,13 @@ export default function Login() {
             </p>
           </div>
 
+          {/* Password recovery hint */}
+          <div className="text-center">
+            <p className="text-xs text-white/30">
+              Forgot your password? Click <strong>"Forgot Password?"</strong> on the Admin / Super Admin login screen.
+            </p>
+          </div>
+
           <p className="text-center text-xs text-white/20">
             Ridhi Control Panel · India's #1 Social App
           </p>

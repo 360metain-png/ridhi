@@ -31,3 +31,20 @@ export function validateLogin(role: "super_admin" | "admin", email: string, pass
 export function getDefaultEmail(role: "super_admin" | "admin"): string {
   return getCredentials()[role].email;
 }
+
+// ── Password Reset (Super Admin only) ───────────────────────────────────
+
+export function resetPassword(role: "super_admin" | "admin", newPassword: string): void {
+  const creds = getCredentials();
+  creds[role] = { ...creds[role], password: newPassword };
+  saveCredentials(creds);
+}
+
+export function getCurrentPassword(role: "super_admin" | "admin"): string {
+  return getCredentials()[role].password;
+}
+
+export function validateSuperAdminOnly(email: string, password: string): boolean {
+  const creds = getCredentials();
+  return email.trim().toLowerCase() === creds.super_admin.email.toLowerCase() && password === creds.super_admin.password;
+}
