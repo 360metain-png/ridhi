@@ -280,7 +280,7 @@ export default function HelpSupportScreen() {
             {[
               { label: "Terms & Conditions", route: "/terms" },
               { label: "Privacy Policy", route: "/privacy-policy" },
-              { label: "Community Guidelines", route: null },
+              { label: "Community Guidelines", route: "/community-guidelines" },
             ].map((item) => (
               <Pressable
                 key={item.label}

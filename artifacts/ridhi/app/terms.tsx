@@ -131,13 +131,22 @@ const SECTIONS: SectionDef[] = [
   },
   {
     num: "5", title: "Community Guidelines", icon: "heart", color: "#E91E8C",
-    body: () => (
-      <>
-        <PP>Ridhi promotes a respectful and inclusive community. Users must:</PP>
-        {["Respect all cultures, genders, and communities.", "Maintain polite communication during chats and calls.", "Avoid abusive or discriminatory language.", "Follow platform safety and moderation standards.", "Respect consent and personal boundaries."].map(t => <Bullet key={t} text={t} />)}
-        <PP>The Company reserves the right to review, moderate, remove, restrict, or disable any content or account that violates community standards.</PP>
-      </>
-    ),
+    body: () => {
+      const colors = useColors();
+      return (
+        <>
+          <PP>Ridhi promotes a respectful and inclusive community. Users must:</PP>
+          {["Respect all cultures, genders, and communities.", "Maintain polite communication during chats and calls.", "Avoid abusive or discriminatory language.", "Follow platform safety and moderation standards.", "Respect consent and personal boundaries."].map(t => <Bullet key={t} text={t} />)}
+          <PP>The Company reserves the right to review, moderate, remove, restrict, or disable any content or account that violates community standards.</PP>
+          <Pressable onPress={() => router.push("/community-guidelines")} style={{ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Feather name="external-link" size={14} color={colors.primary} />
+            <Text style={{ color: colors.primary, fontFamily: "Inter_600SemiBold", fontSize: 13 }}>
+              Read full Community Guidelines
+            </Text>
+          </Pressable>
+        </>
+      );
+    },
   },
   {
     num: "6", title: "Audio & Video Calling Services", icon: "phone-call", color: "#00BCD4",
