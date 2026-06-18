@@ -47,6 +47,22 @@ const TONES: { id: Tone; label: string; emoji: string }[] = [
   { id: "desi", label: "Desi", emoji: "🇮🇳" },
 ];
 
+const TTS_LANGUAGES = [
+  { code: "hi", name: "Hindi", flag: "🇮🇳" },
+  { code: "ta", name: "Tamil", flag: "🇮🇳" },
+  { code: "te", name: "Telugu", flag: "🇮🇳" },
+  { code: "bn", name: "Bengali", flag: "🇮🇳" },
+  { code: "mr", name: "Marathi", flag: "🇮🇳" },
+  { code: "gu", name: "Gujarati", flag: "🇮🇳" },
+  { code: "kn", name: "Kannada", flag: "🇮🇳" },
+  { code: "ml", name: "Malayalam", flag: "🇮🇳" },
+  { code: "pa", name: "Punjabi", flag: "🇮🇳" },
+  { code: "ur", name: "Urdu", flag: "🇮🇳" },
+  { code: "or", name: "Odia", flag: "🇮🇳" },
+  { code: "as", name: "Assamese", flag: "🇮🇳" },
+  { code: "en", name: "English", flag: "🇬🇧" },
+];
+
 const CAPTIONS_BY_TONE: Record<Tone, string[]> = {
   casual: [
     "Living my best life, one moment at a time ✨",
@@ -126,6 +142,18 @@ export default function CreatePostScreen() {
   const [aiHashtags, setAiHashtags] = useState<string[]>([]);
   const [hashtagTopic, setHashtagTopic] = useState<string>("");
 
+  // ── TTS (Text-to-Speech) state ──
+  const [showTtsPanel, setShowTtsPanel] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [ttsLanguage, setTtsLanguage] = useState<string>("hi");
+  const [ttsVoice, setTtsVoice] = useState<"male" | "female">("female");
+  const [ttsPreviewing, setTtsPreviewing] = useState(false);
+  const ttsPanelAnim = useRef(new Animated.Value(0)).current;
+
+  // ── Auto-Captions state ──
+  const [autoCaptionsEnabled, setAutoCaptionsEnabled] = useState(false);
+  const [captionLanguage, setCaptionLanguage] = useState<string>("hi");
+
   // ── Scheduling state ──
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledAt, setScheduledAt] = useState<string>("");
@@ -134,6 +162,7 @@ export default function CreatePostScreen() {
   const captionPanelAnim = useRef(new Animated.Value(0)).current;
   const hashtagPanelAnim = useRef(new Animated.Value(0)).current;
   const schedulePanelAnim = useRef(new Animated.Value(0)).current;
+  const ttsPanelAnimRef = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -178,6 +207,22 @@ export default function CreatePostScreen() {
 
   const closeHashtagPanel = () => {
     Animated.timing(hashtagPanelAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setShowHashtagPanel(false));
+  };
+
+  const openTtsPanel = () => {
+    setShowTtsPanel(true);
+    Animated.spring(ttsPanelAnimRef, { toValue: 1, useNativeDriver: true, tension: 120, friction: 8 }).start();
+  };
+
+  const closeTtsPanel = () => {
+    Animated.timing(ttsPanelAnimRef, { toValue: 0, duration: 200, useNativeDriver: true }).start(() => setShowTtsPanel(false));
+  };
+
+  const previewTts = async () => {
+    setTtsPreviewing(true);
+    await new Promise((r) => setTimeout(r, 1500));
+    setTtsPreviewing(false);
+    Alert.alert("Text-to-Speech", `Preview: "${text.slice(0, 50)}..." in ${ttsVoice} ${ttsLanguage} voice`, [{ text: "OK" }]);
   };
 
   const pickMedia = async (type: "photo" | "video") => {
@@ -255,6 +300,19 @@ export default function CreatePostScreen() {
         body.soundId = params.soundId;
         body.soundTitle = params.soundTitle;
         body.soundArtist = params.soundArtist;
+      }
+      if (ttsEnabled) {
+        body.tts = {
+          enabled: true,
+          language: ttsLanguage,
+          voice: ttsVoice,
+        };
+      }
+      if (autoCaptionsEnabled) {
+        body.autoCaptions = {
+          enabled: true,
+          language: captionLanguage,
+        };
       }
       const res = await fetch("/api/posts", {
         method: "POST",
@@ -445,6 +503,42 @@ export default function CreatePostScreen() {
             </View>
             <Text style={[styles.aiChipText, { color: colors.primary }]}>Music Library</Text>
           </Pressable>
+
+          {/* TTS Chip — only for text/audio posts */}
+          {(selectedType === "text" || selectedType === "audio") && (
+            <Pressable
+              onPress={openTtsPanel}
+              style={[styles.aiChip, {
+                backgroundColor: ttsEnabled ? "#FF6B35" + "18" : colors.muted,
+                borderColor: ttsEnabled ? "#FF6B35" + "40" : colors.border,
+              }]}
+            >
+              <View style={[styles.aiChipIcon, { backgroundColor: ttsEnabled ? "#FF6B35" : colors.mutedForeground }]}>
+                <Feather name="volume-2" size={11} color="#fff" />
+              </View>
+              <Text style={[styles.aiChipText, { color: ttsEnabled ? "#FF6B35" : colors.foreground }]}>
+                {ttsEnabled ? "TTS On" : "Text-to-Speech"}
+              </Text>
+            </Pressable>
+          )}
+
+          {/* Auto-Captions Chip — only for video/reel/story */}
+          {(selectedType === "video" || selectedType === "reel" || selectedType === "story") && (
+            <Pressable
+              onPress={() => setAutoCaptionsEnabled(!autoCaptionsEnabled)}
+              style={[styles.aiChip, {
+                backgroundColor: autoCaptionsEnabled ? "#34C759" + "18" : colors.muted,
+                borderColor: autoCaptionsEnabled ? "#34C759" + "40" : colors.border,
+              }]}
+            >
+              <View style={[styles.aiChipIcon, { backgroundColor: autoCaptionsEnabled ? "#34C759" : colors.mutedForeground }]}>
+                <Feather name="type" size={11} color="#fff" />
+              </View>
+              <Text style={[styles.aiChipText, { color: autoCaptionsEnabled ? "#34C759" : colors.foreground }]}>
+                {autoCaptionsEnabled ? "Captions On" : "Auto-Captions"}
+              </Text>
+            </Pressable>
+          )}
         </View>
 
         {selectedType !== "text" && selectedType !== "poll" && (
@@ -690,6 +784,139 @@ export default function CreatePostScreen() {
         </Animated.View>
       )}
 
+      {/* TTS indicator */}
+      {ttsEnabled && (
+        <View style={[styles.ttsIndicator, { backgroundColor: "#FF6B35" + "12", borderColor: "#FF6B35" + "30" }]}>
+          <Feather name="volume-2" size={14} color="#FF6B35" />
+          <Text style={[styles.ttsIndicatorText, { color: "#FF6B35" }]}>
+            Text-to-Speech: {ttsVoice} · {TTS_LANGUAGES.find((l) => l.code === ttsLanguage)?.name ?? "Hindi"}
+          </Text>
+          <Pressable onPress={() => setTtsEnabled(false)}>
+            <Feather name="x" size={14} color="#FF6B35" />
+          </Pressable>
+        </View>
+      )}
+
+      {/* Auto-Captions indicator */}
+      {autoCaptionsEnabled && (
+        <View style={[styles.ttsIndicator, { backgroundColor: "#34C759" + "12", borderColor: "#34C759" + "30" }]}>
+          <Feather name="type" size={14} color="#34C759" />
+          <Text style={[styles.ttsIndicatorText, { color: "#34C759" }]}>
+            Auto-Captions: {TTS_LANGUAGES.find((l) => l.code === captionLanguage)?.name ?? "Hindi"}
+          </Text>
+          <Pressable onPress={() => setAutoCaptionsEnabled(false)}>
+            <Feather name="x" size={14} color="#34C759" />
+          </Pressable>
+        </View>
+      )}
+
+      {/* TTS panel */}
+      {showTtsPanel && (
+        <Animated.View
+          style={[styles.bottomPanel, {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.border,
+            transform: [{ translateY: ttsPanelAnimRef.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }) }],
+          }]}
+        >
+          <View style={styles.panelHandle} />
+          <View style={styles.panelHeader}>
+            <View style={[styles.panelIcon, { backgroundColor: "#FF6B35" }]}>
+              <Feather name="volume-2" size={14} color="#fff" />
+            </View>
+            <Text style={[styles.panelTitle, { color: colors.foreground }]}>Text-to-Speech</Text>
+            <Pressable onPress={closeTtsPanel}>
+              <Feather name="x" size={20} color={colors.mutedForeground} />
+            </Pressable>
+          </View>
+
+          <Text style={[styles.scheduleNote, { color: colors.mutedForeground }]}>
+            Convert your text into spoken audio in Indian languages. Perfect for podcasts and voice reels.
+          </Text>
+
+          <View style={{ paddingHorizontal: 16, gap: 12, marginBottom: 16 }}>
+            {/* Enable toggle */}
+            <View style={[styles.ttsToggleRow, { borderColor: colors.border }]}>
+              <Text style={[styles.ttsToggleLabel, { color: colors.foreground }]}>Enable TTS for this post</Text>
+              <Pressable
+                onPress={() => { setTtsEnabled(!ttsEnabled); }}
+                style={[styles.ttsToggle, { backgroundColor: ttsEnabled ? "#FF6B35" : colors.border }]}
+              >
+                <View style={[styles.ttsToggleKnob, { backgroundColor: "#fff", transform: [{ translateX: ttsEnabled ? 18 : 0 }] }]} />
+              </Pressable>
+            </View>
+
+            {/* Language selector */}
+            <Text style={[styles.ttsSectionLabel, { color: colors.mutedForeground }]}>Language</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+              {TTS_LANGUAGES.map((lang) => (
+                <Pressable
+                  key={lang.code}
+                  onPress={() => setTtsLanguage(lang.code)}
+                  style={[styles.ttsLangBtn, {
+                    backgroundColor: ttsLanguage === lang.code ? "#FF6B35" + "20" : colors.muted,
+                    borderColor: ttsLanguage === lang.code ? "#FF6B35" : colors.border,
+                  }]}
+                >
+                  <Text style={{ fontSize: 14 }}>{lang.flag}</Text>
+                  <Text style={[styles.ttsLangText, { color: ttsLanguage === lang.code ? "#FF6B35" : colors.foreground }]}>
+                    {lang.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+
+            {/* Voice selector */}
+            <Text style={[styles.ttsSectionLabel, { color: colors.mutedForeground }]}>Voice</Text>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {(["female", "male"] as const).map((v) => (
+                <Pressable
+                  key={v}
+                  onPress={() => setTtsVoice(v)}
+                  style={[styles.ttsVoiceBtn, {
+                    backgroundColor: ttsVoice === v ? "#FF6B35" + "20" : colors.muted,
+                    borderColor: ttsVoice === v ? "#FF6B35" : colors.border,
+                  }]}
+                >
+                  <Feather name={v === "female" ? "user" : "user"} size={14} color={ttsVoice === v ? "#FF6B35" : colors.mutedForeground} />
+                  <Text style={[styles.ttsVoiceText, { color: ttsVoice === v ? "#FF6B35" : colors.foreground }]}>
+                    {v === "female" ? "Female" : "Male"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Preview button */}
+            <Pressable
+              onPress={previewTts}
+              disabled={!text.trim() || ttsPreviewing}
+              style={[styles.ttsPreviewBtn, {
+                backgroundColor: !text.trim() ? colors.muted : "#FF6B35" + "18",
+                borderColor: !text.trim() ? colors.border : "#FF6B35" + "40",
+                opacity: !text.trim() ? 0.5 : 1,
+              }]}
+            >
+              <Feather name={ttsPreviewing ? "loader" : "play-circle"} size={16} color={!text.trim() ? colors.mutedForeground : "#FF6B35"} />
+              <Text style={[styles.ttsPreviewText, { color: !text.trim() ? colors.mutedForeground : "#FF6B35" }]}>
+                {ttsPreviewing ? "Generating preview..." : "Preview Voice"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={[styles.hashtagPanelFooter, { borderTopColor: colors.border }]}>
+            <Text style={[styles.hashtagPanelFooterText, { color: colors.mutedForeground }]}>
+              {ttsEnabled ? "TTS will be added to your post" : "TTS is off"}
+            </Text>
+            <Pressable
+              onPress={() => { setTtsEnabled(true); closeTtsPanel(); }}
+              style={[styles.doneBtn, { backgroundColor: ttsEnabled ? "#FF6B35" : colors.primary }]}
+            >
+              <Text style={styles.doneBtnText}>Done</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      )}
+
       {/* Schedule picker panel */}
       {showSchedulePicker && (
         <Animated.View
@@ -834,4 +1061,19 @@ const styles = StyleSheet.create({
   scheduleGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingBottom: 20, justifyContent: "center" },
   scheduleSlot: { alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14, borderWidth: 1, minWidth: 80 },
   scheduleSlotLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+
+  // TTS styles
+  ttsIndicator: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, marginHorizontal: 16, marginBottom: 8, alignSelf: "flex-start" },
+  ttsIndicatorText: { fontSize: 13, fontFamily: "Inter_600SemiBold", flex: 1 },
+  ttsToggleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  ttsToggleLabel: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  ttsToggle: { width: 44, height: 24, borderRadius: 12, justifyContent: "center", paddingHorizontal: 2 },
+  ttsToggleKnob: { width: 20, height: 20, borderRadius: 10 },
+  ttsSectionLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginTop: 4 },
+  ttsLangBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 14, borderWidth: 1 },
+  ttsLangText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  ttsVoiceBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, borderWidth: 1, flex: 1, justifyContent: "center" },
+  ttsVoiceText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  ttsPreviewBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 12, borderRadius: 14, borderWidth: 1, marginTop: 4 },
+  ttsPreviewText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

@@ -387,6 +387,22 @@ export default function FeedScreen() {
     setTimeout(() => setReportDone(false), 2500);
   };
 
+  const handleRepost = useCallback((id: string) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, isReposted: !p.isReposted, repostCount: (p.repostCount ?? 0) + (p.isReposted ? -1 : 1) }
+          : p
+      )
+    );
+    const post = postsRef.current.find((p) => p.id === id);
+    const nowReposted = !post?.isReposted;
+    if (nowReposted) {
+      // Show toast-like alert
+      // In real app, this would persist to server and show in followers' Following feed
+    }
+  }, []);
+
   const handleBoost = async () => {
     if (!boostTarget) return;
     const tiers = [
@@ -953,6 +969,7 @@ export default function FeedScreen() {
               onComment={handleOpenComments}
               onProfile={emptyFn}
               onMenuPress={handleMenuPress}
+              onRepost={handleRepost}
             />
           );
         }}
@@ -1171,6 +1188,18 @@ export default function FeedScreen() {
             </>
           ) : (
             <>
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => { if (postMenu) { handleRepost(postMenu.id); setPostMenu(null); } }}>
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.primary + "18" }]}>
+                  <Feather name="repeat" size={16} color={colors.primary} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Repost to Followers</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Share this post on your followers' feed</Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
+
               {(["post", "user"] as const).map((target) => {
                 const cfg = {
                   post: { icon: "flag" as const,   label: "Report Post", desc: "Content is inappropriate or harmful", color: "#FF9500" },

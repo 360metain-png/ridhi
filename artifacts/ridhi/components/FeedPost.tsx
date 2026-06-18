@@ -33,6 +33,10 @@ export interface Post {
   hashtags?: string[];
   isBoosted?: boolean;
   boostViews?: number;
+  // Repost
+  repostCount?: number;
+  isReposted?: boolean;
+  repostedBy?: { userName: string; userId?: string; comment?: string };
   // Collaboration & sound
   duetWith?: { reelId: string; reelTitle: string; reelUser: string };
   stitchWith?: { reelId: string; reelTitle: string; reelUser: string; trim: string };
@@ -48,6 +52,7 @@ interface FeedPostProps {
   onProfile: (userId: string) => void;
   onMenuPress?: (id: string, isOwn: boolean) => void;
   onBoostPress?: (id: string) => void;
+  onRepost?: (id: string) => void;
 }
 
 // ─── Privacy badge ─────────────────────────────────────────────────────────────
@@ -126,6 +131,7 @@ export const FeedPost = React.memo(function FeedPost({
   onProfile,
   onMenuPress,
   onBoostPress,
+  onRepost,
 }: FeedPostProps) {
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
@@ -213,6 +219,17 @@ export const FeedPost = React.memo(function FeedPost({
           </Pressable>
         </Pressable>
 
+        {/* Repost badge */}
+        {post.repostedBy && (
+          <View style={[styles.repostBadge, { backgroundColor: colors.primary + "10" }]}>
+            <Feather name="repeat" size={11} color={colors.primary} />
+            <Text style={[styles.repostBadgeText, { color: colors.primary }]}>
+              Reposted by {post.repostedBy.userName}
+              {post.repostedBy.comment ? ` · "${post.repostedBy.comment}"` : ""}
+            </Text>
+          </View>
+        )}
+
         {/* ── Content ── */}
         {post.content ? (
           <Text style={[styles.content, { color: colors.foreground }]}>{post.content}</Text>
@@ -297,6 +314,20 @@ export const FeedPost = React.memo(function FeedPost({
             <Text style={[styles.actionCount, { color: colors.mutedForeground }]}>{post.shares}</Text>
           </Pressable>
 
+          <Pressable
+            style={styles.action}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onRepost?.(post.id); }}
+            accessibilityRole="button"
+            accessibilityLabel={post.isReposted ? "Undo repost" : "Repost to followers"}
+          >
+            <View style={[styles.actionIcon, { backgroundColor: post.isReposted ? colors.primary + "20" : colors.muted }]}>
+              <Feather name="repeat" size={14} color={post.isReposted ? colors.primary : colors.mutedForeground} />
+            </View>
+            <Text style={[styles.actionCount, { color: post.isReposted ? colors.primary : colors.mutedForeground }]}>
+              {post.repostCount ?? 0}
+            </Text>
+          </Pressable>
+
           <View style={{ flex: 1 }} />
 
           <Pressable
@@ -354,6 +385,8 @@ const styles = StyleSheet.create({
   likeActive:    { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
   likeInactive:  { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
   actionCount:   { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  repostBadge:   { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginHorizontal: 14, marginBottom: 6, alignSelf: "flex-start" },
+  repostBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
   collabBadge:   { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginHorizontal: 14, marginBottom: 8, alignSelf: "flex-start" },
   collabText:    { fontSize: 12, fontFamily: "Inter_500Medium" },
 });
