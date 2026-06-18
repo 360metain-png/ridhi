@@ -323,6 +323,28 @@ const HOST_SECTIONS: Section[] = [
     ],
   },
   {
+    id: "h-tiktok-tools",
+    icon: Video,
+    color: "text-pink-600",
+    bg: "bg-pink-50",
+    title: "TikTok-Style Content Tools (New)",
+    subtitle: "New features for Indian creators: TTS, Auto-Captions, Carousel, Video Replies, Streaks, and more",
+    features: [
+      "Text-to-Speech (TTS): convert your post text to spoken audio in 13 Indian languages — Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Assamese, Urdu, and English",
+      "TTS voice selector: choose from Voice A, Voice B, or Voice C per language — each with a unique tone and accent",
+      "Auto-Captions: automatically generate subtitles for videos and reels in the language you select — fully editable before publishing",
+      "Photo Carousel: upload 2–10 photos in a single post with horizontal swipe, dot indicators, and a 'Cover' badge on the first image",
+      "Video Replies to Comments: reply to any comment on your post with a short video — opens the create-post screen with pre-filled context",
+      "Not Interested / Hide Posts: users can tap 'Not Interested' on any post to hide it and train their personal recommendation algorithm",
+      "Repost to Followers: repost any public post to your own followers with a single tap — repost count shown on the original post",
+      "Streaks: daily posting streak counter — post at least once every day to maintain your streak. Miss one day and streak resets. 🔥 badge on profile shows current streak count",
+      "Streaks are tracked server-side and update in real time on the profile — visible to all followers",
+      "All these tools are available in the Create Post screen (+ button) and are accessible to all users, not just Hosts",
+      "Regional language support is core: all tools default to the user's selected language from Settings (13 Indian languages)",
+    ],
+    note: "These TikTok-inspired features are designed for Indian users and regional content creators. The TTS engine supports Indian-accented voices for each language. Auto-Captions are generated locally on-device for privacy. Streaks update at midnight IST.",
+  },
+  {
     id: "h-support",
     icon: HelpCircle,
     color: "text-slate-600",
@@ -720,6 +742,27 @@ const ADMIN_SECTIONS: Section[] = [
     ],
   },
   {
+    id: "a-tiktok-tools",
+    icon: Video,
+    color: "text-pink-600",
+    bg: "bg-pink-50",
+    title: "TikTok-Style Content Tools — Moderation",
+    subtitle: "Moderate new content features: TTS, Auto-Captions, Carousel, Video Replies, Streaks",
+    features: [
+      "TTS abuse detection: flag posts that use TTS for spam, repeated identical audio, or unauthorized commercial content",
+      "Auto-Captions review: if captions contain banned words or misinformation, flag for manual review before removing the post",
+      "Carousel posts: moderation works the same as single-image posts — all carousel images are scanned by AI for nudity, violence, and hate symbols",
+      "Video Replies to Comments: these are treated as regular video posts for moderation. Check the original comment thread for harassment context",
+      "Repost monitoring: track repost chains to detect spam accounts or bot networks that mass-repost content. Repost count is visible on the post detail",
+      "Streaks fraud detection: detect users artificially inflating streaks (e.g., automated posting tools) — reset streak and warn or suspend",
+      "Not Interested signals: aggregate Not Interested data to identify low-quality content creators or trending harmful content themes",
+      "Regional language moderation: TTS and captions are generated in 13 Indian languages — the AI moderation model covers Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, Assamese, Urdu, and English",
+      "Analytics dashboard: view TTS usage by language, carousel engagement rate, video reply adoption rate, and streak participation rate",
+      "Admin actions on flagged content: Warn User, Remove Post, Suspend User, or Ban User — all actions are logged for audit",
+    ],
+    note: "These features are new (TikTok-inspired for Indian users). Moderation policies are the same as other content: no nudity, hate speech, spam, violence, or misinformation. The AI moderation system auto-scans all generated TTS audio captions and user-submitted carousel images.",
+  },
+  {
     id: "a-marketing",
     icon: Megaphone,
     color: "text-rose-600",
@@ -911,6 +954,30 @@ const SA_SECTIONS: Section[] = [
     ],
   },
   {
+    id: "sa-tiktok-tools",
+    icon: Video,
+    color: "text-pink-600",
+    bg: "bg-pink-50",
+    title: "TikTok-Style Content Tools — Configuration & Oversight",
+    subtitle: "Configure, monitor, and control all new TikTok-inspired features for Indian users",
+    features: [
+      "TTS Engine Configuration: enable/disable Text-to-Speech globally, set default voice per language (A/B/C), and manage voice pack updates from the AI provider",
+      "TTS usage limits: set daily TTS generation limit per user to prevent abuse and control API costs",
+      "Auto-Captions toggle: enable/disable auto-caption generation for all video/reel uploads. Set default language fallback",
+      "Carousel limits: configure maximum photos per carousel (default 10, min 2, max 20). Set max file size per image",
+      "Video Reply controls: enable/disable video replies to comments. Set max duration (default 60 sec, max 3 min). Review flagged video-reply threads",
+      "Repost controls: enable/disable reposting globally. Set max reposts per user per day. View repost chain analytics",
+      "Streaks configuration: set streak freeze rules (e.g., 1 'freeze' day per week allowed). Set milestone badges (3-day, 7-day, 30-day, 100-day streak)",
+      "Streak fraud detection: configure automated detection thresholds (e.g., >5 posts per minute triggers review). Set auto-reset policy for suspicious streaks",
+      "Not Interested algorithm: tune the recommendation algorithm weight for Not Interested signals. Export aggregate data for content quality analysis",
+      "Regional language support: manage TTS voice coverage and caption models for all 13 Indian languages. Request new language support from AI provider",
+      "TikTok-style analytics dashboard: TTS usage by language, carousel engagement rate, video reply adoption rate, streak participation, repost virality, Not Interested trends",
+      "Feature flags: enable/disable each TikTok feature independently (TTS, Auto-Captions, Carousel, Video Replies, Repost, Streaks, Not Interested) for gradual rollout or A/B testing",
+      "Monetisation: set if TikTok features are available to free users vs VIP tiers. Example: Carousel and Video Replies for all users; TTS voice packs for Gold+ only",
+    ],
+    note: "These TikTok-inspired features are specifically designed for Indian users and regional content creators. All features support 13 Indian languages. TTS and auto-captions use on-device generation where possible for privacy. Streaks update at midnight IST.",
+  },
+  {
     id: "sa-ads",
     icon: Zap,
     color: "text-yellow-600",
@@ -1067,7 +1134,7 @@ export default function HandbookPage() {
             Ridhi Platform Handbook
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.0.0
+            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.1.0
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1199,7 +1266,7 @@ export default function HandbookPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground border-t pt-4">
-        <p>Ridhi Platform Handbook · Version 3.0.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
+        <p>Ridhi Platform Handbook · Version 3.1.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
         <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · hello@ridhi.app</p>
       </div>
     </div>
