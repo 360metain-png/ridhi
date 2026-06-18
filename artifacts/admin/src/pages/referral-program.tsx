@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAdminRole } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -163,7 +164,7 @@ export default function ReferralProgramPage() {
   const [sortBy, setSortBy] = useState<"referrals"|"coins"|"conversion">("referrals");
   const [sortDir, setSortDir] = useState<"desc"|"asc">("desc");
 
-  const isSA = (localStorage.getItem("ridhi_admin_role") ?? "") === "super_admin";
+  const isSA = (getAdminRole() ?? "") === "super_admin";
 
   const sortedReferrers = [...TOP_REFERRERS].sort((a, b) => {
     const va = sortBy === "referrals" ? a.referrals : sortBy === "coins" ? a.coinsEarned : a.conversionRate;

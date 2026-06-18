@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getAdminName } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ interface WorkTask {
 
 // ── Mock data — scoped to logged-in admin ─────────────────────────────────
 const currentAdmin = {
-  name: localStorage.getItem("ridhi_admin_email")?.split("@")[0] ?? "Admin",
+  name: getAdminName()?.split("@")[0] ?? "Admin",
   role: "Content Admin",
   joinedAt: "Jan 2025",
   completedAllTime: 2840,

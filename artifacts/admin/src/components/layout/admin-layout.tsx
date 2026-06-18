@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
 import { type AdminRole, ROUTE_ROLES } from "@/App";
+import { getAdminRole, getAdminName, clearAdminSession } from "@/lib/admin-api";
 import GlobalSearch from "@/components/global-search";
 
 interface AdminLayoutProps { children: ReactNode }
@@ -120,24 +121,24 @@ type RoleInfo = {
   badgeClass: string; avatarClass: string; initial: string; name: string;
 };
 
-function getRoleInfo(role: string | null, email: string | null): RoleInfo {
+function getRoleInfo(role: string | null, name: string | null): RoleInfo {
   if (role === "admin") return {
     label: "Admin", sublabel: "Manages Agents", badge: "Admin",
     badgeClass: "bg-indigo-100 text-indigo-700 border-indigo-200",
     avatarClass: "bg-indigo-500", initial: "A",
-    name: email?.split("@")[0]?.replace("admin.", "") ?? "Admin User",
+    name: name ?? "Admin User",
   };
   return {
     label: "Super Admin", sublabel: "Full Platform Control", badge: "Super Admin",
     badgeClass: "bg-purple-100 text-purple-700 border-purple-200",
     avatarClass: "bg-gradient-to-br from-purple-600 to-pink-500", initial: "S",
-    name: "Arjun Mehta",
+    name: name ?? "Super Admin",
   };
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation]     = useLocation();
-  const [roleInfo, setRoleInfo]     = useState<RoleInfo>(getRoleInfo(null, null));
+  const [roleInfo, setRoleInfo]     = useState<RoleInfo>(getRoleInfo(null, getAdminName()));
   const [role, setRole]             = useState<AdminRole>("super_admin");
   const [collapsed, setCollapsed]   = useState<Record<string, boolean>>({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -151,18 +152,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, []);
 
   useEffect(() => {
-    const r     = localStorage.getItem("ridhi_admin_role") as AdminRole ?? "super_admin";
-    const email = localStorage.getItem("ridhi_admin_email");
+    const r = getAdminRole() ?? "super_admin";
+    const name = getAdminName();
     setRole(r);
-    setRoleInfo(getRoleInfo(r, email));
+    setRoleInfo(getRoleInfo(r, name));
   }, [location]);
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   const handleLogout = () => {
-    localStorage.removeItem("ridhi_admin_logged_in");
-    localStorage.removeItem("ridhi_admin_role");
-    localStorage.removeItem("ridhi_admin_email");
+    clearAdminSession();
     setLocation("/login");
   };
 

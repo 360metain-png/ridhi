@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { getAdminRole } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -165,7 +166,7 @@ export default function Dashboard() {
   const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
   useEffect(() => {
-    const stored = localStorage.getItem("ridhi_admin_role") as AdminRole | null;
+    const stored = getAdminRole() as AdminRole | null;
     if (stored) setRole(stored);
   }, []);
 

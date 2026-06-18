@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAdminRole, getAdminName } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -315,12 +316,12 @@ function HostDetail({ host, onClose }: { host: Host; onClose: () => void }) {
 
 export default function HostsPage() {
   const { toast } = useToast();
-  const role         = localStorage.getItem("ridhi_admin_role") ?? "admin";
-  const myEmail      = localStorage.getItem("ridhi_admin_email") ?? "";
+  const role = getAdminRole() ?? "admin";
+  const myEmail = getAdminName() ?? "";
 
   const isSA    = role === "super_admin";
   const isAdmin = role === "admin";
-  const isAgent = role === "agent";
+  const isAgent = false;
 
   // Live admins from shared store
   const liveAdmins = getLiveAdmins();

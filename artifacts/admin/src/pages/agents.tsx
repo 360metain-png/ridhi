@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAdminRole, getAdminName } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -303,8 +304,8 @@ function RecruitDialog({
 
 export default function AgentsPage() {
   const { toast } = useToast();
-  const role = localStorage.getItem("ridhi_admin_role") ?? "admin";
-  const myAdminEmail = localStorage.getItem("ridhi_admin_email") ?? "";
+  const role = getAdminRole() ?? "admin";
+  const myAdminEmail = getAdminName() ?? "";
 
   // Live admins from shared store
   const liveAdmins = getLiveAdmins();

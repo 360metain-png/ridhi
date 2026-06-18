@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { getAdminRole } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -940,8 +941,8 @@ export default function CoinsPage() {
   const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
   useEffect(() => {
-    const role = localStorage.getItem("ridhi_admin_role");
-    setIsSuperAdmin(!role || role === "super_admin" || role === "host" || role === "agent");
+    const role = getAdminRole();
+    setIsSuperAdmin(!role || role === "super_admin");
   }, []);
 
   const pendingCount = mockCoinRequests.filter((r) => r.status === "Pending").length;

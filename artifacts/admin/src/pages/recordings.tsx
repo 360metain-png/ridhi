@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getAdminRole } from "@/lib/admin-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,7 @@ import { downloadCSV } from "@/lib/utils";
 
 // ── Role helper ────────────────────────────────────────────────────────────────
 function useRole(): AdminRole {
-  return (localStorage.getItem("ridhi_admin_role") ?? "admin") as AdminRole;
+  return (getAdminRole() ?? "admin") as AdminRole;
 }
 
 // ── Mock data ──────────────────────────────────────────────────────────────────

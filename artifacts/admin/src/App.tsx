@@ -42,7 +42,6 @@ import SpecialAds          from "@/pages/special-ads";
 import CommercialBanners   from "@/pages/commercial-banners";
 import Subscriptions       from "@/pages/subscriptions";
 import ContentAssets       from "@/pages/content-assets";
-import PortalLogin         from "@/pages/portal-login";
 import Support            from "@/pages/support";
 import FinancialStatements from "@/pages/financial-statements";
 import Podcasts            from "@/pages/podcasts";
@@ -56,11 +55,12 @@ import PaymentGateway      from "@/pages/payment-gateway";
 import AdminManagement     from "@/pages/admin-management";
 import AdminLayout         from "@/components/layout/admin-layout";
 
+import { isAdminLoggedIn, getAdminRole, clearAdminSession } from "@/lib/admin-api";
+
 const queryClient = new QueryClient();
 
 export type AdminRole = "super_admin" | "admin";
 
-// Which roles may access each route
 export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/":             ["super_admin", "admin"],
   "/reports":      ["super_admin"],
@@ -115,7 +115,7 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 function AccessDenied({ route }: { route: string }) {
-  const role      = localStorage.getItem("ridhi_admin_role") ?? "";
+  const role      = getAdminRole() ?? "";
   const allowed   = ROUTE_ROLES[route] ?? [];
   const minRole   = allowed[0] ? ROLE_LABEL[allowed[0]] : "higher role";
   return (
@@ -132,31 +132,22 @@ function AccessDenied({ route }: { route: string }) {
       </div>
       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-4 py-2 rounded-full">
         <Lock className="w-3 h-3" />
-        Contact your Super Admin or Admin to request access
+        Contact your Super Admin to request access
       </div>
     </div>
   );
 }
 
-// Only seed a default session on first load — never overwrite a real login
-function seedDefaultSession() {
-  if (!localStorage.getItem("ridhi_admin_logged_in")) {
-    localStorage.setItem("ridhi_admin_logged_in", "true");
-    localStorage.setItem("ridhi_admin_role",      "super_admin");
-    localStorage.setItem("ridhi_admin_email",     "arjun@ridhi.app");
-  }
-}
-
 function RoleRoute({ component: Component, path }: { component: React.ComponentType<any>; path: string }) {
   const [location, setLocation] = useLocation();
 
-  seedDefaultSession();
-
   useEffect(() => {
-    if (localStorage.getItem("ridhi_admin_logged_in") !== "true") setLocation("/login");
+    if (!isAdminLoggedIn()) {
+      setLocation("/login");
+    }
   }, [location, setLocation]);
 
-  const role    = (localStorage.getItem("ridhi_admin_role") ?? "") as AdminRole;
+  const role    = (getAdminRole() ?? "") as AdminRole;
   const allowed = ROUTE_ROLES[path] ?? ["super_admin"];
 
   return (
@@ -171,8 +162,6 @@ function Router() {
     <Switch>
       <Route path="/support"             component={Support} />
       <Route path="/login"               component={Login} />
-      <Route path="/login/super-admin"   component={() => <PortalLogin role="super_admin" />} />
-      <Route path="/login/admin"         component={() => <PortalLogin role="admin" />} />
       <Route path="/"             component={() => <RoleRoute component={Dashboard}   path="/" />} />
       <Route path="/users"        component={() => <RoleRoute component={Users}        path="/users" />} />
       <Route path="/users/:id"    component={() => <RoleRoute component={UserDetail}   path="/users" />} />
