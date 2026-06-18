@@ -64,6 +64,8 @@ export interface UserProfile {
   kycSubmittedAt?: string;
   kycVerifiedAt?: string;
   lastDailyRewardAt?: string;
+  streakCount?: number;
+  lastPostDate?: string;
 }
 
 interface AuthContextValue {
@@ -103,6 +105,8 @@ const DEFAULT_USER: UserProfile = {
   posts: 12,
   plan: "free" as const,
   isVerified: false,
+  streakCount: 3,
+  lastPostDate: new Date().toISOString(),
   createdAt: new Date().toISOString(),
 };
 

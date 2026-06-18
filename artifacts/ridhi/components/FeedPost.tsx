@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -24,6 +24,9 @@ export interface Post {
   privacy?: "public" | "followers" | "private";
   content?: string;
   imageUri?: string;
+  // Carousel
+  carouselImages?: string[];
+  carouselIndex?: number;
   likes: number;
   comments: number;
   shares: number;
@@ -263,7 +266,10 @@ export const FeedPost = React.memo(function FeedPost({
           </View>
         )}
 
-        {post.imageUri ? (
+        {/* Carousel or single image */}
+        {post.carouselImages && post.carouselImages.length > 0 ? (
+          <CarouselViewer images={post.carouselImages} colors={colors} />
+        ) : post.imageUri ? (
           <View style={styles.imageWrap}>
             <Image source={{ uri: post.imageUri }} style={styles.image} resizeMode="cover" />
             <LinearGradient colors={["transparent", "rgba(0,0,0,0.4)"]} style={styles.imageOverlay} />
@@ -358,6 +364,41 @@ export const FeedPost = React.memo(function FeedPost({
   );
 });
 
+// ─── Carousel Viewer ───────────────────────────────────────────────────────────
+function CarouselViewer({ images, colors }: { images: string[]; colors: any }) {
+  const [index, setIndex] = useState(0);
+  const flatListRef = useRef<ScrollView>(null);
+  return (
+    <View style={styles.carouselWrap}>
+      <ScrollView
+        ref={flatListRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={(e) => {
+          const x = e.nativeEvent.contentOffset.x;
+          const w = e.nativeEvent.layoutMeasurement.width;
+          setIndex(Math.round(x / w));
+        }}
+        scrollEventThrottle={16}
+        style={styles.carouselScroll}
+      >
+        {images.map((uri, i) => (
+          <Image key={i} source={{ uri }} style={[styles.carouselImage, { width: Dimensions.get("window").width - 24 }]} resizeMode="cover" />
+        ))}
+      </ScrollView>
+      <View style={styles.carouselDots}>
+        {images.map((_, i) => (
+          <View key={i} style={[styles.carouselDot, { backgroundColor: i === index ? colors.primary : colors.mutedForeground }]} />
+        ))}
+      </View>
+      <View style={[styles.carouselCount, { backgroundColor: "rgba(0,0,0,0.6)" }]}>
+        <Text style={styles.carouselCountText}>{index + 1}/{images.length}</Text>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   cardWrap:      { paddingHorizontal: 12, paddingVertical: 5 },
   card:          { borderRadius: 18, borderWidth: 1, overflow: "hidden" },
@@ -389,4 +430,12 @@ const styles = StyleSheet.create({
   repostBadgeText: { fontSize: 11, fontFamily: "Inter_500Medium" },
   collabBadge:   { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, marginHorizontal: 14, marginBottom: 8, alignSelf: "flex-start" },
   collabText:    { fontSize: 12, fontFamily: "Inter_500Medium" },
+  // Carousel
+  carouselWrap:  { position: "relative" },
+  carouselScroll:{ width: "100%" },
+  carouselImage: { width: "100%", aspectRatio: 4 / 3 },
+  carouselDots:  { flexDirection: "row", gap: 6, position: "absolute", bottom: 12, left: 0, right: 0, justifyContent: "center" },
+  carouselDot:   { width: 6, height: 6, borderRadius: 3 },
+  carouselCount: { position: "absolute", top: 10, right: 14, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
+  carouselCountText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });

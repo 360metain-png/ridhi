@@ -12,6 +12,27 @@ export const STORIES = [
 
 export const INITIAL_POSTS: Post[] = [
   {
+    id: "car1",
+    userName: "Meera Patel",
+    userCity: "Ahmedabad",
+    language: "Gujarati",
+    isVerified: true,
+    content: "Navratri vibes! Check out my Garba lookbook 🎃✨ Swipe to see all 4 outfits!",
+    carouselImages: [
+      "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=600",
+      "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600",
+      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=600",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600",
+    ],
+    likes: 1243,
+    comments: 89,
+    shares: 156,
+    isLiked: true,
+    timeAgo: "30m ago",
+    type: "carousel",
+    hashtags: ["#Navratri", "#Garba", "#Ahmedabad", "#IndianFashion"],
+  },
+  {
     id: "p1",
     userId: "u1",
     userName: "Ananya Singh",

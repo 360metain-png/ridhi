@@ -3,6 +3,7 @@ import {
   Alert,
   Animated,
   Dimensions,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -29,6 +30,7 @@ const POST_TYPES = [
   { id: "text", icon: "type", label: "Status", desc: "Share what's on your mind" },
   { id: "audio", icon: "mic", label: "Audio", desc: "Share a voice note or podcast clip" },
   { id: "photo", icon: "image", label: "Photo", desc: "Share a photo from your gallery" },
+  { id: "carousel", icon: "layers", label: "Carousel", desc: "Multiple photos with swipe" },
   { id: "reel", icon: "play", label: "Reel", desc: "Create a short audio/video reel" },
   { id: "story", icon: "circle", label: "Story", desc: "Visible for 24 hours" },
   { id: "video", icon: "video", label: "Video", desc: "Share a video up to 5 minutes" },
@@ -117,7 +119,7 @@ export default function CreatePostScreen() {
   useTrackScreen("create_post");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
 
   const params = useLocalSearchParams<{ soundId?: string; soundTitle?: string; soundArtist?: string; duetWith?: string; duetTitle?: string; duetUser?: string; stitchWith?: string; stitchTitle?: string; stitchUser?: string; stitchTrim?: string; type?: string }>();
 
@@ -128,6 +130,7 @@ export default function CreatePostScreen() {
   const [loading, setLoading] = useState(false);
 
   const [mediaUri, setMediaUri] = useState<string | null>(null);
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [location, setLocation] = useState<string | null>(null);
   const [feeling, setFeeling] = useState<string | null>(null);
   const [taggedPeople, setTaggedPeople] = useState<string[]>([]);
@@ -225,10 +228,22 @@ export default function CreatePostScreen() {
     Alert.alert("Text-to-Speech", `Preview: "${text.slice(0, 50)}..." in ${ttsVoice} ${ttsLanguage} voice`, [{ text: "OK" }]);
   };
 
-  const pickMedia = async (type: "photo" | "video") => {
+  const pickMedia = async (type: "photo" | "video" | "carousel") => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permission needed", "Allow access to your gallery to upload photos and videos.", [{ text: "OK" }]);
+      return;
+    }
+    if (type === "carousel") {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets.length > 0) {
+        setCarouselImages(result.assets.map((a) => a.uri));
+        setMediaUri(null);
+      }
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -287,7 +302,7 @@ export default function CreatePostScreen() {
     try {
       const body: any = {
         content: text.trim(),
-        images: mediaUri ? [mediaUri] : [],
+        images: selectedType === "carousel" ? carouselImages : (mediaUri ? [mediaUri] : []),
         city: user?.city ?? null,
         language: user?.language ?? null,
         type: selectedType,
@@ -323,6 +338,15 @@ export default function CreatePostScreen() {
         body: JSON.stringify(body),
       });
       if (res.ok) {
+        // Update streak
+        const today = new Date().toISOString().split("T")[0];
+        const lastPost = user?.lastPostDate?.split("T")[0];
+        if (lastPost !== today) {
+          const newStreak = lastPost === new Date(Date.now() - 86400000).toISOString().split("T")[0]
+            ? (user?.streakCount ?? 0) + 1
+            : 1;
+          updateProfile?.({ streakCount: newStreak, lastPostDate: new Date().toISOString() });
+        }
         Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
         trackCreate(selectedType as "post" | "reel" | "story" | "live");
       } else {
@@ -541,7 +565,32 @@ export default function CreatePostScreen() {
           )}
         </View>
 
-        {selectedType !== "text" && selectedType !== "poll" && (
+        {/* Carousel image preview grid */}
+        {selectedType === "carousel" && carouselImages.length > 0 && (
+          <View style={styles.carouselGrid}>
+            {carouselImages.map((uri, idx) => (
+              <View key={uri} style={[styles.carouselThumb, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <Image source={{ uri }} style={styles.carouselThumbImg} />
+                <Pressable onPress={() => setCarouselImages((prev) => prev.filter((_, i) => i !== idx))} style={[styles.carouselRemoveBtn, { backgroundColor: "rgba(0,0,0,0.6)" }]}>
+                  <Feather name="x" size={12} color="#fff" />
+                </Pressable>
+                {idx === 0 && (
+                  <View style={[styles.carouselCoverBadge, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.carouselCoverText}>Cover</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+            {carouselImages.length < 10 && (
+              <Pressable onPress={() => pickMedia("carousel")} style={[styles.carouselAddBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <Feather name="plus" size={24} color={colors.primary} />
+                <Text style={[styles.carouselAddText, { color: colors.mutedForeground }]}>Add</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
+        {selectedType !== "text" && selectedType !== "poll" && selectedType !== "carousel" && (
           <Pressable
             onPress={() => {
               if (selectedType === "photo" || selectedType === "story") pickMedia("photo");
@@ -569,6 +618,20 @@ export default function CreatePostScreen() {
                   </Text>
                 </>
               )}
+            </LinearGradient>
+          </Pressable>
+        )}
+
+        {/* Carousel initial upload button */}
+        {selectedType === "carousel" && carouselImages.length === 0 && (
+          <Pressable
+            onPress={() => pickMedia("carousel")}
+            style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: colors.border }]}
+          >
+            <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={styles.mediaUploadInner}>
+              <Feather name="layers" size={32} color={colors.primary} />
+              <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Tap to add photos</Text>
+              <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Select 2-10 photos · JPG, PNG up to 20MB each</Text>
             </LinearGradient>
           </Pressable>
         )}
@@ -987,6 +1050,15 @@ const styles = StyleSheet.create({
   aiChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   mediaUpload: { marginHorizontal: 16, borderRadius: 18, borderWidth: 2, borderStyle: "dashed", overflow: "hidden", marginVertical: 12 },
   mediaUploadInner: { paddingVertical: 48, alignItems: "center", gap: 10 },
+  // Carousel
+  carouselGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: 16, marginVertical: 12 },
+  carouselThumb: { width: 80, height: 80, borderRadius: 12, borderWidth: 1, overflow: "hidden", position: "relative" },
+  carouselThumbImg: { width: 80, height: 80 },
+  carouselRemoveBtn: { position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  carouselCoverBadge: { position: "absolute", bottom: 4, left: 4, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  carouselCoverText: { fontSize: 9, fontFamily: "Inter_700Bold", color: "#fff" },
+  carouselAddBtn: { width: 80, height: 80, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", alignItems: "center", justifyContent: "center", gap: 4 },
+  carouselAddText: { fontSize: 11, fontFamily: "Inter_500Medium" },
   mediaUploadText: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
   mediaUploadSub: { fontSize: 13, fontFamily: "Inter_400Regular" },
   pollOptions: { paddingHorizontal: 16, gap: 10, marginVertical: 8 },

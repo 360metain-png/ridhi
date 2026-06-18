@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   FlatList,
   Image,
@@ -401,6 +402,18 @@ export default function FeedScreen() {
       // Show toast-like alert
       // In real app, this would persist to server and show in followers' Following feed
     }
+  }, []);
+
+  const handleNotInterested = useCallback((id: string) => {
+    setPosts((prev) => prev.filter((p) => p.id !== id));
+    Alert.alert("Not Interested", "We'll show you fewer posts like this. You can always change this in Settings > Content Preferences.");
+  }, []);
+
+  const handleReplyWithVideo = useCallback((postId: string, commentId: string) => {
+    router.push({
+      pathname: "/create-post",
+      params: { type: "reel", replyTo: postId, replyComment: commentId },
+    });
   }, []);
 
   const handleBoost = async () => {
@@ -1033,7 +1046,13 @@ export default function FeedScreen() {
                       <Text style={[styles.commentName, { color: colors.foreground }]}>{c.name}</Text>
                       <Text style={[styles.commentText, { color: colors.foreground }]}>{c.text}</Text>
                     </View>
-                    <Text style={[styles.commentTime, { color: colors.mutedForeground }]}>{c.timeAgo}</Text>
+                    <View style={styles.commentActions}>
+                      <Text style={[styles.commentTime, { color: colors.mutedForeground }]}>{c.timeAgo}</Text>
+                      <Pressable onPress={() => handleReplyWithVideo(commentPostId ?? "", c.id)} style={[styles.replyVideoBtn, { backgroundColor: colors.primary + "18" }]}>
+                        <Feather name="video" size={11} color={colors.primary} />
+                        <Text style={[styles.replyVideoText, { color: colors.primary }]}>Reply with Video</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -1228,6 +1247,17 @@ export default function FeedScreen() {
                 <View style={styles.menuItemText}>
                   <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Block User</Text>
                   <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Stop seeing posts from this person</Text>
+                </View>
+              </Pressable>
+
+              <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => { if (postMenu) { handleNotInterested(postMenu.id); setPostMenu(null); } }}>
+                <View style={[styles.menuItemIcon, { backgroundColor: "#FF9500" + "18" }]}>
+                  <Feather name="eye-off" size={16} color="#FF9500" />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>Not Interested</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Show fewer posts like this</Text>
                 </View>
               </Pressable>
             </>
@@ -1762,6 +1792,9 @@ const styles = StyleSheet.create({
   commentName: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   commentText: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 18 },
   commentTime: { fontSize: 11, fontFamily: "Inter_400Regular", marginLeft: 4 },
+  commentActions: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 4 },
+  replyVideoBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  replyVideoText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   commentInputRow: {
     flexDirection: "row",
     alignItems: "center",
