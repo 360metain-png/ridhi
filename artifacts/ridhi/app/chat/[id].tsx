@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { AIReplySuggestions } from "@/components/AIReplySuggestions";
 
 interface Message {
   id: string;
@@ -306,6 +307,18 @@ export default function ChatDetailScreen() {
         }
         renderItem={renderMessage}
       />
+
+      {/* AI Reply Suggestions - based on last message */}
+      {messages.length > 0 && !messages[0].fromMe && (
+        <AIReplySuggestions
+          lastMessage={messages[0].text ?? ""}
+          otherUser={{ name: otherUser?.name ?? "User" }}
+          onSelectReply={(reply) => {
+            setInput(reply);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }}
+        />
+      )}
 
       {showStickers && (
         <View style={[styles.stickerPanel, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>

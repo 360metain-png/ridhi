@@ -24,6 +24,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { MATCH_PROFILES } from "@/data/mockData";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
+import { AISuggestionPanel } from "@/components/AISuggestionPanel";
+import { AIMatchBadge } from "@/components/AIMatchBadge";
+import { useAIMatchSuggestions } from "@/hooks/useAIMatch";
+import { type AISuggestedMatch } from "@/data/aiMatchEngine";
+import { calculateCompatibility } from "@/data/aiMatchEngine";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -177,6 +182,9 @@ export default function MatchScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<DiscoverFilters>(initialFilters);
   const [draft, setDraft] = useState<DiscoverFilters>(initialFilters);
+  const [showAI, setShowAI] = useState(true);
+
+  const aiSuggestions = useAIMatchSuggestions(5);
 
   const position = useRef(new Animated.ValueXY()).current;
   const rotateAnim = position.x.interpolate({
@@ -305,6 +313,32 @@ export default function MatchScreen() {
         </Pressable>
       </View>
 
+      {/* ── AI SUGGESTED MATCHES ───────────────────────────────────────────── */}
+      {showAI && aiSuggestions.length > 0 && (
+        <AISuggestionPanel
+          suggestions={aiSuggestions}
+          onPressMatch={(profile) => {
+            // Insert the AI-suggested profile at the top of the deck
+            setProfiles((prev) => [profile as Profile, ...prev]);
+            setShowAI(false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          }}
+        />
+      )}
+
+      {/* ── AI TOGGLE (small button to show/hide AI panel) ─────────────────── */}
+      {aiSuggestions.length > 0 && (
+        <Pressable
+          onPress={() => setShowAI(!showAI)}
+          style={[styles.aiToggle, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}
+        >
+          <Feather name="cpu" size={14} color={colors.primary} />
+          <Text style={[styles.aiToggleText, { color: colors.primary }]}>
+            {showAI ? "Hide AI Picks" : `AI Picks (${aiSuggestions.length})`}
+          </Text>
+        </Pressable>
+      )}
+
       {/* ── CARD AREA ──────────────────────────────────────────────────────── */}
       <View style={[styles.cardArea, { paddingBottom: bottomPad + 16 }]}>
         {profiles.length === 0 ? (
@@ -354,10 +388,12 @@ export default function MatchScreen() {
                     <Text style={styles.cardName}>
                       {current.name}, {current.age}
                     </Text>
-                    <View style={[styles.matchBadge, { backgroundColor: colors.primary }]}>
-                      <Feather name="zap" size={12} color="#fff" />
-                      <Text style={styles.matchPct}>{current.matchPercent}%</Text>
-                    </View>
+                    <AIMatchBadge
+                      score={current.compatibilityScore ?? current.matchPercent ?? 75}
+                      reasons={[]}
+                      matchType="high"
+                      compact
+                    />
                   </View>
                   {current.vipTier && (
                     <SubscriptionBadge tier={current.vipTier} size="sm" style={{ marginBottom: 6, alignSelf: "flex-start" }} />
@@ -712,6 +748,19 @@ const styles = StyleSheet.create({
   },
   cardLangText: { color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" },
   cardBio: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  aiToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignSelf: "center",
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  aiToggleText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
   cardTags: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   cardTag: { backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   cardTagText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },

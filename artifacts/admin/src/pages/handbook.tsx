@@ -974,8 +974,13 @@ const SA_SECTIONS: Section[] = [
       "TikTok-style analytics dashboard: TTS usage by language, carousel engagement rate, video reply adoption rate, streak participation, repost virality, Not Interested trends",
       "Feature flags: enable/disable each TikTok feature independently (TTS, Auto-Captions, Carousel, Video Replies, Repost, Streaks, Not Interested) for gradual rollout or A/B testing",
       "Monetisation: set if TikTok features are available to free users vs VIP tiers. Example: Carousel and Video Replies for all users; TTS voice packs for Gold+ only",
+      "AI Matchmaking Engine: configure compatibility scoring weights (interests, language, age, location, bio). Set minimum match threshold for AI suggestions (default 70%). Enable/disable AI icebreaker generation",
+      "AI Smart Icebreakers: toggle AI-generated first messages. Set language preference for icebreakers (user's language vs English). Configure icebreaker tone (casual, flirty, friendly)",
+      "AI Reply Suggestions: enable/disable AI reply suggestions in chat. Set context awareness (last 3 messages vs last 10). Configure suggestion count per message (default 3)",
+      "AI Matchmaking Analytics: track AI suggestion acceptance rate, icebreaker response rate, reply suggestion usage, compatibility score distribution. Export for ML model improvement",
+      "Feature flags: enable/disable AI Matchmaking features independently for gradual rollout or A/B testing",
     ],
-    note: "These TikTok-inspired features are specifically designed for Indian users and regional content creators. All features support 13 Indian languages. TTS and auto-captions use on-device generation where possible for privacy. Streaks update at midnight IST.",
+    note: "These TikTok-inspired features and AI Matchmaking are specifically designed for Indian users and regional content creators. All features support 13 Indian languages. TTS and auto-captions use on-device generation where possible for privacy. Streaks update at midnight IST. AI Matchmaking works offline using on-device algorithms for privacy.",
   },
   {
     id: "sa-ads",
@@ -1134,7 +1139,7 @@ export default function HandbookPage() {
             Ridhi Platform Handbook
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.1.0
+            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.2.0
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1266,7 +1271,7 @@ export default function HandbookPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground border-t pt-4">
-        <p>Ridhi Platform Handbook · Version 3.1.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
+        <p>Ridhi Platform Handbook · Version 3.2.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
         <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · hello@ridhi.app</p>
       </div>
     </div>
