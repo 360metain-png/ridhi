@@ -2,12 +2,13 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { posts, postLikes, postComments, follows, users } from "@workspace/db";
 import { eq, desc, sql, and, inArray, isNull } from "drizzle-orm";
+import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
 
 const router = Router();
 
 // ── GET /api/feed — posts from followed users + trending ──
-router.get("/feed", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string | undefined;
+router.get("/feed", async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req);
   const trending = req.query.trending === "true";
   const limit = Math.min(parseInt(req.query.limit as string || "20"), 50);
   const offset = parseInt(req.query.offset as string || "0");
@@ -110,12 +111,8 @@ router.get("/feed", async (req, res) => {
 let totalResult: any[];
 
 // ── POST /api/posts — create a new post ──
-router.post("/posts", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
+router.post("/posts", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
 
   const { content, images, city, language } = req.body;
   if (!content || content.trim().length === 0) {
@@ -143,13 +140,9 @@ router.post("/posts", async (req, res) => {
 });
 
 // ── POST /api/posts/:id/like — toggle like ──
-router.post("/posts/:id/like", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  const postId = req.params.id;
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
+router.post("/posts/:id/like", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
+  const postId = req.params.id as string;
   // Accept non-UUID user IDs for demo/test mode
   const effectiveUserId = userId.startsWith("test") || userId.length < 36
     ? "00000000-0000-0000-0000-000000000000"
@@ -192,15 +185,10 @@ router.post("/posts/:id/like", async (req, res) => {
 });
 
 // ── POST /api/posts/:id/comment — add comment ──
-router.post("/posts/:id/comment", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  const postId = req.params.id;
+router.post("/posts/:id/comment", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
+  const postId = req.params.id as string;
   const { content } = req.body;
-
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
   if (!content || content.trim().length === 0) {
     res.status(400).json({ error: "Comment content is required" });
     return;

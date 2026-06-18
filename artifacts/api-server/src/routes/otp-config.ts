@@ -5,17 +5,14 @@ import {
   type OtpProvider,
 } from "../lib/otpConfig";
 import { isFirebaseConfigured } from "../lib/firebaseAdmin";
+import { requireSuperAdmin } from "../lib/auth";
+import { auditFromRequest } from "../lib/audit";
+import { adminRateLimit } from "../lib/rateLimit";
 
 const router = Router();
 
 const MSG91_AUTH_KEY = process.env["MSG91_AUTH_KEY"];
 const MSG91_TEMPLATE_ID = process.env["MSG91_OTP_TEMPLATE_ID"];
-
-/** Simple Super Admin check — in production, replace with real JWT role validation */
-function isSuperAdmin(req: any): boolean {
-  const header = req.headers["x-admin-role"];
-  return header === "super_admin";
-}
 
 // ── GET /api/admin/otp-config ──
 // Read current OTP provider configuration + availability status
@@ -38,12 +35,7 @@ router.get("/admin/otp-config", (req, res) => {
 
 // ── POST /api/admin/otp-config ──
 // Switch active provider (Super Admin only)
-router.post("/admin/otp-config", (req, res) => {
-  if (!isSuperAdmin(req)) {
-    res.status(403).json({ success: false, error: "Super Admin access required" });
-    return;
-  }
-
+router.post("/admin/otp-config", requireSuperAdmin, adminRateLimit, (req, res) => {
   const { provider, changedBy } = req.body as {
     provider: string;
     changedBy?: string;

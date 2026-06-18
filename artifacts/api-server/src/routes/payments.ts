@@ -5,6 +5,9 @@ import {
   getProviderAvailability,
   type PaymentProvider,
 } from "../lib/paymentConfig";
+import { requireUser, type AuthenticatedRequest } from "../lib/auth";
+import { paymentRateLimit } from "../lib/rateLimit";
+import { auditFromRequest } from "../lib/audit";
 
 const router = Router();
 
@@ -259,7 +262,7 @@ async function createProviderOrder(
 }
 
 // ── POST /api/payments/create-order ──────────────────────────────────────────
-router.post("/payments/create-order", async (req, res) => {
+router.post("/payments/create-order", requireUser, paymentRateLimit, async (req: AuthenticatedRequest, res) => {
   const { amount, currency = "INR", receipt, notes } = req.body as {
     amount: number;
     currency?: string;
@@ -293,7 +296,7 @@ router.post("/payments/create-order", async (req, res) => {
 });
 
 // ── POST /api/payments/verify ─────────────────────────────────────────────────
-router.post("/payments/verify", async (req, res) => {
+router.post("/payments/verify", requireUser, paymentRateLimit, async (req: AuthenticatedRequest, res) => {
   const {
     razorpay_order_id,
     razorpay_payment_id,
@@ -420,6 +423,11 @@ router.post("/payments/verify", async (req, res) => {
 
   if (verified) {
     verifiedOrders.set(resolvedOrderId, resolvedPaymentId);
+    auditFromRequest(req, "payment_verify", resolvedOrderId, "payment", {
+      paymentId: resolvedPaymentId,
+      provider: activeProvider,
+      amount: req.body?.amount,
+    });
     req.log.info({ paymentId: resolvedPaymentId, provider: activeProvider }, "Payment verified");
     res.json({ success: true, testMode: false, paymentId: resolvedPaymentId, provider: activeProvider });
   } else {
@@ -490,7 +498,8 @@ router.get("/payments/checkout", (req, res) => {
   // The checkout URL should have been returned in the create-order response
   if (activeProvider === "phonepe" || activeProvider === "instamojo" || activeProvider === "cashfree") {
     const redirectUrl = req.query.checkoutUrl as string;
-    if (redirectUrl) {
+    // Validate redirect URL to prevent open redirect
+    if (redirectUrl && (redirectUrl.startsWith("https://") || redirectUrl.startsWith("http://"))) {
       res.redirect(redirectUrl);
       return;
     }
@@ -518,6 +527,10 @@ router.get("/payments/callback", (req, res) => {
     verifiedOrders.set(resolvedOrderId, resolvedPaymentId);
   }
 
+  // Sanitize user-controlled values before embedding in HTML
+  const escapeHtml = (str: string) => str.replace(/[&<>"']/g, (m) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]!));
+  const safePaymentId = escapeHtml(resolvedPaymentId);
+
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>body{font-family:sans-serif;background:#0d0d0d;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
@@ -525,7 +538,7 @@ router.get("/payments/callback", (req, res) => {
 .success{color:#34C759;font-size:20px;font-weight:700;margin:16px 0}
 .close{color:#888;font-size:14px;margin-top:16px}</style></head>
 <body><div class="logo">Ridhi</div><div class="success">✅ Payment Received</div>
-<p>Transaction: ${resolvedPaymentId}</p><p class="close">You can close this tab.</p></body></html>`;
+<p>Transaction: ${safePaymentId}</p><p class="close">You can close this tab.</p></body></html>`;
 
   res.setHeader("Content-Type", "text/html");
   res.send(html);

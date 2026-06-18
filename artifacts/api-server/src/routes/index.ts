@@ -10,6 +10,7 @@ import callsRouter from "./calls";
 import feedRouter from "./feed";
 import usersRouter from "./users";
 import chatRouter from "./chat";
+import adminAuthRouter from "./admin-auth";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(callsRouter);
 router.use(feedRouter);
 router.use(usersRouter);
 router.use(chatRouter);
+router.use(adminAuthRouter);
 
 export default router;

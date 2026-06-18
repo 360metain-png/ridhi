@@ -5,14 +5,11 @@ import {
   getProviderAvailability,
   type PaymentProvider,
 } from "../lib/paymentConfig";
+import { requireSuperAdmin } from "../lib/auth";
+import { auditFromRequest } from "../lib/audit";
+import { adminRateLimit } from "../lib/rateLimit";
 
 const router = Router();
-
-/** Simple Super Admin check — in production, replace with real JWT role validation */
-function isSuperAdmin(req: any): boolean {
-  const header = req.headers["x-admin-role"];
-  return header === "super_admin";
-}
 
 // ── GET /api/admin/payment-config ──
 // Read current payment provider configuration + availability status
@@ -26,12 +23,7 @@ router.get("/admin/payment-config", (_req, res) => {
 
 // ── POST /api/admin/payment-config ──
 // Switch active payment provider (Super Admin only)
-router.post("/admin/payment-config", (req, res) => {
-  if (!isSuperAdmin(req)) {
-    res.status(403).json({ success: false, error: "Super Admin access required" });
-    return;
-  }
-
+router.post("/admin/payment-config", requireSuperAdmin, adminRateLimit, (req, res) => {
   const { provider, changedBy } = req.body as {
     provider: string;
     changedBy?: string;

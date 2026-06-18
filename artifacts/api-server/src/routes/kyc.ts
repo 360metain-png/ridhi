@@ -2,6 +2,10 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { kycRecords } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { requireUser, requireAdmin, type AuthenticatedRequest } from "../lib/auth";
+import { encryptKycFields, decryptKycFields } from "../lib/encryption";
+import { auditFromRequest } from "../lib/audit";
+import { adminRateLimit } from "../lib/rateLimit";
 
 const router = Router();
 
@@ -20,8 +24,8 @@ function isValidIfsc(v: unknown): v is string {
   return typeof v === "string" && /^[A-Z]{4}[0-9]{7}$/.test(v);
 }
 
-// ── POST /api/kyc/submit ────────────────────────────────────────────────────
-router.post("/kyc/submit", async (req, res) => {
+// ── POST /api/kyc/submit — user submits KYC ─────────────────────────────────────────────
+router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) => {
   const body = req.body as any;
   if (!body?.userId || typeof body.userId !== "string") {
     res.status(400).json({ success: false, error: "userId is required" });
@@ -54,6 +58,15 @@ router.post("/kyc/submit", async (req, res) => {
     }
 
     const now = new Date();
+    // Encrypt sensitive fields before storage
+    const encrypted = encryptKycFields({
+      aadhaarNumber: isValidAadhaar(body.aadhaarNumber) ? body.aadhaarNumber : undefined,
+      panNumber: isValidPan(body.panNumber) ? body.panNumber : undefined,
+      bankAccountNumber: typeof body.bankAccountNumber === "string" ? body.bankAccountNumber : undefined,
+      bankIfsc: isValidIfsc(body.bankIfsc) ? body.bankIfsc : undefined,
+      bankName: typeof body.bankName === "string" ? body.bankName : undefined,
+      bankHolderName: typeof body.bankHolderName === "string" ? body.bankHolderName : undefined,
+    });
     const record: any = {
       userId: body.userId,
       roles: body.roles,
@@ -61,12 +74,7 @@ router.post("/kyc/submit", async (req, res) => {
       aadhaarBackImage: body.aadhaarBackImage || undefined,
       panImage: body.panImage || undefined,
       bankProofImage: body.bankProofImage || undefined,
-      aadhaarNumber: isValidAadhaar(body.aadhaarNumber) ? body.aadhaarNumber : undefined,
-      panNumber: isValidPan(body.panNumber) ? body.panNumber : undefined,
-      bankAccountNumber: typeof body.bankAccountNumber === "string" ? body.bankAccountNumber : undefined,
-      bankIfsc: isValidIfsc(body.bankIfsc) ? body.bankIfsc : undefined,
-      bankName: typeof body.bankName === "string" ? body.bankName : undefined,
-      bankHolderName: typeof body.bankHolderName === "string" ? body.bankHolderName : undefined,
+      ...encrypted,
       status: "pending" as const,
       reviewStatus: "pending" as const,
       submittedAt: now,
@@ -93,8 +101,8 @@ router.post("/kyc/submit", async (req, res) => {
 });
 
 // ── GET /api/kyc/status/:userId ──────────────────────────────────────────────
-router.get("/kyc/status/:userId", async (req, res) => {
-  const { userId } = req.params;
+router.get("/kyc/status/:userId", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.params.userId as string;
   try {
     const rows = await db.select().from(kycRecords).where(eq(kycRecords.userId, userId)).limit(1);
     if (rows.length === 0) {
@@ -112,18 +120,20 @@ router.get("/kyc/status/:userId", async (req, res) => {
       return;
     }
     const k = rows[0];
+    // Decrypt sensitive fields before returning
+    const decrypted = decryptKycFields(k);
     res.json({
       success: true,
       kyc: {
         status: k.status,
         reviewStatus: k.reviewStatus,
         roles: k.roles,
-        aadhaarNumber: k.aadhaarNumber,
+        aadhaarNumber: decrypted.aadhaarNumber,
         aadhaarVerified: k.aadhaarVerified,
-        panNumber: k.panNumber,
+        panNumber: decrypted.panNumber,
         panVerified: k.panVerified,
-        bankName: k.bankName,
-        bankIfsc: k.bankIfsc,
+        bankName: decrypted.bankName,
+        bankIfsc: decrypted.bankIfsc,
         bankVerified: k.bankVerified,
         submittedAt: k.submittedAt,
         reviewedAt: k.reviewedAt,
@@ -139,8 +149,8 @@ router.get("/kyc/status/:userId", async (req, res) => {
 });
 
 // ── GET /api/kyc/documents/:userId ───────────────────────────────────────────
-router.get("/kyc/documents/:userId", async (req, res) => {
-  const { userId } = req.params;
+router.get("/kyc/documents/:userId", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  const userId = req.params.userId as string;
   try {
     const rows = await db.select().from(kycRecords).where(eq(kycRecords.userId, userId)).limit(1);
     if (rows.length === 0) {
@@ -164,7 +174,7 @@ router.get("/kyc/documents/:userId", async (req, res) => {
 });
 
 // ── GET /api/kyc/queue ──────────────────────────────────────────────────────
-router.get("/kyc/queue", async (req, res) => {
+router.get("/kyc/queue", requireAdmin, adminRateLimit, async (req: AuthenticatedRequest, res) => {
   const { status, reviewStatus, role } = req.query as Record<string, string>;
   try {
     let query: any = db.select().from(kycRecords);
@@ -212,8 +222,8 @@ router.get("/kyc/queue", async (req, res) => {
 });
 
 // ── POST /api/kyc/review/:userId ────────────────────────────────────────────
-router.post("/kyc/review/:userId", async (req, res) => {
-  const { userId } = req.params;
+router.post("/kyc/review/:userId", requireAdmin, adminRateLimit, async (req: AuthenticatedRequest, res) => {
+  const userId = req.params.userId as string;
   const body = req.body as any;
   const action = body?.action;
   if (!action || !["approve", "reject"].includes(action)) {
@@ -252,6 +262,11 @@ router.post("/kyc/review/:userId", async (req, res) => {
 
     await db.update(kycRecords).set(update).where(eq(kycRecords.userId, userId));
 
+    auditFromRequest(req, action === "approve" ? "kyc_approve" : "kyc_reject", userId, "user", {
+      reviewedBy: body.reviewedBy,
+      adminComment: body.adminComment,
+      rejectionReason: body.rejectionReason,
+    });
     req.log.info({ userId, action, reviewedBy: body.reviewedBy }, "KYC reviewed");
     res.json({
       success: true,

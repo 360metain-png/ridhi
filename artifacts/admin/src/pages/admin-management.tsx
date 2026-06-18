@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { downloadCSV } from "@/lib/utils";
-import { getSharedAdmins, setSharedAdmins, addSharedAdmin, updateSharedAdmin, deleteSharedAdmin } from "@/lib/admin-store";
+import { getSharedAdmins, setSharedAdmins, addSharedAdmin, updateSharedAdmin, deleteSharedAdmin, type SharedAdmin } from "@/lib/admin-store";
 import {
   UserPlus, Edit2, Trash2, ShieldCheck, Users, CheckCircle, XCircle,
   Clock, Search, Eye, EyeOff, Copy, MoreVertical, LayoutDashboard,

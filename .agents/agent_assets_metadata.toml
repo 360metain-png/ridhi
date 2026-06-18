@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "MORwc0M3ckz4fNDBHRsOr"
@@ -30,3 +29,9 @@ id = "Vd_yrMf6XSrHbPpjTkv56"
 uri = "file://artifacts/ridhi/assets/images/feed_post2.png"
 type = "image"
 title = "feed_post_wedding"
+
+[[outputs]]
+id = "oK7a5jCJi0ada67hRTH7h"
+uri = "file://artifacts/api-server/SECURITY_AUDIT_REPORT.md"
+type = "text"
+title = "Ridhi Security Audit Report"

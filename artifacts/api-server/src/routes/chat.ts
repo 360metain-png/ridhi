@@ -2,16 +2,13 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { conversations, messages, users } from "@workspace/db";
 import { eq, desc, sql, and, inArray } from "drizzle-orm";
+import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
 
 const router = Router();
 
 // ── GET /api/chat — list conversations for current user ──
-router.get("/chat", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
+router.get("/chat", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
 
   try {
     const convList = await db
@@ -51,14 +48,9 @@ router.get("/chat", async (req, res) => {
 });
 
 // ── POST /api/chat — create or get conversation ──
-router.post("/chat", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
+router.post("/chat", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
   const { otherUserId } = req.body;
-
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
   if (!otherUserId) {
     res.status(400).json({ error: "otherUserId is required" });
     return;
@@ -92,14 +84,9 @@ router.post("/chat", async (req, res) => {
 });
 
 // ── GET /api/chat/:id/messages ──
-router.get("/chat/:id/messages", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  const conversationId = req.params.id;
-
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
+router.get("/chat/:id/messages", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
+  const conversationId = req.params.id as string;
 
   try {
     // Verify user is part of this conversation
@@ -137,15 +124,10 @@ router.get("/chat/:id/messages", async (req, res) => {
 });
 
 // ── POST /api/chat/:id/messages ──
-router.post("/chat/:id/messages", async (req, res) => {
-  const userId = req.headers["x-user-id"] as string;
-  const conversationId = req.params.id;
+router.post("/chat/:id/messages", requireUser, async (req: AuthenticatedRequest, res) => {
+  const userId = getUserId(req) as string;
+  const conversationId = req.params.id as string;
   const { content, type = "text" } = req.body;
-
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
   if (!content || content.trim().length === 0) {
     res.status(400).json({ error: "Content is required" });
     return;

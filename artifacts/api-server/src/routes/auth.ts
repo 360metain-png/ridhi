@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { verifyFirebaseIdToken } from "../lib/firebaseAdmin";
 import { resolveProvider } from "../lib/otpConfig";
+import { signUserToken } from "../lib/auth";
+import { otpRateLimit } from "../lib/rateLimit";
+import { auditFromRequest } from "../lib/audit";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -93,7 +97,7 @@ router.get("/auth/otp-provider", (_req, res) => {
 });
 
 // ── POST /api/auth/send-otp ────────────────────────────────────────────────────
-router.post("/auth/send-otp", async (req, res) => {
+router.post("/auth/send-otp", otpRateLimit, async (req, res) => {
   const { contact, type } = req.body as { contact: string; type: "phone" | "email" };
 
   if (!contact || !type) {
@@ -181,7 +185,10 @@ router.post("/auth/verify-otp", async (req, res) => {
     }
     otpStore.delete(contact);
     req.log.info({ contact }, "OTP verified (local store)");
-    res.json({ success: true, message: "OTP verified" });
+    // Generate JWT token for the user
+    const token = signUserToken(contact);
+    auditFromRequest(req, "admin_login", contact, "user", { provider: "local" });
+    res.json({ success: true, message: "OTP verified", token });
     return;
   }
 
@@ -236,7 +243,9 @@ router.post("/auth/firebase-verify", async (req, res) => {
   }
 
   req.log.info({ contact, uid: result.uid }, "Firebase OTP verified");
-  res.json({ success: true, provider: "firebase", uid: result.uid, message: "OTP verified via Firebase" });
+  const token = signUserToken(contact);
+  auditFromRequest(req, "admin_login", contact, "user", { provider: "firebase", uid: result.uid });
+  res.json({ success: true, provider: "firebase", uid: result.uid, message: "OTP verified via Firebase", token });
 });
 
 // ── POST /api/auth/resend-otp ─────────────────────────────────────────────────

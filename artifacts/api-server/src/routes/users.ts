@@ -2,13 +2,15 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { users, follows, posts } from "@workspace/db";
 import { eq, and, desc, sql, count } from "drizzle-orm";
+import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
+import { searchRateLimit } from "../lib/rateLimit";
 
 const router = Router();
 
 // ── GET /api/users/:id — get user profile ──
-router.get("/users/:id", async (req, res) => {
-  const userId = req.params.id;
-  const currentUserId = req.headers["x-user-id"] as string | undefined;
+router.get("/users/:id", async (req: AuthenticatedRequest, res) => {
+  const userId = req.params.id as string;
+  const currentUserId = getUserId(req);
 
   try {
     const [user] = await db
@@ -61,9 +63,9 @@ router.get("/users/:id", async (req, res) => {
 });
 
 // ── POST /api/users/:id/follow — toggle follow ──
-router.post("/users/:id/follow", async (req, res) => {
-  const currentUserId = req.headers["x-user-id"] as string;
-  const targetUserId = req.params.id;
+router.post("/users/:id/follow", requireUser, async (req: AuthenticatedRequest, res) => {
+  const currentUserId = getUserId(req) as string;
+  const targetUserId = req.params.id as string;
 
   if (!currentUserId) {
     res.status(401).json({ error: "Authentication required" });
@@ -100,8 +102,8 @@ router.post("/users/:id/follow", async (req, res) => {
 });
 
 // ── GET /api/users/:id/posts — get user's posts ──
-router.get("/users/:id/posts", async (req, res) => {
-  const userId = req.params.id;
+router.get("/users/:id/posts", async (req: AuthenticatedRequest, res) => {
+  const userId = req.params.id as string;
   const limit = Math.min(parseInt(req.query.limit as string || "20"), 50);
   const offset = parseInt(req.query.offset as string || "0");
 
@@ -122,7 +124,7 @@ router.get("/users/:id/posts", async (req, res) => {
 });
 
 // ── GET /api/users/search?q= — search users ──
-router.get("/users", async (req, res) => {
+router.get("/users", searchRateLimit, async (req: AuthenticatedRequest, res) => {
   const q = (req.query.q as string || "").trim();
   const limit = Math.min(parseInt(req.query.limit as string || "20"), 50);
 
