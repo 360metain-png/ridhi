@@ -121,6 +121,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="voice-reels"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <AnimatedTabIcon name="mic" focused={focused} color={color} />
+          ),
+          tabBarLabel: ({ focused }) => <TabLabel label="Voice" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="match"
         options={{
           tabBarIcon: () => (

@@ -6,7 +6,8 @@ import {
   Users, UserPlus, FileText, Coins, IndianRupee, TrendingUp, Radio,
   Zap, Heart, Star, Award, Briefcase, Shield, Crown,
   ArrowUpRight, CheckCircle, Clock, AlertTriangle,
-  Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power, Download} from "lucide-react";
+  Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power, Download,
+  HardDrive, Database, FileAudio, Video} from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -400,6 +401,49 @@ export default function Dashboard() {
         </div>
       )}
 
+
+      {/* ── Storage Metrics (SA only) ───────────────────────────────────── */}
+      {isSA && (
+        <Card className="border-emerald-200 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <HardDrive className="w-4 h-4 text-emerald-600" /> Storage Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "Total Used", value: "2.4 GB", sub: "of 50 GB plan", icon: Database, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/20" },
+                { label: "Video Storage", value: "1.8 GB", sub: "75% of total", icon: Video, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/20" },
+                { label: "Audio Storage", value: "312 MB", sub: "13% of total", icon: FileAudio, color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/20" },
+                { label: "Space Saved", value: "1.2 GB", sub: "from compression", icon: Zap, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/20" },
+              ].map((s) => (
+                <div key={s.label} className={`flex items-center gap-3 p-3 rounded-lg border ${s.bg} border-transparent`}>
+                  <div className={`p-2 rounded-lg ${s.bg}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
+                  <div>
+                    <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className="text-[10px] text-muted-foreground/70">{s.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Storage capacity</span>
+                <span className="font-medium">4.8% used (2.4 GB / 50 GB)</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" style={{ width: "4.8%" }} />
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-emerald-700">
+                <CheckCircle className="w-3 h-3" />
+                <span>Audio-first policy active — new recordings are audio-only. Video auto-delete set to 30 days.</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Charts row 2 (SA / Admin) ───────────────────────────────────── */}
       {(isSA || isAdmin) && (

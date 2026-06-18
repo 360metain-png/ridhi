@@ -5,10 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   Phone, Video, Mic, Radio, Search, Play, Download, Trash2, Clock,
   Shield, ShieldAlert, Eye, Lock, ChevronRight, Calendar, Users,
-  Volume2, AlertTriangle, CheckCircle, Filter,
+  Volume2, AlertTriangle, CheckCircle, Filter, Zap, HardDrive, Music, Database,
+  Cloud, Trash, Archive, FileAudio, Settings,
 } from "lucide-react";
 import { type AdminRole } from "@/App";
 import { downloadCSV } from "@/lib/utils";
@@ -248,8 +253,42 @@ export default function Recordings() {
   const [recordings,  setRecordings]  = useState<CallRecording[]>(CALL_RECORDINGS);
   const [rooms,       setRooms]       = useState<RoomActivity[]>(ROOM_ACTIVITIES);
 
+  // Audio-first / storage policy state
+  const [audioOnlyMode, setAudioOnlyMode] = useState(false);
+  const [retentionDays, setRetentionDays] = useState(30);
+  const [autoDeleteEnabled, setAutoDeleteEnabled] = useState(false);
+  const [showPolicyDialog, setShowPolicyDialog] = useState(false);
+  const [showCompressDialog, setShowCompressDialog] = useState(false);
+  const [compressLoading, setCompressLoading] = useState(false);
+  const [storageSaved, setStorageSaved] = useState(0); // MB saved
+  const { toast } = useToast();
+
   const deleteRecording = (id: string) => setRecordings(prev => prev.filter(r => r.id !== id));
   const deleteRoom      = (id: string) => setRooms(prev => prev.filter(r => r.id !== id));
+
+  const compressToAudio = () => {
+    setCompressLoading(true);
+    setTimeout(() => {
+      const videoRecs = recordings.filter(r => r.type === "video-call");
+      const saved = videoRecs.reduce((acc, r) => {
+        const mb = parseFloat(r.size.replace(" MB", ""));
+        return acc + (mb * 0.85); // 85% reduction
+      }, 0);
+      setRecordings(prev => prev.map(r => r.type === "video-call" ? { ...r, type: "audio-call", size: `${(parseFloat(r.size.replace(" MB", "")) * 0.15).toFixed(1)} MB` } : r));
+      setStorageSaved(prev => prev + saved);
+      setCompressLoading(false);
+      setShowCompressDialog(false);
+      toast({ title: "Compression Complete", description: `${videoRecs.length} video recordings converted to audio. ${saved.toFixed(1)} MB saved.`, variant: "default" });
+    }, 2000);
+  };
+
+  const deleteOldVideo = () => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - retentionDays);
+    const oldVideo = recordings.filter(r => r.type === "video-call" && new Date(r.date) < cutoff);
+    setRecordings(prev => prev.filter(r => !(r.type === "video-call" && new Date(r.date) < cutoff)));
+    toast({ title: "Auto-Cleanup", description: `${oldVideo.length} old video recordings deleted.`, variant: "default" });
+  };
 
   // Admin only sees problematic (flagged) recordings by default.
   // Switching to "All" shows clean recordings too.
@@ -333,6 +372,62 @@ export default function Recordings() {
             </p>
           </div>
         </div>
+      )}
+
+      {/* ── Storage Policy Panel (Super Admin) ── */}
+      {isSuperAdmin && (
+        <Card className="border border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <HardDrive className="w-4 h-4 text-emerald-600" />
+              <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Storage Policy — Audio-First</h3>
+              {storageSaved > 0 && (
+                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300 text-[10px]">
+                  {storageSaved.toFixed(1)} MB saved
+                </Badge>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Audio-Only Toggle */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-black/20 border border-emerald-100 dark:border-emerald-800">
+                <div className="flex items-center gap-2">
+                  <Music className="w-4 h-4 text-violet-600" />
+                  <div>
+                    <p className="text-sm font-medium">Audio-Only Mode</p>
+                    <p className="text-xs text-muted-foreground">New calls record audio only</p>
+                  </div>
+                </div>
+                <Switch checked={audioOnlyMode} onCheckedChange={setAudioOnlyMode} />
+              </div>
+              {/* Compress to Audio */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-black/20 border border-emerald-100 dark:border-emerald-800">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-600" />
+                  <div>
+                    <p className="text-sm font-medium">Compress Video</p>
+                    <p className="text-xs text-muted-foreground">Convert video to audio</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowCompressDialog(true)}>
+                  <FileAudio className="w-3 h-3" />Compress
+                </Button>
+              </div>
+              {/* Auto-Delete Policy */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-black/20 border border-emerald-100 dark:border-emerald-800">
+                <div className="flex items-center gap-2">
+                  <Trash className="w-4 h-4 text-rose-600" />
+                  <div>
+                    <p className="text-sm font-medium">Auto-Delete</p>
+                    <p className="text-xs text-muted-foreground">Delete old recordings</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowPolicyDialog(true)}>
+                  <Settings className="w-3 h-3" />Configure
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* ── Summary cards ── */}
@@ -457,6 +552,105 @@ export default function Recordings() {
             : roomList.map(r => <RoomActivityRow key={r.id} room={r} isSuperAdmin={isSuperAdmin} onDelete={deleteRoom} />)}
         </TabsContent>
       </Tabs>
+
+      {/* ── Compress Dialog ── */}
+      <Dialog open={showCompressDialog} onOpenChange={setShowCompressDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Zap className="w-4 h-4 text-amber-500" /> Compress Video to Audio
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <p className="text-sm text-muted-foreground">
+              Convert all video call recordings to audio-only format. This reduces file size by ~85% while preserving all voice content.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="bg-rose-50 border-rose-200">
+                <CardContent className="p-3 text-center">
+                  <p className="text-lg font-bold text-rose-600">{recordings.filter(r => r.type === "video-call").length}</p>
+                  <p className="text-xs text-muted-foreground">Video recordings</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-emerald-50 border-emerald-200">
+                <CardContent className="p-3 text-center">
+                  <p className="text-lg font-bold text-emerald-600">{recordings.filter(r => r.type === "video-call").reduce((s, r) => s + parseFloat(r.size.replace(" MB", "")) * 0.85, 0).toFixed(0)} MB</p>
+                  <p className="text-xs text-muted-foreground">Estimated space saved</p>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-9" onClick={() => setShowCompressDialog(false)}>Cancel</Button>
+              <Button
+                size="sm"
+                className="h-9 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0"
+                onClick={compressToAudio}
+                disabled={compressLoading}
+              >
+                {compressLoading ? "Compressing..." : "Compress All"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Storage Policy Dialog ── */}
+      <Dialog open={showPolicyDialog} onOpenChange={setShowPolicyDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Database className="w-4 h-4 text-blue-500" /> Storage Policy
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-blue-500" />
+                  <Label className="text-sm font-medium">Auto-Delete Old Videos</Label>
+                </div>
+                <Switch checked={autoDeleteEnabled} onCheckedChange={setAutoDeleteEnabled} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Delete video recordings older than</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={retentionDays}
+                    onChange={(e) => setRetentionDays(parseInt(e.target.value) || 30)}
+                    className="w-20 h-9"
+                    min={1}
+                    max={365}
+                  />
+                  <span className="text-sm text-muted-foreground">days</span>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <div className="flex items-start gap-2">
+                  <Archive className="w-4 h-4 text-amber-500 mt-0.5" />
+                  <div className="text-xs text-muted-foreground">
+                    <strong className="text-amber-700">Audio recordings</strong> are kept for 90 days. <strong className="text-amber-700">Flagged recordings</strong> are kept indefinitely for review.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-9" onClick={() => setShowPolicyDialog(false)}>Cancel</Button>
+              <Button
+                size="sm"
+                className="h-9 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0"
+                onClick={() => {
+                  if (autoDeleteEnabled) deleteOldVideo();
+                  setShowPolicyDialog(false);
+                  toast({ title: "Policy Updated", description: `Auto-delete ${autoDeleteEnabled ? "enabled" : "disabled"}. Retention: ${retentionDays} days.`, variant: "default" });
+                }}
+              >
+                Save Policy
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

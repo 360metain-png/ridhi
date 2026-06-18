@@ -27,13 +27,13 @@ const { width } = Dimensions.get("window");
 
 const POST_TYPES = [
   { id: "text", icon: "type", label: "Status", desc: "Share what's on your mind" },
+  { id: "audio", icon: "mic", label: "Audio", desc: "Share a voice note or podcast clip" },
   { id: "photo", icon: "image", label: "Photo", desc: "Share a photo from your gallery" },
+  { id: "reel", icon: "play", label: "Reel", desc: "Create a short audio/video reel" },
+  { id: "story", icon: "circle", label: "Story", desc: "Visible for 24 hours" },
   { id: "video", icon: "video", label: "Video", desc: "Share a video up to 5 minutes" },
-  { id: "reel", icon: "play", label: "Reel", desc: "Create a short vertical video" },
   { id: "duet", icon: "users", label: "Duet", desc: "Side-by-side with another video" },
   { id: "stitch", icon: "git-merge", label: "Stitch", desc: "React to a part of another video" },
-  { id: "story", icon: "circle", label: "Story", desc: "Visible for 24 hours" },
-  { id: "audio", icon: "mic", label: "Audio", desc: "Share a voice note or audio clip" },
   { id: "gif", icon: "film", label: "GIF", desc: "Share an animated GIF" },
   { id: "poll", icon: "bar-chart-2", label: "Poll", desc: "Ask your followers a question" },
 ] as const;
