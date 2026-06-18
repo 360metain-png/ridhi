@@ -52,6 +52,7 @@ import LeadForms           from "@/pages/lead-forms";
 import Stories             from "@/pages/stories";
 import Dating              from "@/pages/dating";
 import CRM                 from "@/pages/crm";
+import PaymentGateway      from "@/pages/payment-gateway";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/my-report":         ["super_admin", "admin"],
   "/video-uploads":     ["super_admin"],
   "/handbook":     ["super_admin", "admin"],
+  "/payment-gateway": ["super_admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -211,6 +213,7 @@ function Router() {
       <Route path="/stories"         component={() => <RoleRoute component={Stories}          path="/stories" />} />
       <Route path="/dating"         component={() => <RoleRoute component={Dating}           path="/dating" />} />
       <Route path="/crm"             component={() => <RoleRoute component={CRM}               path="/crm" />} />
+      <Route path="/payment-gateway" component={() => <RoleRoute component={PaymentGateway}   path="/payment-gateway" />} />
       <Route component={NotFound} />
     </Switch>
   );
