@@ -1,289 +1,326 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  UserCog, ChevronRight, Smartphone, Shield,
-  Users, FileText, TrendingUp, Layers,
-  Radio, Coins,
+  UserCog, Shield, Eye, EyeOff, ChevronRight, ArrowLeft,
+  AlertCircle, Lock, KeyRound, Mail,
 } from "lucide-react";
+import type { AdminRole } from "@/App";
+import { validateLogin, validateSuperAdminOnly, resetPassword, getDefaultEmail } from "@/config/credentials";
 
-const FEATURES = [
-  { icon: Users,      label: "User Management",    desc: "Manage all users, hosts & agents"     },
-  { icon: FileText,   label: "Content Moderation",  desc: "Review posts, reels & live streams"   },
-  { icon: TrendingUp, label: "Revenue Analytics",   desc: "Track coins, payouts & subscriptions" },
-  { icon: Radio,      label: "Live Stream Control", desc: "Monitor & moderate live sessions"     },
-  { icon: Coins,      label: "Coin Economy",        desc: "Configure packages & coin rules"      },
-  { icon: Layers,     label: "Platform Settings",   desc: "Feature flags & system config"        },
+const ROLES: { id: AdminRole; label: string; desc: string; icon: typeof UserCog; color: string; gradient: string }[] = [
+  {
+    id: "admin", label: "Admin Portal", desc: "Manage agents, revenue, and operations",
+    icon: UserCog, color: "#7B2FBE", gradient: "from-purple-600 to-pink-500",
+  },
+  {
+    id: "super_admin", label: "Super Admin", desc: "Full platform control & admin management",
+    icon: Shield, color: "#6d28d9", gradient: "from-violet-600 to-purple-700",
+  },
 ];
 
 export default function Login() {
-  const [, setLocation]         = useLocation();
-  const [saClicks, setSaClicks] = useState(0);
-  const [showSA,   setShowSA]   = useState(false);
+  const [, setLocation] = useLocation();
+  const [selectedRole, setSelectedRole] = useState<AdminRole | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleLogoClick() {
-    const next = saClicks + 1;
-    setSaClicks(next);
-    if (next >= 5) { setShowSA(true); setSaClicks(0); }
-  }
+  // Forgot password
+  const [showForgot, setShowForgot] = useState(false);
+  const [saEmail, setSaEmail] = useState("");
+  const [saPass, setSaPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedRole) return;
+    if (!email || !password) { setError("Please enter email and password."); return; }
+    setLoading(true);
+    setTimeout(() => {
+      if (!validateLogin(selectedRole, email, password)) {
+        setError("Incorrect email or password.");
+        setLoading(false);
+        return;
+      }
+      localStorage.setItem("ridhi_admin_logged_in", "true");
+      localStorage.setItem("ridhi_admin_role", selectedRole);
+      localStorage.setItem("ridhi_admin_email", email.trim().toLowerCase());
+      setLocation("/");
+    }, 400);
+  };
+
+  const handleReset = (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError(""); setResetSuccess("");
+    if (!saEmail || !saPass || !newPass || !confirmPass) {
+      setResetError("Please fill all fields."); return;
+    }
+    if (!validateSuperAdminOnly(saEmail, saPass)) {
+      setResetError("Invalid Super Admin credentials."); return;
+    }
+    if (newPass.length < 8) { setResetError("Password must be at least 8 characters."); return; }
+    if (newPass !== confirmPass) { setResetError("Passwords do not match."); return; }
+    resetPassword("super_admin", newPass);
+    setResetSuccess("Password reset successfully.");
+    setTimeout(() => { setShowForgot(false); setResetSuccess(""); }, 2500);
+  };
+
+  const cfg = selectedRole ? ROLES.find((r) => r.id === selectedRole)! : null;
 
   return (
-    <div className="min-h-screen flex overflow-hidden bg-[#0a0a12]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a0533] via-[#0d0d18] to-[#0a0a12] p-4">
 
-      {/* ── LEFT — Brand panel ─────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-10 overflow-hidden">
+      {/* Subtle background glows */}
+      <div className="fixed top-0 left-0 w-[500px] h-[500px] rounded-full bg-purple-700/10 blur-[150px] pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-pink-600/10 blur-[150px] pointer-events-none" />
 
-        {/* layered gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a0533] via-[#2d0a5e] to-[#0e0120]" />
-
-        {/* decorative orbs */}
-        <div className="absolute top-[-80px] left-[-80px] w-[400px] h-[400px] rounded-full bg-purple-700/30 blur-[100px]" />
-        <div className="absolute bottom-[-60px] right-[-60px] w-[350px] h-[350px] rounded-full bg-pink-600/25 blur-[100px]" />
-        <div className="absolute top-1/2 left-1/3 w-[200px] h-[200px] rounded-full bg-purple-500/15 blur-[80px]" />
-
-        {/* subtle grid overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
+      <div className="relative z-10 w-full max-w-[420px]">
 
         {/* Logo */}
-        <div className="relative z-10 flex items-center gap-3 select-none cursor-pointer pl-2" onClick={handleLogoClick}>
-          <div className="relative">
-            <img
-              src={`${import.meta.env.BASE_URL}ridhi_logo.png`}
-              alt="Ridhi"
-              className="w-12 h-12 object-contain drop-shadow-2xl"
-            />
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-purple-500/40 to-pink-500/40 blur-md" />
-          </div>
+        <div className="flex items-center gap-3 justify-center mb-8">
+          <img src={`${import.meta.env.BASE_URL}ridhi_logo.png`} alt="Ridhi" className="w-10 h-10 object-contain" />
           <div>
-            <p className="text-white font-black text-xl leading-none tracking-tight">Ridhi</p>
-            <p className="text-purple-300/80 text-[11px] leading-none mt-1 font-medium tracking-widest uppercase">Control Panel</p>
+            <p className="text-white font-black text-lg leading-none">Ridhi</p>
+            <p className="text-purple-300/60 text-[10px] mt-0.5 font-medium tracking-widest uppercase">Control Panel</p>
           </div>
         </div>
 
-        {/* Hero text */}
-        <div className="relative z-10 space-y-6 pl-2">
-          <div>
-            <h1 className="text-5xl font-black text-white leading-[1.1] tracking-tight">
-              India's #1<br />
-              <span
-                className="text-transparent bg-clip-text"
-                style={{ backgroundImage: "linear-gradient(135deg, #c084fc 0%, #e879f9 50%, #f472b6 100%)" }}
-              >
-                Social Platform
-              </span>
-            </h1>
-            <p className="mt-4 text-purple-200/70 text-base leading-relaxed max-w-xs">
-              Manage 1 Cr+ users, live streams, creator payouts, and platform-wide features — all from one dashboard.
-            </p>
-          </div>
-
-          {/* Feature grid */}
-          <div className="grid grid-cols-2 gap-3">
-            {FEATURES.map(({ icon: Icon, label, desc }) => (
-              <div
-                key={label}
-                className="flex items-start gap-3 rounded-xl p-3"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: "linear-gradient(135deg, rgba(139,92,246,.35), rgba(236,72,153,.25))" }}>
-                  <Icon className="w-4 h-4 text-purple-300" />
-                </div>
-                <div>
-                  <p className="text-white text-[11px] font-bold leading-none">{label}</p>
-                  <p className="text-purple-300/60 text-[10px] mt-1 leading-snug">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Platform stats strip */}
-        <div
-          className="relative z-10 flex items-center gap-6 rounded-2xl px-5 py-3 ml-2"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-        >
-          {[
-            { val: "1 Cr+",  lbl: "Users"        },
-            { val: "284",    lbl: "Live Now"      },
-            { val: "₹2.5Cr", lbl: "Rev / Month"  },
-            { val: "13",     lbl: "Languages"     },
-          ].map(({ val, lbl }) => (
-            <div key={lbl} className="text-center">
-              <p className="text-white font-black text-lg leading-none">{val}</p>
-              <p className="text-purple-300/60 text-[10px] mt-0.5">{lbl}</p>
+        {/* Role selector (shown when no role selected) */}
+        {!selectedRole && (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-black text-white">Welcome back</h2>
+              <p className="text-purple-300/50 text-sm mt-1">Select your portal to continue</p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* ── RIGHT — Login panel ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 relative">
-
-        {/* mobile bg */}
-        <div className="absolute inset-0 lg:hidden bg-gradient-to-br from-[#1a0533] via-[#0a0a12] to-[#0a0a12]" />
-        <div className="absolute inset-0 hidden lg:block bg-[#0d0d18]" />
-
-        {/* subtle right-side glow */}
-        <div className="absolute top-1/4 right-0 w-[300px] h-[300px] rounded-full bg-pink-700/10 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 left-0 w-[250px] h-[250px] rounded-full bg-purple-700/10 blur-[100px] pointer-events-none" />
-
-        <div className="relative z-10 w-full max-w-[400px] space-y-8">
-
-          {/* Mobile logo (hidden on lg) */}
-          <button
-            onClick={handleLogoClick}
-            className="lg:hidden flex items-center gap-3 mx-auto focus:outline-none"
-          >
-            <img
-              src={`${import.meta.env.BASE_URL}ridhi_logo.png`}
-              alt="Ridhi"
-              className="w-12 h-12 object-contain drop-shadow-xl"
-            />
-            <div className="text-left">
-              <p className="text-white font-black text-xl leading-none">Ridhi</p>
-              <p className="text-purple-400 text-xs mt-0.5 font-medium tracking-wider uppercase">Control Panel</p>
-            </div>
-          </button>
-
-          {/* Heading */}
-          <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-black text-white leading-tight">Welcome back</h2>
-            <p className="text-purple-300/70 text-sm mt-1.5">Sign in to access the admin dashboard</p>
-          </div>
-
-          {/* Admin card */}
-          <button
-            onClick={() => setLocation("/login/admin")}
-            className="group w-full text-left rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(123,47,190,0.4)] focus:outline-none"
-            style={{
-              background: "linear-gradient(135deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.06) 100%)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              backdropFilter: "blur(24px)",
-            }}
-          >
-            {/* gradient top bar */}
-            <div className="h-[3px]" style={{ background: "linear-gradient(90deg, #7B2FBE, #E91E8C)" }} />
-
-            <div className="p-6 space-y-5">
-              {/* Icon row */}
-              <div className="flex items-center justify-between">
-                <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, rgba(123,47,190,0.4), rgba(233,30,140,0.3))", border: "1px solid rgba(255,255,255,0.12)" }}
+            {ROLES.map((role) => {
+              const Icon = role.icon;
+              return (
+                <button
+                  key={role.id}
+                  onClick={() => {
+                    setSelectedRole(role.id);
+                    setEmail(getDefaultEmail(role.id));
+                    setError("");
+                  }}
+                  className="group w-full text-left rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_60px_rgba(123,47,190,0.35)] focus:outline-none"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                  }}
                 >
-                  <UserCog className="w-7 h-7 text-purple-200" />
-                </div>
-                <span
-                  className="text-[10px] font-bold px-3 py-1 rounded-full text-white"
-                  style={{ background: "linear-gradient(135deg, #7B2FBE, #E91E8C)" }}
-                >
-                  Platform Operations
-                </span>
-              </div>
-
-              {/* Title */}
-              <div>
-                <h3 className="text-2xl font-black text-white">Admin Portal</h3>
-                <p className="text-purple-300/60 text-sm mt-1 leading-relaxed">
-                  Oversee users, content, hosts, agents, and platform operations.
-                </p>
-              </div>
-
-              {/* Access list */}
-              <div
-                className="rounded-xl p-4 grid grid-cols-2 gap-y-2 gap-x-3"
-                style={{ background: "rgba(123,47,190,0.15)", border: "1px solid rgba(123,47,190,0.2)" }}
-              >
-                {["Users & content", "Hosts & agents", "Revenue overview", "Marketing tools"].map((a) => (
-                  <div key={a} className="flex items-center gap-2">
+                  <div className="h-[2px]" style={{ background: `linear-gradient(90deg, ${role.color}, ${role.color === "#7B2FBE" ? "#E91E8C" : "#a855f7"})` }} />
+                  <div className="p-5 flex items-center gap-4">
                     <div
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ background: "linear-gradient(135deg, #7B2FBE, #E91E8C)" }}
-                    />
-                    <span className="text-purple-200/80 text-xs">{a}</span>
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: `linear-gradient(135deg, ${role.color}40, ${role.color}25)`, border: "1px solid rgba(255,255,255,0.1)" }}
+                    >
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-bold text-sm">{role.label}</h3>
+                      <p className="text-purple-300/50 text-xs mt-0.5">{role.desc}</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
                   </div>
-                ))}
-              </div>
+                </button>
+              );
+            })}
 
-              {/* CTA button */}
-              <div
-                className="flex items-center justify-between rounded-xl px-5 py-3.5 text-white transition-opacity group-hover:opacity-90"
-                style={{ background: "linear-gradient(135deg, #7B2FBE 0%, #E91E8C 100%)" }}
-              >
-                <span className="font-bold text-sm">Enter Portal</span>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            {/* Credentials hint */}
+            <div className="mt-6 rounded-lg border border-white/5 bg-white/[0.02] p-3">
+              <p className="text-[11px] text-white/30 text-center font-medium mb-2">Default Credentials</p>
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-white/40">
+                <div className="text-center">
+                  <span className="text-purple-300/60 font-semibold">Admin</span>
+                  <p className="mt-0.5">admin.sneha@ridhi.app</p>
+                  <p>Ridhi@Admin2024</p>
+                </div>
+                <div className="text-center">
+                  <span className="text-violet-300/60 font-semibold">Super Admin</span>
+                  <p className="mt-0.5">arjun@ridhi.app</p>
+                  <p>Ridhi@SA2024</p>
+                </div>
               </div>
             </div>
-          </button>
+          </div>
+        )}
 
-          {/* SA card — unlocked by 5× logo tap */}
-          {showSA && (
+        {/* Login form (shown when role selected) */}
+        {selectedRole && cfg && (
+          <div className="space-y-5">
+            {/* Back button */}
             <button
-              onClick={() => setLocation("/login/super-admin")}
-              className="group w-full text-left rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(109,40,217,0.4)] focus:outline-none"
-              style={{
-                background: "linear-gradient(135deg, rgba(109,40,217,0.15) 0%, rgba(76,29,149,0.1) 100%)",
-                border: "1px solid rgba(139,92,246,0.3)",
-                backdropFilter: "blur(20px)",
-              }}
+              onClick={() => { setSelectedRole(null); setError(""); setEmail(""); setPassword(""); }}
+              className="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs font-medium transition-colors"
             >
-              <div className="h-[3px]" style={{ background: "linear-gradient(90deg, #6d28d9, #7c3aed)" }} />
-              <div className="p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: "rgba(109,40,217,0.3)", border: "1px solid rgba(139,92,246,0.3)" }}
-                  >
-                    <Shield className="w-6 h-6 text-violet-300" />
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-violet-700 text-white">
-                    Full Platform Control
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-white">Super Admin</h3>
-                  <p className="text-violet-300/60 text-sm mt-1">Full access — settings, finance, admin management & more.</p>
-                </div>
-                <div
-                  className="flex items-center justify-between rounded-xl px-5 py-3 text-white transition-opacity group-hover:opacity-90"
-                  style={{ background: "linear-gradient(135deg, #6d28d9, #7c3aed)" }}
-                >
-                  <span className="font-bold text-sm">Enter Portal</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                </div>
-              </div>
+              <ArrowLeft className="w-3 h-3" /> Back to portals
             </button>
-          )}
 
-          {/* Mobile app note */}
-          <div
-            className="flex items-center gap-3 rounded-xl px-4 py-3"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <Smartphone className="w-4 h-4 text-pink-400 shrink-0" />
-            <p className="text-xs text-white/50 leading-snug">
-              <span className="text-white/80 font-semibold">Hosts & Users</span> — use the Ridhi Android / iOS app to access your account
+            {/* Header */}
+            <div className="text-center">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                style={{ background: `linear-gradient(135deg, ${cfg.color}40, ${cfg.color}25)`, border: "1px solid rgba(255,255,255,0.1)" }}
+              >
+                <cfg.icon className="w-7 h-7 text-white" />
+              </div>
+              <h2 className="text-xl font-black text-white">{cfg.label}</h2>
+              <p className="text-purple-300/40 text-xs mt-0.5">Ridhi Control Panel</p>
+            </div>
+
+            <Card className="shadow-2xl border-0 ring-1 ring-white/10 bg-white">
+              <CardContent className="p-5 space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Email</Label>
+                    <Input
+                      type="email"
+                      placeholder={getDefaultEmail(selectedRole)}
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                      className="h-10"
+                      autoComplete="email"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Password</Label>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgot(true)}
+                        className="text-[11px] font-medium text-purple-600 hover:text-purple-800 transition-colors"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Input
+                        type={showPass ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                        className="h-10 pr-10"
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPass((p) => !p)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                      >
+                        {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                      <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                      <p className="text-xs text-red-600 font-medium">{error}</p>
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full h-10 text-sm font-bold bg-gradient-to-r ${cfg.gradient} hover:opacity-90 border-0 shadow-md`}
+                  >
+                    {loading ? "Signing in..." : "Sign In"}
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <p className="text-center text-[10px] text-white/15">
+              Ridhi Control Panel · India's #1 Social App
             </p>
           </div>
+        )}
 
-          {/* Password recovery hint */}
-          <div className="text-center">
-            <p className="text-xs text-white/30">
-              Forgot your password? Click <strong>"Forgot Password?"</strong> on the Admin / Super Admin login screen.
-            </p>
+        {/* Forgot Password overlay */}
+        {showForgot && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="w-full max-w-sm bg-white rounded-xl shadow-2xl overflow-hidden">
+              <div className="p-5 border-b">
+                <h3 className="flex items-center gap-2 text-base font-bold">
+                  <KeyRound className="w-4 h-4 text-purple-600" /> Reset Password
+                </h3>
+              </div>
+              <form onSubmit={handleReset} className="p-5 space-y-4">
+                {selectedRole === "admin" ? (
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                    <p className="font-medium">Contact Super Admin</p>
+                    <p className="text-xs mt-1 text-amber-700">
+                      Admin passwords can only be reset by the Super Admin.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full h-8 mt-3" onClick={() => setShowForgot(false)} type="button">Close</Button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-muted-foreground">
+                      Enter your current Super Admin credentials, then set a new password.
+                    </p>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-semibold text-gray-500 uppercase">Super Admin Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input type="email" placeholder="arjun@ridhi.app" value={saEmail} onChange={(e) => { setSaEmail(e.target.value); setResetError(""); }} className="h-9 pl-9" required />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-semibold text-gray-500 uppercase">Current Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input type="password" value={saPass} onChange={(e) => { setSaPass(e.target.value); setResetError(""); }} className="h-9 pl-9" required />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-semibold text-gray-500 uppercase">New Password</Label>
+                      <div className="relative">
+                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input type={showNewPass ? "text" : "password"} value={newPass} onChange={(e) => { setNewPass(e.target.value); setResetError(""); }} className="h-9 pl-9" placeholder="Min 8 characters" required />
+                        <button type="button" onClick={() => setShowNewPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+                          {showNewPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] font-semibold text-gray-500 uppercase">Confirm Password</Label>
+                      <Input type={showNewPass ? "text" : "password"} value={confirmPass} onChange={(e) => { setConfirmPass(e.target.value); setResetError(""); }} className="h-9" required />
+                    </div>
+                    {resetError && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+                        <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                        <p className="text-xs text-red-600 font-medium">{resetError}</p>
+                      </div>
+                    )}
+                    {resetSuccess && (
+                      <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                        <Lock className="w-4 h-4 text-green-600 shrink-0" />
+                        <p className="text-xs text-green-700 font-medium">{resetSuccess}</p>
+                      </div>
+                    )}
+                    <div className="flex gap-2 pt-1">
+                      <Button variant="outline" size="sm" className="h-9" onClick={() => setShowForgot(false)} type="button">Cancel</Button>
+                      <Button size="sm" className="h-9 bg-gradient-to-r from-purple-600 to-pink-500 text-white border-0" type="submit">Reset</Button>
+                    </div>
+                  </>
+                )}
+              </form>
+            </div>
           </div>
-
-          <p className="text-center text-xs text-white/20">
-            Ridhi Control Panel · India's #1 Social App
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );
