@@ -1,29 +1,40 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
-import { mockUsers, getRiskLevel, getRiskFlagLabel } from "@/data/mock-data";
+import { mockUsers, getRiskLevel, getRiskFlagLabel, calculateTrustScore } from "@/data/mock-data";
 import type { User, RiskFlag } from "@/data/mock-data";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  Search, Filter, MoreHorizontal, Eye, ShieldCheck, Ban, Trash2,
+  Search, Filter, MoreHorizontal, Eye, ShieldCheck, Ban, Trash2, Plus,
   Users as UsersIcon, UserCheck, UserX, Clock, Download, MapPin, Phone, Mail,
   Calendar, FileText, Coins, ShieldAlert, Shield, AlertTriangle, CheckCircle,
   Fingerprint, Activity, Globe, Smartphone
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { downloadCSV } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Users() {
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [riskFilter, setRiskFilter] = useState("all");
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<User[]>(mockUsers);
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; action: string; userId: string | null }>({ isOpen: false, action: "", userId: null });
+
+  // Add User dialog state
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: "", phone: "", email: "", city: "", state: "", language: "Hindi",
+    status: "active" as User["status"],
+  });
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase()) || user.phone.includes(search);
@@ -38,16 +49,82 @@ export default function Users() {
 
   const confirmAction = () => {
     if (confirmDialog.userId) {
+      if (confirmDialog.action === "delete") {
+        const userToDelete = users.find(u => u.id === confirmDialog.userId);
+        setUsers(prev => prev.filter(u => u.id !== confirmDialog.userId));
+        toast({
+          title: "User Deleted",
+          description: `${userToDelete?.name ?? "User"} has been permanently removed.`,
+          variant: "destructive",
+        });
+        setConfirmDialog({ isOpen: false, action: "", userId: null });
+        return;
+      }
       setUsers(users.map(u => {
         if (u.id === confirmDialog.userId) {
           if (confirmDialog.action === "suspend") return { ...u, status: "suspended" };
+          if (confirmDialog.action === "activate") return { ...u, status: "active" };
           if (confirmDialog.action === "verify") return { ...u, isVerified: true };
-          if (confirmDialog.action === "delete") return { ...u, status: "pending" };
         }
         return u;
       }));
+      toast({
+        title: `User ${confirmDialog.action.charAt(0).toUpperCase() + confirmDialog.action.slice(1)}`,
+        description: "Action completed successfully.",
+      });
     }
     setConfirmDialog({ isOpen: false, action: "", userId: null });
+  };
+
+  const validateAddUser = () => {
+    const errors: Record<string, string> = {};
+    if (!newUser.name.trim()) errors.name = "Name is required";
+    if (!newUser.phone.trim()) errors.phone = "Phone is required";
+    if (!newUser.email.trim()) errors.email = "Email is required";
+    if (!newUser.email.includes("@")) errors.email = "Invalid email address";
+    if (!newUser.city.trim()) errors.city = "City is required";
+    if (!newUser.state.trim()) errors.state = "State is required";
+    setAddErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleAddUser = () => {
+    if (!validateAddUser()) return;
+    const id = `u${Date.now()}`;
+    const user: User = {
+      id,
+      name: newUser.name.trim(),
+      avatar: "",
+      phone: newUser.phone.trim(),
+      email: newUser.email.trim().toLowerCase(),
+      city: newUser.city.trim(),
+      state: newUser.state.trim(),
+      language: newUser.language,
+      joinDate: new Date().toISOString().split("T")[0],
+      status: newUser.status,
+      followers: 0,
+      following: 0,
+      posts: 0,
+      coins: 0,
+      reportsReceived: 0,
+      isVerified: false,
+      trustScore: calculateTrustScore({ name: newUser.name, email: newUser.email, bioText: "", posts: 0, followers: 0, following: 0, profileCompletion: 20, socialLinks: {} }),
+      bioText: "",
+      profileCompletion: 20,
+      deviceCount: 1,
+      ipCount: 1,
+      lastActivity: new Date().toISOString(),
+      riskFlags: [],
+      socialLinks: {},
+    };
+    setUsers(prev => [user, ...prev]);
+    setNewUser({ name: "", phone: "", email: "", city: "", state: "", language: "Hindi", status: "active" });
+    setAddErrors({});
+    setShowAddUser(false);
+    toast({
+      title: "User Added",
+      description: `${user.name} has been added successfully.`,
+    });
   };
 
   const getStatusConfig = (status: string) => {
@@ -193,6 +270,9 @@ export default function Users() {
             <Button variant="outline" size="sm" className="h-10 gap-2">
               <Download className="w-4 h-4" />
               Export
+            </Button>
+            <Button size="sm" className="h-10 gap-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white border-0" onClick={() => setShowAddUser(true)}>
+              <Plus className="w-4 h-4" /> Add User
             </Button>
           </div>
         </div>
@@ -356,13 +436,106 @@ export default function Users() {
         </Table>
       </div>
 
+      {/* ── Add User Dialog ── */}
+      <Dialog open={showAddUser} onOpenChange={(open) => { if (!open) { setShowAddUser(false); setAddErrors({}); } }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-base">Add New User</DialogTitle>
+            <DialogDescription className="text-sm">
+              Create a new user account. A default password will be assigned and shared via SMS.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">Name</Label>
+              <Input
+                placeholder="e.g. Rahul Sharma"
+                value={newUser.name}
+                onChange={(e) => { setNewUser({ ...newUser, name: e.target.value }); setAddErrors({ ...addErrors, name: "" }); }}
+                className={addErrors.name ? "border-red-300" : ""}
+              />
+              {addErrors.name && <p className="text-[10px] text-red-500">{addErrors.name}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">Phone</Label>
+              <Input
+                placeholder="+91 98765 43210"
+                value={newUser.phone}
+                onChange={(e) => { setNewUser({ ...newUser, phone: e.target.value }); setAddErrors({ ...addErrors, phone: "" }); }}
+                className={addErrors.phone ? "border-red-300" : ""}
+              />
+              {addErrors.phone && <p className="text-[10px] text-red-500">{addErrors.phone}</p>}
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">Email</Label>
+              <Input
+                type="email"
+                placeholder="user@example.com"
+                value={newUser.email}
+                onChange={(e) => { setNewUser({ ...newUser, email: e.target.value }); setAddErrors({ ...addErrors, email: "" }); }}
+                className={addErrors.email ? "border-red-300" : ""}
+              />
+              {addErrors.email && <p className="text-[10px] text-red-500">{addErrors.email}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">City</Label>
+              <Input
+                placeholder="e.g. Mumbai"
+                value={newUser.city}
+                onChange={(e) => { setNewUser({ ...newUser, city: e.target.value }); setAddErrors({ ...addErrors, city: "" }); }}
+                className={addErrors.city ? "border-red-300" : ""}
+              />
+              {addErrors.city && <p className="text-[10px] text-red-500">{addErrors.city}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">State</Label>
+              <Input
+                placeholder="e.g. Maharashtra"
+                value={newUser.state}
+                onChange={(e) => { setNewUser({ ...newUser, state: e.target.value }); setAddErrors({ ...addErrors, state: "" }); }}
+                className={addErrors.state ? "border-red-300" : ""}
+              />
+              {addErrors.state && <p className="text-[10px] text-red-500">{addErrors.state}</p>}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">Language</Label>
+              <Select value={newUser.language} onValueChange={(v) => setNewUser({ ...newUser, language: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["Hindi", "English", "Marathi", "Tamil", "Telugu", "Bengali", "Malayalam", "Gujarati", "Kannada", "Punjabi", "Odia", "Urdu", "Assamese"].map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-gray-500 uppercase">Status</Label>
+              <Select value={newUser.status} onValueChange={(v) => setNewUser({ ...newUser, status: v as User["status"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" size="sm" onClick={() => { setShowAddUser(false); setAddErrors({}); }}>Cancel</Button>
+            <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-500 text-white border-0" onClick={handleAddUser}>
+              Create User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ── Confirm Dialog ── */}
       <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => !open && setConfirmDialog({ isOpen: false, action: "", userId: null })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="capitalize text-base">Confirm {confirmDialog.action}</DialogTitle>
             <DialogDescription className="text-sm">
-              Are you sure you want to {confirmDialog.action} this user? This action will be logged for auditing purposes.
+              {confirmDialog.action === "delete"
+                ? "Are you sure you want to permanently delete this user? This action cannot be undone."
+                : `Are you sure you want to ${confirmDialog.action} this user? This action will be logged for auditing purposes.`}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
