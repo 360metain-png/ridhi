@@ -104,6 +104,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Marketing",   href: "/marketing",   icon: Megaphone,  allowedRoles: SA_A },
       { name: "Settings",    href: "/settings",    icon: Settings,   allowedRoles: SA   },
       { name: "Super Admin",         href: "/super-admin",       icon: ShieldCheck,   allowedRoles: SA   },
+      { name: "Admin Role Management", href: "/admin-management", icon: Users,         allowedRoles: SA   },
       { name: "My Work Report",     href: "/my-report",         icon: ClipboardList, allowedRoles: SA_A },
       { name: "API Integrations",   href: "/api-integrations",  icon: Plug,          allowedRoles: SA   },
       { name: "Payment Gateways",   href: "/payment-gateway",   icon: CreditCard,    allowedRoles: SA   },
@@ -305,7 +306,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                 {item.badge}
                               </Badge>
                             )}
-                            {item.href === "/super-admin" && (
+                            {(item.href === "/super-admin" || item.href === "/admin-management") && (
                               <Badge variant="outline" className="text-[9px] px-1 h-4 text-purple-600 border-purple-300 bg-purple-50 font-bold">
                                 SA
                               </Badge>
