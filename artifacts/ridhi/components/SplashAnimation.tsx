@@ -54,6 +54,12 @@ interface Props {
 }
 
 export function SplashAnimation({ onAnimationComplete, isReady }: Props) {
+  // ── Safety timeout: always dismiss after 6s regardless of animation ──
+  useEffect(() => {
+    const t = setTimeout(() => onAnimationComplete(), 6000);
+    return () => clearTimeout(t);
+  }, []);
+
   // ── Animation values ──────────────────────────────────────────────────────
   const bgOpacity      = useRef(new Animated.Value(0)).current;
   const blobScale      = useRef(new Animated.Value(0.5)).current;
