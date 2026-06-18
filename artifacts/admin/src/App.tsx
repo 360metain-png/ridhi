@@ -53,6 +53,7 @@ import Stories             from "@/pages/stories";
 import Dating              from "@/pages/dating";
 import CRM                 from "@/pages/crm";
 import PaymentGateway      from "@/pages/payment-gateway";
+import AdminManagement     from "@/pages/admin-management";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 const queryClient = new QueryClient();
@@ -97,6 +98,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/marketing":    ["super_admin", "admin"],
   "/settings":     ["super_admin"],
   "/super-admin":  ["super_admin"],
+  "/admin-management": ["super_admin"],
   "/promo-codes":  ["super_admin"],
   "/referral":          ["super_admin", "admin"],
   "/api-integrations":  ["super_admin"],
@@ -187,6 +189,7 @@ function Router() {
       <Route path="/revenue"      component={() => <RoleRoute component={Revenue}      path="/revenue" />} />
       <Route path="/monetization" component={() => <RoleRoute component={Monetization} path="/monetization" />} />
       <Route path="/super-admin"  component={() => <RoleRoute component={SuperAdmin}   path="/super-admin" />} />
+      <Route path="/admin-management" component={() => <RoleRoute component={AdminManagement} path="/admin-management" />} />
       <Route path="/promo-codes"  component={() => <RoleRoute component={PromoCodes}      path="/promo-codes" />} />
       <Route path="/referral"          component={() => <RoleRoute component={ReferralProgram}  path="/referral" />} />
       <Route path="/api-integrations"  component={() => <RoleRoute component={ApiIntegrations}  path="/api-integrations"  />} />

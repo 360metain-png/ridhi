@@ -1103,7 +1103,7 @@ export default function SuperAdminPage() {
                 <Button
                   size="sm"
                   className="w-full gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90"
-                  onClick={() => window.location.href = "/admins/admin-management"}
+                  onClick={() => window.location.href = "admin-management"}
                 >
                   Open Admin Management <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
