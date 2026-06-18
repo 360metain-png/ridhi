@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { downloadCSV } from "@/lib/utils";
+import { getSharedAdmins, useSharedAdmins } from "@/lib/admin-store";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,13 +48,13 @@ interface Agent {
   adminId: string;
 }
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
-const ADMINS: Admin[] = [
-  { id: "adm1", name: "Priya Sharma (Admin)",  email: "priya@ridhi.app",  agentCount: 2 },
-  { id: "adm2", name: "Rahul Mehta (Admin)",   email: "rahul@ridhi.app",  agentCount: 2 },
-  { id: "adm3", name: "Neha Gupta (Admin)",    email: "neha@ridhi.app",   agentCount: 2 },
-];
+function getLiveAdmins(): Admin[] {
+  return getSharedAdmins()
+    .filter((a) => a.status === "active")
+    .map((a) => ({ id: a.id, name: a.name + " (Admin)", email: a.email, agentCount: 0 }));
+}
 
 const AGENT_LEVELS = [
   { level: "A1", title: "Agent",        hostsRequired: 5,   commissionRate: 2,  color: "#9E9E9E", icon: "🥉" },
@@ -196,6 +198,107 @@ function RemoveDialog({
   );
 }
 
+// ── Recruit Agent Dialog ─────────────────────────────────────────────────────
+
+function RecruitDialog({
+  open, admins, onClose, onRecruit,
+}: {
+  open: boolean;
+  admins: Admin[];
+  onClose: () => void;
+  onRecruit: (agent: Omit<Agent, "id" | "earned" | "pendingPayout" | "status"> & { adminId: string }) => void;
+}) {
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [phone, setPhone] = useState("");
+  const [adminId, setAdminId] = useState("");
+  const [level, setLevel] = useState("A1");
+  const [hosts, setHosts] = useState("0");
+  const [topHost, setTopHost] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !city || !phone || !adminId) return;
+    onRecruit({
+      name, city, phone, level, hosts: parseInt(hosts) || 0, activeHosts: 0,
+      commission: AGENT_LEVELS.find(l => l.level === level)?.commissionRate ?? 2,
+      totalHostEarnings: 0, topHost: topHost || "—",
+      joinDate: new Date().toLocaleString("default", { month: "short", year: "numeric" }),
+      adminId,
+    });
+    setName(""); setCity(""); setPhone(""); setAdminId(""); setLevel("A1"); setHosts("0"); setTopHost("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-violet-500" /> Recruit Agent
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-3 py-1">
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold text-gray-500 uppercase">Name</Label>
+            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Agent full name" required />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-gray-500 uppercase">City</Label>
+              <Input value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Mumbai" required />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-gray-500 uppercase">Phone</Label>
+              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210" required />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold text-gray-500 uppercase">Assign to Admin</Label>
+            <Select value={adminId} onValueChange={setAdminId} required>
+              <SelectTrigger><SelectValue placeholder="Select admin…" /></SelectTrigger>
+              <SelectContent>
+                {admins.map(a => (
+                  <SelectItem key={a.id} value={a.id}>
+                    <span className="flex items-center gap-2">
+                      <Crown className="w-3.5 h-3.5 text-violet-500" /> {a.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-gray-500 uppercase">Level</Label>
+              <Select value={level} onValueChange={setLevel}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {AGENT_LEVELS.map(l => <SelectItem key={l.level} value={l.level}>{l.level} — {l.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-gray-500 uppercase">Starting Hosts</Label>
+              <Input type="number" min={0} value={hosts} onChange={e => setHosts(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold text-gray-500 uppercase">Top Host Name</Label>
+            <Input value={topHost} onChange={e => setTopHost(e.target.value)} placeholder="Optional" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" type="button" onClick={onClose}>Cancel</Button>
+            <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white" type="submit" disabled={!name || !city || !phone || !adminId}>
+              <CheckCircle className="w-3.5 h-3.5 mr-1" /> Recruit
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
@@ -203,9 +306,13 @@ export default function AgentsPage() {
   const role = localStorage.getItem("ridhi_admin_role") ?? "admin";
   const myAdminEmail = localStorage.getItem("ridhi_admin_email") ?? "";
 
+  // Live admins from shared store
+  const liveAdmins = getLiveAdmins();
+  const _useShared = useSharedAdmins(); // re-trigger when admins change
+
   // Determine the current admin's ID (for non-SA roles)
   const myAdminId = role === "admin"
-    ? (ADMINS.find(a => a.email === myAdminEmail)?.id ?? "adm1")
+    ? (liveAdmins.find(a => a.email === myAdminEmail)?.id ?? liveAdmins[0]?.id ?? "adm1")
     : null;
 
   const isSA    = role === "super_admin";
@@ -218,6 +325,7 @@ export default function AgentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [assignTarget, setAssignTarget] = useState<Agent | null>(null);
   const [removeTarget, setRemoveTarget] = useState<Agent | null>(null);
+  const [showRecruit, setShowRecruit] = useState(false);
   const [showHierarchy, setShowHierarchy] = useState(false);
 
   // Role-based data scope
@@ -249,9 +357,22 @@ export default function AgentsPage() {
 
   const handleAssign = (agentId: string, adminId: string) => {
     setAgents(prev => prev.map(a => a.id === agentId ? { ...a, adminId } : a));
-    const admin = ADMINS.find(x => x.id === adminId)!;
+    const admin = getLiveAdmins().find(x => x.id === adminId)!;
     const agent = agents.find(x => x.id === agentId)!;
     toast({ title: "Agent reassigned", description: `${agent.name} assigned to ${admin.name}` });
+  };
+
+  const handleRecruit = (data: Omit<Agent, "id" | "earned" | "pendingPayout" | "status"> & { adminId: string }) => {
+    const newAgent: Agent = {
+      ...data,
+      id: `ag-${Date.now()}`,
+      earned: 0,
+      pendingPayout: 0,
+      status: "active",
+    };
+    setAgents(prev => [newAgent, ...prev]);
+    const admin = getLiveAdmins().find(x => x.id === data.adminId);
+    toast({ title: "Agent recruited", description: `${newAgent.name} assigned to ${admin?.name ?? data.adminId}` });
   };
 
   const totalAgents    = scopedAgents.length;
@@ -295,7 +416,7 @@ export default function AgentsPage() {
               {showHierarchy ? "Hide" : "Show"} Hierarchy
             </Button>
           )}
-          <Button className="gap-2"><Plus className="w-4 h-4" /> Recruit Agent</Button>
+          <Button className="gap-2" onClick={() => setShowRecruit(true)}><Plus className="w-4 h-4" /> Recruit Agent</Button>
         </div>
       </div>
 
@@ -384,7 +505,7 @@ export default function AgentsPage() {
                 <div className="text-xs text-muted-foreground">Full access · manages all admins</div>
               </div>
 
-              {ADMINS.map((adm) => {
+              {liveAdmins.map((adm) => {
                 const admAgents = agents.filter(a => a.adminId === adm.id && a.status !== "removed");
                 return (
                   <div key={adm.id} className="ml-6 border-l-2 border-violet-200 pl-4 space-y-2">
@@ -556,7 +677,7 @@ export default function AgentsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Admins</SelectItem>
-                    {ADMINS.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                    {liveAdmins.map(a => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               )}
@@ -598,7 +719,7 @@ export default function AgentsPage() {
                   <tr><td colSpan={12} className="text-center py-10 text-muted-foreground text-sm">No agents found</td></tr>
                 ) : filtered.map(a => {
                   const sm = STATUS_META[a.status];
-                  const admin = ADMINS.find(x => x.id === a.adminId);
+                  const admin = liveAdmins.find(x => x.id === a.adminId);
                   return (
                     <tr key={a.id} className={`hover:bg-muted/40 ${a.status === "suspended" ? "opacity-70" : ""}`}>
                       <td className="p-4 py-3">
@@ -713,12 +834,16 @@ export default function AgentsPage() {
 
       {/* Dialogs */}
       <AssignDialog
-        agent={assignTarget} admins={ADMINS} open={!!assignTarget}
+        agent={assignTarget} admins={liveAdmins} open={!!assignTarget}
         onClose={() => setAssignTarget(null)} onAssign={handleAssign}
       />
       <RemoveDialog
         agent={removeTarget} open={!!removeTarget}
         onClose={() => setRemoveTarget(null)} onConfirm={handleRemove}
+      />
+      <RecruitDialog
+        open={showRecruit} admins={liveAdmins}
+        onClose={() => setShowRecruit(false)} onRecruit={handleRecruit}
       />
     </div>
   );

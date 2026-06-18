@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { downloadCSV } from "@/lib/utils";
+import { getSharedAdmins, setSharedAdmins, addSharedAdmin, updateSharedAdmin, deleteSharedAdmin } from "@/lib/admin-store";
 import {
   UserPlus, Edit2, Trash2, ShieldCheck, Users, CheckCircle, XCircle,
   Clock, Search, Eye, EyeOff, Copy, MoreVertical, LayoutDashboard,
@@ -164,7 +165,11 @@ const BLANK_FORM = {
 
 // ── Component ─────────────────────────────────────────────────────────────
 export default function AdminManagementPage() {
-  const [admins, setAdmins]       = useState<AdminAccount[]>(INITIAL_ADMINS);
+  const [admins, setAdmins]       = useState<AdminAccount[]>(() => {
+    const shared = getSharedAdmins();
+    // merge defaults if storage is empty
+    return shared.length > 0 ? shared.map((s) => ({ ...s, permissions: s.permissions ?? {} })) as AdminAccount[] : INITIAL_ADMINS;
+  });
   const [search, setSearch]       = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [editId, setEditId]       = useState<string | null>(null);
@@ -210,24 +215,31 @@ export default function AdminManagementPage() {
   const saveAdmin = () => {
     if (!form.name || !form.email) return;
     if (editId) {
-      setAdmins((prev) => prev.map((a) =>
+      const updated = admins.map((a) =>
         a.id === editId ? { ...a, name: form.name, email: form.email, phone: form.phone, role: form.role, city: form.city, permissions: form.permissions } : a
-      ));
+      );
+      setAdmins(updated);
+      setSharedAdmins(updated);
     } else {
       const newAdmin: AdminAccount = {
-        id: `a${Date.now()}`, name: form.name, email: form.email, phone: form.phone,
+        id: `adm-${Date.now()}`, name: form.name, email: form.email, phone: form.phone,
         role: form.role, status: "active", lastLogin: "Never", joinedAt: "May 2025",
         actionsToday: 0, actionsTotal: 0, city: form.city, permissions: form.permissions,
       };
-      setAdmins((prev) => [newAdmin, ...prev]);
+      const updated = [newAdmin, ...admins];
+      setAdmins(updated);
+      setSharedAdmins(updated);
     }
     setShowDialog(false);
   };
 
-  const toggleStatus = (id: string) =>
-    setAdmins((prev) => prev.map((a) =>
+  const toggleStatus = (id: string) => {
+    const updated = admins.map((a) =>
       a.id === id ? { ...a, status: a.status === "active" ? "inactive" : "active" } : a
-    ));
+    );
+    setAdmins(updated);
+    setSharedAdmins(updated);
+  };
 
   const deleteAdmin = (id: string) => {
     const admin = admins.find((a) => a.id === id);
@@ -237,7 +249,9 @@ export default function AdminManagementPage() {
       return;
     }
     if (!window.confirm(`Are you sure you want to permanently delete ${admin.name}'s admin account? This action cannot be undone.`)) return;
-    setAdmins((prev) => prev.filter((a) => a.id !== id));
+    const updated = admins.filter((a) => a.id !== id);
+    setAdmins(updated);
+    setSharedAdmins(updated);
   };
 
   const permCount = (a: AdminAccount) => Object.values(a.permissions).filter(Boolean).length;
