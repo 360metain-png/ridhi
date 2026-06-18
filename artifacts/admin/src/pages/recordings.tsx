@@ -282,12 +282,18 @@ export default function Recordings() {
     }, 2000);
   };
 
-  const deleteOldVideo = () => {
+  const deleteOldRecordings = () => {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - retentionDays);
+    const oldAudio = recordings.filter(r => r.type === "audio-call" && new Date(r.date) < cutoff);
     const oldVideo = recordings.filter(r => r.type === "video-call" && new Date(r.date) < cutoff);
-    setRecordings(prev => prev.filter(r => !(r.type === "video-call" && new Date(r.date) < cutoff)));
-    toast({ title: "Auto-Cleanup", description: `${oldVideo.length} old video recordings deleted.`, variant: "default" });
+    const totalDeleted = oldAudio.length + oldVideo.length;
+    setRecordings(prev => prev.filter(r => !(new Date(r.date) < cutoff)));
+    toast({
+      title: "Auto-Cleanup Complete",
+      description: `${totalDeleted} old recordings deleted (${oldAudio.length} audio, ${oldVideo.length} video).`,
+      variant: "default"
+    });
   };
 
   // Admin only sees problematic (flagged) recordings by default.
@@ -418,7 +424,7 @@ export default function Recordings() {
                   <Trash className="w-4 h-4 text-rose-600" />
                   <div>
                     <p className="text-sm font-medium">Auto-Delete</p>
-                    <p className="text-xs text-muted-foreground">Delete old recordings</p>
+                    <p className="text-xs text-muted-foreground">{retentionDays}-day cleanup for audio & video</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowPolicyDialog(true)}>
@@ -607,12 +613,12 @@ export default function Recordings() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Cloud className="w-4 h-4 text-blue-500" />
-                  <Label className="text-sm font-medium">Auto-Delete Old Videos</Label>
+                  <Label className="text-sm font-medium">Auto-Delete Old Recordings</Label>
                 </div>
                 <Switch checked={autoDeleteEnabled} onCheckedChange={setAutoDeleteEnabled} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Delete video recordings older than</Label>
+                <Label className="text-xs text-muted-foreground">Delete audio & video recordings older than</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
@@ -629,7 +635,7 @@ export default function Recordings() {
                 <div className="flex items-start gap-2">
                   <Archive className="w-4 h-4 text-amber-500 mt-0.5" />
                   <div className="text-xs text-muted-foreground">
-                    <strong className="text-amber-700">Audio recordings</strong> are kept for 90 days. <strong className="text-amber-700">Flagged recordings</strong> are kept indefinitely for review.
+                    <strong className="text-amber-700">Flagged recordings</strong> are kept indefinitely for review. <strong className="text-amber-700">Audio rooms</strong> are excluded from auto-delete.
                   </div>
                 </div>
               </div>
@@ -640,9 +646,9 @@ export default function Recordings() {
                 size="sm"
                 className="h-9 bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0"
                 onClick={() => {
-                  if (autoDeleteEnabled) deleteOldVideo();
+                  if (autoDeleteEnabled) deleteOldRecordings();
                   setShowPolicyDialog(false);
-                  toast({ title: "Policy Updated", description: `Auto-delete ${autoDeleteEnabled ? "enabled" : "disabled"}. Retention: ${retentionDays} days.`, variant: "default" });
+                  toast({ title: "Policy Updated", description: `Auto-delete ${autoDeleteEnabled ? "enabled" : "disabled"}. Retention: ${retentionDays} days for audio & video recordings.`, variant: "default" });
                 }}
               >
                 Save Policy
