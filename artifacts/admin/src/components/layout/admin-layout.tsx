@@ -60,6 +60,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
       { name: "Agents",             href: "/agents",       icon: Briefcase,allowedRoles: SA_A  },
       { name: "Levels & Promotion", href: "/levels",       icon: TrendingUp, allowedRoles: SA_AA },
       { name: "E-Verification", href: "/kyc",          icon: ScanFace, badge: "4", allowedRoles: SA_AA },
+      { name: "PK Battle Approvals", href: "/pk-battle-approvals", icon: Zap, badge: "NEW", allowedRoles: SA },
       { name: "Calls",              href: "/calls",        icon: Phone,       allowedRoles: ALL   },
       { name: "Recordings",         href: "/recordings",   icon: FolderOpen,  allowedRoles: SA_A  },
       { name: "Promotions & Ads",   href: "/promotions",   icon: Zap,         allowedRoles: SA },

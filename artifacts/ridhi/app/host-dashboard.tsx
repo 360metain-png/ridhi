@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors"
 import { useTrackScreen } from "@/hooks/useAnalytics";
 ;
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserProfile } from "@/contexts/AuthContext";
 import { PrivateHead } from "@/components/PrivateHead";
 
 const { width } = Dimensions.get("window");
@@ -94,6 +94,59 @@ function fmtCoins(n: number) {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+function PkBattleHostCard({ user }: { user: UserProfile | null }) {
+  const status = user?.pkBattleStatus || "not_requested";
+  const colors = useColors();
+
+  const meta: Record<string, { emoji: string; title: string; sub: string; bg: string; text: string; icon: string }> = {
+    not_requested: {
+      emoji: "🎯",
+      title: "Not Requested",
+      sub: "Complete E-verification, then request PK Battle host approval.",
+      bg: "#7B2FBE15",
+      text: "#7B2FBE",
+      icon: "zap",
+    },
+    requested: {
+      emoji: "⏳",
+      title: "Pending Review",
+      sub: "Your request is awaiting Super Admin approval.",
+      bg: "#FFB80015",
+      text: "#F57F17",
+      icon: "clock",
+    },
+    approved: {
+      emoji: "✨",
+      title: "Approved Host",
+      sub: "You can host PK Battles and earn coins.",
+      bg: "#34C75915",
+      text: "#2E7D32",
+      icon: "check-circle",
+    },
+    rejected: {
+      emoji: "🚫",
+      title: "Not Approved",
+      sub: user?.pkBattleRejectionReason || "Request rejected. Contact support.",
+      bg: "#FF3B3015",
+      text: "#C62828",
+      icon: "x-circle",
+    },
+  };
+
+  const m = meta[status];
+  return (
+    <View style={[styles.pkCard, { backgroundColor: m.bg }]}>
+      <View style={[styles.pkCardLeft, { backgroundColor: m.text + "20" }]}>
+        <Feather name={m.icon as any} size={22} color={m.text} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.pkCardTitle, { color: m.text }]}>{m.title}</Text>
+        <Text style={[styles.pkCardSub, { color: colors.mutedForeground }]}>{m.sub}</Text>
+      </View>
+    </View>
+  );
+}
 
 function ProgressBar({ value, color }: { value: number; color: string }) {
   return (
@@ -291,6 +344,12 @@ export default function HostDashboard() {
           </View>
         </View>
 
+        {/* ── PK Battle Host Status ── */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>PK Battle Host Status</Text>
+          <PkBattleHostCard user={user} />
+        </View>
+
         {/* ── KYC Status ── */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>KYC Verification</Text>
@@ -444,6 +503,11 @@ const styles = StyleSheet.create({
   agentEmail:      { fontSize: 11, marginBottom: 1 },
   agentPhone:      { fontSize: 11 },
   contactBtn:      { width: 38, height: 38, borderRadius: 19, backgroundColor: "#7B2FBE15", alignItems: "center", justifyContent: "center" },
+
+  pkCard:          { borderRadius: 16, padding: 16, gap: 10, flexDirection: "row", alignItems: "center" },
+  pkCardLeft:      { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  pkCardTitle:     { fontSize: 14, fontWeight: "800", marginBottom: 3 },
+  pkCardSub:       { fontSize: 12, lineHeight: 17 },
 
   activityCard:    { borderRadius: 16, overflow: "hidden" },
   activityRow:     { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },

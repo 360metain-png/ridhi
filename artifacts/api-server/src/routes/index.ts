@@ -11,6 +11,7 @@ import feedRouter from "./feed";
 import usersRouter from "./users";
 import chatRouter from "./chat";
 import adminAuthRouter from "./admin-auth";
+import pkBattleRouter from "./pk-battle";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(feedRouter);
 router.use(usersRouter);
 router.use(chatRouter);
 router.use(adminAuthRouter);
+router.use(pkBattleRouter);
 
 export default router;

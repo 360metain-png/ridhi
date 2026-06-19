@@ -14,6 +14,15 @@ export const users = pgTable("users", {
   coins: integer("coins").notNull().default(100),
   plan: varchar("plan", { length: 20 }).notNull().default("free"),
   interests: jsonb("interests").$type<string[]>().notNull().default([]),
+
+  // PK Battle host approval
+  pkBattleApproved: integer("pk_battle_approved").notNull().default(0),
+    // 0 = not_requested | 1 = requested | 2 = approved | 3 = rejected
+  pkBattleRequestedAt: timestamp("pk_battle_requested_at", { withTimezone: true }),
+  pkBattleApprovedAt: timestamp("pk_battle_approved_at", { withTimezone: true }),
+  pkBattleApprovedBy: text("pk_battle_approved_by"),
+  pkBattleRejectionReason: text("pk_battle_rejection_reason"),
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

@@ -30,7 +30,9 @@ export type AuditAction =
   | "admin_login"
   | "admin_login_failed"
   | "user_delete"
-  | "role_change";
+  | "role_change"
+  | "pk_battle_approve"
+  | "pk_battle_reject";
 
 export interface AuditEntry {
   action: AuditAction;

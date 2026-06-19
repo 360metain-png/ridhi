@@ -1,0 +1,3 @@
+- [Drizzle-kit push TTY](drizzle-kit-tty.md) — drizzle-kit push requires a TTY; use executeSql for schema migrations instead
+- [Mobile JWT auth gap](mobile-jwt-auth.md) — mobile app issued OTP tokens but never stored them in AsyncStorage; apiFetch now auto-attaches tokens
+- [AuditAction enum](audit-action-enum.md) — new audit actions must be added to the AuditAction union in audit.ts before use

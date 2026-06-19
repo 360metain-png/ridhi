@@ -14,6 +14,7 @@ import { useColors } from "@/hooks/useColors";
 import { GradientButton } from "@/components/GradientButton";
 import { apiFetch, ApiError } from "@/utils/api";
 import { FloatingEmojiBg } from "@/components/FloatingEmojiBg";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   verifyFirebaseOtp,
   getPendingFirebaseConfirmation,
@@ -94,20 +95,26 @@ export default function OtpScreen() {
           return;
         }
         // Exchange Firebase ID token with backend
-        await apiFetch("/api/auth/firebase-verify", {
+        const fbResp = await apiFetch<{ success: boolean; token?: string; message?: string }>("/api/auth/firebase-verify", {
           method: "POST",
           body: JSON.stringify({ idToken: result.idToken, contact }),
         });
+        if (fbResp.token) {
+          await AsyncStorage.setItem("ridhi_token", fbResp.token);
+        }
         clearPendingFirebaseConfirmation();
         router.replace("/auth/profile-setup");
         return;
       }
 
       // MSG91 / demo flow: verify OTP with backend
-      await apiFetch("/api/auth/verify-otp", {
+      const resp = await apiFetch<{ success: boolean; token?: string; message?: string }>("/api/auth/verify-otp", {
         method: "POST",
         body: JSON.stringify({ contact, type, otp: otp.join("") }),
       });
+      if (resp.token) {
+        await AsyncStorage.setItem("ridhi_token", resp.token);
+      }
       router.replace("/auth/profile-setup");
     } catch (err: unknown) {
       const msg = err instanceof ApiError ? err.message : "Verification failed. Please try again.";

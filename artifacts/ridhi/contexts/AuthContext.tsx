@@ -63,6 +63,11 @@ export interface UserProfile {
   panNumber?: string;     // masked: XXXXX9999X
   kycSubmittedAt?: string;
   kycVerifiedAt?: string;
+  // PK Battle host approval
+  pkBattleStatus?: "not_requested" | "requested" | "approved" | "rejected";
+  pkBattleRequestedAt?: string;
+  pkBattleApprovedAt?: string;
+  pkBattleRejectionReason?: string;
   lastDailyRewardAt?: string;
   streakCount?: number;
   lastPostDate?: string;
@@ -82,6 +87,7 @@ interface AuthContextValue {
   subscribePlan: (planId: string, billing: string, bonusCoins: number) => Promise<void>;
   cancelPlan: () => Promise<void>;
   syncKycStatus: (userId: string) => Promise<void>;
+  syncPkBattleStatus: (userId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -171,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await AsyncStorage.removeItem("ridhi_user");
+    await AsyncStorage.removeItem("ridhi_token");
     setUser(null);
   }, []);
 
@@ -291,9 +298,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const syncPkBattleStatus = useCallback(async (userId: string) => {
+    try {
+      const resp = await apiFetch<{
+        success: boolean;
+        pkBattleStatus?: "not_requested" | "requested" | "approved" | "rejected";
+        requestedAt?: string;
+        approvedAt?: string;
+        rejectionReason?: string;
+      }>(`/api/pk-battle/status`, { headers: { "X-User-Id": userId } });
+      if (resp.success) {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated: UserProfile = {
+            ...prev,
+            pkBattleStatus: resp.pkBattleStatus,
+            pkBattleRequestedAt: resp.requestedAt,
+            pkBattleApprovedAt: resp.approvedAt,
+            pkBattleRejectionReason: resp.rejectionReason,
+          };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch {
+      // offline: keep local state
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus, syncPkBattleStatus }}
     >
       {children}
     </AuthContext.Provider>

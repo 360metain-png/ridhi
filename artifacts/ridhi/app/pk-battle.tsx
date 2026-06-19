@@ -23,6 +23,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { PrivateHead } from "@/components/PrivateHead";
+import { apiFetch } from "@/utils/api";
+import { UserProfile } from "@/contexts/AuthContext";
 
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
@@ -108,6 +110,8 @@ export default function PKBattleScreen() {
   const [ended, setEnded] = useState(false);
   const [floatingGifts, setFloatingGifts] = useState<{ id: string; emoji: string; side: "left" | "right" }[]>([]);
   const [supportSide, setSupportSide] = useState<"left" | "right">("left");
+  const [hostRequestLoading, setHostRequestLoading] = useState(false);
+  const [hostRequestMsg, setHostRequestMsg] = useState("");
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const vsAnim = useRef(new Animated.Value(1)).current;
@@ -365,6 +369,7 @@ export default function PKBattleScreen() {
           );
         }}
         ListHeaderComponent={
+          <>
           <LinearGradient
             colors={["#E91E8C18", "#7B2FBE10"]}
             style={[styles.heroBanner, { borderColor: colors.border }]}
@@ -375,6 +380,31 @@ export default function PKBattleScreen() {
               <Text style={[styles.heroBannerSub, { color: colors.mutedForeground }]}>Compete, gift & crown the winner</Text>
             </View>
           </LinearGradient>
+          {/* Host request banner */}
+          <HostRequestBanner
+            user={user}
+            loading={hostRequestLoading}
+            msg={hostRequestMsg}
+            onRequest={async () => {
+              setHostRequestLoading(true);
+              setHostRequestMsg("");
+              try {
+                const resp = await apiFetch<{ success: boolean; message?: string; error?: string }>(
+                  "/api/pk-battle/request",
+                  { method: "POST", headers: { "X-User-Id": user?.id || "" } }
+                );
+                if (resp.success) {
+                  setHostRequestMsg("Request submitted! Awaiting admin approval.");
+                } else {
+                  setHostRequestMsg(resp.error || "Request failed");
+                }
+              } catch (e) {
+                setHostRequestMsg("Network error. Try again.");
+              }
+              setHostRequestLoading(false);
+            }}
+          />
+          </>
         }
       />
     </View>
@@ -535,4 +565,117 @@ const styles = StyleSheet.create({
   },
   giftEmoji: { fontSize: 24 },
   giftCoins: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  hostBanner: {
+    marginHorizontal: 12,
+    marginTop: 10,
+    borderRadius: 16,
+    padding: 16,
+    gap: 10,
+  },
+  hostBannerTop: { flexDirection: "row", alignItems: "center", gap: 8 },
+  hostBannerText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  hostBannerSub: { fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 18 },
+  hostBannerRow: { flexDirection: "row", gap: 8, marginTop: 4 },
 });
+
+// ── Host request banner sub-component ─────────────────────────────────────────
+
+function HostRequestBanner({
+  user,
+  loading,
+  msg,
+  onRequest,
+}: {
+  user: UserProfile | null;
+  loading: boolean;
+  msg: string;
+  onRequest: () => void;
+}) {
+  const colors = useColors();
+  const status = user?.pkBattleStatus || "not_requested";
+
+  const meta: Record<string, { emoji: string; title: string; sub: string; bg: string; border: string; text: string }> = {
+    not_requested: {
+      emoji: "🎯",
+      title: "Want to host PK Battles?",
+      sub: "E-verified users can request approval to host PK Battles and earn coins.",
+      bg: colors.primary + "12",
+      border: colors.primary + "40",
+      text: colors.primary,
+    },
+    requested: {
+      emoji: "⏳",
+      title: "Request under review",
+      sub: "Your PK Battle host request is pending admin approval.",
+      bg: "#FFB80015",
+      border: "#FFB80040",
+      text: "#F57F17",
+    },
+    approved: {
+      emoji: "✨",
+      title: "You're a PK Battle host!",
+      sub: "Approved. You can now host PK Battles and earn coins.",
+      bg: "#34C75915",
+      border: "#34C75940",
+      text: "#2E7D32",
+    },
+    rejected: {
+      emoji: "🚫",
+      title: "Request not approved",
+      sub: user?.pkBattleRejectionReason || "Your request was rejected. Contact support for details.",
+      bg: "#FF3B3015",
+      border: "#FF3B3040",
+      text: "#C62828",
+    },
+  };
+
+  const m = meta[status];
+
+  return (
+    <View style={[styles.hostBanner, { backgroundColor: m.bg, borderColor: m.border, borderWidth: 1 }]}>
+      <View style={styles.hostBannerTop}>
+        <Text style={{ fontSize: 20 }}>{m.emoji}</Text>
+        <Text style={[styles.hostBannerText, { color: m.text }]}>{m.title}</Text>
+      </View>
+      <Text style={[styles.hostBannerSub, { color: colors.mutedForeground }]}>{m.sub}</Text>
+      {status === "not_requested" && (
+        <View style={styles.hostBannerRow}>
+          <Pressable
+            onPress={onRequest}
+            disabled={loading}
+            style={({ pressed }) => ({
+              backgroundColor: colors.primary,
+              paddingHorizontal: 18,
+              paddingVertical: 10,
+              borderRadius: 12,
+              opacity: pressed ? 0.8 : 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+            })}
+          >
+            <Feather name="zap" size={14} color="#fff" />
+            <Text style={{ color: "#fff", fontFamily: "Inter_600SemiBold", fontSize: 13 }}>
+              {loading ? "Submitting..." : "Request Approval"}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      {status === "rejected" && (
+        <Pressable
+          onPress={() => router.push("/kyc" as any)}
+          style={{ marginTop: 4 }}
+        >
+          <Text style={{ color: colors.primary, fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
+            Check KYC status →
+          </Text>
+        </Pressable>
+      )}
+      {msg ? (
+        <Text style={{ fontSize: 12, color: msg.includes("submitted") ? "#2E7D32" : "#C62828", fontFamily: "Inter_600SemiBold" }}>
+          {msg}
+        </Text>
+      ) : null}
+    </View>
+  );
+}

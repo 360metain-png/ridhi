@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function getApiBase(): string {
   if (Platform.OS === "web") {
@@ -24,11 +25,17 @@ export async function apiFetch<T = unknown>(
   options?: RequestInit,
 ): Promise<T> {
   const url = `${API_BASE}${path}`;
+  // Attach JWT token if available
+  const token = await AsyncStorage.getItem("ridhi_token").catch(() => null);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options?.headers ?? {}) as Record<string, string>,
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
   const res = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options?.headers ?? {}),
-    },
+    headers,
     ...options,
   });
 
