@@ -3,7 +3,7 @@
  * All admin endpoints use JWT Bearer token.
  */
 
-const API_BASE = `${import.meta.env.BASE_URL}api`;
+const API_BASE = "/api";
 
 function getToken(): string | null {
   return localStorage.getItem("ridhi_admin_token");

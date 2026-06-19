@@ -112,9 +112,12 @@ export default function Login() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
-                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                  <p className="text-xs text-red-600 font-medium">{error}</p>
+                <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
+                  <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-red-600 font-medium leading-relaxed">{error}</p>
+                    <p className="text-[10px] text-red-500/80 mt-1">Super Admin: admin.sneha@ridhi.app / Ridhi@2025</p>
+                  </div>
                 </div>
               )}
 
