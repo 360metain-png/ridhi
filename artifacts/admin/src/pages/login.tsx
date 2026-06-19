@@ -46,7 +46,7 @@ export default function Login() {
       <div className="fixed top-0 left-0 w-[500px] h-[500px] rounded-full bg-purple-700/10 blur-[150px] pointer-events-none" />
       <div className="fixed bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-pink-600/10 blur-[150px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[400px]">
+      <div className="relative z-10 w-full max-w-[400px] md:max-w-[420px]">
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-8">
           <img src={`${import.meta.env.BASE_URL}ridhi_logo.png`} alt="Ridhi" className="w-10 h-10 object-contain" />
@@ -71,10 +71,10 @@ export default function Login() {
         <Card className="shadow-2xl border-0 ring-1 ring-white/10 bg-white w-full">
           <CardContent className="p-6 space-y-5">
             <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Email</Label>
-                <div className="relative w-full">
-                  <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 z-10 pointer-events-none" />
+                <div className="flex items-center gap-3 h-12 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 shadow-sm outline-none focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+                  <Mail className="w-4 h-4 text-gray-400 shrink-0" />
                   <input
                     type="email"
                     placeholder="admin@ridhi.app"
@@ -82,27 +82,28 @@ export default function Login() {
                     onChange={(e) => { setEmail(e.target.value); setError(""); }}
                     autoComplete="email"
                     disabled={loading}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 pl-6 pr-3 py-2 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                    className="flex-1 min-w-0 bg-transparent text-base text-gray-900 placeholder:text-gray-400 outline-none disabled:opacity-50"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Password</Label>
-                <div className="relative w-full">
-                  <Lock className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 z-10 pointer-events-none" />
+                <div className="flex items-center gap-3 h-12 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 shadow-sm outline-none focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all">
+                  <Lock className="w-4 h-4 text-gray-400 shrink-0" />
                   <input
                     type={showPass ? "text" : "password"}
+                    placeholder="Enter password"
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); setError(""); }}
                     autoComplete="current-password"
                     disabled={loading}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 pl-6 pr-10 py-2 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                    className="flex-1 min-w-0 bg-transparent text-base text-gray-900 placeholder:text-gray-400 outline-none disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 z-10"
+                    className="text-gray-400 hover:text-gray-700 shrink-0"
                   >
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
