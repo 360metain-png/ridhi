@@ -20,14 +20,15 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { SplashAnimation } from "@/components/SplashAnimation";
 import { configureIap } from "@/lib/iap";
-import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
 SplashScreen.preventAutoHideAsync();
 
-/* Initialize IAP and ATT once at app startup */
+/* Initialize IAP and ATT once at app startup (native only) */
 if (Platform.OS !== "web") {
   configureIap();
-  requestTrackingPermissionsAsync().catch(() => {});
+  import("expo-tracking-transparency").then((mod) =>
+    mod.requestTrackingPermissionsAsync().catch(() => {})
+  );
 }
 
 const queryClient = new QueryClient();

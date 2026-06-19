@@ -188,6 +188,7 @@ export default function FeedScreen() {
   const [boostTarget, setBoostTarget] = useState<string | null>(null);
   const [boostTier, setBoostTier] = useState(1);
   const [boostSuccess, setBoostSuccess] = useState(false);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
   const storyProgress = useRef(new Animated.Value(0)).current;
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -902,7 +903,7 @@ export default function FeedScreen() {
 
         <View style={styles.headerActions}>
           <Pressable
-            onPress={() => router.push("/create-post")}
+            onPress={() => setShowCreateMenu(true)}
             style={[styles.headerBtn, { backgroundColor: colors.primary + "20" }]}
           >
             <Feather name="plus" size={18} color={colors.primary} />
@@ -1442,6 +1443,55 @@ export default function FeedScreen() {
               <Text style={[styles.menuCancelText, { color: colors.foreground }]}>Cancel</Text>
             </Pressable>
           </View>
+        </View>
+      </Modal>
+
+      {/* ── Create Content Menu (Instagram-style) ─────────────────────────── */}
+      <Modal
+        visible={showCreateMenu}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCreateMenu(false)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setShowCreateMenu(false)} />
+        <View style={[styles.createMenuSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <View style={[styles.commentHandle, { backgroundColor: colors.border }]} />
+          <Text style={[styles.createMenuTitle, { color: colors.foreground }]}>Create</Text>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 4, paddingBottom: insets.bottom + 20 }}>
+            {[
+              { id: "reel", icon: "film", label: "Reel", desc: "Share a short video", color: "#E91E8C" },
+              { id: "story", icon: "circle", label: "Story", desc: "Photo/video that disappears in 24h", color: "#7B2FBE" },
+              { id: "photo", icon: "image", label: "Post", desc: "Share a photo on your feed", color: "#4A90E2" },
+              { id: "carousel", icon: "copy", label: "Carousel", desc: "Share multiple photos", color: "#34C759" },
+              { id: "video", icon: "video", label: "Video", desc: "Long video up to 5 minutes", color: "#FF3B30" },
+              { id: "text", icon: "type", label: "Status", desc: "Share a text-only update", color: "#FF9500" },
+              { id: "audio", icon: "mic", label: "Audio", desc: "Voice note or podcast clip", color: "#8E8E93" },
+              { id: "live-stream", icon: "radio", label: "Go Live", desc: "Start a live broadcast", color: "#FF3B30" },
+              { id: "poll", icon: "bar-chart-2", label: "Poll", desc: "Ask followers a question", color: "#5856D6" },
+            ].map((item) => (
+              <Pressable
+                key={item.id}
+                style={styles.createMenuItem}
+                onPress={() => {
+                  setShowCreateMenu(false);
+                  if (item.id === "live-stream") {
+                    router.push("/live-stream");
+                  } else {
+                    router.push({ pathname: "/create-post", params: { type: item.id } });
+                  }
+                }}
+              >
+                <View style={[styles.createMenuIcon, { backgroundColor: item.color + "18" }]}>
+                  <Feather name={item.icon as any} size={22} color={item.color} />
+                </View>
+                <View style={styles.createMenuText}>
+                  <Text style={[styles.createMenuLabel, { color: colors.foreground }]}>{item.label}</Text>
+                  <Text style={[styles.createMenuDesc, { color: colors.mutedForeground }]}>{item.desc}</Text>
+                </View>
+                <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+              </Pressable>
+            ))}
+          </ScrollView>
         </View>
       </Modal>
 
@@ -2005,4 +2055,42 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   boostPayBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
+
+  // ── Create Menu Sheet (Instagram-style) ────────────────────────────
+  createMenuSheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    maxHeight: "70%",
+  },
+  createMenuTitle: {
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  createMenuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 14,
+  },
+  createMenuIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  createMenuText: { flex: 1 },
+  createMenuLabel: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  createMenuDesc: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
 });
