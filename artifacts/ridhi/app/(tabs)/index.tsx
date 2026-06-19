@@ -902,6 +902,12 @@ export default function FeedScreen() {
 
         <View style={styles.headerActions}>
           <Pressable
+            onPress={() => router.push("/create-post")}
+            style={[styles.headerBtn, { backgroundColor: colors.primary + "20" }]}
+          >
+            <Feather name="plus" size={18} color={colors.primary} />
+          </Pressable>
+          <Pressable
             onPress={() => router.push("/explore")}
             style={[styles.headerBtn, { backgroundColor: colors.muted }]}
           >
