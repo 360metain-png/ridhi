@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Alert,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -67,12 +68,50 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
     }
 
     // Platform-specific deep links
-    if (Platform.OS === "web") {
-      Alert.alert(
-        "Share",
-        `Share this ${type} with your friends!`,
-        [{ text: "OK" }]
-      );
+    const deepLinks: Record<string, string> = {
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      snapchat: `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(shareUrl)}`,
+      instagram: `https://www.instagram.com/`, // Instagram web share not supported via URL scheme; will open app
+    };
+
+    const url = deepLinks[optionId];
+    if (url) {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else if (Platform.OS === "web") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        Alert.alert(
+          "App Not Found",
+          `${optionId} is not installed on your device.`,
+          [{ text: "OK" }]
+        );
+      }
+      onClose();
+      return;
+    }
+
+    // Fallback for "more" on web
+    if (optionId === "more" && Platform.OS === "web") {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: data.title,
+            text: shareText,
+            url: shareUrl,
+          });
+        } catch {
+          // User cancelled
+        }
+      } else {
+        await Clipboard.setStringAsync(shareText);
+        Alert.alert("Copied", "Share text copied to clipboard!");
+      }
+      onClose();
       return;
     }
 
