@@ -258,6 +258,32 @@ export default function CreatePostScreen() {
     }
   };
 
+  const openCamera = async (type: "photo" | "video") => {
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Camera not available",
+        "Camera access is only available in the mobile app. Please upload from your gallery instead.",
+        [{ text: "Pick from Gallery", onPress: () => pickMedia(type) }, { text: "Cancel", style: "cancel" }]
+      );
+      return;
+    }
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Camera needed", "Allow camera access to take photos and videos.", [{ text: "OK" }]);
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: true,
+      quality: 0.9,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setMediaUri(result.assets[0].uri);
+      if (type === "photo" && selectedType === "text") setSelectedType("photo");
+      if (type === "video" && selectedType === "text") setSelectedType("video");
+    }
+  };
+
   const handleLocationTag = () => {
     const cities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Kolkata", "Chennai", "Pune", "Jaipur"];
     Alert.alert("Tag Location", "Choose your location:", [
@@ -700,6 +726,7 @@ export default function CreatePostScreen() {
 
         <View style={[styles.toolbarRow, { borderTopColor: colors.border }]}>
           {[
+            { icon: "camera", label: "Camera", active: false, onPress: () => openCamera(selectedType === "video" || selectedType === "reel" || selectedType === "story" ? "video" : "photo") },
             { icon: "image", label: "Photo", active: !!mediaUri && (selectedType === "photo" || selectedType === "story"), onPress: () => pickMedia("photo") },
             { icon: "video", label: "Video", active: !!mediaUri && (selectedType === "video" || selectedType === "reel"), onPress: () => pickMedia("video") },
             { icon: "map-pin", label: location || "Location", active: !!location, onPress: handleLocationTag },
