@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -449,6 +449,46 @@ const INITIAL_SERVICES: ServiceConfig[] = [
 
   // ── ANALYTICS ────────────────────────────────────────────────────────
   {
+    id: "google-analytics",
+    name: "Google Analytics 4",
+    provider: "Google",
+    category: "analytics",
+    description: "GA4 event tracking for web + mobile",
+    docsUrl: "https://developers.google.com/analytics/devguides/collection/ga4",
+    status: "disconnected",
+    env: "sandbox",
+    enabled: false,
+    lastTested: "Never",
+    fields: [
+      { key: "measurementId", label: "Measurement ID (G-XXXX)", placeholder: "G-XXXXXXXXXX", secret: false, value: "" },
+      { key: "apiSecret",     label: "Measurement Protocol API Secret", placeholder: "Secret…", secret: true, value: "" },
+    ],
+    extraSettings: [
+      { key: "debugMode", label: "Debug Mode", type: "toggle", value: false },
+      { key: "sendUserProps", label: "Send User Properties", type: "toggle", value: true },
+    ],
+  },
+  {
+    id: "facebook-pixel",
+    name: "Facebook Pixel",
+    provider: "Meta",
+    category: "analytics",
+    description: "Meta Pixel for ads attribution & events",
+    docsUrl: "https://developers.facebook.com/docs/meta-pixel",
+    status: "disconnected",
+    env: "sandbox",
+    enabled: false,
+    lastTested: "Never",
+    fields: [
+      { key: "pixelId",     label: "Pixel ID",     placeholder: "1234567890…", secret: false, value: "" },
+      { key: "accessToken", label: "Access Token", placeholder: "EAAxx…",     secret: true,  value: "" },
+    ],
+    extraSettings: [
+      { key: "trackStandardEvents", label: "Track Standard Events", type: "toggle", value: true },
+      { key: "trackCustomEvents",   label: "Track Custom Events", type: "toggle", value: true },
+    ],
+  },
+  {
     id: "firebase-analytics",
     name: "Firebase Analytics",
     provider: "Google Firebase",
@@ -486,6 +526,8 @@ const INITIAL_SERVICES: ServiceConfig[] = [
   },
 ];
 
+const API_BASE = "/api";
+
 // ── Category definitions ──────────────────────────────────────────────────
 const CATEGORIES = [
   { id: "all",       label: "All",               icon: Plug },
@@ -522,6 +564,69 @@ function useHiddenFields() {
 
 export default function ApiIntegrationsPage() {
   const [services, setServices] = useState<ServiceConfig[]>(INITIAL_SERVICES);
+  const [configLoaded, setConfigLoaded] = useState(false);
+
+  // Load saved analytics config from backend on mount
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch(`${API_BASE}/admin/analytics-config`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setServices((prev) =>
+          prev.map((svc) => {
+            if (svc.id === "google-analytics" && data.googleAnalytics) {
+              return {
+                ...svc,
+                enabled: data.googleAnalytics.enabled,
+                fields: svc.fields.map((f) =>
+                  f.key === "measurementId"
+                    ? { ...f, value: data.googleAnalytics.measurementId || "" }
+                    : f.key === "apiSecret"
+                    ? { ...f, value: data.googleAnalytics.apiSecret || "" }
+                    : f
+                ),
+                extraSettings: svc.extraSettings?.map((s) =>
+                  s.key === "debugMode"
+                    ? { ...s, value: data.googleAnalytics.debugMode ?? false }
+                    : s.key === "sendUserProps"
+                    ? { ...s, value: data.googleAnalytics.sendUserProps ?? true }
+                    : s
+                ),
+              };
+            }
+            if (svc.id === "facebook-pixel" && data.facebookPixel) {
+              return {
+                ...svc,
+                enabled: data.facebookPixel.enabled,
+                fields: svc.fields.map((f) =>
+                  f.key === "pixelId"
+                    ? { ...f, value: data.facebookPixel.pixelId || "" }
+                    : f.key === "accessToken"
+                    ? { ...f, value: data.facebookPixel.accessToken || "" }
+                    : f
+                ),
+                extraSettings: svc.extraSettings?.map((s) =>
+                  s.key === "trackStandardEvents"
+                    ? { ...s, value: data.facebookPixel.trackStandardEvents ?? true }
+                    : s.key === "trackCustomEvents"
+                    ? { ...s, value: data.facebookPixel.trackCustomEvents ?? true }
+                    : s
+                ),
+              };
+            }
+            return svc;
+          })
+        );
+      } catch (err) {
+        console.error("Failed to load analytics config", err);
+      } finally {
+        setConfigLoaded(true);
+      }
+    }
+    loadConfig();
+  }, []);
+
   const [activeCategory, setActiveCategory] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [testing, setTesting] = useState<string | null>(null);
@@ -561,8 +666,59 @@ export default function ApiIntegrationsPage() {
     setTesting(id);
     setTimeout(() => setTesting(null), 1500);
   }
-  function saveService(id: string) {
+  async function saveService(id: string) {
     setSavedId(id);
+    const svc = services.find((s) => s.id === id);
+    if (!svc) {
+      setSavedId(null);
+      return;
+    }
+
+    // Persist analytics config to backend
+    if (id === "google-analytics" || id === "facebook-pixel") {
+      const body: Record<string, any> = { changedBy: "super_admin" };
+      if (id === "google-analytics") {
+        const measurementId = svc.fields.find((f) => f.key === "measurementId")?.value || "";
+        const apiSecret = svc.fields.find((f) => f.key === "apiSecret")?.value || "";
+        const debugMode = svc.extraSettings?.find((s) => s.key === "debugMode")?.value ?? false;
+        const sendUserProps = svc.extraSettings?.find((s) => s.key === "sendUserProps")?.value ?? true;
+        body.googleAnalytics = {
+          enabled: svc.enabled,
+          measurementId,
+          apiSecret,
+        };
+        body.googleAnalytics.debugMode = debugMode;
+        body.googleAnalytics.sendUserProps = sendUserProps;
+      } else if (id === "facebook-pixel") {
+        const pixelId = svc.fields.find((f) => f.key === "pixelId")?.value || "";
+        const accessToken = svc.fields.find((f) => f.key === "accessToken")?.value || "";
+        const trackStandard = svc.extraSettings?.find((s) => s.key === "trackStandardEvents")?.value ?? true;
+        const trackCustom = svc.extraSettings?.find((s) => s.key === "trackCustomEvents")?.value ?? true;
+        body.facebookPixel = {
+          enabled: svc.enabled,
+          pixelId,
+          accessToken,
+        };
+        body.facebookPixel.trackStandardEvents = trackStandard;
+        body.facebookPixel.trackCustomEvents = trackCustom;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/analytics-config`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-role": "super_admin",
+          },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          console.error("Failed to save analytics config", await res.text());
+        }
+      } catch (err) {
+        console.error("Error saving analytics config", err);
+      }
+    }
     setTimeout(() => setSavedId(null), 2000);
   }
   function exportCSV() {

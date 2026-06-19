@@ -12,6 +12,7 @@ import usersRouter from "./users";
 import chatRouter from "./chat";
 import adminAuthRouter from "./admin-auth";
 import pkBattleRouter from "./pk-battle";
+import analyticsConfigRouter from "./analytics-config";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(usersRouter);
 router.use(chatRouter);
 router.use(adminAuthRouter);
 router.use(pkBattleRouter);
+router.use(analyticsConfigRouter);
 
 export default router;
