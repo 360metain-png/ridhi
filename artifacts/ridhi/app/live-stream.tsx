@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ScreenCapture from "expo-screen-capture";
+import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -354,6 +355,25 @@ export default function LiveStreamScreen() {
           />
         </View>
 
+        {/* Free emoji reactions */}
+        <View style={[styles.reactionRow, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
+          {["❤️", "🔥", "😍", "👏", "💯", "🤩", "🙏", "😂"].map((emoji) => (
+            <Pressable
+              key={emoji}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setMessages((prev) => [
+                  ...prev,
+                  { id: `m${Date.now()}`, user: user?.name?.split(" ")[0] ?? "You", text: emoji, time: "now" },
+                ]);
+              }}
+              style={styles.reactionChip}
+            >
+              <Text style={{ fontSize: 22 }}>{emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         {showGifts && (
           <View style={[styles.giftsPanel, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
             <View style={styles.giftsPanelHeader}>
@@ -578,6 +598,8 @@ const styles = StyleSheet.create({
   hostCoinPill: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#FFB80050" },
   hostCoinText: { fontSize: 14, fontFamily: "Inter_700Bold" },
   hostVideoText: { color: "rgba(255,255,255,0.4)", fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center" },
+  reactionRow: { flexDirection: "row", paddingVertical: 8, paddingHorizontal: 10, gap: 8, borderTopWidth: 1, overflow: "scroll" },
+  reactionChip: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.08)" },
   hostControls: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 16, padding: 20, borderTopWidth: 1 },
   controlBtn2: { width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center" },
   endLiveBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 24 },

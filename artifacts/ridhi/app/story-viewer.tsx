@@ -13,9 +13,9 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors"
+import * as Haptics from "expo-haptics";
+import { useColors } from "@/hooks/useColors";
 import { useTrackScreen } from "@/hooks/useAnalytics";
-;
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
@@ -59,6 +59,9 @@ export default function StoryViewerScreen() {
   const [paused, setPaused] = useState(false);
   const [reply, setReply] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [storyReactions, setStoryReactions] = useState<Record<string, string[]>>({});
+  const [lastReaction, setLastReaction] = useState("");
+  const reactionAnim = useRef(new Animated.Value(0)).current;
   const progress = useRef(new Animated.Value(0)).current;
   const animRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -97,6 +100,21 @@ export default function StoryViewerScreen() {
     if (currentIndex > 0) {
       setCurrentIndex((i) => i - 1);
     }
+  };
+
+  const handleReaction = (emoji: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setStoryReactions((prev) => {
+      const key = STORIES[currentIndex].id;
+      const existing = prev[key] ?? [];
+      return { ...prev, [key]: [...existing, emoji] };
+    });
+    setLastReaction(emoji);
+    reactionAnim.setValue(0);
+    Animated.sequence([
+      Animated.spring(reactionAnim, { toValue: 1, useNativeDriver: true, speed: 40, friction: 6 }),
+      Animated.timing(reactionAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start();
   };
 
   return (
@@ -158,9 +176,26 @@ export default function StoryViewerScreen() {
           <Text style={styles.storyText}>{story.text}</Text>
         </View>
 
+        {/* Floating reaction animation */}
+        <Animated.View
+          style={[
+            styles.floatingReaction,
+            {
+              opacity: reactionAnim,
+              transform: [
+                { scale: reactionAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1.5] }) },
+                { translateY: reactionAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -80] }) },
+              ],
+            },
+          ]}
+          pointerEvents="none"
+        >
+          <Text style={{ fontSize: 48 }}>{lastReaction}</Text>
+        </Animated.View>
+
         <View style={styles.reactionsRow}>
           {story.reactions.map((r, i) => (
-            <Pressable key={i} style={styles.reactionBtn}>
+            <Pressable key={i} style={styles.reactionBtn} onPress={() => handleReaction(r)}>
               <Text style={styles.reactionEmoji}>{r}</Text>
             </Pressable>
           ))}
@@ -232,4 +267,12 @@ const styles = StyleSheet.create({
   sendReplyBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
   replyActions: { flexDirection: "row", gap: 4 },
   replyActionBtn: { padding: 8 },
+  floatingReaction: {
+    position: "absolute",
+    bottom: 140,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
 });
