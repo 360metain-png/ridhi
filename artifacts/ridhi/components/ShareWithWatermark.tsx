@@ -11,6 +11,7 @@ import {
 import * as Sharing from "expo-sharing";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 
 interface ShareData {
@@ -20,14 +21,14 @@ interface ShareData {
 }
 
 const SHARE_OPTIONS = [
-  { id: "whatsapp", label: "WhatsApp", emoji: "👋", color: "#25D366" },
-  { id: "instagram", label: "Instagram", emoji: "📸", color: "#E1306C" },
-  { id: "facebook", label: "Facebook", emoji: "📘", color: "#1877F2" },
-  { id: "twitter", label: "X / Twitter", emoji: "🐦", color: "#000000" },
-  { id: "telegram", label: "Telegram", emoji: "✈️", color: "#0088CC" },
-  { id: "snapchat", label: "Snapchat", emoji: "👻", color: "#FFFC00" },
-  { id: "copy", label: "Copy Link", emoji: "📋", color: "#7B2FBE" },
-  { id: "more", label: "More", emoji: "•••", color: "#9E9E9E" },
+  { id: "whatsapp", label: "WhatsApp", icon: "whatsapp", iconSet: "fa5" as const, color: "#25D366" },
+  { id: "instagram", label: "Instagram", icon: "instagram", iconSet: "fa5" as const, color: "#E1306C" },
+  { id: "facebook", label: "Facebook", icon: "facebook", iconSet: "fa5" as const, color: "#1877F2" },
+  { id: "twitter", label: "X / Twitter", icon: "twitter", iconSet: "fa5" as const, color: "#000000" },
+  { id: "telegram", label: "Telegram", icon: "telegram", iconSet: "fa5" as const, color: "#0088CC" },
+  { id: "snapchat", label: "Snapchat", icon: "snapchat", iconSet: "fa5" as const, color: "#FFFC00" },
+  { id: "copy", label: "Copy Link", icon: "link", iconSet: "feather" as const, color: "#7B2FBE" },
+  { id: "more", label: "More", icon: "more-horizontal", iconSet: "feather" as const, color: "#9E9E9E" },
 ];
 
 interface ShareWithWatermarkProps {
@@ -42,7 +43,7 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
   const [copied, setCopied] = useState(false);
 
   const handleShare = async (optionId: string) => {
-    const shareText = `${data.title} 🎨\n\n${data.message}\n\nShared from @RidhiApp — India's Social Universe 🇮🇳\n\n${data.url ?? ""}`;
+    const shareText = `${data.title}\n\n${data.message}\n\n${data.url ?? ""}`;
     const shareUrl = data.url ?? "https://ridhi.app";
 
     if (optionId === "copy") {
@@ -68,16 +69,16 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
     // Platform-specific deep links
     if (Platform.OS === "web") {
       Alert.alert(
-        "Share with Watermark",
-        `All shared content from Ridhi carries a watermark. This ${type} will be shared with the @RidhiApp mark.`,
+        "Share",
+        `Share this ${type} with your friends!`,
         [{ text: "OK" }]
       );
       return;
     }
 
     Alert.alert(
-      "Sharing with Watermark",
-      `This ${type} will be shared with the Ridhi watermark embedded.`,
+      "Share",
+      `This ${type} will be shared.`,
       [{ text: "OK", onPress: () => onClose() }]
     );
   };
@@ -97,21 +98,7 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.headerTitle, { color: colors.foreground }]}>
-              Share with Watermark
-            </Text>
-            <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-              All shared content carries the Ridhi mark
-            </Text>
-          </View>
-
-          {/* Watermark preview */}
-          <View style={[styles.watermarkPreview, { backgroundColor: colors.muted }]}>
-            <Text style={{ fontSize: 28 }}>🎨</Text>
-            <Text style={[styles.watermarkText, { color: colors.foreground }]}>
-              @RidhiApp watermark applied
-            </Text>
-            <Text style={[styles.watermarkSub, { color: colors.mutedForeground }]}>
-              {type.charAt(0).toUpperCase() + type.slice(1)} will be shared with Ridhi branding
+              Share
             </Text>
           </View>
 
@@ -123,7 +110,13 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
                 style={[styles.option, { backgroundColor: colors.muted }]}
                 onPress={() => handleShare(opt.id)}
               >
-                <Text style={{ fontSize: 28 }}>{opt.emoji}</Text>
+                <View style={[styles.iconBox, { backgroundColor: opt.color + "18" }]}>
+                  {opt.iconSet === "fa5" ? (
+                    <FontAwesome5 name={opt.icon as any} size={22} color={opt.color} />
+                  ) : (
+                    <Feather name={opt.icon as any} size={22} color={opt.color} />
+                  )}
+                </View>
                 <Text style={[styles.optionLabel, { color: colors.foreground }]}>
                   {opt.id === "copy" && copied ? "Copied!" : opt.label}
                 </Text>
@@ -163,18 +156,6 @@ const styles = StyleSheet.create({
   },
   header: { alignItems: "center", paddingHorizontal: 20, marginBottom: 16 },
   headerTitle: { fontSize: 18, fontFamily: "Inter_700Bold" },
-  headerSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 4, textAlign: "center" },
-
-  watermarkPreview: {
-    alignItems: "center",
-    paddingVertical: 16,
-    marginHorizontal: 16,
-    borderRadius: 16,
-    gap: 6,
-    marginBottom: 16,
-  },
-  watermarkText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  watermarkSub: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 20 },
 
   grid: {
     flexDirection: "row",
@@ -186,11 +167,18 @@ const styles = StyleSheet.create({
   },
   option: {
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 14,
     minWidth: 72,
+  },
+  iconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
   },
   optionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
 
