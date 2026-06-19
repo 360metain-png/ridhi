@@ -74,7 +74,7 @@ export default function Login() {
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Email</Label>
                 <div className="relative w-full">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 pointer-events-none" />
+                  <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 z-10 pointer-events-none" />
                   <input
                     type="email"
                     placeholder="admin@ridhi.app"
@@ -82,8 +82,7 @@ export default function Login() {
                     onChange={(e) => { setEmail(e.target.value); setError(""); }}
                     autoComplete="email"
                     disabled={loading}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 pl-10 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                    style={{ WebkitAppearance: "none" }}
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 pl-6 pr-3 py-2 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                   />
                 </div>
               </div>
@@ -91,15 +90,14 @@ export default function Login() {
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Password</Label>
                 <div className="relative w-full">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 pointer-events-none" />
+                  <Lock className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 z-10 pointer-events-none" />
                   <input
                     type={showPass ? "text" : "password"}
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); setError(""); }}
                     autoComplete="current-password"
                     disabled={loading}
-                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 pl-10 pr-10 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                    style={{ WebkitAppearance: "none" }}
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-gray-50 pl-6 pr-10 py-2 text-base text-gray-900 placeholder:text-gray-400 shadow-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                   />
                   <button
                     type="button"
