@@ -116,7 +116,17 @@ export default function HostProfileScreen() {
       Animated.spring(checkAnim, { toValue: 1, useNativeDriver: true, tension: 80, friction: 6, delay: 200 }),
     ]).start();
     await new Promise((r) => setTimeout(r, 2400));
-    await updateProfile({ isHost: true, hostRegisteredAt: new Date().toISOString(), name: regName.trim(), phone: regPhone.trim(), city: regCity.trim() });
+    const activeUntil = new Date();
+    activeUntil.setDate(activeUntil.getDate() + 30);
+    await updateProfile({
+      isHost: true,
+      hostRegisteredAt: new Date().toISOString(),
+      hostMonthlyHours: 0,
+      hostActiveUntil: activeUntil.toISOString(),
+      name: regName.trim(),
+      phone: regPhone.trim(),
+      city: regCity.trim(),
+    });
   };
 
   // ── Pre-compute progress (must be before any conditional return) ────────────
@@ -266,7 +276,7 @@ export default function HostProfileScreen() {
                 <Text style={regStyles.successTitle}>Application Submitted! 🎉</Text>
                 <Text style={regStyles.successSub}>
                   Welcome to the Ridhi Host family, {regName.split(" ")[0]}!{"\n"}
-                  You'll be notified within 24–48 hours.
+                  You must complete 30 hours of live streams per month to maintain your registration.
                 </Text>
                 <Text style={regStyles.successSub2}>Opening your Host Dashboard…</Text>
               </LinearGradient>

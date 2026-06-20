@@ -53,6 +53,11 @@ export interface UserProfile {
   brandRevokedAt?: string;
   brandRevokedReason?: string;
   hostRegisteredAt?: string;
+  hostMonthlyHours?: number;       // hours this month
+  hostLastActivityAt?: string;      // last time host was active
+  hostActiveUntil?: string;         // deadline for 30hr checkpoint
+  hostRevokedAt?: string;
+  hostRevokedReason?: string;
   agentRegisteredAt?: string;
   // Random Call Fake Profile
   callPersona?: CallPersona;
@@ -135,7 +140,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const now = new Date();
           const activeUntil = new Date(parsed.brandActiveUntil);
           if (now > activeUntil) {
-            // Brand expired — revoke registration
             const revoked = {
               ...parsed,
               isBrandRegistered: false,
@@ -146,6 +150,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(revoked);
             setIsLoading(false);
             return;
+          }
+        }
+        // Check host activity checkpoint (30 hours per month)
+        if (parsed.isHost && parsed.hostActiveUntil) {
+          const now = new Date();
+          const activeUntil = new Date(parsed.hostActiveUntil);
+          if (now > activeUntil) {
+            const monthlyHours = parsed.hostMonthlyHours ?? 0;
+            if (monthlyHours < 30) {
+              // Host didn't meet 30hr requirement — revoke
+              const revoked = {
+                ...parsed,
+                isHost: false,
+                hostRevokedAt: now.toISOString(),
+                hostRevokedReason: `Only ${monthlyHours}h streamed this month. Minimum 30h required.`,
+                hostMonthlyHours: 0,
+              };
+              await AsyncStorage.setItem("ridhi_user", JSON.stringify(revoked));
+              setUser(revoked);
+              setIsLoading(false);
+              return;
+            } else {
+              // Met requirement — reset for next month
+              const nextMonth = new Date();
+              nextMonth.setDate(nextMonth.getDate() + 30);
+              const renewed = {
+                ...parsed,
+                hostMonthlyHours: 0,
+                hostActiveUntil: nextMonth.toISOString(),
+              };
+              await AsyncStorage.setItem("ridhi_user", JSON.stringify(renewed));
+              setUser(renewed);
+              setIsLoading(false);
+              return;
+            }
           }
         }
         setUser(parsed);

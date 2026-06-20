@@ -131,7 +131,7 @@ export default function LiveStreamScreen() {
   useTrackScreen("live");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins } = useAuth();
+  const { user, addCoins, updateProfile } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
   const { trackChat } = useAnalytics();
   // Block screenshots & screen recordings during live streams (native only)
@@ -492,7 +492,19 @@ export default function LiveStreamScreen() {
                 <Feather name="camera" size={22} color={colors.foreground} />
               </Pressable>
               <Pressable
-                onPress={() => { setIsLive(false); setView("browse"); }}
+                onPress={() => {
+                  // Track host hours when ending live
+                  if (user?.isHost && hostDuration > 0) {
+                    const hours = hostDuration / 3600;
+                    const currentHours = user?.hostMonthlyHours ?? 0;
+                    updateProfile({
+                      hostMonthlyHours: currentHours + hours,
+                      hostLastActivityAt: new Date().toISOString(),
+                    });
+                  }
+                  setIsLive(false);
+                  setView("browse");
+                }}
                 style={[styles.endLiveBtn, { backgroundColor: colors.destructive }]}
               >
                 <Feather name="x" size={20} color="#fff" />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Dimensions,
   Platform,
@@ -183,6 +183,19 @@ export default function HostDashboard() {
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const h       = HOST_DATA;
 
+  // Host activity checkpoint
+  const hostHours = user?.hostMonthlyHours ?? 0;
+  const hostHoursPct = Math.min(100, Math.round((hostHours / 30) * 100));
+  const hostDaysLeft = useMemo(() => {
+    if (!user?.isHost || !user?.hostActiveUntil) return null;
+    const now = new Date();
+    const activeUntil = new Date(user.hostActiveUntil);
+    const diffMs = activeUntil.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }, [user?.hostActiveUntil, user?.isHost]);
+  const isHostExpired = hostDaysLeft === 0;
+
   const kycColors = {
     verified: { bg: "#E8F5E9", text: "#2E7D32", icon: "check-circle" },
     pending:  { bg: "#FFF8E1", text: "#F57F17", icon: "clock"        },
@@ -254,6 +267,41 @@ export default function HostDashboard() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + 24 }]}>
+
+        {/* ── Host Activity Checkpoint Banner ── */}
+        {user?.isHost && hostDaysLeft !== null && (
+          <View style={[styles.checkpointBanner, { backgroundColor: isHostExpired ? "#FFEBEE" : hostDaysLeft <= 3 ? "#FFF8E1" : "#E8F5E9" }]}>
+            <View style={styles.checkpointLeft}>
+              <Feather
+                name={isHostExpired ? "alert-triangle" : "radio"}
+                size={18}
+                color={isHostExpired ? "#C62828" : hostDaysLeft <= 3 ? "#F57F17" : "#2E7D32"}
+              />
+              <View style={{ flex: 1 }}>
+                {isHostExpired ? (
+                  <>
+                    <Text style={styles.checkpointTitle}>Host Registration Expired</Text>
+                    <Text style={styles.checkpointSub}>You must re-register to continue hosting.</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.checkpointTitle}>Host Activity Checkpoint</Text>
+                    <Text style={styles.checkpointSub}>
+                      {hostDaysLeft} day{hostDaysLeft !== 1 ? "s" : ""} left to complete 30 hours of live streams.
+                    </Text>
+                  </>
+                )}
+              </View>
+            </View>
+            <View style={styles.checkpointRight}>
+              <Text style={[styles.checkpointHours, { color: isHostExpired ? "#C62828" : hostDaysLeft <= 3 ? "#F57F17" : "#2E7D32" }]}>
+                {hostHours.toFixed(1)}h
+              </Text>
+              <Text style={styles.checkpointTotal}>/ 30h</Text>
+              <ProgressBar value={hostHoursPct} color={isHostExpired ? "#C62828" : hostDaysLeft <= 3 ? "#F57F17" : "#2E7D32"} />
+            </View>
+          </View>
+        )}
 
         {/* ── Quick Actions ── */}
         <View style={styles.section}>
@@ -516,4 +564,13 @@ const styles = StyleSheet.create({
   activityDesc:    { fontSize: 13, fontWeight: "500", marginBottom: 2 },
   activityDate:    { fontSize: 11 },
   activityAmount:  { fontSize: 13, fontWeight: "700" },
+
+  // Host checkpoint banner
+  checkpointBanner: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, marginBottom: 16, borderWidth: 1, borderColor: "#00000010" },
+  checkpointLeft:   { flexDirection: "row", alignItems: "flex-start", gap: 10, flex: 1 },
+  checkpointTitle: { fontSize: 13, fontWeight: "700", marginBottom: 2 },
+  checkpointSub:    { fontSize: 11, color: "#666" },
+  checkpointRight: { alignItems: "flex-end", width: 80 },
+  checkpointHours: { fontSize: 18, fontWeight: "800" },
+  checkpointTotal: { fontSize: 11, fontWeight: "600", color: "#999", marginBottom: 4 },
 });
