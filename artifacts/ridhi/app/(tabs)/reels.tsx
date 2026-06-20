@@ -27,6 +27,7 @@ import { useWatermark } from "@/hooks/useWatermark";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
 import { VideoFilter, VIDEO_FILTERS, type FilterDef } from "@/components/VideoFilter";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
+import { ReelOptionsMenu } from "@/components/ReelOptionsMenu";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const REELS = [
@@ -482,6 +483,7 @@ function ReelItem({
   const [currentFilter, setFilter] = useState<string>("none");
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
 
   // ── Content entry animations ─────────────────────────────────────────────
@@ -694,7 +696,13 @@ function ReelItem({
             <Text style={{ fontSize: 22 }}>🎨</Text>
             <Text style={styles.reelActionCount}>Filter</Text>
           </Pressable>
-          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="More options">
+          <Pressable
+            style={styles.reelAction}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setShowMoreOptions(true); }}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel="More options"
+          >
             <Feather name="more-vertical" size={28} color="#fff" />
           </Pressable>
         </Animated.View>
@@ -738,6 +746,13 @@ function ReelItem({
           url: `https://ridhi.app/reel/${reel.id}`,
         }}
         type="reel"
+      />
+
+      {/* More options menu */}
+      <ReelOptionsMenu
+        visible={showMoreOptions}
+        onClose={() => setShowMoreOptions(false)}
+        reel={reel}
       />
     </View>
   );
