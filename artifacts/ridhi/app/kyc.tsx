@@ -26,9 +26,10 @@ import * as ImagePicker from "expo-image-picker";
 const TOTAL_STEPS = 4;
 const STEP_LABELS = ["Select Roles", "Upload Documents", "Review & Submit", "Status"];
 
-const ROLE_META: { key: "host" | "creator"; label: string; desc: string; color: string }[] = [
+const ROLE_META: { key: "host" | "creator" | "agent"; label: string; desc: string; color: string }[] = [
   { key: "host", label: "Host", desc: "Go live, receive gifts & coins", color: "#E91E8C" },
   { key: "creator", label: "Creator", desc: "Monetize content & posts", color: "#FFB800" },
+  { key: "agent", label: "Agent", desc: "Recruit hosts & earn commission", color: "#00BCD4" },
 ];
 
 const DOC_TYPES: { key: string; label: string; sublabel: string; required: boolean; mode: "camera" | "gallery" }[] = [
@@ -142,7 +143,7 @@ export default function KYCScreen() {
   const [error, setError] = useState("");
 
   // Step 1: Roles
-  const [roles, setRoles] = useState<("host" | "creator")[]>([]);
+  const [roles, setRoles] = useState<("host" | "creator" | "agent")[]>([]);
 
   // Step 2: Documents
   const [docs, setDocs] = useState<Record<string, DocImage | null>>({
@@ -185,7 +186,7 @@ export default function KYCScreen() {
       .finally(() => setFetching(false));
   }, [user?.id]);
 
-  const toggleRole = (role: "host" | "creator") => {
+  const toggleRole = (role: "host" | "creator" | "agent") => {
     setRoles((prev) => {
       if (prev.includes(role)) return prev.filter((r) => r !== role);
       return [...prev, role];
