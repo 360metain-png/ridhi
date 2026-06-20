@@ -114,7 +114,7 @@ const MENU_SECTIONS = [
     title: "Creator Marketplace",
     items: [
       { icon: "target",      label: "Brand Deals",        route: "/creator-marketplace", color: "#E91E8C" },
-      { icon: "trending-up", label: "Top Creators",       route: "/creator-marketplace", color: "#7B2FBE" },
+      { icon: "trending-up", label: "Top Creators",       route: "/leaderboard",          color: "#7B2FBE" },
     ],
   },
   {
