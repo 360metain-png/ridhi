@@ -403,7 +403,7 @@ export default function WalletScreen() {
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Ways to Spend</Text>
             <View style={[styles.rateChip, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "35" }]}>
               <Image source={COIN_IMAGE} style={{ width: 13, height: 13 }} resizeMode="contain" />
-              <Text style={[styles.rateChipText, { color: colors.primary }]}>1 Coin = ₹0.80</Text>
+              <Text style={[styles.rateChipText, { color: colors.primary }]}>1 Coin = ₹1.00</Text>
             </View>
           </View>
           <View style={styles.spendGrid}>

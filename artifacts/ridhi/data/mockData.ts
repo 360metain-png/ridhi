@@ -953,8 +953,8 @@ export const POPUP_ADS: PopupAdConfig[] = [
     id: "pa2",
     title: "Flash Sale Interstitial",
     headline: "⚡ 4-Hour Flash Sale — Ends Soon!",
-    body: "500 coins for just ₹149! This deal disappears at midnight. Don't miss it!",
-    ctaText: "Buy Now — ₹149",
+    body: "500 coins for just ₹249! This deal disappears at midnight. Don't miss it!",
+    ctaText: "Buy Now — ₹249",
     ctaRoute: "/wallet",
     gradient: ["#FF9500", "#FF3B30"],
     textColor: "white",
@@ -1036,8 +1036,8 @@ export const MARKETING_NOTIFICATIONS: MarketingNotification[] = [
   {
     id: "m5",
     type: "discount",
-    title: "⚡ Flash Sale: 500 Coins at ₹199",
-    body: "Our biggest coin discount ever — 500 coins for just ₹199 (50% off regular price). Only 4 hours left!",
+    title: "⚡ Flash Sale: 500 Coins at ₹249",
+    body: "Our biggest coin discount ever — 500 coins for just ₹249 (50% off regular price). Only 4 hours left!",
     channel: "email",
     cta: "Buy Now",
     ctaRoute: "/wallet",
@@ -1242,10 +1242,10 @@ export const COIN_PACKAGES = [
   { id: "cp1", coins: 50,    price: 49,   popular: false, label: "Starter",    bonus: 0, perCoin: "₹0.98" },
   { id: "cp2", coins: 100,   price: 99,   popular: false, label: "Basic",      bonus: 0, perCoin: "₹0.99" },
   { id: "cp3", coins: 200,   price: 199,  popular: false, label: "Popular",    bonus: 0, perCoin: "₹0.99" },
-  { id: "cp4", coins: 500,   price: 499,  popular: false, label: "Value",      bonus: 0, perCoin: "₹0.99" },
+  { id: "cp4", coins: 500,   price: 499,  popular: false, label: "Value",      bonus: 0, perCoin: "₹1.00" },
   { id: "cp5", coins: 1000,  price: 999,  popular: true,  label: "Best Value", bonus: 0, perCoin: "₹0.99" },
-  { id: "cp6", coins: 2000,  price: 1999, popular: false, label: "Premium",    bonus: 0, perCoin: "₹0.99" },
-  { id: "cp7", coins: 5000,  price: 4999, popular: false, label: "Elite",      bonus: 0, perCoin: "₹0.99" },
+  { id: "cp6", coins: 2000,  price: 1999, popular: false, label: "Premium",    bonus: 0, perCoin: "₹1.00" },
+  { id: "cp7", coins: 5000,  price: 4999, popular: false, label: "Elite",      bonus: 0, perCoin: "₹1.00" },
 ];
 
 export const COIN_TRANSACTIONS = [

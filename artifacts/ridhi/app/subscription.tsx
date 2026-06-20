@@ -348,7 +348,7 @@ const CREATOR_PLANS = [
     color: "#2196F3", gradient: ["#2196F3", "#0D47A1"] as [string, string],
     icon: "video" as const,
     tagline: "Go live & start earning",
-    highlights: ["Creator badge", "Live up to 2hr/day", "10% commission cut"],
+    highlights: ["Creator badge", "Live up to 2hr/day", "30% → 20% commission"],
     features: [
       "Creator badge on your profile",
       "Live streaming (up to 2 hrs/day)",
@@ -356,7 +356,7 @@ const CREATOR_PLANS = [
       "Basic creator analytics dashboard",
       "Gift & coin earnings tracker",
       "1 Fan Club tier setup",
-      "10% commission reduction on withdrawals",
+      "10pp commission reduction on withdrawals (30% → 20%)",
       "Creator support (email, 48hr SLA)",
     ],
     locked: ["HD streaming", "Revenue insights", "Podcast monetization", "Stream promotions"],
@@ -368,7 +368,7 @@ const CREATOR_PLANS = [
     popular: true,
     icon: "trending-up" as const,
     tagline: "Scale your creator business",
-    highlights: ["HD streaming (unlimited)", "17% commission cut"],
+    highlights: ["HD streaming (unlimited)", "30% → 13% commission"],
     features: [
       "Everything in Creator Starter, plus:",
       "HD/4K live streaming (unlimited hours)",
@@ -378,7 +378,7 @@ const CREATOR_PLANS = [
       "Stream promotions — featured in Explore",
       "Fan polls & live Q&A tools",
       "3 Fan Club tiers (Supporter / Super Fan / VIP)",
-      "17% commission reduction on withdrawals",
+      "17pp commission reduction on withdrawals (30% → 13%)",
       "Priority creator support (chat, 12hr SLA)",
     ],
     locked: ["Homepage featured", "Verified badge", "Brand deals", "Dedicated manager"],
@@ -389,7 +389,7 @@ const CREATOR_PLANS = [
     color: "#E91E8C", gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
     icon: "star" as const,
     tagline: "India's top creator tier",
-    highlights: ["Homepage featured", "Verified blue badge", "22% commission cut"],
+    highlights: ["Homepage featured", "Verified blue badge", "30% → 8% commission"],
     features: [
       "Everything in Creator Pro, plus:",
       "Homepage featured placement (rotational)",
@@ -400,7 +400,7 @@ const CREATOR_PLANS = [
       "Exclusive creator meetups & events",
       "Custom branded creator room",
       "Featured in 'Top Creators' section",
-      "22% commission reduction on withdrawals",
+      "22pp commission reduction on withdrawals (30% → 8%)",
       "Priority support (WhatsApp, 2hr SLA)",
     ],
     locked: [],
@@ -561,13 +561,13 @@ const PLAN_RANK: Record<string, number> = {
 };
 
 // ── Fan tiers ──────────────────────────────────────────────────────────────────
-// Fan Club subscriptions are paid in Ridhi Coins (1 coin ≈ ₹0.80).
+// Fan Club subscriptions are paid in Ridhi Coins (1 coin ≈ ₹1.00).
 // Creator keeps 70% of fan revenue; Ridhi retains 30% (20% on Creator Pro+).
 // Prices shown per creator — users may join multiple creators' fan clubs.
 const FAN_TIERS = [
   {
     id: "supporter", name: "Supporter",
-    coinPrice: 49, rupeesApprox: "≈₹39", period: "/month",
+    coinPrice: 49, rupeesApprox: "≈₹49", period: "/month",
     color: "#34C759", icon: "heart",
     perks: [
       "Supporter badge on your profile & chat",
@@ -578,7 +578,7 @@ const FAN_TIERS = [
   },
   {
     id: "superfan", name: "Super Fan",
-    coinPrice: 149, rupeesApprox: "≈₹119", period: "/month",
+    coinPrice: 149, rupeesApprox: "≈₹149", period: "/month",
     color: "#FF9500", icon: "star",
     perks: [
       "All Supporter perks, plus:",
@@ -590,7 +590,7 @@ const FAN_TIERS = [
   },
   {
     id: "vipfan", name: "VIP Fan",
-    coinPrice: 499, rupeesApprox: "≈₹399", period: "/month",
+    coinPrice: 499, rupeesApprox: "≈₹499", period: "/month",
     color: "#E91E8C", icon: "award",
     perks: [
       "All Super Fan perks, plus:",
@@ -1524,7 +1524,7 @@ export default function SubscriptionScreen() {
                   { icon: "gift",        color: "#E91E8C", text: "Gifts from live streams → 70–92% goes to you" },
                   { icon: "users",       color: "#7B2FBE", text: "Fan Club coins → 70–92% revenue share"       },
                   { icon: "mic",         color: "#2196F3", text: "Paid podcast episodes → 70–92% revenue share" },
-                  { icon: "credit-card", color: "#FFB800", text: "Minimum withdrawal: 1,000 coins (≈₹800)"      },
+                  { icon: "credit-card", color: "#FFB800", text: "Minimum withdrawal: 1,000 coins (≈₹1,000)"    },
                 ].map(({ icon, color, text }) => (
                   <View key={text} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
                     <View style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: color + "20", alignItems: "center", justifyContent: "center" }}>
@@ -1598,7 +1598,7 @@ export default function SubscriptionScreen() {
               </Text>
               <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
                 {[
-                  { icon: "credit-card", label: "1 Coin ≈ ₹0.80",    color: "#FFB800" },
+                  { icon: "credit-card", label: "1 Coin ≈ ₹1.00",    color: "#FFB800" },
                   { icon: "users",       label: "Creator gets 70%+",  color: "#34C759" },
                   { icon: "refresh-cw",  label: "Cancel anytime",     color: "#7B2FBE" },
                 ].map(({ icon, label, color }) => (
