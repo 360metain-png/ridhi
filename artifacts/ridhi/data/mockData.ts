@@ -1082,6 +1082,7 @@ export const MARKETING_NOTIFICATIONS: MarketingNotification[] = [
 export type AdCampaignStatus = "pending" | "active" | "paused" | "completed" | "rejected";
 export type AdCampaignFormat = "feed" | "story" | "reel" | "banner" | "explore";
 export type AdPayMethod = "coins" | "direct";
+export type AdCampaignType = "paidAds" | "buyCreator";
 
 export interface AdCampaign {
   id: string;
@@ -1100,6 +1101,7 @@ export interface AdCampaign {
   days: number;
   totalCost: number;
   payMethod: AdPayMethod;
+  campaignType?: AdCampaignType;
   status: AdCampaignStatus;
   submittedAt: string;
   startDate?: string;

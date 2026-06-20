@@ -29,7 +29,7 @@ import { useTrackScreen } from "@/hooks/useAnalytics";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
-import { USER_CAMPAIGNS, type AdCampaign, type AdCampaignStatus, type AdCampaignFormat, type AdPayMethod } from "@/data/mockData";
+import { USER_CAMPAIGNS, type AdCampaign, type AdCampaignStatus, type AdCampaignFormat, type AdPayMethod, type AdCampaignType } from "@/data/mockData";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import type { InvoiceData } from "@/components/GstInvoice";
 
@@ -110,9 +110,16 @@ function CampaignCard({
               <Text style={[styles.statusText, { color: meta.color }]}>{meta.label}</Text>
             </View>
           </View>
-          <Text style={[styles.campaignFormat, { color: colors.mutedForeground }]}>
-            {FORMATS.find((f) => f.key === item.format)?.label} · {item.targetCity}
-          </Text>
+          <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
+            <Text style={[styles.campaignFormat, { color: colors.mutedForeground }]}>
+              {FORMATS.find((f) => f.key === item.format)?.label} · {item.targetCity}
+            </Text>
+            {item.campaignType === "buyCreator" && (
+              <View style={[styles.typeBadge, { backgroundColor: colors.primary + "20" }]}>
+                <Text style={[styles.typeBadgeText, { color: colors.primary }]}>Buy Creator</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.campaignMetaRow}>
             <Text style={[styles.campaignCost, { color: colors.foreground }]}>
               {isDirect ? `₹${fmtN(item.totalCost)}` : `${fmtN(item.totalCost / COIN_TO_RUPEE)} coins`}
@@ -415,6 +422,7 @@ export default function AdsManagerScreen() {
   const [dailyBudget, setDailyBudget] = useState("");
   const [days, setDays] = useState("");
   const [payMethod, setPayMethod] = useState<AdPayMethod | null>(null);
+  const [campaignType, setCampaignType] = useState<"paidAds" | "buyCreator">("paidAds");
   const [showPayment, setShowPayment] = useState(false);
   const [showCoinConfirm, setShowCoinConfirm] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
@@ -438,6 +446,7 @@ export default function AdsManagerScreen() {
     setTargetCity(null); setTargetAge(null); setTargetGender(null); setTargetInterests([]);
     setDailyBudget(""); setDays("");
     setPayMethod(null);
+    setCampaignType("paidAds");
   };
 
   const pickCreative = async (type: "image" | "video") => {
@@ -482,6 +491,7 @@ export default function AdsManagerScreen() {
       days: parseInt(days) || 0,
       totalCost,
       payMethod,
+      campaignType,
       status: "pending",
       submittedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
       impressions: 0, clicks: 0, ctr: 0, spent: 0,
@@ -533,11 +543,14 @@ export default function AdsManagerScreen() {
   };
 
   // Step validation
+  const minDaily = 100;
+  const isBudgetValid = parseInt(dailyBudget) >= minDaily && parseInt(days) > 0;
+
   const canNext = () => {
     if (step === 1) return headline.trim().length >= 3 && cta.trim().length > 0 && format !== null;
     if (step === 2) return creativeUri !== null;
     if (step === 3) return targetCity !== null && targetAge !== null && targetGender !== null;
-    if (step === 4) return totalCost > 0;
+    if (step === 4) return isBudgetValid;
     if (step === 5) return payMethod !== null;
     return false;
   };
@@ -813,15 +826,57 @@ export default function AdsManagerScreen() {
                 <Text style={[styles.stepTitle, { color: colors.foreground }]}>Budget & Duration</Text>
 
                 <View style={{ gap: 6 }}>
+                  <Text style={[styles.inputLabel, { color: colors.mutedForeground }]}>Campaign Type</Text>
+                  <View style={{ flexDirection: "row", gap: 10 }}>
+                    <Pressable
+                      onPress={() => setCampaignType("paidAds")}
+                      style={[styles.typeCard, { backgroundColor: campaignType === "paidAds" ? colors.primary : colors.card, borderColor: colors.border }]}
+                    >
+                      <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: campaignType === "paidAds" ? "#fff" : colors.foreground }}>Paid Ads</Text>
+                      <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: campaignType === "paidAds" ? "#fff" : colors.mutedForeground }}>Run ads on Ridhi</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => setCampaignType("buyCreator")}
+                      style={[styles.typeCard, { backgroundColor: campaignType === "buyCreator" ? colors.primary : colors.card, borderColor: colors.border }]}
+                    >
+                      <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: campaignType === "buyCreator" ? "#fff" : colors.foreground }}>Buy Creator</Text>
+                      <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: campaignType === "buyCreator" ? "#fff" : colors.mutedForeground }}>Hire creators to post</Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={{ gap: 6 }}>
                   <Text style={[styles.inputLabel, { color: colors.mutedForeground }]}>Daily Budget (₹) *</Text>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                    {([100, 200, 500, 1000] as const).map((amt) => (
+                      <Pressable
+                        key={amt}
+                        onPress={() => { setDailyBudget(String(amt)); }}
+                        style={[
+                          styles.budgetChip,
+                          { backgroundColor: parseInt(dailyBudget) === amt ? colors.primary : colors.card, borderColor: colors.border },
+                        ]}
+                      >
+                        <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: parseInt(dailyBudget) === amt ? "#fff" : colors.foreground }}>
+                          ₹{amt}/day
+                        </Text>
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: parseInt(dailyBudget) === amt ? "#fff" : colors.mutedForeground }}>
+                          {Math.ceil(amt / COIN_TO_RUPEE)} coins
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
                   <TextInput
                     value={dailyBudget}
                     onChangeText={(t) => setDailyBudget(t.replace(/[^0-9]/g, ""))}
-                    placeholder="e.g. 500"
+                    placeholder="Or enter custom amount (Min ₹100)"
                     placeholderTextColor={colors.mutedForeground}
                     keyboardType="numeric"
                     style={[styles.textInput, { color: colors.foreground, backgroundColor: colors.card, borderColor: colors.border }]}
                   />
+                  <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>
+                    Minimum daily budget: ₹100 or equivalent coins
+                  </Text>
                 </View>
 
                 <View style={{ gap: 6 }}>
@@ -1119,6 +1174,8 @@ const styles = StyleSheet.create({
   campaignMetaRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 2 },
   campaignCost: { fontSize: 12, fontFamily: "Inter_700Bold" },
   campaignDate: { fontSize: 11, fontFamily: "Inter_400Regular" },
+  typeBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
+  typeBadgeText: { fontSize: 9, fontFamily: "Inter_700Bold" },
 
   liveStats: { flexDirection: "row", justifyContent: "space-around", paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth },
   statCol: { alignItems: "center", gap: 2 },
@@ -1175,6 +1232,11 @@ const styles = StyleSheet.create({
   chipWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   chipText: { fontSize: 12, fontFamily: "Inter_500Medium" },
+
+  // Budget chips
+  budgetChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderWidth: 1, alignItems: "center", gap: 2 },
+  // Campaign type cards
+  typeCard: { flex: 1, borderRadius: 14, borderWidth: 1, padding: 14, alignItems: "center", gap: 4 },
 
   // Cost card
   costCard: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 10 },
