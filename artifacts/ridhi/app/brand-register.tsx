@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -18,6 +20,9 @@ import { useTrackScreen } from "@/hooks/useAnalytics";
 ;
 import { GradientButton } from "@/components/GradientButton";
 import { SeoHead } from "@/components/SeoHead";
+import { PaymentSheet } from "@/components/PaymentSheet";
+import { useAuth } from "@/contexts/AuthContext";
+const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
 const { width } = Dimensions.get("window");
 
@@ -60,38 +65,9 @@ const BRAND_SIZES = [
   { label: "Agency",     sub: "Managing clients",  emoji: "🎯" },
 ];
 
-const PLANS = [
-  {
-    id: "starter",
-    name: "Starter",
-    price: "₹2,999",
-    period: "/month",
-    deals: "Up to 3 active deals",
-    color: "#7B2FBE",
-    features: ["3 active campaigns", "20 creator slots/deal", "Basic analytics", "Email support"],
-    popular: false,
-  },
-  {
-    id: "growth",
-    name: "Growth",
-    price: "₹7,999",
-    period: "/month",
-    deals: "Up to 10 active deals",
-    color: "#E91E8C",
-    features: ["10 active campaigns", "50 creator slots/deal", "Advanced analytics", "Priority support", "Featured badge"],
-    popular: true,
-  },
-  {
-    id: "scale",
-    name: "Scale",
-    price: "₹19,999",
-    period: "/month",
-    deals: "Unlimited deals",
-    color: "#FF6B35",
-    features: ["Unlimited campaigns", "Unlimited slots", "Real-time analytics", "Dedicated account manager", "Homepage feature spot"],
-    popular: false,
-  },
-];
+const BRAND_REGISTRATION_FEE = 1000;
+const COIN_TO_RUPEE = 0.8;
+const BRAND_REGISTRATION_COINS = Math.ceil(BRAND_REGISTRATION_FEE / COIN_TO_RUPEE);
 
 const TOTAL_STEPS = 4;
 
@@ -122,8 +98,14 @@ export default function BrandRegisterScreen() {
   const [gst,         setGst]         = useState("");
   const [pan,         setPan]         = useState("");
 
-  // Step 3 — Plan
-  const [selectedPlan, setSelectedPlan] = useState("growth");
+  // Step 3 — Payment
+  const [payMethod, setPayMethod] = useState<"direct" | "coins" | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [showCoinConfirm, setShowCoinConfirm] = useState(false);
+  const [paymentDone, setPaymentDone] = useState(false);
+
+  const { user, deductCoins } = useAuth();
+  const coinBalance = user?.coins ?? 0;
 
   const togglePlatform = (p: string) => {
     setSelectedPlats((prev) =>
@@ -135,12 +117,31 @@ export default function BrandRegisterScreen() {
     brandName.trim().length >= 2 && !!industry,
     contactName.trim().length >= 2 && phone.trim().length >= 10 && email.includes("@"),
     !!brandSize && !!budgetRange,
-    !!selectedPlan,
+    paymentDone,
   ][step];
 
   const handleNext = () => {
     if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
+    // Step 3 = payment already handled, show success
     setSubmitted(true);
+  };
+
+  const handlePaySuccess = () => {
+    setShowPayment(false);
+    setPaymentDone(true);
+  };
+
+  const handleCoinPay = () => {
+    if (coinBalance < BRAND_REGISTRATION_COINS) {
+      Alert.alert("Insufficient Coins", `You need ${BRAND_REGISTRATION_COINS} coins. Go to Wallet to recharge.`, [
+        { text: "Cancel", style: "cancel" },
+        { text: "Go to Wallet", onPress: () => router.push("/wallet" as any) },
+      ]);
+      return;
+    }
+    setShowCoinConfirm(false);
+    deductCoins(BRAND_REGISTRATION_COINS);
+    setPaymentDone(true);
   };
 
   const progress = (step + 1) / TOTAL_STEPS;
@@ -211,40 +212,37 @@ export default function BrandRegisterScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={[styles.scroll, { paddingBottom: (Platform.OS === "web" ? 84 : insets.bottom) + 40 }]}
-      >
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}>
 
-        {/* ── STEP 0: Brand Identity ───────────────────────────────────────── */}
+        {/* ── STEP 0: Brand Identity ─────────────────────────────────────── */}
         {step === 0 && (
           <View style={styles.stepWrap}>
-            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Tell us about your brand</Text>
-            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>This is what creators will see when browsing your campaigns</Text>
+            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Brand Identity</Text>
+            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Tell us about your brand</Text>
 
-            <Field label="Brand / Company Name *" icon="briefcase" color={colors.primary}>
+            <Field label="Brand Name *" icon="type" color={colors.mutedForeground}>
               <TextInput
-                style={[styles.input, { color: colors.foreground, borderColor: brandName ? colors.primary : colors.border, backgroundColor: colors.card }]}
-                placeholder="e.g. boAt Lifestyle, Nykaa, CRED…"
+                style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
+                placeholder="e.g. Lakme, Swiggy, Noise"
                 placeholderTextColor={colors.mutedForeground}
                 value={brandName}
                 onChangeText={setBrandName}
+                maxLength={40}
               />
             </Field>
 
-            <Field label="Tagline (optional)" icon="type" color={colors.mutedForeground}>
+            <Field label="Tagline" icon="align-left" color={colors.mutedForeground}>
               <TextInput
                 style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
-                placeholder="e.g. Feel the bass. Live the beat."
+                placeholder="Short tagline or slogan"
                 placeholderTextColor={colors.mutedForeground}
                 value={tagline}
                 onChangeText={setTagline}
-                maxLength={80}
+                maxLength={60}
               />
             </Field>
 
-            <Field label="Industry / Category *" icon="tag" color={colors.primary}>
+            <Field label="Industry *" icon="grid" color={colors.mutedForeground}>
               <View style={styles.chipGrid}>
                 {INDUSTRIES.map((ind) => (
                   <Pressable
@@ -252,67 +250,69 @@ export default function BrandRegisterScreen() {
                     onPress={() => setIndustry(ind)}
                     style={[
                       styles.chip,
-                      { borderColor: industry === ind ? "#E91E8C" : colors.border },
-                      industry === ind && { backgroundColor: "#E91E8C18" },
+                      { backgroundColor: industry === ind ? colors.primary : colors.card, borderColor: industry === ind ? colors.primary : colors.border },
                     ]}
                   >
-                    <Text style={[styles.chipText, { color: industry === ind ? "#E91E8C" : colors.mutedForeground }]}>{ind}</Text>
+                    <Text style={[styles.chipText, { color: industry === ind ? "#fff" : colors.foreground }]}>{ind}</Text>
                   </Pressable>
                 ))}
               </View>
             </Field>
 
-            <Field label="Platforms you want creators to post on" icon="share-2" color={colors.primary}>
+            <Field label="Platforms" icon="share-2" color={colors.mutedForeground}>
               <View style={styles.chipGrid}>
-                {PLATFORMS.map((p) => {
-                  const on = selectedPlats.includes(p);
-                  return (
-                    <Pressable
-                      key={p}
-                      onPress={() => togglePlatform(p)}
-                      style={[styles.chip, { borderColor: on ? "#7B2FBE" : colors.border }, on && { backgroundColor: "#7B2FBE18" }]}
-                    >
-                      <Text style={[styles.chipText, { color: on ? "#7B2FBE" : colors.mutedForeground }]}>{p}</Text>
-                    </Pressable>
-                  );
-                })}
+                {PLATFORMS.map((p) => (
+                  <Pressable
+                    key={p}
+                    onPress={() => togglePlatform(p)}
+                    style={[
+                      styles.chip,
+                      { backgroundColor: selectedPlats.includes(p) ? colors.primary : colors.card, borderColor: selectedPlats.includes(p) ? colors.primary : colors.border },
+                    ]}
+                  >
+                    <Text style={[styles.chipText, { color: selectedPlats.includes(p) ? "#fff" : colors.foreground }]}>{p}</Text>
+                  </Pressable>
+                ))}
               </View>
+              <Text style={[styles.helperText, { color: colors.mutedForeground }]}>
+                {selectedPlats.length} platform{selectedPlats.length !== 1 ? "s" : ""} selected
+              </Text>
             </Field>
           </View>
         )}
 
-        {/* ── STEP 1: Contact Details ──────────────────────────────────────── */}
+        {/* ── STEP 1: Contact Details ──────────────────────────────────── */}
         {step === 1 && (
           <View style={styles.stepWrap}>
-            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Your contact details</Text>
-            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Used for campaign communication and account verification</Text>
+            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Contact Details</Text>
+            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Who should we reach for deals?</Text>
 
-            <Field label="Contact Person Name *" icon="user" color={colors.primary}>
+            <Field label="Contact Person *" icon="user" color={colors.mutedForeground}>
               <TextInput
-                style={[styles.input, { color: colors.foreground, borderColor: contactName ? colors.primary : colors.border, backgroundColor: colors.card }]}
-                placeholder="Full name of the marketing / brand person"
+                style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
+                placeholder="Full name"
                 placeholderTextColor={colors.mutedForeground}
                 value={contactName}
                 onChangeText={setContactName}
               />
             </Field>
 
-            <Field label="Phone Number *" icon="phone" color={colors.primary}>
+            <Field label="Phone *" icon="phone" color={colors.mutedForeground}>
               <TextInput
-                style={[styles.input, { color: colors.foreground, borderColor: phone.length >= 10 ? colors.primary : colors.border, backgroundColor: colors.card }]}
+                style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
                 placeholder="+91 98765 43210"
                 placeholderTextColor={colors.mutedForeground}
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
-                maxLength={13}
+                maxLength={15}
               />
             </Field>
 
-            <Field label="Business Email *" icon="mail" color={colors.primary}>
+            <Field label="Email *" icon="mail" color={colors.mutedForeground}>
               <TextInput
-                style={[styles.input, { color: colors.foreground, borderColor: email.includes("@") ? colors.primary : colors.border, backgroundColor: colors.card }]}
-                placeholder="marketing@yourbrand.com"
+                style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
+                placeholder="contact@company.com"
                 placeholderTextColor={colors.mutedForeground}
                 value={email}
                 onChangeText={setEmail}
@@ -321,33 +321,26 @@ export default function BrandRegisterScreen() {
               />
             </Field>
 
-            <Field label="Website (optional)" icon="globe" color={colors.mutedForeground}>
+            <Field label="Website" icon="globe" color={colors.mutedForeground}>
               <TextInput
                 style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
-                placeholder="https://yourbrand.com"
+                placeholder="https://company.com"
                 placeholderTextColor={colors.mutedForeground}
                 value={website}
                 onChangeText={setWebsite}
                 autoCapitalize="none"
               />
             </Field>
-
-            <View style={[styles.infoBox, { backgroundColor: "#7B2FBE10", borderColor: "#7B2FBE30" }]}>
-              <Feather name="shield" size={14} color="#7B2FBE" />
-              <Text style={[styles.infoText, { color: colors.mutedForeground }]}>
-                Your contact details are never shared with creators. Only your brand name, category, and campaign details are visible.
-              </Text>
-            </View>
           </View>
         )}
 
-        {/* ── STEP 2: Company Profile + Verification ───────────────────────── */}
+        {/* ── STEP 2: Company Profile ────────────────────────────────────── */}
         {step === 2 && (
           <View style={styles.stepWrap}>
-            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Company profile</Text>
-            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Helps us match you with the right creator tier and verify your business</Text>
+            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Company Profile</Text>
+            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Help creators understand your scale</Text>
 
-            <Field label="Brand Size *" icon="users" color={colors.primary}>
+            <Field label="Company Size *" icon="users" color={colors.mutedForeground}>
               <View style={{ gap: 10 }}>
                 {BRAND_SIZES.map((s) => (
                   <Pressable
@@ -355,34 +348,34 @@ export default function BrandRegisterScreen() {
                     onPress={() => setBrandSize(s.label)}
                     style={[
                       styles.sizeCard,
-                      { backgroundColor: colors.card, borderColor: brandSize === s.label ? "#E91E8C" : colors.border },
-                      brandSize === s.label && { backgroundColor: "#E91E8C08" },
+                      { backgroundColor: colors.card, borderColor: brandSize === s.label ? colors.primary : colors.border },
                     ]}
                   >
-                    <Text style={{ fontSize: 24 }}>{s.emoji}</Text>
-                    <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 28 }}>{s.emoji}</Text>
+                    <View>
                       <Text style={[styles.sizeLabel, { color: colors.foreground }]}>{s.label}</Text>
                       <Text style={[styles.sizeSub, { color: colors.mutedForeground }]}>{s.sub}</Text>
                     </View>
-                    {brandSize === s.label && <Feather name="check-circle" size={18} color="#E91E8C" />}
+                    {brandSize === s.label && (
+                      <Feather name="check-circle" size={20} color={colors.primary} />
+                    )}
                   </Pressable>
                 ))}
               </View>
             </Field>
 
-            <Field label="Monthly Creator Budget *" icon="dollar-sign" color={colors.primary}>
+            <Field label="Monthly Budget Range *" icon="trending-up" color={colors.mutedForeground}>
               <View style={styles.chipGrid}>
-                {BUDGET_RANGES.map((b) => (
+                {BUDGET_RANGES.map((r) => (
                   <Pressable
-                    key={b}
-                    onPress={() => setBudgetRange(b)}
+                    key={r}
+                    onPress={() => setBudgetRange(r)}
                     style={[
                       styles.chip,
-                      { borderColor: budgetRange === b ? "#7B2FBE" : colors.border },
-                      budgetRange === b && { backgroundColor: "#7B2FBE18" },
+                      { backgroundColor: budgetRange === r ? colors.primary : colors.card, borderColor: budgetRange === r ? colors.primary : colors.border },
                     ]}
                   >
-                    <Text style={[styles.chipText, { color: budgetRange === b ? "#7B2FBE" : colors.mutedForeground }]}>{b}</Text>
+                    <Text style={[styles.chipText, { color: budgetRange === r ? "#fff" : colors.foreground }]}>{r}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -421,71 +414,98 @@ export default function BrandRegisterScreen() {
           </View>
         )}
 
-        {/* ── STEP 3: Choose Plan ──────────────────────────────────────────── */}
+        {/* ── STEP 3: Pay & Register ──────────────────────────────────────────── */}
         {step === 3 && (
           <View style={styles.stepWrap}>
-            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Choose your plan</Text>
-            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>Start free for 14 days — no credit card required</Text>
+            <Text style={[styles.stepTitle, { color: colors.foreground }]}>Complete Registration</Text>
+            <Text style={[styles.stepSub, { color: colors.mutedForeground }]}>
+              One-time fee to activate your brand on Ridhi Creator Marketplace
+            </Text>
 
-            <View style={{ gap: 14 }}>
-              {PLANS.map((plan) => {
-                const active = selectedPlan === plan.id;
-                return (
-                  <Pressable
-                    key={plan.id}
-                    onPress={() => setSelectedPlan(plan.id)}
-                    style={[
-                      styles.planCard,
-                      { backgroundColor: colors.card, borderColor: active ? plan.color : colors.border, borderWidth: active ? 2 : 1 },
-                    ]}
-                  >
-                    {plan.popular && (
-                      <View style={[styles.popularBadge, { backgroundColor: plan.color }]}>
-                        <Text style={styles.popularBadgeText}>MOST POPULAR</Text>
-                      </View>
-                    )}
-                    {active && (
-                      <LinearGradient
-                        colors={[plan.color + "10", "transparent"]}
-                        style={StyleSheet.absoluteFill}
-                      />
-                    )}
-                    <View style={styles.planTop}>
-                      <View>
-                        <Text style={[styles.planName, { color: colors.foreground }]}>{plan.name}</Text>
-                        <Text style={[styles.planDeals, { color: colors.mutedForeground }]}>{plan.deals}</Text>
-                      </View>
-                      <View style={{ alignItems: "flex-end" }}>
-                        <Text style={[styles.planPrice, { color: plan.color }]}>{plan.price}</Text>
-                        <Text style={[styles.planPeriod, { color: colors.mutedForeground }]}>{plan.period}</Text>
-                      </View>
-                    </View>
-                    <View style={[styles.planDivider, { backgroundColor: colors.border }]} />
-                    <View style={{ gap: 8 }}>
-                      {plan.features.map((f) => (
-                        <View key={f} style={styles.featureRow}>
-                          <Feather name="check" size={13} color={plan.color} />
-                          <Text style={[styles.featureText, { color: colors.mutedForeground }]}>{f}</Text>
-                        </View>
-                      ))}
-                    </View>
-                    {active && (
-                      <View style={[styles.selectedMark, { borderColor: plan.color, backgroundColor: plan.color + "15" }]}>
-                        <Feather name="check-circle" size={14} color={plan.color} />
-                        <Text style={[styles.selectedMarkText, { color: plan.color }]}>Selected</Text>
-                      </View>
-                    )}
-                  </Pressable>
-                );
-              })}
+            {/* Fee card */}
+            <View style={[styles.payCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View style={[styles.payIcon, { backgroundColor: colors.primary + "20" }]}>
+                  <Feather name="briefcase" size={24} color={colors.primary} />
+                </View>
+                <View>
+                  <Text style={{ fontSize: 16, fontFamily: "Inter_700Bold", color: colors.foreground }}>Brand Registration</Text>
+                  <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>Lifetime access · No hidden fees</Text>
+                </View>
+              </View>
+              <View style={[styles.payDivider, { backgroundColor: colors.border }]} />
+              <View style={styles.payRow}>
+                <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>Registration Fee</Text>
+                <Text style={{ fontSize: 18, fontFamily: "Inter_700Bold", color: colors.foreground }}>₹{BRAND_REGISTRATION_FEE.toLocaleString("en-IN")}</Text>
+              </View>
+              <View style={styles.payRow}>
+                <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>In Coins</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                  <Text style={{ fontSize: 18, fontFamily: "Inter_700Bold", color: colors.primary }}>{BRAND_REGISTRATION_COINS}</Text>
+                </View>
+              </View>
+              <View style={[styles.payDivider, { backgroundColor: colors.border }]} />
+              <View style={{ gap: 6 }}>
+                {[
+                  "Unlimited brand deals",
+                  "Creator marketplace access",
+                  "Campaign analytics",
+                  "Invoice & GST support",
+                  "Priority support",
+                ].map((f) => (
+                  <View key={f} style={styles.featureRow}>
+                    <Feather name="check" size={13} color={colors.primary} />
+                    <Text style={[styles.featureText, { color: colors.mutedForeground }]}>{f}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
-            <View style={[styles.infoBox, { backgroundColor: "#FFB80010", borderColor: "#FFB80030", marginTop: 8 }]}>
-              <Feather name="gift" size={14} color="#FFB800" />
-              <Text style={[styles.infoText, { color: colors.mutedForeground }]}>
-                All plans include a 14-day free trial. Cancel anytime — no lock-in.
-              </Text>
+            {/* Payment Method */}
+            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.mutedForeground }}>Choose Payment Method</Text>
+            <View style={{ gap: 10 }}>
+              <Pressable
+                onPress={() => setPayMethod("coins")}
+                style={[styles.payCard, { backgroundColor: colors.card, borderColor: payMethod === "coins" ? colors.primary : colors.border }]}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={[styles.payIcon, { backgroundColor: "#FFB80020" }]}>
+                    <Image source={COIN_IMAGE} style={{ width: 22, height: 22 }} resizeMode="contain" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.payLabel, { color: colors.foreground }]}>Ridhi Coins</Text>
+                    <Text style={[styles.paySub, { color: colors.mutedForeground }]}>You have {coinBalance.toLocaleString("en-IN")} coins</Text>
+                  </View>
+                  <Text style={[styles.payAmount, { color: colors.primary }]}>{BRAND_REGISTRATION_COINS} coins</Text>
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => setPayMethod("direct")}
+                style={[styles.payCard, { backgroundColor: colors.card, borderColor: payMethod === "direct" ? colors.primary : colors.border }]}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                  <View style={[styles.payIcon, { backgroundColor: "#22C55E20" }]}>
+                    <Feather name="credit-card" size={22} color="#22C55E" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.payLabel, { color: colors.foreground }]}>Direct Payment</Text>
+                    <Text style={[styles.paySub, { color: colors.mutedForeground }]}>UPI, Card, Net Banking via Razorpay</Text>
+                  </View>
+                  <Text style={[styles.payAmount, { color: colors.primary }]}>₹{BRAND_REGISTRATION_FEE.toLocaleString("en-IN")}</Text>
+                </View>
+              </Pressable>
             </View>
+
+            {paymentDone && (
+              <View style={[styles.infoBox, { backgroundColor: "#22C55E10", borderColor: "#22C55E30" }]}>
+                <Feather name="check-circle" size={16} color="#22C55E" />
+                <Text style={[styles.infoText, { color: colors.mutedForeground }]}>
+                  Payment confirmed! Tap "Submit & Create Account" to complete registration.
+                </Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -495,10 +515,55 @@ export default function BrandRegisterScreen() {
       <View style={[styles.bottomBar, { paddingBottom: Platform.OS === "web" ? 24 : insets.bottom + 12, backgroundColor: colors.background, borderTopColor: colors.border }]}>
         <GradientButton
           label={step === TOTAL_STEPS - 1 ? "Submit & Create Account" : `Continue  →`}
-          onPress={handleNext}
+          onPress={() => {
+            if (step === 3 && payMethod === "direct" && !paymentDone) {
+              setShowPayment(true);
+            } else if (step === 3 && payMethod === "coins" && !paymentDone) {
+              setShowCoinConfirm(true);
+            } else {
+              handleNext();
+            }
+          }}
           disabled={!canProceed}
         />
       </View>
+
+      {/* Payment Sheet */}
+      <PaymentSheet
+        visible={showPayment}
+        onClose={() => setShowPayment(false)}
+        onSuccess={handlePaySuccess}
+        amount={BRAND_REGISTRATION_FEE}
+        label="Brand Registration"
+        sublabel={`Register ${brandName || "Your Brand"} on Ridhi Creator Marketplace`}
+        noGst={false}
+      />
+
+      {/* Coin Confirm Modal */}
+      {showCoinConfirm && (
+        <Pressable
+          style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+          onPress={() => setShowCoinConfirm(false)}
+        >
+          <View style={[styles.confirmSheet, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Image source={COIN_IMAGE} style={{ width: 28, height: 28 }} resizeMode="contain" />
+              <Text style={[styles.confirmTitle, { color: colors.foreground }]}>Confirm Payment</Text>
+            </View>
+            <Text style={[styles.confirmBody, { color: colors.mutedForeground }]}>
+              Pay {BRAND_REGISTRATION_COINS} coins for Brand Registration?
+            </Text>
+            <View style={[styles.confirmRow, { borderColor: colors.border }]}>
+              <Pressable onPress={() => setShowCoinConfirm(false)} style={[styles.confirmBtn, { borderColor: colors.border }]}>
+                <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: colors.foreground }}>Cancel</Text>
+              </Pressable>
+              <Pressable onPress={handleCoinPay} style={[styles.confirmBtn, { backgroundColor: colors.primary }]}>
+                <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" }}>Pay {BRAND_REGISTRATION_COINS} coins</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Pressable>
+      )}
     </View>
     </>
   );
@@ -540,6 +605,7 @@ const styles = StyleSheet.create({
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip:     { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5 },
   chipText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  helperText: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 6 },
 
   sizeCard:  { flexDirection: "row", alignItems: "center", gap: 14, borderRadius: 14, borderWidth: 1.5, padding: 14 },
   sizeLabel: { fontSize: 15, fontFamily: "Inter_700Bold" },
@@ -564,6 +630,15 @@ const styles = StyleSheet.create({
 
   bottomBar:  { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
 
+  // Payment
+  payCard:    { borderRadius: 16, borderWidth: 1.5, padding: 16, gap: 12 },
+  payIcon:    { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  payDivider: { height: StyleSheet.hairlineWidth },
+  payRow:     { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  payLabel:   { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  paySub:     { fontSize: 12, fontFamily: "Inter_400Regular" },
+  payAmount:  { fontSize: 14, fontFamily: "Inter_700Bold" },
+
   // success
   successBg:    { alignItems: "center", gap: 12, padding: 32, paddingBottom: 40 },
   successIcon:  { width: 90, height: 90, borderRadius: 45, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
@@ -573,4 +648,12 @@ const styles = StyleSheet.create({
   successRowText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   skipBtn:      { alignItems: "center", paddingVertical: 12 },
   skipBtnText:  { fontSize: 14, fontFamily: "Inter_400Regular" },
+
+  // Modal
+  modalOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" },
+  confirmSheet: { borderRadius: 24, padding: 28, gap: 14, width: "100%", maxWidth: 340, borderWidth: 1 },
+  confirmTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
+  confirmBody: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 19 },
+  confirmRow: { flexDirection: "row", gap: 10, width: "100%", marginTop: 4 },
+  confirmBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, alignItems: "center" },
 });
