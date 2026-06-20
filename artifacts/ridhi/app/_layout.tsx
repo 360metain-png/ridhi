@@ -56,7 +56,6 @@ function RootLayoutNav() {
       <Stack.Screen name="group-chat" options={{ presentation: "card" }} />
       <Stack.Screen name="subscription" options={{ presentation: "card" }} />
       <Stack.Screen name="pk-battle" options={{ presentation: "card" }} />
-      <Stack.Screen name="agent-dashboard" options={{ presentation: "card" }} />
       <Stack.Screen name="host-profile" options={{ presentation: "card" }} />
       <Stack.Screen name="call-persona" options={{ presentation: "card" }} />
       <Stack.Screen name="vibe-stars" options={{ presentation: "card" }} />

@@ -44,8 +44,7 @@ const HOST_LEVELS = [
 const CURRENT_LEVEL = 3;
 const CURRENT_COINS = 180000;
 
-// How coins are split between Host, Agent (if any) and Ridhi platform
-// Agent commission is ALWAYS paid from Ridhi's share — never from the host's cut
+// How coins are split between Host and Ridhi platform
 const HOST_COIN_SPLIT = [
   { level: 1, badge: "Bronze", emoji: "🥉", hostPct: 40, ridhiPct: 60, color: "#CD7F32" },
   { level: 2, badge: "Silver", emoji: "🥈", hostPct: 45, ridhiPct: 55, color: "#C0C0C0" },
@@ -244,7 +243,7 @@ export default function HostProfileScreen() {
               { icon: "trending-up", text: "Earn from Video & Audio calls, Live streams, Gifts", color: "#22C55E" },
               { icon: "trending-up", text: "Level up from Bronze to Crown — unlock higher payouts", color: "#FFB800" },
               { icon: "users", text: "Build your own fan base and fan clubs", color: "#7B2FBE" },
-              { icon: "shield", text: "Dedicated agent support and weekly payouts", color: "#E91E8C" },
+              { icon: "shield", text: "Dedicated support and weekly payouts", color: "#E91E8C" },
             ].map((b, i) => (
               <View key={i} style={regStyles.benefitRow}>
                 <View style={[regStyles.benefitIcon, { backgroundColor: b.color + "20" }]}>
@@ -581,7 +580,7 @@ export default function HostProfileScreen() {
                 </View>
               </View>
               <Text style={[styles.splitSubtitle, { color: colors.mutedForeground }]}>
-                Your share grows with every level. Agent commission always comes from Ridhi's cut — not yours.
+                Your share grows with every level.
               </Text>
 
               {HOST_COIN_SPLIT.map((row) => {
@@ -613,18 +612,11 @@ export default function HostProfileScreen() {
                 );
               })}
 
-              {/* Agent note */}
-              <View style={[styles.splitAgentNote, { backgroundColor: "#00BCD415", borderColor: "#00BCD430" }]}>
-                <Feather name="info" size={13} color="#00BCD4" />
-                <Text style={[styles.splitAgentNoteText, { color: colors.mutedForeground }]}>
-                  If you have an <Text style={{ color: "#00BCD4", fontFamily: "Inter_600SemiBold" }}>Agent</Text>, their commission (2–10%) is deducted from Ridhi's share — your payout stays the same.
-                </Text>
-              </View>
             </View>
 
             {/* ── EXAMPLE CALCULATION ── */}
             <View style={[styles.exampleCard, { backgroundColor: "#FFB80010", borderColor: "#FFB80035" }]}>
-              <Text style={[styles.exampleTitle, { color: colors.foreground }]}>💡 Example — Gold Host (L3) with A3 Agent</Text>
+              <Text style={[styles.exampleTitle, { color: colors.foreground }]}>💡 Example — Gold Host (L3)</Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
                 <Text style={[styles.exampleSub, { color: colors.mutedForeground }]}>Fan sends</Text>
                 <RidhiCoin size={13} />
@@ -633,8 +625,7 @@ export default function HostProfileScreen() {
               <View style={{ gap: 8, marginTop: 10 }}>
                 {[
                   { who: "You (Host)",        pct: "50%", amount: "500 → ₹400", color: "#34C759",  icon: "mic" },
-                  { who: "Agent (A3 Pro)",    pct: "5%",  amount: "50 → ₹40",   color: "#00BCD4",  icon: "user-check" },
-                  { who: "Ridhi Platform",    pct: "45%", amount: "450 → ₹360", color: "#7B2FBE",  icon: "shield" },
+                  { who: "Ridhi Platform",    pct: "50%", amount: "500 → ₹400", color: "#7B2FBE",  icon: "shield" },
                 ].map(({ who, pct, amount, color, icon }) => (
                   <View key={who} style={styles.exampleRow}>
                     <View style={[styles.exampleIcon, { backgroundColor: color + "20" }]}>

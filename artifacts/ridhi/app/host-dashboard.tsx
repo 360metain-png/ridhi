@@ -58,11 +58,6 @@ const HOST_DATA = {
   // Coins
   coinBalance:   4_820,
   giftsToday:    380,
-  // Agent info
-  agentName:     "Rahul Verma",
-  agentLevel:    "A3",
-  agentPhone:    "+91 98765 43210",
-  agentEmail:    "agent.rahul@ridhi.app",
 };
 
 const RECENT_ACTIVITY = [
@@ -180,7 +175,6 @@ export default function HostDashboard() {
   const insets  = useSafeAreaInsets();
   const { user } = useAuth();
   const [tab, setTab] = useState<"overview" | "earnings" | "streams">("overview");
-  const [showAgentReport, setShowAgentReport] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const h       = HOST_DATA;
@@ -426,41 +420,6 @@ export default function HostDashboard() {
           </Pressable>
         </View>
 
-        {/* ── Agent Info ── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Agent</Text>
-          <View style={[styles.agentCard, { backgroundColor: colors.card }]}>
-            <View style={styles.agentAvatar}>
-              <Text style={styles.agentAvatarText}>{h.agentName.split(" ").map(w => w[0]).join("")}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <View style={styles.agentNameRow}>
-                <Text style={[styles.agentName, { color: colors.text }]}>{h.agentName}</Text>
-                <View style={styles.agentLevelBadge}>
-                  <Text style={styles.agentLevelText}>{h.agentLevel} Super Agent</Text>
-                </View>
-              </View>
-              <Text style={[styles.agentEmail, { color: colors.mutedForeground }]}>{h.agentEmail}</Text>
-              <Text style={[styles.agentPhone, { color: colors.mutedForeground }]}>Chat for issues — no calls needed</Text>
-            </View>
-            <Pressable
-              style={styles.contactBtn}
-              onPress={() => router.push({ pathname: "/chat/[id]", params: { id: "agent-rahul" } })}
-            >
-              <Feather name="message-circle" size={18} color="#7B2FBE" />
-            </Pressable>
-          </View>
-          {/* Raise Complaint row */}
-          <Pressable
-            style={[styles.complaintRow, { backgroundColor: colors.card }]}
-            onPress={() => setShowAgentReport(true)}
-          >
-            <Feather name="flag" size={14} color="#C62828" />
-            <Text style={[styles.complaintText, { color: "#C62828" }]}>Raise Complaint Against Agent</Text>
-            <Feather name="chevron-right" size={14} color="#C62828" />
-          </Pressable>
-        </View>
-
         {/* ── Recent Activity ── */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Activity</Text>
@@ -486,17 +445,6 @@ export default function HostDashboard() {
 
       </ScrollView>
     </View>
-
-    {/* Agent Complaint Sheet */}
-    <ReportSheet
-      visible={showAgentReport}
-      onClose={() => setShowAgentReport(false)}
-      targetId="agent-rahul"
-      targetType="agent"
-      targetTitle={h.agentName}
-      targetUser={h.agentName}
-      reporterId={user?.id ?? "host"}
-    />
   </>
   );
 }

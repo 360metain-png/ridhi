@@ -36,14 +36,11 @@ const LIVE_EVENTS = [
   { type: "credit" as const, amount: 50, label: "Gift Received", sublabel: "🌹 Rose from Riya", role: "Host" },
   { type: "debit" as const, amount: 100, label: "Gift Sent", sublabel: "💗 Heart to Priya", role: "User" },
   { type: "credit" as const, amount: 200, label: "Call Earnings", sublabel: "Audio Call · 20 min", role: "Host" },
-  { type: "debit" as const, amount: 40, label: "Audio Call", sublabel: "New Host · 4 min", role: "User" },
-  { type: "credit" as const, amount: 500, label: "Agent Commission", sublabel: "10 hosts · ₹1.2K", role: "Agent" },
-  { type: "debit" as const, amount: 25, label: "Video Call", sublabel: "VIP Host · 1 min", role: "User" },
+  { type: "debit" as const, amount: 40, label: "Audio Call", sublabel: "Creator · 4 min", role: "User" },
   { type: "credit" as const, amount: 1000, label: "Recharge Bonus", sublabel: "Razorpay · +100 bonus", role: "User" },
   { type: "credit" as const, amount: 80, label: "Gift Received", sublabel: "🎂 Cake from Kavya", role: "Host" },
   { type: "debit" as const, amount: 250, label: "Gift Sent", sublabel: "🚗 Car to Dev", role: "User" },
   { type: "credit" as const, amount: 320, label: "Call Earnings", sublabel: "Video Call · 8 min", role: "Host" },
-  { type: "credit" as const, amount: 120, label: "Host Commission", sublabel: "Weekly payout", role: "Agent" },
   { type: "credit" as const, amount: 3, label: "Download Earning", sublabel: "Reel · 60% split", role: "Creator" },
   { type: "debit" as const, amount: 10, label: "Download", sublabel: "Post · @neha_art", role: "User" },
   { type: "credit" as const, amount: 6, label: "Download Earning", sublabel: "Post · 60% split", role: "Creator" },
@@ -305,8 +302,8 @@ export default function WalletScreen() {
               <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 0 }]}>Live Coin Activity</Text>
             </View>
             <View style={styles.liveRoleRow}>
-              {["User", "Host", "Agent"].map((r, i) => {
-                const rc = ["#3B82F6", "#E91E8C", "#A855F7"][i];
+              {["User", "Host", "Creator"].map((r, i) => {
+                const rc = ["#3B82F6", "#E91E8C", "#FFB800"][i];
                 return (
                   <View key={r} style={[styles.roleChip, { backgroundColor: rc + "18", borderColor: rc + "40" }]}>
                     <Text style={[styles.roleChipText, { color: rc }]}>{r}</Text>

@@ -217,35 +217,6 @@ export default function CreatorDashboardScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.section, { paddingBottom: 4 }]}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Host Level Status</Text>
-          <LinearGradient
-            colors={["#FFB80025", "#FFB80008"]}
-            style={[styles.hostLevelCard, { borderColor: "#FFB80050" }]}
-          >
-            <View style={styles.hostLevelTop}>
-              <Text style={styles.hostLevelEmoji}>🥇</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.hostLevelName, { color: colors.foreground }]}>L3 Popular · Gold Badge</Text>
-                <Text style={[styles.hostLevelEarnings, { color: "#FFB800" }]}>Est. ₹25K–₹60K / month</Text>
-              </View>
-              <Pressable onPress={() => router.push("/host-profile" as any)} style={[styles.hostLevelBtn, { backgroundColor: "#FFB80025", borderColor: "#FFB80060" }]}>
-                <Text style={[styles.hostLevelBtnText, { color: "#FFB800" }]}>View</Text>
-                <Feather name="chevron-right" size={13} color="#FFB800" />
-              </Pressable>
-            </View>
-            <View style={styles.hostLevelProgress}>
-              <View style={styles.hostLevelProgressHeader}>
-                <Text style={[styles.hostLevelProgressLabel, { color: colors.mutedForeground }]}>Progress to L4 Platinum</Text>
-                <Text style={[styles.hostLevelProgressVal, { color: "#FFB800" }]}>1.8L / 3L coins</Text>
-              </View>
-              <View style={[styles.hostProgressBar, { backgroundColor: colors.muted }]}>
-                <LinearGradient colors={["#FFB800", "#FF6B35"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[styles.hostProgressFill, { width: "60%" }]} />
-              </View>
-            </View>
-          </LinearGradient>
-        </View>
-
         {/* ── My Leads ── */}
         <View style={[styles.section, { paddingBottom: 4 }]}>
           <View style={styles.sectionHeaderRow}>

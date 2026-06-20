@@ -86,7 +86,7 @@ function KycGateScreen({ colors }: { colors: any }) {
       <View style={[st.kycInfoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         {[
           { icon: "upload", text: "Upload Aadhaar + PAN + Bank Proof" },
-          { icon: "check-circle", text: "One verification for Host, Agent & Creator" },
+          { icon: "check-circle", text: "One verification for Creator & Host" },
           { icon: "shield", text: "Super Admin review — usually 1-2 days" },
         ].map((item) => (
           <View key={item.text} style={st.kycInfoRow}>

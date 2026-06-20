@@ -26,9 +26,8 @@ import * as ImagePicker from "expo-image-picker";
 const TOTAL_STEPS = 4;
 const STEP_LABELS = ["Select Roles", "Upload Documents", "Review & Submit", "Status"];
 
-const ROLE_META: { key: "host" | "agent" | "creator"; label: string; desc: string; color: string }[] = [
+const ROLE_META: { key: "host" | "creator"; label: string; desc: string; color: string }[] = [
   { key: "host", label: "Host", desc: "Go live, receive gifts & coins", color: "#E91E8C" },
-  { key: "agent", label: "Agent", desc: "Manage hosts & earn commission", color: "#00BCD4" },
   { key: "creator", label: "Creator", desc: "Monetize content & posts", color: "#FFB800" },
 ];
 
@@ -143,7 +142,7 @@ export default function KYCScreen() {
   const [error, setError] = useState("");
 
   // Step 1: Roles
-  const [roles, setRoles] = useState<("host" | "agent" | "creator")[]>([]);
+  const [roles, setRoles] = useState<("host" | "creator")[]>([]);
 
   // Step 2: Documents
   const [docs, setDocs] = useState<Record<string, DocImage | null>>({
@@ -186,12 +185,9 @@ export default function KYCScreen() {
       .finally(() => setFetching(false));
   }, [user?.id]);
 
-  const toggleRole = (role: "host" | "agent" | "creator") => {
+  const toggleRole = (role: "host" | "creator") => {
     setRoles((prev) => {
       if (prev.includes(role)) return prev.filter((r) => r !== role);
-      // Host and Agent are mutually exclusive (conflict of interest)
-      if (role === "host") return prev.filter((r) => r !== "agent").concat("host");
-      if (role === "agent") return prev.filter((r) => r !== "host").concat("agent");
       return [...prev, role];
     });
     setError("");
@@ -363,7 +359,7 @@ export default function KYCScreen() {
           <>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>I want to earn as</Text>
             <Text style={[styles.sectionSub, { color: colors.mutedForeground }]}>
-              Select one or more roles. Host and Agent cannot be combined.
+              Select one or more roles to start earning.
             </Text>
 
             {/* Locked banner when resubmitting */}
@@ -401,7 +397,7 @@ export default function KYCScreen() {
                   >
                     <View style={[styles.roleIcon, { backgroundColor: role.color + "20" }]}>
                       <Feather
-                        name={role.key === "host" ? "video" : role.key === "agent" ? "users" : "pen-tool"}
+                        name={role.key === "host" ? "video" : "pen-tool"}
                         size={20}
                         color={role.color}
                       />
@@ -611,7 +607,7 @@ export default function KYCScreen() {
                   const meta = ROLE_META.find((m) => m.key === r)!;
                   return (
                     <View key={r} style={[styles.reviewRoleChip, { backgroundColor: meta.color + "18", borderColor: meta.color + "30" }]}>
-                      <Feather name={r === "host" ? "video" : r === "agent" ? "users" : "pen-tool"} size={12} color={meta.color} />
+                      <Feather name={r === "host" ? "video" : "pen-tool"} size={12} color={meta.color} />
                       <Text style={[styles.reviewRoleText, { color: meta.color }]}>{meta.label}</Text>
                     </View>
                   );
@@ -701,7 +697,7 @@ export default function KYCScreen() {
                   </Text>
                   <Text style={[styles.statusDesc, { color: colors.mutedForeground }]}>
                     {kycStatus.reviewStatus === "approved"
-                      ? "Super Admin has approved your E-Verification. You can now start earning as a Host, Agent, and/or Creator."
+                      ? "Super Admin has approved your E-Verification. You can now start earning as a Host and/or Creator."
                       : kycStatus.reviewStatus === "rejected"
                       ? "Please review the admin comment below and resubmit your corrected documents."
                       : "Super Admin will review your documents shortly. This usually takes 1-2 business days."}
@@ -766,7 +762,7 @@ export default function KYCScreen() {
                 <Feather name="shield" size={48} color={colors.mutedForeground} />
                 <Text style={[styles.sectionTitle, { color: colors.foreground, marginTop: 16 }]}>No Verification Yet</Text>
                 <Text style={[styles.sectionSub, { color: colors.mutedForeground, textAlign: "center" }]}>
-                  Complete your E-Verification to start earning as a Host, Agent, or Creator.
+                  Complete your E-Verification to start earning as a Host or Creator.
                 </Text>
                 <Pressable onPress={() => setStep(1)} style={[styles.actionBtn, { backgroundColor: colors.primary, marginTop: 20 }]}>
                   <Feather name="shield" size={16} color="#fff" />
