@@ -128,9 +128,12 @@ export default function BrandRegisterScreen() {
 
   const markBrandRegistered = () => {
     if (user) {
+      const activeUntil = new Date();
+      activeUntil.setDate(activeUntil.getDate() + 30);
       updateProfile({
         isBrandRegistered: true,
         brandRegisteredAt: new Date().toISOString(),
+        brandActiveUntil: activeUntil.toISOString(),
       });
     }
   };
@@ -176,6 +179,7 @@ export default function BrandRegisterScreen() {
             { icon: "check-circle", text: "Brand profile saved",                  color: "#22C55E" },
             { icon: "clock",        text: "Account under review (24 hrs)",        color: "#FFB800" },
             { icon: "mail",         text: `Confirmation sent to ${email || "your email"}`, color: "#7B2FBE" },
+            { icon: "alert-circle", text: "Run 1 campaign every 30 days to stay active", color: "#CA8A04" },
           ].map((item) => (
             <View key={item.text} style={[styles.successRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Feather name={item.icon as any} size={18} color={item.color} />
@@ -184,8 +188,8 @@ export default function BrandRegisterScreen() {
           ))}
 
           <GradientButton
-            label="Post Your First Deal →"
-            onPress={() => router.replace("/brand-post-deal")}
+            label="Go to Ads Manager →"
+            onPress={() => router.replace("/ads-manager")}
             style={{ marginTop: 8 }}
           />
           <Pressable onPress={() => router.back()} style={styles.skipBtn}>

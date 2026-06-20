@@ -401,6 +401,18 @@ export default function AdsManagerScreen() {
   const { user, updateProfile } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
+  // Brand activity check
+  const brandDaysLeft = useMemo(() => {
+    if (!user?.isBrandRegistered || !user?.brandActiveUntil) return null;
+    const now = new Date();
+    const activeUntil = new Date(user.brandActiveUntil);
+    const diffMs = activeUntil.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  }, [user?.brandActiveUntil, user?.isBrandRegistered]);
+
+  const isBrandExpired = brandDaysLeft === 0;
+
   const [tab, setTab] = useState<TabKey>("campaigns");
   const [campaigns, setCampaigns] = useState<AdCampaign[]>(USER_CAMPAIGNS.map((c) => ({ ...c })));
   const [selectedCampaign, setSelectedCampaign] = useState<AdCampaign | null>(null);
@@ -500,6 +512,14 @@ export default function AdsManagerScreen() {
     setCampaigns((prev) => [newCampaign, ...prev]);
     resetCreate();
     setTab("campaigns");
+    // Update brand activity tracking
+    const now = new Date().toISOString();
+    const activeUntil = new Date();
+    activeUntil.setDate(activeUntil.getDate() + 30);
+    updateProfile({
+      lastAdCampaignAt: now,
+      brandActiveUntil: activeUntil.toISOString(),
+    });
     Alert.alert("Campaign Submitted", "Your campaign is under review. You will be notified once it goes live or if any changes are needed.");
   };
 
@@ -617,6 +637,18 @@ export default function AdsManagerScreen() {
               onPress={() => { setSelectedCampaign(item); setShowDetail(true); }}
             />
           )}
+          ListHeaderComponent={
+            brandDaysLeft !== null ? (
+              <View style={[styles.expiryBanner, { backgroundColor: isBrandExpired ? "#FEF2F2" : "#FEFCE8", borderColor: isBrandExpired ? "#FECACA" : "#FDE047" }]}>
+                <Feather name={isBrandExpired ? "alert-triangle" : "clock"} size={18} color={isBrandExpired ? "#EF4444" : "#CA8A04"} />
+                <Text style={[styles.expiryText, { color: isBrandExpired ? "#B91C1C" : "#854D0E" }]}>
+                  {isBrandExpired
+                    ? "Brand registration expired. Run a campaign to reactivate."
+                    : `Run at least 1 campaign every 30 days. ${brandDaysLeft} day${brandDaysLeft === 1 ? "" : "s"} left.`}
+                </Text>
+              </View>
+            ) : null
+          }
           contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 24 }}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           ListEmptyComponent={
@@ -1358,6 +1390,10 @@ const styles = StyleSheet.create({
   invoiceTriggerText: { fontSize: 14, fontFamily: "Inter_600SemiBold", flex: 1 },
   rejectedBox: { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, borderRadius: 12, borderWidth: 1 },
   rejectedBoxText: { fontSize: 12, fontFamily: "Inter_400Regular", flex: 1, lineHeight: 18 },
+
+  // Expiry banner
+  expiryBanner: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 12, borderWidth: 1, padding: 12, marginBottom: 4 },
+  expiryText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1, lineHeight: 18 },
 
   // Invoice modal
   invoiceOverlay: { flex: 1, justifyContent: "flex-end" },

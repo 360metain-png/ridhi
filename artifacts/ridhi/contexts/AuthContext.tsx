@@ -48,6 +48,10 @@ export interface UserProfile {
   isAdUser?: boolean;
   isBrandRegistered?: boolean;
   brandRegisteredAt?: string;
+  lastAdCampaignAt?: string;
+  brandActiveUntil?: string;
+  brandRevokedAt?: string;
+  brandRevokedReason?: string;
   hostRegisteredAt?: string;
   agentRegisteredAt?: string;
   // Random Call Fake Profile
@@ -126,6 +130,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.getItem("ridhi_user").then(async (data) => {
       if (data) {
         const parsed = JSON.parse(data) as UserProfile;
+        // Check brand registration expiry (30-day rule)
+        if (parsed.isBrandRegistered && parsed.brandActiveUntil) {
+          const now = new Date();
+          const activeUntil = new Date(parsed.brandActiveUntil);
+          if (now > activeUntil) {
+            // Brand expired — revoke registration
+            const revoked = {
+              ...parsed,
+              isBrandRegistered: false,
+              brandRevokedAt: now.toISOString(),
+              brandRevokedReason: "No ad campaign in the last 30 days",
+            };
+            await AsyncStorage.setItem("ridhi_user", JSON.stringify(revoked));
+            setUser(revoked);
+            setIsLoading(false);
+            return;
+          }
+        }
         setUser(parsed);
         // Sync KYC status from backend on app load
         try {
