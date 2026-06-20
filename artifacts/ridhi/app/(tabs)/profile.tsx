@@ -511,7 +511,37 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>EARN ON RIDHI</Text>
         <View style={styles.earnRow}>
-          {/* Creator */}
+          {/* Host — only if registered */}
+          {user.isHost && (
+            <Pressable
+              onPress={() => router.push("/host-profile" as any)}
+              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: "#FFB800" }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
+                <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Host</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
+              <View style={styles.activeDot} />
+            </Pressable>
+          )}
+
+          {/* Agent — only if registered */}
+          {user.isAgent && (
+            <Pressable
+              onPress={() => router.push("/agent-dashboard" as any)}
+              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: "#00BCD4" }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: "#00BCD420" }]}>
+                <Feather name="briefcase" size={20} color="#00BCD4" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Agent</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
+              <View style={[styles.activeDot, { backgroundColor: "#00BCD4" }]} />
+            </Pressable>
+          )}
+
+          {/* Creator — always visible */}
           <Pressable
             onPress={() => router.push("/creator-dashboard" as any)}
             style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
@@ -524,6 +554,82 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
       </View>
+
+      {/* ── MY HOST STATUS ────────────────────────────────────────────────── */}
+      {user.isHost && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MY HOST STATUS</Text>
+          <View style={[styles.levelCard, { backgroundColor: colors.card, borderColor: "#FFB800" }]}>
+            <View style={styles.levelHeader}>
+              <LinearGradient colors={["#FFB800", "#FF8C00"]} style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>L3</Text>
+              </LinearGradient>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.levelName, { color: colors.foreground }]}>Silver Host</Text>
+                <Text style={[styles.levelSub, { color: colors.mutedForeground }]}>4,284 fans · Mumbai</Text>
+              </View>
+              <View style={[styles.nextLevelPill, { borderColor: "#FFD700" + "60", backgroundColor: "#FFD70012" }]}>
+                <Text style={[styles.nextLevelText, { color: "#FFB800" }]}>→ L4 Gold</Text>
+              </View>
+            </View>
+            {[
+              { label: "Coins Received",  current: 240000, target: 500000, pct: 48, color: "#E91E8C" },
+              { label: "Stream Hours",    current: 124,    target: 200,    pct: 62, color: "#7B2FBE" },
+              { label: "PK Wins",         current: 8,      target: 10,     pct: 80, color: "#FFB800" },
+            ].map((bar) => (
+              <View key={bar.label} style={styles.progressRow}>
+                <View style={styles.progressLabelRow}>
+                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>{bar.label}</Text>
+                  <Text style={[styles.progressLabel, { color: colors.foreground }]}>{bar.pct}%</Text>
+                </View>
+                <View style={[styles.progressTrack, { backgroundColor: colors.muted }]}>
+                  <View style={[styles.progressFill, { width: `${bar.pct}%` as any, backgroundColor: bar.color }]} />
+                </View>
+              </View>
+            ))}
+            <Text style={[styles.levelTip, { color: colors.mutedForeground }]}>
+              💡 Stream 76 more hours + 2 PK wins to reach L4 Gold
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {user.isAgent && !user.isHost && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>MY AGENT STATUS</Text>
+          <View style={[styles.levelCard, { backgroundColor: colors.card, borderColor: "#00BCD4" }]}>
+            <View style={styles.levelHeader}>
+              <LinearGradient colors={["#00BCD4", "#0097A7"]} style={styles.levelBadge}>
+                <Text style={styles.levelBadgeText}>A2</Text>
+              </LinearGradient>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[styles.levelName, { color: colors.foreground }]}>Senior Agent</Text>
+                <Text style={[styles.levelSub, { color: colors.mutedForeground }]}>5% commission · 54 hosts</Text>
+              </View>
+              <View style={[styles.nextLevelPill, { borderColor: "#00BCD460", backgroundColor: "#00BCD412" }]}>
+                <Text style={[styles.nextLevelText, { color: "#00BCD4" }]}>→ A3</Text>
+              </View>
+            </View>
+            {[
+              { label: "Hosts Managed",  current: 54,  target: 100, pct: 54, color: "#00BCD4" },
+              { label: "Active Rate",    current: 79,  target: 80,  pct: 99, color: "#7B2FBE" },
+            ].map((bar) => (
+              <View key={bar.label} style={styles.progressRow}>
+                <View style={styles.progressLabelRow}>
+                  <Text style={[styles.progressLabel, { color: colors.mutedForeground }]}>{bar.label}</Text>
+                  <Text style={[styles.progressLabel, { color: colors.foreground }]}>{bar.pct}%</Text>
+                </View>
+                <View style={[styles.progressTrack, { backgroundColor: colors.muted }]}>
+                  <View style={[styles.progressFill, { width: `${bar.pct}%` as any, backgroundColor: bar.color }]} />
+                </View>
+              </View>
+            ))}
+            <Text style={[styles.levelTip, { color: colors.mutedForeground }]}>
+              🎯 Recruit 46 more hosts to reach A3 — unlock 7% commission
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* ── MENU SECTIONS ─────────────────────────────────────────────────── */}
       {MENU_SECTIONS.map((section) => (
