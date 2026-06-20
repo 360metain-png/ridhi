@@ -24,6 +24,7 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { useApp } from "@/contexts/AppContext";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { apiFetch } from "@/utils/api";
 import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
@@ -323,10 +324,7 @@ export default function FeedScreen() {
     // API call
     if (user?.id) {
       try {
-        await fetch(`/api/posts/${id}/like`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-user-id": user.id },
-        });
+        await apiFetch(`/api/posts/${id}/like`, { method: "POST" });
       } catch {
         // Revert on failure
         setPosts((prev) =>
@@ -486,11 +484,8 @@ export default function FeedScreen() {
     setRefreshing(true);
     try {
       const trending = activeTab === "Trending";
-      const res = await fetch(`/api/feed?trending=${trending}&limit=20`, {
-        headers: user?.id ? { "x-user-id": user.id } : {},
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiFetch<{ posts: any[] }>(`/api/feed?trending=${trending}&limit=20`);
+      if (data) {
         const apiPosts = data.posts ?? [];
         const mapped: Post[] = apiPosts.map((p: any) => ({
           id: p.id,

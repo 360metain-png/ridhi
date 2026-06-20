@@ -23,6 +23,7 @@ import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { apiFetch, ApiError } from "@/utils/api";
 
 const { width } = Dimensions.get("window");
 
@@ -355,15 +356,11 @@ export default function CreatePostScreen() {
           language: captionLanguage,
         };
       }
-      const res = await fetch("/api/posts", {
+      const res = await apiFetch<{ success: boolean; post?: any }>("/api/posts", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": user?.id ?? "",
-        },
         body: JSON.stringify(body),
       });
-      if (res.ok) {
+      if (res.success) {
         // Update streak
         const today = new Date().toISOString().split("T")[0];
         const lastPost = user?.lastPostDate?.split("T")[0];
@@ -378,8 +375,9 @@ export default function CreatePostScreen() {
       } else {
         Alert.alert("Error", "Failed to post. Please try again.");
       }
-    } catch {
-      Alert.alert("Error", "Network error. Please try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof ApiError ? err.message : "Network error. Please try again.";
+      Alert.alert("Error", msg);
     } finally {
       setLoading(false);
     }

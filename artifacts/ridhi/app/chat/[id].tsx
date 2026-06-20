@@ -22,6 +22,7 @@ import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { AIReplySuggestions } from "@/components/AIReplySuggestions";
+import { apiFetch } from "@/utils/api";
 
 interface Message {
   id: string;
@@ -80,11 +81,7 @@ export default function ChatDetailScreen() {
 
   async function loadMessages() {
     try {
-      const res = await fetch(`/api/chat/${id}/messages`, {
-        headers: { "x-user-id": userId! },
-      });
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json();
+      const data = await apiFetch<{ messages: ApiMessage[] }>(`/api/chat/${id}/messages`);
       const apiMsgs: ApiMessage[] = data.messages ?? [];
 
       const mapped: Message[] = apiMsgs.map((m) => ({
@@ -128,9 +125,8 @@ export default function ChatDetailScreen() {
     // Send to API
     if (userId && id) {
       try {
-        await fetch(`/api/chat/${id}/messages`, {
+        await apiFetch(`/api/chat/${id}/messages`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-user-id": userId },
           body: JSON.stringify({ content: msgText, type }),
         });
       } catch {

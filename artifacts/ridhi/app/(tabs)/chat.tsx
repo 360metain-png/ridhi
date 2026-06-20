@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ChatItem } from "@/components/ChatItem";
 import { CHATS } from "@/data/mockData";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { apiFetch } from "@/utils/api";
 
 interface Conversation {
   id: string;
@@ -50,11 +51,7 @@ export default function ChatScreen() {
   async function fetchConversations() {
     try {
       setLoading(true);
-      const res = await fetch("/api/chat", {
-        headers: { "x-user-id": user!.id },
-      });
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json();
+      const data = await apiFetch<{ conversations: any[] }>("/api/chat");
       setConversations(data.conversations ?? []);
     } catch {
       // fallback to mock
