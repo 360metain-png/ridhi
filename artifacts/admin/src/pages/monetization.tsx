@@ -92,16 +92,16 @@ const funnelData = [
 
 // ─── Transaction log (with GST + actual cost) ───
 const transactionLog = [
-  { id: "TXN-001", user: "Aarav Sharma", type: "Coin Recharge", method: "UPI", amount: 499, gst: 76, total: 575, coins: 6500, status: "completed", date: "12 Jun 2026" },
-  { id: "TXN-002", user: "Priya Patel", type: "Subscription", method: "Card", amount: 1299, gst: 234, total: 1533, plan: "Gold Monthly", status: "completed", date: "12 Jun 2026" },
-  { id: "TXN-003", user: "Rohan Mehta", type: "Coin Recharge", method: "Net Banking", amount: 1999, gst: 360, total: 2359, coins: 30000, status: "completed", date: "11 Jun 2026" },
+  { id: "TXN-001", user: "Aarav Sharma", type: "Coin Recharge", method: "UPI", amount: 499, gst: 76, total: 575, coins: 500, status: "completed", date: "12 Jun 2026" },
+  { id: "TXN-002", user: "Priya Patel", type: "Subscription", method: "Card", amount: 299, gst: 54, total: 353, plan: "Gold Monthly", status: "completed", date: "12 Jun 2026" },
+  { id: "TXN-003", user: "Rohan Mehta", type: "Coin Recharge", method: "Net Banking", amount: 1999, gst: 360, total: 2359, coins: 2000, status: "completed", date: "11 Jun 2026" },
   { id: "TXN-004", user: "Ananya Rao", type: "Ad Campaign", method: "Direct", amount: 5000, gst: 900, total: 5900, campaign: "Summer Promo", status: "completed", date: "11 Jun 2026" },
-  { id: "TXN-005", user: "Kavya Iyer", type: "Subscription", method: "UPI", amount: 4999, gst: 900, total: 5899, plan: "Platinum Yearly", status: "completed", date: "10 Jun 2026" },
-  { id: "TXN-006", user: "Vikram Joshi", type: "Coin Recharge", method: "Wallet", amount: 99, gst: 18, total: 117, coins: 1100, status: "failed", date: "10 Jun 2026" },
-  { id: "TXN-007", user: "Neha Gupta", type: "Gift Purchase", method: "Coins", amount: 0, gst: 0, total: 0, coins: 500, gift: "Crown", status: "completed", date: "09 Jun 2026" },
-  { id: "TXN-008", user: "Arjun Nair", type: "Withdrawal", method: "UPI", amount: 3500, platformFee: 1050, gst: 189, net: 2261, status: "pending", date: "09 Jun 2026" },
-  { id: "TXN-009", user: "Devika Shah", type: "Coin Recharge", method: "Card", amount: 4999, gst: 900, total: 5899, coins: 80000, status: "completed", date: "08 Jun 2026" },
-  { id: "TXN-010", user: "Ishaan Reddy", type: "Subscription", method: "UPI", amount: 299, gst: 54, total: 353, plan: "Silver Weekly", status: "completed", date: "08 Jun 2026" },
+  { id: "TXN-005", user: "Kavya Iyer", type: "Subscription", method: "UPI", amount: 3999, gst: 720, total: 4719, plan: "Platinum Yearly", status: "completed", date: "10 Jun 2026" },
+  { id: "TXN-006", user: "Vikram Joshi", type: "Coin Recharge", method: "Wallet", amount: 99, gst: 18, total: 117, coins: 100, status: "failed", date: "10 Jun 2026" },
+  { id: "TXN-007", user: "Neha Gupta", type: "Gift Purchase", method: "Coins", amount: 0, gst: 0, total: 0, coins: 100, gift: "Crown", status: "completed", date: "09 Jun 2026" },
+  { id: "TXN-008", user: "Arjun Nair", type: "Withdrawal", method: "UPI", amount: 1000, platformFee: 200, gst: 180, net: 800, status: "pending", date: "09 Jun 2026" },
+  { id: "TXN-009", user: "Devika Shah", type: "Coin Recharge", method: "Card", amount: 4999, gst: 900, total: 5899, coins: 5000, status: "completed", date: "08 Jun 2026" },
+  { id: "TXN-010", user: "Ishaan Reddy", type: "Subscription", method: "UPI", amount: 49, gst: 9, total: 58, plan: "Silver Weekly", status: "completed", date: "08 Jun 2026" },
 ];
 
 // ─── Daily coin transactions ───
@@ -431,14 +431,14 @@ export default function MonetizationPage() {
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { pack: "₹49", coins: 500, sales: 2840, revenue: "₹1,39,160" },
-                  { pack: "₹99", coins: 1100, sales: 4120, revenue: "₹4,07,880" },
-                  { pack: "₹199", coins: 2400, sales: 3560, revenue: "₹7,08,440" },
-                  { pack: "₹499", coins: 6500, sales: 1890, revenue: "₹9,43,110" },
-                  { pack: "₹999", coins: 14000, sales: 980, revenue: "₹9,79,020" },
-                  { pack: "₹1999", coins: 30000, sales: 420, revenue: "₹8,39,580" },
-                  { pack: "₹4999", coins: 80000, sales: 156, revenue: "₹7,79,844" },
-                  { pack: "₹9999", coins: 175000, sales: 48, revenue: "₹4,79,952" },
+                  { pack: "₹49", coins: 50, sales: 2840, revenue: "₹1,39,160" },
+                  { pack: "₹99", coins: 100, sales: 4120, revenue: "₹4,07,880" },
+                  { pack: "₹199", coins: 200, sales: 3560, revenue: "₹7,08,440" },
+                  { pack: "₹499", coins: 500, sales: 1890, revenue: "₹9,43,110" },
+                  { pack: "₹999", coins: 1000, sales: 980, revenue: "₹9,79,020" },
+                  { pack: "₹1999", coins: 2000, sales: 420, revenue: "₹8,39,580" },
+                  { pack: "₹4999", coins: 5000, sales: 156, revenue: "₹7,79,844" },
+                  { pack: "₹9999", coins: 10000, sales: 48, revenue: "₹4,79,952" },
                 ].map((item) => (
                   <div key={item.pack} className="border rounded-lg p-4 space-y-2">
                     <div className="flex items-center justify-between">
@@ -525,10 +525,10 @@ export default function MonetizationPage() {
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { plan: "Silver", weekly: 2900, monthly: 5200, yearly: 1800, weeklyPrice: "₹29", monthlyPrice: "₹99", yearlyPrice: "₹499" },
-                  { plan: "Gold", weekly: 1800, monthly: 3400, yearly: 1200, weeklyPrice: "₹49", monthlyPrice: "₹199", yearlyPrice: "₹999" },
-                  { plan: "Platinum", weekly: 950, monthly: 2100, yearly: 850, weeklyPrice: "₹99", monthlyPrice: "₹299", yearlyPrice: "₹1,499" },
-                  { plan: "Diamond Elite", weekly: 380, monthly: 890, yearly: 420, weeklyPrice: "₹199", monthlyPrice: "₹599", yearlyPrice: "₹2,999" },
+                  { plan: "Silver", weekly: 2900, monthly: 5200, yearly: 1800, weeklyPrice: "₹49", monthlyPrice: "₹149", yearlyPrice: "₹999" },
+                  { plan: "Gold", weekly: 1800, monthly: 3400, yearly: 1200, weeklyPrice: "₹99", monthlyPrice: "₹299", yearlyPrice: "₹1,999" },
+                  { plan: "Platinum", weekly: 950, monthly: 2100, yearly: 850, weeklyPrice: "₹199", monthlyPrice: "₹599", yearlyPrice: "₹3,999" },
+                  { plan: "Diamond Elite", weekly: 380, monthly: 890, yearly: 420, weeklyPrice: "₹349", monthlyPrice: "₹999", yearlyPrice: "₹6,999" },
                 ].map((item) => (
                   <div key={item.plan} className="border rounded-lg p-4 space-y-3">
                     <div className="font-bold text-primary">{item.plan}</div>

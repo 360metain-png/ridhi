@@ -46,41 +46,41 @@ interface CreatorSubscriber {
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
 const VIP_SUBS: VIPSubscriber[] = [
-  { id: "v1",  name: "Priya Sharma",    city: "Mumbai",     tier: "diamond",  billing: "monthly", amount: 2499, since: "Jan 2025", renewsIn: "12 days", status: "active",    bonusCoinsGiven: 9000  },
-  { id: "v2",  name: "Rohit Verma",     city: "Delhi",      tier: "platinum", billing: "yearly",  amount: 9999, since: "Mar 2025", renewsIn: "6 months",status: "active",    bonusCoinsGiven: 3000  },
-  { id: "v3",  name: "Ananya Singh",    city: "Bangalore",  tier: "gold",     billing: "monthly", amount: 499,  since: "Feb 2025", renewsIn: "18 days", status: "active",    bonusCoinsGiven: 1050  },
-  { id: "v4",  name: "Karan Mehta",     city: "Hyderabad",  tier: "gold",     billing: "weekly",  amount: 199,  since: "Apr 2025", renewsIn: "3 days",  status: "active",    bonusCoinsGiven: 700   },
-  { id: "v5",  name: "Deepika Nair",    city: "Chennai",    tier: "silver",   billing: "yearly",  amount: 1999, since: "Dec 2024", renewsIn: "7 months",status: "active",    bonusCoinsGiven: 500   },
-  { id: "v6",  name: "Arjun Reddy",     city: "Pune",       tier: "platinum", billing: "monthly", amount: 999,  since: "Apr 2025", renewsIn: "22 days", status: "active",    bonusCoinsGiven: 2000  },
-  { id: "v7",  name: "Sneha Patel",     city: "Ahmedabad",  tier: "silver",   billing: "monthly", amount: 199,  since: "May 2025", renewsIn: "28 days", status: "active",    bonusCoinsGiven: 100   },
-  { id: "v8",  name: "Vikram Kumar",    city: "Jaipur",     tier: "gold",     billing: "monthly", amount: 499,  since: "Mar 2025", renewsIn: "—",       status: "cancelled", bonusCoinsGiven: 1400  },
-  { id: "v9",  name: "Meera Krishnan",  city: "Kochi",      tier: "diamond",  billing: "yearly",  amount: 24999,since: "Jan 2025", renewsIn: "8 months",status: "active",    bonusCoinsGiven: 18000 },
-  { id: "v10", name: "Ravi Shankar",    city: "Kolkata",    tier: "platinum", billing: "yearly",  amount: 9999, since: "Feb 2025", renewsIn: "9 months",status: "active",    bonusCoinsGiven: 3000  },
+  { id: "v1",  name: "Priya Sharma",    city: "Mumbai",     tier: "diamond",  billing: "monthly", amount: 999,  since: "Jan 2025", renewsIn: "12 days", status: "active",    bonusCoinsGiven: 300  },
+  { id: "v2",  name: "Rohit Verma",     city: "Delhi",      tier: "platinum", billing: "yearly",  amount: 3999, since: "Mar 2025", renewsIn: "6 months",status: "active",    bonusCoinsGiven: 100  },
+  { id: "v3",  name: "Ananya Singh",    city: "Bangalore",  tier: "gold",     billing: "monthly", amount: 299,  since: "Feb 2025", renewsIn: "18 days", status: "active",    bonusCoinsGiven: 40   },
+  { id: "v4",  name: "Karan Mehta",     city: "Hyderabad",  tier: "gold",     billing: "weekly",  amount: 99,   since: "Apr 2025", renewsIn: "3 days",  status: "active",    bonusCoinsGiven: 40   },
+  { id: "v5",  name: "Deepika Nair",    city: "Chennai",    tier: "silver",   billing: "yearly",  amount: 999,  since: "Dec 2024", renewsIn: "7 months",status: "active",    bonusCoinsGiven: 15   },
+  { id: "v6",  name: "Arjun Reddy",     city: "Pune",       tier: "platinum", billing: "monthly", amount: 599,  since: "Apr 2025", renewsIn: "22 days", status: "active",    bonusCoinsGiven: 100  },
+  { id: "v7",  name: "Sneha Patel",     city: "Ahmedabad",  tier: "silver",   billing: "monthly", amount: 149,  since: "May 2025", renewsIn: "28 days", status: "active",    bonusCoinsGiven: 15   },
+  { id: "v8",  name: "Vikram Kumar",    city: "Jaipur",     tier: "gold",     billing: "monthly", amount: 299,  since: "Mar 2025", renewsIn: "—",       status: "cancelled", bonusCoinsGiven: 40   },
+  { id: "v9",  name: "Meera Krishnan",  city: "Kochi",      tier: "diamond",  billing: "yearly",  amount: 6999, since: "Jan 2025", renewsIn: "8 months",status: "active",    bonusCoinsGiven: 300  },
+  { id: "v10", name: "Ravi Shankar",    city: "Kolkata",    tier: "platinum", billing: "yearly",  amount: 3999, since: "Feb 2025", renewsIn: "9 months",status: "active",    bonusCoinsGiven: 100  },
 ];
 
 const CREATOR_SUBS: CreatorSubscriber[] = [
-  { id: "c1", name: "DJ Aryan",       city: "Mumbai",    tier: "elite", amount: 4999, since: "Jan 2025", renewsIn: "8 days",  status: "active",    followers: 42000 },
-  { id: "c2", name: "Komal Vlogs",    city: "Delhi",     tier: "pro",   amount: 1499, since: "Mar 2025", renewsIn: "14 days", status: "active",    followers: 18500 },
-  { id: "c3", name: "Tech Tanvir",    city: "Hyderabad", tier: "pro",   amount: 1499, since: "Feb 2025", renewsIn: "21 days", status: "active",    followers: 9800  },
-  { id: "c4", name: "Preethi Music",  city: "Chennai",   tier: "basic", amount: 499,  since: "Apr 2025", renewsIn: "25 days", status: "active",    followers: 3400  },
-  { id: "c5", name: "Reel Rohan",     city: "Pune",      tier: "elite", amount: 4999, since: "Dec 2024", renewsIn: "—",       status: "cancelled", followers: 67000 },
-  { id: "c6", name: "Fitness Falak",  city: "Bangalore", tier: "pro",   amount: 1499, since: "May 2025", renewsIn: "29 days", status: "trial",     followers: 5600  },
+  { id: "c1", name: "DJ Aryan",       city: "Mumbai",    tier: "elite", amount: 999, since: "Jan 2025", renewsIn: "8 days",  status: "active",    followers: 42000 },
+  { id: "c2", name: "Komal Vlogs",    city: "Delhi",     tier: "pro",   amount: 499, since: "Mar 2025", renewsIn: "14 days", status: "active",    followers: 18500 },
+  { id: "c3", name: "Tech Tanvir",    city: "Hyderabad", tier: "pro",   amount: 499, since: "Feb 2025", renewsIn: "21 days", status: "active",    followers: 9800  },
+  { id: "c4", name: "Preethi Music",  city: "Chennai",   tier: "basic", amount: 199, since: "Apr 2025", renewsIn: "25 days", status: "active",    followers: 3400  },
+  { id: "c5", name: "Reel Rohan",     city: "Pune",      tier: "elite", amount: 999, since: "Dec 2024", renewsIn: "—",       status: "cancelled", followers: 67000 },
+  { id: "c6", name: "Fitness Falak",  city: "Bangalore", tier: "pro",   amount: 499, since: "May 2025", renewsIn: "29 days", status: "trial",     followers: 5600  },
 ];
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
 
 const VIP_META: Record<VIPTier, { label: string; color: string; bg: string; icon: typeof Crown; monthlyPrice: number; bonusCoins: number }> = {
   free:     { label: "Free",         color: "text-gray-600",    bg: "bg-gray-50 border-gray-200",       icon: Users,   monthlyPrice: 0,    bonusCoins: 0    },
-  silver:   { label: "Silver VIP",   color: "text-gray-500",    bg: "bg-gray-50 border-gray-200",       icon: Shield,  monthlyPrice: 199,  bonusCoins: 100  },
-  gold:     { label: "Gold VIP",     color: "text-amber-600",   bg: "bg-amber-50 border-amber-200",     icon: Award,   monthlyPrice: 499,  bonusCoins: 350  },
-  platinum: { label: "Platinum VIP", color: "text-purple-600",  bg: "bg-purple-50 border-purple-200",   icon: Layers,  monthlyPrice: 999,  bonusCoins: 1000 },
-  diamond:  { label: "Diamond Elite",color: "text-pink-600",    bg: "bg-pink-50 border-pink-200",       icon: Crown,   monthlyPrice: 2499, bonusCoins: 3000 },
+  silver:   { label: "Silver VIP",   color: "text-gray-500",    bg: "bg-gray-50 border-gray-200",       icon: Shield,  monthlyPrice: 149,  bonusCoins: 15   },
+  gold:     { label: "Gold VIP",     color: "text-amber-600",   bg: "bg-amber-50 border-amber-200",     icon: Award,   monthlyPrice: 299,  bonusCoins: 40   },
+  platinum: { label: "Platinum VIP", color: "text-purple-600",  bg: "bg-purple-50 border-purple-200",   icon: Layers,  monthlyPrice: 599,  bonusCoins: 100  },
+  diamond:  { label: "Diamond Elite",color: "text-pink-600",    bg: "bg-pink-50 border-pink-200",       icon: Crown,   monthlyPrice: 999,  bonusCoins: 300  },
 };
 
 const CREATOR_META: Record<CreatorTier, { label: string; color: string; bg: string; monthlyPrice: number }> = {
-  basic: { label: "Creator Basic", color: "text-blue-600",   bg: "bg-blue-50 border-blue-200",     monthlyPrice: 499  },
-  pro:   { label: "Creator Pro",   color: "text-purple-600", bg: "bg-purple-50 border-purple-200", monthlyPrice: 1499 },
-  elite: { label: "Creator Elite", color: "text-pink-600",   bg: "bg-pink-50 border-pink-200",     monthlyPrice: 4999 },
+  basic: { label: "Creator Starter", color: "text-blue-600",   bg: "bg-blue-50 border-blue-200",     monthlyPrice: 199  },
+  pro:   { label: "Creator Pro",   color: "text-purple-600", bg: "bg-purple-50 border-purple-200", monthlyPrice: 499  },
+  elite: { label: "Creator Elite", color: "text-pink-600",   bg: "bg-pink-50 border-pink-200",     monthlyPrice: 999  },
 };
 
 const STATUS_META: Record<SubStatus, { label: string; color: string; bg: string }> = {

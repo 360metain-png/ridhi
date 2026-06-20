@@ -45,11 +45,11 @@ const adPerformance = Array.from({ length: 14 }, (_, i) => {
 });
 
 const subscriptionData = [
-  { month: "2025-01", Basic: 1200, Premium: 480, VIP: 120 },
-  { month: "2025-02", Basic: 1450, Premium: 560, VIP: 145 },
-  { month: "2025-03", Basic: 1680, Premium: 640, VIP: 178 },
-  { month: "2025-04", Basic: 1920, Premium: 740, VIP: 210 },
-  { month: "2025-05", Basic: 2180, Premium: 860, VIP: 248 },
+  { month: "2025-01", Silver: 1200, Gold: 480, Platinum: 120, Diamond: 0 },
+  { month: "2025-02", Silver: 1450, Gold: 560, Platinum: 145, Diamond: 0 },
+  { month: "2025-03", Silver: 1680, Gold: 640, Platinum: 178, Diamond: 0 },
+  { month: "2025-04", Silver: 1920, Gold: 740, Platinum: 210, Diamond: 12 },
+  { month: "2025-05", Silver: 2180, Gold: 860, Platinum: 248, Diamond: 15 },
 ];
 
 const revenueSplit = [
@@ -70,9 +70,10 @@ const TOP_ADVERTISERS = [
 ];
 
 const SUBSCRIPTION_PLANS = [
-  { name: "Basic", price: 49, subscribers: 2180, mrr: 106820, churn: 4.2, color: TEAL },
-  { name: "Premium", price: 149, subscribers: 860, mrr: 128140, churn: 2.8, color: PURPLE },
-  { name: "VIP", price: 499, subscribers: 248, mrr: 123752, churn: 1.4, color: MAGENTA },
+  { name: "Silver", price: 149, subscribers: 2180, mrr: 325220, churn: 4.2, color: TEAL },
+  { name: "Gold", price: 299, subscribers: 860, mrr: 257140, churn: 2.8, color: PURPLE },
+  { name: "Platinum", price: 599, subscribers: 248, mrr: 148552, churn: 1.4, color: MAGENTA },
+  { name: "Diamond", price: 999, subscribers: 120, mrr: 119880, churn: 0.8, color: "#E91E8C" },
 ];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -126,7 +127,7 @@ export default function RevenuePage() {
     if (activeTab === "ads") {
       return filteredAds.map((d) => ({ date: d.date, impressions: d.Impressions, clicks: d.Clicks, revenue: d.Revenue }));
     }
-    return filteredSubs.map((d) => ({ month: d.month, basic: d.Basic, premium: d.Premium, vip: d.VIP }));
+    return filteredSubs.map((d) => ({ month: d.month, silver: d.Silver, gold: d.Gold, platinum: d.Platinum, diamond: d.Diamond }));
   }, [activeTab, filteredDaily, filteredAds, filteredSubs]);
 
   return (
@@ -331,9 +332,10 @@ export default function RevenuePage() {
                   <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} tickLine={false} axisLine={false} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }} />
-                  <Bar dataKey="Basic" fill={TEAL} radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="Premium" fill={PURPLE} radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="VIP" fill={MAGENTA} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Silver" fill={TEAL} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Gold" fill={AMBER} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Platinum" fill={PURPLE} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="Diamond" fill={MAGENTA} radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

@@ -257,9 +257,9 @@ function CoinValuesTab() {
       {/* Revenue Split Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label: "Ridhi Platform",  pct: "50%", color: "text-violet-400",  bg: "bg-violet-500/10",  border: "border-violet-500/20" },
-          { label: "Host Earnings",   pct: "45%", color: "text-pink-400",    bg: "bg-pink-500/10",    border: "border-pink-500/20"   },
-          { label: "Agent Commission",pct: "5%",  color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20"},
+          { label: "Ridhi Platform",  pct: "40%", color: "text-violet-400",  bg: "bg-violet-500/10",  border: "border-violet-500/20" },
+          { label: "Host Earnings",   pct: "60%", color: "text-pink-400",    bg: "bg-pink-500/10",    border: "border-pink-500/20"   },
+          { label: "Agent Commission",pct: "0%",  color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20"},
         ].map((s) => (
           <div key={s.label} className={`rounded-xl border ${s.border} ${s.bg} p-4 flex items-center gap-4`}>
             <div className={`text-3xl font-black ${s.color}`}>{s.pct}</div>

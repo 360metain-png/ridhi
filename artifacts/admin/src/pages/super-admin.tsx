@@ -2904,9 +2904,9 @@ export default function SuperAdminPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {([
-                  { name: "Creator Basic", price: 499, features: "Badge, Live, Basic Analytics", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-                  { name: "Creator Pro", price: 1499, features: "HD, PK Battle, Revenue Insights", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-                  { name: "Creator Elite", price: 4999, features: "Homepage, Verified, Manager", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                  { name: "Creator Starter", price: 199, features: "Badge, Live, Basic Analytics", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                  { name: "Creator Pro", price: 499, features: "HD, PK Battle, Revenue Insights", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                  { name: "Creator Elite", price: 999, features: "Homepage, Verified, Manager", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
                 ] as const).map((plan) => (
                   <div key={plan.name} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">

@@ -531,31 +531,31 @@ export type ManualCoinLog = {
 };
 
 export const DEFAULT_COIN_VALUE_CONFIG: CoinValueConfig = {
-  inrPerCoin: 0.80,
-  coinPerInr: 1.25,
+  inrPerCoin: 1.00,
+  coinPerInr: 1.00,
   dailyLoginReward: 10,
   referralBonus: 50,
   profileBoostCost: 100,
   unlockChatCost: 50,
-  giftHeartCost: 20,
-  giftRoseCost: 10,
+  giftHeartCost: 5,
+  giftRoseCost: 3,
   giftDiamondCost: 200,
-  giftCrownCost: 500,
-  audioCallCostPerMin: 12,
-  videoCallCostPerMin: 30,
-  platformFeePercent: 50,
-  hostSharePercent: 45,
-  agentSharePercent: 5,
+  giftCrownCost: 100,
+  audioCallCostPerMin: 15,
+  videoCallCostPerMin: 40,
+  platformFeePercent: 40,
+  hostSharePercent: 60,
+  agentSharePercent: 0,
 };
 
 export const DEFAULT_COIN_PACKAGES: CoinPackageConfig[] = [
-  { id: "pkg1", label: "Starter",    coins: 60,    bonusCoins: 0, priceInr: 49,   popular: false, active: true },
-  { id: "pkg2", label: "Basic",      coins: 130,   bonusCoins: 0, priceInr: 99,   popular: false, active: true },
-  { id: "pkg3", label: "Popular",    coins: 280,   bonusCoins: 0, priceInr: 199,  popular: false, active: true },
-  { id: "pkg4", label: "Value",      coins: 750,   bonusCoins: 0, priceInr: 499,  popular: false, active: true },
-  { id: "pkg5", label: "Best Value", coins: 1600,  bonusCoins: 0, priceInr: 999,  popular: true,  active: true },
-  { id: "pkg6", label: "Premium",    coins: 3500,  bonusCoins: 0, priceInr: 1999, popular: false, active: true },
-  { id: "pkg7", label: "Elite",      coins: 10000, bonusCoins: 0, priceInr: 4999, popular: false, active: true },
+  { id: "pkg1", label: "Starter",    coins: 50,    bonusCoins: 0, priceInr: 49,   popular: false, active: true },
+  { id: "pkg2", label: "Basic",      coins: 100,   bonusCoins: 0, priceInr: 99,   popular: false, active: true },
+  { id: "pkg3", label: "Popular",    coins: 200,   bonusCoins: 0, priceInr: 199,  popular: false, active: true },
+  { id: "pkg4", label: "Value",      coins: 500,   bonusCoins: 0, priceInr: 499,  popular: false, active: true },
+  { id: "pkg5", label: "Best Value", coins: 1000,  bonusCoins: 0, priceInr: 999,  popular: true,  active: true },
+  { id: "pkg6", label: "Premium",    coins: 2000,  bonusCoins: 0, priceInr: 1999, popular: false, active: true },
+  { id: "pkg7", label: "Elite",      coins: 5000,  bonusCoins: 0, priceInr: 4999, popular: false, active: true },
 ];
 
 const REQUEST_REASONS = [
@@ -623,8 +623,8 @@ const NAMES  = ["Aarav Sharma", "Diya Patel", "Vihaan Singh", "Aditi Rao", "Arju
                 "Rohan Mehta", "Kavya Nair", "Dev Joshi", "Pooja Verma", "Rahul Tiwari", "Sneha Pillai", "Aditya Bose", "Meera Shah", "Kiran Reddy", "Natasha Roy"];
 
 function coinWithdrawal(id: string, idx: number, role: "User"|"Host"|"Agent", coins: number, method: "UPI"|"Bank", status: "Pending"|"Approved"|"Paid"|"Rejected", daysAgo: number): CoinWithdrawal {
-  const gross = coins * 0.5;
-  const net   = gross * 0.7;
+  const gross = coins * 1.0;
+  const net   = gross * 0.8;
   const name  = NAMES[idx % NAMES.length];
   const city  = CITIES[idx % CITIES.length];
   return {
