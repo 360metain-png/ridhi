@@ -9,7 +9,7 @@ export type ReportReason =
   | "Copyright"
   | "Other";
 
-export type ReportTargetType = "post" | "reel" | "story" | "live" | "user" | "comment" | "chat" | "audio-room" | "community";
+export type ReportTargetType = "post" | "reel" | "story" | "live" | "user" | "comment" | "chat" | "audio-room" | "community" | "agent";
 
 export type ReportStatus = "pending" | "reviewing" | "resolved" | "rejected";
 

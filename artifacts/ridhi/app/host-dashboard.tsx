@@ -17,6 +17,7 @@ import { useTrackScreen } from "@/hooks/useAnalytics";
 ;
 import { useAuth, UserProfile } from "@/contexts/AuthContext";
 import { PrivateHead } from "@/components/PrivateHead";
+import { ReportSheet } from "@/components/ReportSheet";
 
 const { width } = Dimensions.get("window");
 
@@ -179,6 +180,7 @@ export default function HostDashboard() {
   const insets  = useSafeAreaInsets();
   const { user } = useAuth();
   const [tab, setTab] = useState<"overview" | "earnings" | "streams">("overview");
+  const [showAgentReport, setShowAgentReport] = useState(false);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const h       = HOST_DATA;
@@ -439,12 +441,24 @@ export default function HostDashboard() {
                 </View>
               </View>
               <Text style={[styles.agentEmail, { color: colors.mutedForeground }]}>{h.agentEmail}</Text>
-              <Text style={[styles.agentPhone, { color: colors.mutedForeground }]}>{h.agentPhone}</Text>
+              <Text style={[styles.agentPhone, { color: colors.mutedForeground }]}>Chat for issues — no calls needed</Text>
             </View>
-            <Pressable style={styles.contactBtn}>
+            <Pressable
+              style={styles.contactBtn}
+              onPress={() => router.push({ pathname: "/chat/[id]", params: { id: "agent-rahul" } })}
+            >
               <Feather name="message-circle" size={18} color="#7B2FBE" />
             </Pressable>
           </View>
+          {/* Raise Complaint row */}
+          <Pressable
+            style={[styles.complaintRow, { backgroundColor: colors.card }]}
+            onPress={() => setShowAgentReport(true)}
+          >
+            <Feather name="flag" size={14} color="#C62828" />
+            <Text style={[styles.complaintText, { color: "#C62828" }]}>Raise Complaint Against Agent</Text>
+            <Feather name="chevron-right" size={14} color="#C62828" />
+          </Pressable>
         </View>
 
         {/* ── Recent Activity ── */}
@@ -472,6 +486,17 @@ export default function HostDashboard() {
 
       </ScrollView>
     </View>
+
+    {/* Agent Complaint Sheet */}
+    <ReportSheet
+      visible={showAgentReport}
+      onClose={() => setShowAgentReport(false)}
+      targetId="agent-rahul"
+      targetType="agent"
+      targetTitle={h.agentName}
+      targetUser={h.agentName}
+      reporterId={user?.id ?? "host"}
+    />
   </>
   );
 }
@@ -551,6 +576,8 @@ const styles = StyleSheet.create({
   agentEmail:      { fontSize: 11, marginBottom: 1 },
   agentPhone:      { fontSize: 11 },
   contactBtn:      { width: 38, height: 38, borderRadius: 19, backgroundColor: "#7B2FBE15", alignItems: "center", justifyContent: "center" },
+  complaintRow:    { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 10, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: "#C6282820" },
+  complaintText:   { flex: 1, fontSize: 13, fontWeight: "600" },
 
   pkCard:          { borderRadius: 16, padding: 16, gap: 10, flexDirection: "row", alignItems: "center" },
   pkCardLeft:      { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
