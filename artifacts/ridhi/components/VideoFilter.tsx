@@ -40,7 +40,7 @@ interface VideoFilterProps {
 export function VideoFilter({ filterId, children, style }: VideoFilterProps) {
   const filter = VIDEO_FILTERS.find((f) => f.id === filterId) ?? VIDEO_FILTERS[0];
   return (
-    <View style={[style, { position: "relative", overflow: "hidden" }]}>
+    <View style={[style, { overflow: "hidden" }]}>
       {children}
       {/* Filter overlay */}
       {filter.id !== "none" && (
