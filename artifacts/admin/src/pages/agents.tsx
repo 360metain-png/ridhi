@@ -14,7 +14,7 @@ import {
   Search, Award, Plus, CheckCircle, XCircle, Clock,
   Phone, MapPin, ShieldAlert, ArrowRight, Info, Trash2,
   ShieldOff, UserCheck, ChevronRight, Network, UserPlus,
-  Crown, Lock, Rocket, Wrench, Download,
+  Crown, Lock, Rocket, Wrench, Download, AlertTriangle,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { downloadCSV } from "@/lib/utils";
@@ -78,6 +78,26 @@ const PENDING_AGENTS = [
   { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years in talent mgmt" },
   { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 years"     },
   { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform"        },
+];
+
+// ── Agent Complaints (from hosts) ──────────────────────────────────────────
+
+interface AgentComplaint {
+  id: string;
+  agentId: string;
+  hostName: string;
+  hostId: string;
+  reason: string;
+  detail: string;
+  filedAt: string;
+  status: "open" | "resolved" | "escalated";
+}
+
+const AGENT_COMPLAINTS: AgentComplaint[] = [
+  { id: "c1", agentId: "a1", hostName: "Riya Das", hostId: "h7", reason: "Delayed payout", detail: "Agent promised payout within 3 days but it has been 2 weeks.", filedAt: "2025-06-18", status: "open" },
+  { id: "c2", agentId: "a3", hostName: "Rohan Mishra", hostId: "h10", reason: "Unresponsive agent", detail: "Agent does not reply to messages about stream issues.", filedAt: "2025-06-19", status: "open" },
+  { id: "c3", agentId: "a2", hostName: "Meera Pillai", hostId: "h5", reason: "Incorrect commission", detail: "Commission calculated as 4% instead of agreed 6%.", filedAt: "2025-06-15", status: "resolved" },
+  { id: "c4", agentId: "a1", hostName: "Arjun Shah", hostId: "h6", reason: "Forced stream hours", detail: "Agent pressuring me to stream beyond 30h checkpoint.", filedAt: "2025-06-20", status: "escalated" },
 ];
 
 const agentEarningsData = [
@@ -712,12 +732,13 @@ export default function AgentsPage() {
                   <th className="text-right pb-3 text-violet-700">Agent Income</th>
                   <th className="text-right pb-3 text-orange-600">Pending</th>
                   <th className="text-left pb-3">Status</th>
+                  <th className="text-right pb-3">Complaints</th>
                   <th className="text-right pb-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={12} className="text-center py-10 text-muted-foreground text-sm">No agents found</td></tr>
+                  <tr><td colSpan={13} className="text-center py-10 text-muted-foreground text-sm">No agents found</td></tr>
                 ) : filtered.map(a => {
                   const sm = STATUS_META[a.status];
                   const admin = liveAdmins.find(x => x.id === a.adminId);
@@ -775,6 +796,28 @@ export default function AgentsPage() {
                         </div>
                       </td>
                       <td className="py-3 text-right">
+                        {(() => {
+                          const agentComplaints = AGENT_COMPLAINTS.filter(c => c.agentId === a.id);
+                          const openCount = agentComplaints.filter(c => c.status === "open").length;
+                          const escalatedCount = agentComplaints.filter(c => c.status === "escalated").length;
+                          if (openCount === 0 && escalatedCount === 0) return <span className="text-xs text-muted-foreground">—</span>;
+                          return (
+                            <div className="flex items-center justify-end gap-1">
+                              {openCount > 0 && (
+                                <Badge variant="outline" className="text-[10px] h-5 border-amber-300 text-amber-600 bg-amber-50">
+                                  <AlertTriangle className="w-3 h-3 mr-0.5" />{openCount}
+                                </Badge>
+                              )}
+                              {escalatedCount > 0 && (
+                                <Badge variant="outline" className="text-[10px] h-5 border-red-300 text-red-600 bg-red-50">
+                                  <ShieldAlert className="w-3 h-3 mr-0.5" />{escalatedCount}
+                                </Badge>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </td>
+                      <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><Eye className="w-3.5 h-3.5" /></Button>
                           {isSA && (
@@ -811,6 +854,57 @@ export default function AgentsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Agent Complaints (SA + Admin only) ── */}
+      {(isSA || isAdmin) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-red-500" /> Agent Complaints from Hosts
+              <Badge variant="outline" className="text-xs border-red-200 text-red-600 bg-red-50">
+                {AGENT_COMPLAINTS.filter(c => c.status === "open" || c.status === "escalated").length} open
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {AGENT_COMPLAINTS.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-500" /> No complaints filed
+              </div>
+            ) : AGENT_COMPLAINTS.map(c => {
+              const agent = INITIAL_AGENTS.find(a => a.id === c.agentId);
+              const statusMeta = {
+                open:      { label: "Open",      color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+                resolved:  { label: "Resolved",  color: "text-green-600", bg: "bg-green-50", border: "border-green-200" },
+                escalated: { label: "Escalated", color: "text-red-600",   bg: "bg-red-50",   border: "border-red-200" },
+              };
+              const sm = statusMeta[c.status];
+              return (
+                <div key={c.id} className="flex items-start gap-3 border rounded-xl p-3 hover:bg-muted/30">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {agent?.name.split(" ").map(n => n[0]).join("") ?? "A"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{agent?.name ?? "Unknown Agent"}</span>
+                      <Badge variant="outline" className={`text-[10px] ${sm.color} ${sm.bg} ${sm.border}`}>{sm.label}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                      <span>Host: <strong className="text-foreground">{c.hostName}</strong></span>
+                      <span>· {c.reason}</span>
+                      <span>· Filed {c.filedAt}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{c.detail}</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Button variant="outline" size="sm" className="h-6 text-[10px]">View Details</Button>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Income Model (SA + Admin only) ── */}
       <Card>

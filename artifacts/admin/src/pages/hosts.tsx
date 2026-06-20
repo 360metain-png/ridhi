@@ -41,6 +41,11 @@ interface Host {
   status: HostStatus;
   joinDate: string;
   phone: string;
+  // Activity checkpoint fields
+  hostMonthlyHours: number;        // hours streamed this month
+  hostActiveUntil: string;          // deadline for 30hr checkpoint
+  hostRevokedAt?: string;
+  hostRevokedReason?: string;
 }
 
 // ── Shared constants matching agents.tsx ──────────────────────────────────────
@@ -71,16 +76,16 @@ const HOST_LEVELS = [
 ];
 
 const INITIAL_HOSTS: Host[] = [
-  { id: "h1",  name: "Priya Sharma",   city: "Mumbai",    language: "Hindi",     level: "L7", coinsReceived: 6840000, followers: 128400, isLive: true,  agentId: "a1", adminId: "adm1", earnings: 284000, pkWins: 48, streamHours: 1240, verified: true,  status: "active",    joinDate: "Feb 2024", phone: "+91 99001 11111" },
-  { id: "h2",  name: "Rahul Verma",    city: "Delhi",     language: "Hindi",     level: "L6", coinsReceived: 3920000, followers:  98200, isLive: false, agentId: "a2", adminId: "adm1", earnings: 142000, pkWins: 32, streamHours:  840, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99002 22222" },
-  { id: "h3",  name: "Kavya Reddy",    city: "Hyderabad", language: "Telugu",    level: "L5", coinsReceived: 2140000, followers:  76800, isLive: true,  agentId: "a3", adminId: "adm2", earnings:  84000, pkWins: 24, streamHours:  620, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99003 33333" },
-  { id: "h4",  name: "Dev Kumar",      city: "Bangalore", language: "English",   level: "L4", coinsReceived: 1280000, followers:  54300, isLive: false, agentId: "a4", adminId: "adm2", earnings:  58000, pkWins: 18, streamHours:  440, verified: false, status: "active",    joinDate: "May 2024", phone: "+91 99004 44444" },
-  { id: "h5",  name: "Meera Pillai",   city: "Kochi",     language: "Malayalam", level: "L3", coinsReceived:  620000, followers:  41200, isLive: false, agentId: "a5", adminId: "adm3", earnings:  24000, pkWins:  9, streamHours:  280, verified: true,  status: "active",    joinDate: "Jun 2024", phone: "+91 99005 55555" },
-  { id: "h6",  name: "Arjun Shah",     city: "Surat",     language: "Gujarati",  level: "L2", coinsReceived:  240000, followers:  28700, isLive: false, agentId: "a1", adminId: "adm1", earnings:   9600, pkWins:  4, streamHours:  140, verified: false, status: "active",    joinDate: "Jul 2024", phone: "+91 99006 66666" },
-  { id: "h7",  name: "Riya Das",       city: "Kolkata",   language: "Bengali",   level: "L1", coinsReceived:   72000, followers:  12100, isLive: false, agentId: "a1", adminId: "adm1", earnings:   2800, pkWins:  1, streamHours:   48, verified: false, status: "suspended", joinDate: "Aug 2024", phone: "+91 99007 77777" },
-  { id: "h8",  name: "Kiran Nair",     city: "Pune",      language: "Marathi",   level: "L3", coinsReceived:  580000, followers:  33400, isLive: true,  agentId: "a6", adminId: "adm3", earnings:  22000, pkWins:  7, streamHours:  210, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99008 88888" },
-  { id: "h9",  name: "Ananya Sen",     city: "Chennai",   language: "Tamil",     level: "L4", coinsReceived: 1140000, followers:  48900, isLive: false, agentId: "a5", adminId: "adm3", earnings:  44000, pkWins: 14, streamHours:  390, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99009 99999" },
-  { id: "h10", name: "Rohan Mishra",   city: "Lucknow",   language: "Hindi",     level: "L2", coinsReceived:  210000, followers:  22600, isLive: false, agentId: "a3", adminId: "adm2", earnings:   8400, pkWins:  3, streamHours:   98, verified: false, status: "active",    joinDate: "Sep 2024", phone: "+91 99010 10101" },
+  { id: "h1",  name: "Priya Sharma",   city: "Mumbai",    language: "Hindi",     level: "L7", coinsReceived: 6840000, followers: 128400, isLive: true,  agentId: "a1", adminId: "adm1", earnings: 284000, pkWins: 48, streamHours: 1240, verified: true,  status: "active",    joinDate: "Feb 2024", phone: "+91 99001 11111", hostMonthlyHours: 42,  hostActiveUntil: "2025-07-15" },
+  { id: "h2",  name: "Rahul Verma",    city: "Delhi",     language: "Hindi",     level: "L6", coinsReceived: 3920000, followers:  98200, isLive: false, agentId: "a2", adminId: "adm1", earnings: 142000, pkWins: 32, streamHours:  840, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99002 22222", hostMonthlyHours: 28,  hostActiveUntil: "2025-07-10" },
+  { id: "h3",  name: "Kavya Reddy",    city: "Hyderabad", language: "Telugu",    level: "L5", coinsReceived: 2140000, followers:  76800, isLive: true,  agentId: "a3", adminId: "adm2", earnings:  84000, pkWins: 24, streamHours:  620, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99003 33333", hostMonthlyHours: 35,  hostActiveUntil: "2025-07-20" },
+  { id: "h4",  name: "Dev Kumar",      city: "Bangalore", language: "English",   level: "L4", coinsReceived: 1280000, followers:  54300, isLive: false, agentId: "a4", adminId: "adm2", earnings:  58000, pkWins: 18, streamHours:  440, verified: false, status: "active",    joinDate: "May 2024", phone: "+91 99004 44444", hostMonthlyHours: 12,  hostActiveUntil: "2025-07-05" },
+  { id: "h5",  name: "Meera Pillai",   city: "Kochi",     language: "Malayalam", level: "L3", coinsReceived:  620000, followers:  41200, isLive: false, agentId: "a5", adminId: "adm3", earnings:  24000, pkWins:  9, streamHours:  280, verified: true,  status: "active",    joinDate: "Jun 2024", phone: "+91 99005 55555", hostMonthlyHours: 8,   hostActiveUntil: "2025-06-25" },
+  { id: "h6",  name: "Arjun Shah",     city: "Surat",     language: "Gujarati",  level: "L2", coinsReceived:  240000, followers:  28700, isLive: false, agentId: "a1", adminId: "adm1", earnings:   9600, pkWins:  4, streamHours:  140, verified: false, status: "active",    joinDate: "Jul 2024", phone: "+91 99006 66666", hostMonthlyHours: 2,   hostActiveUntil: "2025-06-22" },
+  { id: "h7",  name: "Riya Das",       city: "Kolkata",   language: "Bengali",   level: "L1", coinsReceived:   72000, followers:  12100, isLive: false, agentId: "a1", adminId: "adm1", earnings:   2800, pkWins:  1, streamHours:   48, verified: false, status: "suspended", joinDate: "Aug 2024", phone: "+91 99007 77777", hostMonthlyHours: 0,   hostActiveUntil: "2025-06-20", hostRevokedAt: "2025-06-20", hostRevokedReason: "Did not meet 30-hour monthly streaming requirement" },
+  { id: "h8",  name: "Kiran Nair",     city: "Pune",      language: "Marathi",   level: "L3", coinsReceived:  580000, followers:  33400, isLive: true,  agentId: "a6", adminId: "adm3", earnings:  22000, pkWins:  7, streamHours:  210, verified: true,  status: "active",    joinDate: "Apr 2024", phone: "+91 99008 88888", hostMonthlyHours: 31,  hostActiveUntil: "2025-07-18" },
+  { id: "h9",  name: "Ananya Sen",     city: "Chennai",   language: "Tamil",     level: "L4", coinsReceived: 1140000, followers:  48900, isLive: false, agentId: "a5", adminId: "adm3", earnings:  44000, pkWins: 14, streamHours:  390, verified: true,  status: "active",    joinDate: "Mar 2024", phone: "+91 99009 99999", hostMonthlyHours: 24,  hostActiveUntil: "2025-07-12" },
+  { id: "h10", name: "Rohan Mishra",   city: "Lucknow",   language: "Hindi",     level: "L2", coinsReceived:  210000, followers:  22600, isLive: false, agentId: "a3", adminId: "adm2", earnings:   8400, pkWins:  3, streamHours:   98, verified: false, status: "active",    joinDate: "Sep 2024", phone: "+91 99010 10101", hostMonthlyHours: 5,   hostActiveUntil: "2025-06-28" },
 ];
 
 const PENDING_HOSTS = [
@@ -107,6 +112,31 @@ const STATUS_META: Record<HostStatus, { label: string; cls: string; dot: string 
   suspended: { label: "Suspended", cls: "text-amber-600", dot: "bg-amber-500"  },
   removed:   { label: "Removed",   cls: "text-red-600",   dot: "bg-red-500"    },
 };
+
+// ── Checkpoint helpers ────────────────────────────────────────────────────────
+
+function daysLeft(deadline: string): number {
+  const diff = new Date(deadline).getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+function checkpointStatus(h: Host): { label: string; color: string; bg: string; dot: string } {
+  if (h.hostRevokedAt) {
+    return { label: "Revoked", color: "text-red-600", bg: "bg-red-50", dot: "bg-red-500" };
+  }
+  const dl = daysLeft(h.hostActiveUntil);
+  const met = h.hostMonthlyHours >= 30;
+  if (dl <= 0 && !met) {
+    return { label: "Expired", color: "text-red-600", bg: "bg-red-50", dot: "bg-red-500" };
+  }
+  if (dl <= 5 && !met) {
+    return { label: "Urgent", color: "text-amber-600", bg: "bg-amber-50", dot: "bg-amber-500" };
+  }
+  if (!met) {
+    return { label: "At Risk", color: "text-yellow-600", bg: "bg-yellow-50", dot: "bg-yellow-500" };
+  }
+  return { label: "On Track", color: "text-green-600", bg: "bg-green-50", dot: "bg-green-500" };
+}
 
 // ── Remove Confirm Dialog ─────────────────────────────────────────────────────
 
@@ -280,6 +310,45 @@ function HostDetail({ host, onClose }: { host: Host; onClose: () => void }) {
                 <p className="text-xs text-muted-foreground mt-0.5">{m.label}</p>
               </div>
             ))}
+          </div>
+
+          {/* Activity Checkpoint */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Activity Checkpoint</p>
+            {(() => {
+              const cp = checkpointStatus(host);
+              const dl = daysLeft(host.hostActiveUntil);
+              return (
+                <div className={`rounded-xl p-3 border ${cp.bg} border-opacity-40`} style={{ borderColor: cp.color.replace("text-", "").replace("600", "200").replace("500", "200") }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                      <div className={`w-2 h-2 rounded-full ${cp.dot}`} />
+                      <span className={cp.color}>{cp.label}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {dl > 0 ? `${dl} days left` : dl === 0 ? "Due today" : `${Math.abs(dl)} days overdue`}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Monthly Hours</span>
+                      <span className="font-medium">{host.hostMonthlyHours} / 30 hrs</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${host.hostMonthlyHours >= 30 ? "bg-green-500" : host.hostMonthlyHours >= 15 ? "bg-yellow-500" : "bg-red-500"}`}
+                        style={{ width: `${Math.min(100, (host.hostMonthlyHours / 30) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  {host.hostRevokedAt && (
+                    <div className="mt-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1.5">
+                      <strong>Revoked on {host.hostRevokedAt}:</strong> {host.hostRevokedReason}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Network */}
@@ -738,6 +807,8 @@ export default function HostsPage() {
                   <th className="text-right pb-3">Coins Recv.</th>
                   <th className="text-right pb-3">Earnings</th>
                   <th className="text-right pb-3">PK Wins</th>
+                  <th className="text-right pb-3">Hrs This Month</th>
+                  <th className="text-left pb-3">Checkpoint</th>
                   {(isSA || isAdmin) && <th className="text-left pb-3">Agent</th>}
                   {isSA && <th className="text-left pb-3">Admin</th>}
                   <th className="text-left pb-3">Status</th>
@@ -746,10 +817,11 @@ export default function HostsPage() {
               </thead>
               <tbody className="divide-y">
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={12} className="text-center py-10 text-muted-foreground text-sm">No hosts found</td></tr>
+                  <tr><td colSpan={14} className="text-center py-10 text-muted-foreground text-sm">No hosts found</td></tr>
                 ) : filtered.map(h => {
                   const lvl = levelOf(h.level);
                   const sm  = STATUS_META[h.status];
+                  const cp  = checkpointStatus(h);
                   return (
                     <tr key={h.id} className={`hover:bg-muted/40 ${h.status === "suspended" ? "opacity-70" : ""}`}>
                       <td className="p-4 py-3">
@@ -790,6 +862,20 @@ export default function HostsPage() {
                       <td className="py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Zap className="w-3.5 h-3.5 text-yellow-500" />{h.pkWins}
+                        </div>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-xs font-medium">{h.hostMonthlyHours}</span>
+                          <span className="text-[10px] text-muted-foreground">/30</span>
+                          {h.hostMonthlyHours < 30 && (
+                            <span className="text-[10px] text-amber-500">({daysLeft(h.hostActiveUntil)}d left)</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <div className={`flex items-center gap-1.5 text-xs ${cp.color}`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${cp.dot}`} />{cp.label}
                         </div>
                       </td>
                       {(isSA || isAdmin) && (

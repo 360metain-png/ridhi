@@ -48,6 +48,11 @@ interface Campaign {
   status: AdStatus;
   submittedAt: string;
   rejectionReason?: string;
+  // Brand registration checkpoint
+  isBrandRegistered: boolean;
+  brandActiveUntil: string;
+  brandRevokedAt?: string;
+  brandRevokedReason?: string;
 }
 
 // ── Mock data ──────────────────────────────────────────────────────────────────
@@ -60,6 +65,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 42000, clicks: 630, ctr: 1.5,
     targetCity: "All India", targetAge: "18–34", targetGender: "Female", targetInterests: "Fashion, Beauty",
     startDate: "12 May", endDate: "18 May", status: "active", submittedAt: "11 May 10:22 AM",
+    isBrandRegistered: true, brandActiveUntil: "2025-07-15",
   },
   {
     id: "b2", bizName: "TechZone Electronics",    bizContact: "ads@techzone.in",
@@ -69,6 +75,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 60000, clicks: 1200, ctr: 2.0,
     targetCity: "Mumbai, Delhi, Bangalore", targetAge: "25–44", targetGender: "All", targetInterests: "Tech, Gaming",
     startDate: "15 May", endDate: "21 May", status: "active", submittedAt: "14 May 3:15 PM",
+    isBrandRegistered: true, brandActiveUntil: "2025-07-10",
   },
   {
     id: "b3", bizName: "SpiceRoute Foods",        bizContact: "hello@spiceroute.com",
@@ -78,6 +85,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 0, clicks: 0, ctr: 0,
     targetCity: "Bangalore", targetAge: "18–34", targetGender: "All", targetInterests: "Food, Health",
     startDate: "—", endDate: "—", status: "pending", submittedAt: "18 May 9:05 AM",
+    isBrandRegistered: true, brandActiveUntil: "2025-06-25",
   },
   {
     id: "b4", bizName: "SkillUp Academy",         bizContact: "marketing@skillup.in",
@@ -87,6 +95,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 0, clicks: 0, ctr: 0,
     targetCity: "All India", targetAge: "18–34", targetGender: "All", targetInterests: "Education, Tech",
     startDate: "—", endDate: "—", status: "pending", submittedAt: "18 May 10:44 AM",
+    isBrandRegistered: true, brandActiveUntil: "2025-07-20",
   },
   {
     id: "b5", bizName: "ZenFit Yoga Studio",      bizContact: "zoe@zenfit.in",
@@ -96,6 +105,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 31500, clicks: 472, ctr: 1.5,
     targetCity: "Pune", targetAge: "25–44", targetGender: "Female", targetInterests: "Health, Sports",
     startDate: "1 May", endDate: "7 May", status: "completed", submittedAt: "30 Apr 2:00 PM",
+    isBrandRegistered: true, brandActiveUntil: "2025-06-20", brandRevokedAt: "2025-06-20", brandRevokedReason: "No campaign submitted within 30 days",
   },
   {
     id: "b6", bizName: "RohanCars Motors",        bizContact: "sales@rohancars.com",
@@ -105,6 +115,7 @@ const CAMPAIGNS: Campaign[] = [
     impressions: 0, clicks: 0, ctr: 0,
     targetCity: "Mumbai", targetAge: "25–44", targetGender: "Male", targetInterests: "Vehicles",
     startDate: "—", endDate: "—", status: "pending", submittedAt: "17 May 5:30 PM",
+    isBrandRegistered: false, brandActiveUntil: "—",
   },
   {
     id: "b7", bizName: "QuickMed Pharma",         bizContact: "ops@quickmed.in",
@@ -115,6 +126,7 @@ const CAMPAIGNS: Campaign[] = [
     targetCity: "All India", targetAge: "18+", targetGender: "All", targetInterests: "Health",
     startDate: "—", endDate: "—", status: "rejected", submittedAt: "16 May 11:00 AM",
     rejectionReason: "Misleading medical claims. Violates Ridhi Ads health & safety policy. No prescription claims permitted.",
+    isBrandRegistered: true, brandActiveUntil: "2025-06-22", brandRevokedAt: "2025-06-22", brandRevokedReason: "No campaign submitted within 30 days",
   },
 ];
 
@@ -135,6 +147,15 @@ const formatMix = [
   { name: "Banner",  value: 12, color: "#FFB800" },
   { name: "Explore", value: 8,  color: "#34C759" },
 ];
+
+// ── Checkpoint helpers ─────────────────────────────────────────────────────────
+
+function daysLeft(deadline: string): number {
+  const d = new Date(deadline);
+  if (isNaN(d.getTime())) return 0;
+  const diff = d.getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
 
 // ── Meta helpers ───────────────────────────────────────────────────────────────
 const STATUS_META: Record<AdStatus, { label: string; cls: string }> = {
@@ -193,6 +214,20 @@ function CampaignCard({
               <Badge variant="outline" className="text-[10px] text-muted-foreground border-border capitalize">
                 {campaign.format} ad
               </Badge>
+              {/* Brand checkpoint badge */}
+              {campaign.brandRevokedAt ? (
+                <Badge variant="outline" className="text-[10px] text-red-600 border-red-200 bg-red-50">
+                  <AlertTriangle className="w-3 h-3 mr-0.5" /> Brand Revoked
+                </Badge>
+              ) : campaign.isBrandRegistered ? (
+                <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50">
+                  <Check className="w-3 h-3 mr-0.5" /> Brand Reg · {daysLeft(campaign.brandActiveUntil)}d left
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50">
+                  <AlertTriangle className="w-3 h-3 mr-0.5" /> Unregistered
+                </Badge>
+              )}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">{campaign.headline}</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">{campaign.bizContact} · submitted {campaign.submittedAt}</p>

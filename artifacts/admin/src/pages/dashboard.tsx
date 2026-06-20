@@ -8,7 +8,7 @@ import {
   Zap, Heart, Star, Award, Briefcase, Shield, Crown,
   ArrowUpRight, CheckCircle, Clock, AlertTriangle,
   Rocket, Wrench, Play, Pause, Settings, ExternalLink, Globe, Power, Download,
-  HardDrive, Database, FileAudio, Video} from "lucide-react";
+  HardDrive, Database, FileAudio, Video, Megaphone} from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -115,21 +115,27 @@ const PLATFORM_STATS = [
 ];
 
 const NETWORK_SA = [
-  { label: "Total Agents",     value: "42",     sub: "3 Admins managing",    icon: Briefcase,  color: "text-violet-600 bg-violet-50", badge: null },
-  { label: "Total Hosts",      value: "1,284",  sub: "+47 this week",         icon: Star,       color: "text-yellow-600 bg-yellow-50", badge: null },
-  { label: "Live Hosts Now",   value: "284",    sub: "22% of active hosts",   icon: Radio,      color: "text-red-600 bg-red-50",       badge: "LIVE" },
-  { label: "KYC Pending",      value: "17",     sub: "4 submitted today",     icon: Shield,     color: "text-orange-600 bg-orange-50", badge: "⚠" },
-  { label: "Promotions Due",   value: "8",      sub: "Hosts at threshold",    icon: Crown,      color: "text-amber-600 bg-amber-50",   badge: null },
-  { label: "Payouts Pending",  value: "₹3.2L",  sub: "12 agent requests",     icon: IndianRupee,color: "text-green-600 bg-green-50",   badge: null },
+  { label: "Total Agents",       value: "42",     sub: "3 Admins managing",      icon: Briefcase,      color: "text-violet-600 bg-violet-50", badge: null },
+  { label: "Total Hosts",        value: "1,284",  sub: "+47 this week",           icon: Star,           color: "text-yellow-600 bg-yellow-50", badge: null },
+  { label: "Live Hosts Now",     value: "284",    sub: "22% of active hosts",     icon: Radio,          color: "text-red-600 bg-red-50",       badge: "LIVE" },
+  { label: "KYC Pending",        value: "17",     sub: "4 submitted today",       icon: Shield,         color: "text-orange-600 bg-orange-50", badge: "⚠" },
+  { label: "Promotions Due",     value: "8",      sub: "Hosts at threshold",      icon: Crown,          color: "text-amber-600 bg-amber-50",   badge: null },
+  { label: "Payouts Pending",    value: "₹3.2L",  sub: "12 agent requests",       icon: IndianRupee,    color: "text-green-600 bg-green-50",   badge: null },
+  { label: "Brand Checkpoints",  value: "5",      sub: "2 at risk / 2 revoked",  icon: Megaphone,      color: "text-pink-600 bg-pink-50",     badge: null },
+  { label: "Host Checkpoints",   value: "3",      sub: "Hosts below 30h",        icon: Clock,          color: "text-teal-600 bg-teal-50",     badge: null },
+  { label: "Agent Complaints",   value: "4",      sub: "2 open / 1 escalated",     icon: AlertTriangle,  color: "text-red-600 bg-red-50",       badge: "⚠" },
 ];
 
 const NETWORK_ADMIN = [
-  { label: "My Agents",       value: "14",    sub: "2 promoted this month",  icon: Briefcase,  color: "text-violet-600 bg-violet-50", badge: null },
-  { label: "Total My Hosts",  value: "428",   sub: "+16 this week",          icon: Star,       color: "text-yellow-600 bg-yellow-50", badge: null },
-  { label: "Live Right Now",  value: "96",    sub: "22% of my hosts",        icon: Radio,      color: "text-red-600 bg-red-50",       badge: "LIVE" },
-  { label: "KYC My Queue",    value: "5",     sub: "Action needed",          icon: Shield,     color: "text-orange-600 bg-orange-50", badge: "⚠" },
-  { label: "Promotions Due",  value: "3",     sub: "In my network",          icon: Crown,      color: "text-amber-600 bg-amber-50",   badge: null },
-  { label: "Agent Payouts",   value: "₹94K",  sub: "4 pending requests",     icon: IndianRupee,color: "text-green-600 bg-green-50",   badge: null },
+  { label: "My Agents",          value: "14",    sub: "2 promoted this month",  icon: Briefcase,      color: "text-violet-600 bg-violet-50", badge: null },
+  { label: "Total My Hosts",     value: "428",   sub: "+16 this week",          icon: Star,           color: "text-yellow-600 bg-yellow-50", badge: null },
+  { label: "Live Right Now",     value: "96",    sub: "22% of my hosts",        icon: Radio,          color: "text-red-600 bg-red-50",       badge: "LIVE" },
+  { label: "KYC My Queue",       value: "5",     sub: "Action needed",          icon: Shield,         color: "text-orange-600 bg-orange-50", badge: "⚠" },
+  { label: "Promotions Due",     value: "3",     sub: "In my network",          icon: Crown,          color: "text-amber-600 bg-amber-50",   badge: null },
+  { label: "Agent Payouts",      value: "₹94K",  sub: "4 pending requests",     icon: IndianRupee,    color: "text-green-600 bg-green-50",   badge: null },
+  { label: "Brand Checkpoints",  value: "2",     sub: "1 at risk in your network", icon: Megaphone,    color: "text-pink-600 bg-pink-50",     badge: null },
+  { label: "Host Checkpoints",   value: "1",     sub: "Host below 30h",         icon: Clock,          color: "text-teal-600 bg-teal-50",     badge: null },
+  { label: "Agent Complaints",   value: "2",     sub: "Open complaints",        icon: AlertTriangle,  color: "text-red-600 bg-red-50",       badge: null },
 ];
 
 const NETWORK_AGENT = [
