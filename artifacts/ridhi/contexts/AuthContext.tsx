@@ -82,6 +82,7 @@ export interface UserProfile {
   lastDailyRewardAt?: string;
   streakCount?: number;
   lastPostDate?: string;
+  downloadEarnings?: number;
 }
 
 interface AuthContextValue {
@@ -99,6 +100,7 @@ interface AuthContextValue {
   cancelPlan: () => Promise<void>;
   syncKycStatus: (userId: string) => Promise<void>;
   syncPkBattleStatus: (userId: string) => Promise<void>;
+  recordDownloadEarning: (amount: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -124,6 +126,7 @@ const DEFAULT_USER: UserProfile = {
   isVerified: false,
   streakCount: 3,
   lastPostDate: new Date().toISOString(),
+  downloadEarnings: 0,
   createdAt: new Date().toISOString(),
 };
 
@@ -389,9 +392,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const recordDownloadEarning = useCallback(async (amount: number) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated: UserProfile = {
+        ...prev,
+        coins: prev.coins + amount,
+        downloadEarnings: (prev.downloadEarnings ?? 0) + amount,
+      };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus, syncPkBattleStatus }}
+      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus, syncPkBattleStatus, recordDownloadEarning }}
     >
       {children}
     </AuthContext.Provider>

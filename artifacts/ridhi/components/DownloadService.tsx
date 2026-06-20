@@ -34,7 +34,7 @@ export function DownloadService({
   ownerId,
   onDownloadComplete,
 }: DownloadServiceProps) {
-  const { user, deductCoins, addCoins } = useAuth();
+  const { user, deductCoins, recordDownloadEarning } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -75,10 +75,21 @@ export function DownloadService({
       return;
     }
 
-    // Credit creator (60%)
-    // In real app, this would be an API call to credit the owner
-    // For now, we simulate by logging the transaction
-    console.log(`[Download] ${contentId} | ${price} coins | Creator: ${ownerId} +${creatorShare} | Ridhi: +${platformShare}`);
+    // Credit creator via API (60% goes to creator)
+    try {
+      const { apiFetch } = await import("@/utils/api");
+      await apiFetch("/api/downloads", {
+        method: "POST",
+        body: JSON.stringify({ contentId, contentType, ownerId, price }),
+      });
+    } catch {
+      // API logging failed, but coins already deducted — continue
+    }
+
+    // If downloading own content, credit self
+    if (user.id === ownerId) {
+      await recordDownloadEarning(creatorShare);
+    }
 
     // Record download transaction in AsyncStorage
     try {

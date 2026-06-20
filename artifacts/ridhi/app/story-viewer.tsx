@@ -19,6 +19,7 @@ import { useTrackScreen } from "@/hooks/useAnalytics";
 import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
+import { DownloadService } from "@/components/DownloadService";
 
 const { width, height } = Dimensions.get("window");
 
@@ -59,6 +60,7 @@ export default function StoryViewerScreen() {
   const [paused, setPaused] = useState(false);
   const [reply, setReply] = useState("");
   const [showShare, setShowShare] = useState(false);
+  const [showDownload, setShowDownload] = useState(false);
   const [storyReactions, setStoryReactions] = useState<Record<string, string[]>>({});
   const [lastReaction, setLastReaction] = useState("");
   const reactionAnim = useRef(new Animated.Value(0)).current;
@@ -223,6 +225,9 @@ export default function StoryViewerScreen() {
               <Pressable style={styles.replyActionBtn} onPress={() => setShowShare(true)}>
                 <Feather name="share" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
+              <Pressable style={styles.replyActionBtn} onPress={() => setShowDownload(true)}>
+                <Feather name="download" size={22} color="rgba(255,255,255,0.9)" />
+              </Pressable>
             </View>
           )}
         </View>
@@ -238,6 +243,16 @@ export default function StoryViewerScreen() {
         url: `https://ridhi.app/story/${story.id}`,
       }}
       type="story"
+    />
+
+    <DownloadService
+      visible={showDownload}
+      onClose={() => setShowDownload(false)}
+      contentId={story.id}
+      contentType="story"
+      contentTitle={story.text}
+      ownerName={story.user}
+      ownerId={`user_${story.user.replace(/\s+/g, "_").toLowerCase()}`}
     />
   </>
   );

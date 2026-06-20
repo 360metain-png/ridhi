@@ -24,6 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
 import { apiFetch, ApiError } from "@/utils/api";
+import { moderateContent, type ModerationResult } from "@/utils/contentModeration";
 
 const { width } = Dimensions.get("window");
 
@@ -327,12 +328,51 @@ export default function CreatePostScreen() {
   const handlePost = async () => {
     setLoading(true);
     try {
+      // ── AI Content Moderation Check ──
+      const moderation = await moderateContent(text.trim());
+      if (moderation.flagged && moderation.severity === "critical") {
+        setLoading(false);
+        Alert.alert(
+          "Content Blocked",
+          moderation.suggestion || "Your content violates our community guidelines.",
+          [{ text: "OK", style: "cancel" }]
+        );
+        return;
+      }
+      if (moderation.flagged && moderation.severity === "high") {
+        setLoading(false);
+        Alert.alert(
+          "Content Warning",
+          `${moderation.suggestion}\n\nContinue anyway?`,
+          [
+            { text: "Edit", style: "cancel" },
+            { text: "Continue", onPress: () => proceedWithPost(moderation) },
+          ]
+        );
+        return;
+      }
+      await proceedWithPost(moderation);
+    } catch {
+      setLoading(false);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
+  };
+
+  const proceedWithPost = async (moderation: ModerationResult) => {
+    setLoading(true);
+    try {
       const body: any = {
         content: text.trim(),
         images: selectedType === "carousel" ? carouselImages : (mediaUri ? [mediaUri] : []),
         city: user?.city ?? null,
         language: user?.language ?? null,
         type: selectedType,
+        moderation: {
+          category: moderation.category,
+          severity: moderation.severity,
+          flagged: moderation.flagged,
+          confidence: moderation.confidence,
+        },
       };
       if (selectedType === "duet" || selectedType === "stitch") {
         body.duetWith = params?.duetWith ? { reelId: params.duetWith, reelTitle: params.duetTitle, reelUser: params.duetUser } : undefined;

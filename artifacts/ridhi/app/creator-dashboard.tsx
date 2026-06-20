@@ -36,6 +36,7 @@ const EARNINGS = [
   { source: "Virtual Gifts", amount: "₹1,240", icon: "gift", color: "#E91E8C" },
   { source: "Creator Fund", amount: "₹890", icon: "trending-up", color: "#34C759" },
   { source: "Coin Tips", amount: "₹320", icon: "star", color: "#FFB800" },
+  { source: "Download Earnings", amount: "₹0", icon: "download", color: "#7B2FBE" },
 ];
 
 export default function CreatorDashboardScreen() {

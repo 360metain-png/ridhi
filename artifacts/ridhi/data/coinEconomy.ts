@@ -105,7 +105,29 @@ export const SPEND_CATEGORIES: SpendCategory[] = [
   { id: "sc6", label: "Video Call",       icon: "video",        color: "#10B981", desc: "Face-to-face with hosts",    cost: "40 coins/min",        route: "/random-call" },
   { id: "sc7", label: "Unlock Message",   icon: "lock",         color: "#8B5CF6", desc: "Read locked DMs",            cost: "50 coins",            route: "/(tabs)/chat" },
   { id: "sc8", label: "AI Assistant",     icon: "zap",          color: "#06B6D4", desc: "AI-powered features",        cost: "10 coins/query",      route: "/ai-assistant" },
+  { id: "sc9", label: "Download",         icon: "download",     color: "#34C759", desc: "Download videos & posts",  cost: "3-20 coins",          route: "/(tabs)/reels" },
 ];
+
+export type ContentType = "reel" | "post" | "story" | "live" | "audio";
+
+export interface DownloadPrice {
+  type: ContentType;
+  price: number;
+  label: string;
+}
+
+export const DOWNLOAD_PRICING: Record<ContentType, DownloadPrice> = {
+  reel:   { type: "reel",   price: 5,  label: "Reel" },
+  post:   { type: "post",   price: 10, label: "Post" },
+  story:  { type: "story",  price: 3,  label: "Story" },
+  live:   { type: "live",   price: 20, label: "Live Recording" },
+  audio:  { type: "audio",  price: 8,  label: "Audio Room" },
+};
+
+export const REVENUE_SPLIT = {
+  creator: 0.6,
+  platform: 0.4,
+};
 
 export const DAILY_REWARD_STREAK = [
   { day: 1, reward: 3,   claimed: true },

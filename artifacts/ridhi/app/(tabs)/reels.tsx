@@ -28,6 +28,7 @@ import { SwipeUpHint } from "@/components/SwipeUpHint";
 import { VideoFilter, VIDEO_FILTERS, type FilterDef } from "@/components/VideoFilter";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { ReelOptionsMenu } from "@/components/ReelOptionsMenu";
+import { DownloadService } from "@/components/DownloadService";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 
 const REELS = [
@@ -486,6 +487,7 @@ function ReelItem({
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [showAllFilters, setShowAllFilters] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
+  const [showDownload, setShowDownload] = useState(false);
 
   // ── Content entry animations ─────────────────────────────────────────────
   const infoY       = useRef(new Animated.Value(36)).current;
@@ -554,8 +556,8 @@ function ReelItem({
   const handleSave = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     trackSave(reel.id, "reel");
-    saveWithWatermark();
-  }, [saveWithWatermark, reel.id, trackSave]);
+    setShowDownload(true);
+  }, [reel.id, trackSave]);
 
   const fmt = useCallback(
     (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
@@ -761,6 +763,17 @@ function ReelItem({
         visible={showMoreOptions}
         onClose={() => setShowMoreOptions(false)}
         reel={reel}
+      />
+
+      {/* Paid download service */}
+      <DownloadService
+        visible={showDownload}
+        onClose={() => setShowDownload(false)}
+        contentId={reel.id}
+        contentType="reel"
+        contentTitle={reel.caption}
+        ownerName={reel.userName}
+        ownerId={`user_${reel.userName.replace(/\s+/g, "_").toLowerCase()}`}
       />
     </View>
   );

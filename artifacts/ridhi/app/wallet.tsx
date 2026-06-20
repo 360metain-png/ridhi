@@ -44,6 +44,10 @@ const LIVE_EVENTS = [
   { type: "debit" as const, amount: 250, label: "Gift Sent", sublabel: "🚗 Car to Dev", role: "User" },
   { type: "credit" as const, amount: 320, label: "Call Earnings", sublabel: "Video Call · 8 min", role: "Host" },
   { type: "credit" as const, amount: 120, label: "Host Commission", sublabel: "Weekly payout", role: "Agent" },
+  { type: "credit" as const, amount: 3, label: "Download Earning", sublabel: "Reel · 60% split", role: "Creator" },
+  { type: "debit" as const, amount: 10, label: "Download", sublabel: "Post · @neha_art", role: "User" },
+  { type: "credit" as const, amount: 6, label: "Download Earning", sublabel: "Post · 60% split", role: "Creator" },
+  { type: "debit" as const, amount: 5, label: "Download", sublabel: "Reel · @ravi_dance", role: "User" },
 ];
 
 interface LiveTx {

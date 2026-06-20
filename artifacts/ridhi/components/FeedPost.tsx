@@ -9,6 +9,7 @@ import { WatermarkBadge } from "./WatermarkBadge";
 import { useWatermark } from "@/hooks/useWatermark";
 import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
 import { ShareWithWatermark } from "./ShareWithWatermark";
+import { DownloadService } from "./DownloadService";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
 export interface Post {
@@ -141,6 +142,7 @@ export const FeedPost = React.memo(function FeedPost({
   const { trackShare, trackSave } = useAnalytics();
   const [showBurst, setShowBurst] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showDownload, setShowDownload] = useState(false);
   const likeScale = useRef(new Animated.Value(1)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
   const cardSlide = useRef(new Animated.Value(16)).current;
@@ -337,13 +339,12 @@ export const FeedPost = React.memo(function FeedPost({
           <View style={{ flex: 1 }} />
 
           <Pressable
-            onPress={() => { trackSave(post.id, "post"); saveWithWatermark(post.imageUri); }}
-            disabled={saving}
+            onPress={() => { trackSave(post.id, "post"); setShowDownload(true); }}
             accessibilityRole="button"
-            accessibilityLabel={saved ? "Saved" : "Save to gallery"}
+            accessibilityLabel="Download post"
           >
-            <View style={[styles.actionIcon, { backgroundColor: saved ? "#34C75920" : colors.muted }]}>
-              <Feather name={saved ? "check-circle" : "download"} size={14} color={saved ? "#34C759" : colors.mutedForeground} />
+            <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
+              <Feather name="download" size={14} color={colors.mutedForeground} />
             </View>
           </Pressable>
         </View>
@@ -359,6 +360,17 @@ export const FeedPost = React.memo(function FeedPost({
           url: `https://ridhi.app/post/${post.id}`,
         }}
         type={post.type === "video" ? "video" : "post"}
+      />
+
+      {/* Paid download service */}
+      <DownloadService
+        visible={showDownload}
+        onClose={() => setShowDownload(false)}
+        contentId={post.id}
+        contentType="post"
+        contentTitle={post.content ?? "Post"}
+        ownerName={post.userName}
+        ownerId={post.userId ?? `user_${post.userName.replace(/\s+/g, "_").toLowerCase()}`}
       />
     </Animated.View>
   );

@@ -13,6 +13,8 @@ import chatRouter from "./chat";
 import adminAuthRouter from "./admin-auth";
 import pkBattleRouter from "./pk-battle";
 import analyticsConfigRouter from "./analytics-config";
+import downloadsRouter from "./downloads";
+import moderateRouter from "./moderate";
 
 const router: IRouter = Router();
 
@@ -30,5 +32,7 @@ router.use(chatRouter);
 router.use(adminAuthRouter);
 router.use(pkBattleRouter);
 router.use(analyticsConfigRouter);
+router.use(downloadsRouter);
+router.use(moderateRouter);
 
 export default router;
