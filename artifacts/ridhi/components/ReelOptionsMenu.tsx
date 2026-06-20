@@ -36,9 +36,8 @@ interface MenuOption {
   icon: string;
   label: string;
   subtitle?: string;
-  type: "action" | "toggle" | "section" | "destructive";
+  type: "action" | "toggle" | "destructive";
   value?: boolean;
-  onToggle?: (v: boolean) => void;
 }
 
 export function ReelOptionsMenu({
@@ -57,6 +56,7 @@ export function ReelOptionsMenu({
   const [clearMode, setClearMode] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [showSpeedPicker, setShowSpeedPicker] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const url = `https://ridhi.app/reel/${reel.id}`;
 
@@ -71,7 +71,6 @@ export function ReelOptionsMenu({
     setSaved(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setTimeout(() => setSaved(false), 2000);
-    // TODO: Real download when videoUrl is available
     if (Platform.OS !== "web") {
       Alert.alert("Saved", "Reel saved to your collection.");
     }
@@ -88,53 +87,47 @@ export function ReelOptionsMenu({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
     onNotInterested?.();
-    Alert.alert(
-      "Not Interested",
-      "You'll see less content like this in the future."
-    );
+    Alert.alert("Not Interested", "You'll see less content like this in the future.");
   }, [onClose, onNotInterested]);
 
   const handleWhySee = useCallback(() => {
     Alert.alert(
       "Why you're seeing this",
-      "This reel is shown because:\n\n\u2022 It's trending in your city\n\u2022 You follow similar creators\n\u2022 It matches your interests (food, travel, culture)"
+      "This reel is shown because:\n\n• It's trending in your city\n• You follow similar creators\n• It matches your interests (food, travel, culture)"
     );
   }, []);
 
   const handleSomethingWrong = useCallback(() => {
-    Alert.alert(
-      "Report a Problem",
-      "Please describe what went wrong:",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Send Feedback", onPress: () => {
-          Alert.alert("Thanks", "Your feedback helps us improve.");
-        }},
-      ]
-    );
+    Alert.alert("Report a Problem", "Please describe what went wrong:", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Send Feedback", onPress: () => Alert.alert("Thanks", "Your feedback helps us improve.") },
+    ]);
   }, []);
 
   const speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
-  const mainOptions: MenuOption[] = [
+  const quickOptions: MenuOption[] = [
+    { id: "save", icon: "bookmark", label: saved ? "Saved" : "Save reel", subtitle: saved ? "Saved to collection" : "Add to your saved reels", type: "action" },
+    { id: "copyLink", icon: "link", label: copied ? "Link copied" : "Copy link", subtitle: "Share this reel", type: "action" },
+    { id: "report", icon: "flag", label: "Report", subtitle: "I'm concerned about this reel", type: "destructive" },
+  ];
+
+  const preferenceOptions: MenuOption[] = [
     { id: "interested", icon: "plus-circle", label: "Interested", subtitle: "More of these reels", type: "action" },
     { id: "notInterested", icon: "minus-circle", label: "Not interested", subtitle: "Less of these reels", type: "action" },
+    { id: "hide", icon: "eye-off", label: "Hide reel", subtitle: "I don't want to see this", type: "destructive" },
   ];
 
   const playbackOptions: MenuOption[] = [
     { id: "speed", icon: "fast-forward", label: "Playback speed", subtitle: `${playbackSpeed}x`, type: "action" },
-    { id: "quality", icon: "hard-drive", label: "Quality settings", subtitle: "Auto", type: "action" },
-    { id: "captions", icon: "type", label: "Captions", subtitle: "Off", type: "action" },
     { id: "clearMode", icon: "maximize", label: "Clear mode", type: "toggle", value: clearMode },
-    { id: "autoScroll", icon: "skip-forward", label: "Scroll to next reel automatically", type: "toggle", value: autoScroll },
+    { id: "autoScroll", icon: "skip-forward", label: "Auto-scroll to next", type: "toggle", value: autoScroll },
   ];
 
-  const actionOptions: MenuOption[] = [
-    { id: "save", icon: "bookmark", label: "Save reel", subtitle: saved ? "Saved to collection" : "Add to your saved reels", type: "action" },
-    { id: "copyLink", icon: "link", label: copied ? "Link copied" : "Copy link", subtitle: "Share this reel", type: "action" },
-    { id: "report", icon: "flag", label: "Find support or report reel", subtitle: "I'm concerned about this reel", type: "destructive" },
+  const moreOptions: MenuOption[] = [
+    { id: "quality", icon: "hard-drive", label: "Quality settings", subtitle: "Auto", type: "action" },
+    { id: "captions", icon: "type", label: "Captions", subtitle: "Off", type: "action" },
     { id: "whySee", icon: "help-circle", label: "Why am I seeing this?", type: "action" },
-    { id: "hide", icon: "eye-off", label: "Hide reel", subtitle: "I don't want to see this", type: "destructive" },
     { id: "somethingWrong", icon: "alert-triangle", label: "Something went wrong", type: "action" },
   ];
 
@@ -151,7 +144,7 @@ export function ReelOptionsMenu({
         setShowSpeedPicker(true);
         return;
       case "quality":
-        Alert.alert("Quality Settings", "Available options:\n\n\u2022 Auto (recommended)\n\u2022 High (720p)\n\u2022 Medium (480p)\n\u2022 Data Saver (240p)");
+        Alert.alert("Quality Settings", "Available options:\n\n• Auto (recommended)\n• High (720p)\n• Medium (480p)\n• Data Saver (240p)");
         break;
       case "captions":
         Alert.alert("Captions", "Auto-generated captions are available in 13 Indian languages.");
@@ -185,9 +178,9 @@ export function ReelOptionsMenu({
 
   const renderOption = (opt: MenuOption) => {
     const isDestructive = opt.type === "destructive";
-    const isActive = opt.id === "save" && saved || opt.id === "copyLink" && copied;
-    const labelColor = isDestructive ? "#F43F5E" : isActive ? "#34C759" : colors.foreground;
-    const iconColor = isDestructive ? "#F43F5E" : isActive ? "#34C759" : colors.foreground;
+    const isActive = (opt.id === "save" && saved) || (opt.id === "copyLink" && copied);
+    const labelColor = isDestructive ? "#F43F5E" : isActive ? "#34C759" : "#fff";
+    const iconColor = isDestructive ? "#F43F5E" : isActive ? "#34C759" : "#fff";
 
     return (
       <Pressable
@@ -197,13 +190,9 @@ export function ReelOptionsMenu({
       >
         <Feather name={opt.icon as any} size={20} color={iconColor} style={styles.menuIcon} />
         <View style={{ flex: 1 }}>
-          <Text style={[styles.menuLabel, { color: labelColor }]}>
-            {opt.label}
-          </Text>
+          <Text style={[styles.menuLabel, { color: labelColor }]}>{opt.label}</Text>
           {opt.subtitle && (
-            <Text style={[styles.menuSubtitle, { color: colors.mutedForeground }]}>
-              {opt.subtitle}
-            </Text>
+            <Text style={styles.menuSubtitle}>{opt.subtitle}</Text>
           )}
         </View>
         {opt.type === "toggle" && (
@@ -218,50 +207,63 @@ export function ReelOptionsMenu({
             thumbColor={opt.value ? "#fff" : "#888"}
           />
         )}
-        {opt.type === "action" && (opt.id === "speed" || opt.id === "quality") && (
-          <Text style={[styles.menuSubtitle, { color: colors.mutedForeground }]}>
-            {opt.id === "speed" ? `${playbackSpeed}x` : "Auto"}
-          </Text>
-        )}
       </Pressable>
+    );
+  };
+
+  const renderSection = (title: string, options: MenuOption[], sectionId: string) => {
+    const isExpanded = expandedSection === sectionId;
+    const hasMore = options.length > 3;
+    const visible = isExpanded ? options : options.slice(0, 3);
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {visible.map(renderOption)}
+        {hasMore && (
+          <Pressable
+            style={styles.showMoreRow}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setExpandedSection(isExpanded ? null : sectionId);
+            }}
+          >
+            <Text style={styles.showMoreText}>
+              {isExpanded ? "Show less" : `Show ${options.length - 3} more`}
+            </Text>
+            <Feather name={isExpanded ? "chevron-up" : "chevron-down"} size={16} color="#8E8E93" />
+          </Pressable>
+        )}
+      </View>
     );
   };
 
   return (
     <>
-      <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-        onRequestClose={onClose}
-      >
+      <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
         <Pressable style={styles.overlay} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: "#1C1C1E" }]}>
+        <View style={styles.sheet}>
           <View style={styles.handle} />
           <Text style={styles.sheetTitle}>More Options</Text>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 24 }}
-          >
-            {/* Preference section */}
-            <View style={[styles.section, { borderColor: "#2C2C2E" }]}>
-              {mainOptions.map(renderOption)}
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+            {/* Quick Actions — always visible */}
+            <View style={styles.section}>
+              {quickOptions.map(renderOption)}
             </View>
 
-            {/* Playback section */}
-            <View style={[styles.section, { borderColor: "#2C2C2E" }]}>
-              {playbackOptions.map(renderOption)}
-            </View>
+            {/* Preferences — collapsible */}
+            {renderSection("Preferences", preferenceOptions, "prefs")}
 
-            {/* Actions section */}
-            <View style={[styles.section, { borderColor: "#2C2C2E" }]}>
-              {actionOptions.map(renderOption)}
-            </View>
+            {/* Playback — collapsible */}
+            {renderSection("Playback", playbackOptions, "playback")}
+
+            {/* More — collapsible */}
+            {renderSection("More", moreOptions, "more")}
           </ScrollView>
 
           {/* Speed picker overlay */}
           {showSpeedPicker && (
-            <View style={[styles.speedPicker, { backgroundColor: "#1C1C1E" }]}>
+            <View style={styles.speedPicker}>
               <Text style={[styles.sheetTitle, { marginBottom: 12 }]}>Playback Speed</Text>
               {speedOptions.map((speed) => (
                 <Pressable
@@ -273,23 +275,13 @@ export function ReelOptionsMenu({
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   }}
                 >
-                  <Text
-                    style={[
-                      styles.speedLabel,
-                      { color: playbackSpeed === speed ? "#E91E8C" : "#fff" },
-                    ]}
-                  >
+                  <Text style={[styles.speedLabel, { color: playbackSpeed === speed ? "#E91E8C" : "#fff" }]}>
                     {speed === 1.0 ? "Normal" : `${speed}x`}
                   </Text>
-                  {playbackSpeed === speed && (
-                    <Feather name="check" size={18} color="#E91E8C" />
-                  )}
+                  {playbackSpeed === speed && <Feather name="check" size={18} color="#E91E8C" />}
                 </Pressable>
               ))}
-              <Pressable
-                style={[styles.speedClose, { marginTop: 8 }]}
-                onPress={() => setShowSpeedPicker(false)}
-              >
+              <Pressable style={styles.speedClose} onPress={() => setShowSpeedPicker(false)}>
                 <Text style={{ color: "#8E8E93", fontSize: 14 }}>Close</Text>
               </Pressable>
             </View>
@@ -323,6 +315,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: "75%",
+    backgroundColor: "#1C1C1E",
     paddingBottom: Platform.OS === "ios" ? 34 : 16,
   },
   handle: {
@@ -344,12 +337,23 @@ const styles = StyleSheet.create({
   },
   section: {
     borderTopWidth: 1,
+    borderTopColor: "#2C2C2E",
     marginTop: 8,
+    paddingTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#8E8E93",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginHorizontal: 20,
+    marginBottom: 4,
   },
   menuRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     gap: 16,
   },
@@ -364,8 +368,21 @@ const styles = StyleSheet.create({
   },
   menuSubtitle: {
     fontSize: 12,
+    color: "#8E8E93",
     marginTop: 2,
     lineHeight: 16,
+  },
+  showMoreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    gap: 4,
+  },
+  showMoreText: {
+    fontSize: 13,
+    color: "#E91E8C",
+    fontWeight: "500",
   },
   speedPicker: {
     position: "absolute",
@@ -374,6 +391,7 @@ const styles = StyleSheet.create({
     right: 0,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    backgroundColor: "#1C1C1E",
     padding: 20,
     paddingBottom: Platform.OS === "ios" ? 34 : 16,
   },

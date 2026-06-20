@@ -484,6 +484,7 @@ function ReelItem({
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showAllFilters, setShowAllFilters] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
 
   // ── Content entry animations ─────────────────────────────────────────────
@@ -708,11 +709,11 @@ function ReelItem({
         </Animated.View>
       </LinearGradient>
 
-      {/* Filter bar */}
+      {/* Filter bar — collapsed to 4 popular, expand with "More" */}
       {showFilterBar && (
         <View style={[styles.filterBar, { bottom: bottomPad + 160 }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterBarInner}>
-            {VIDEO_FILTERS.map((f) => {
+            {(showAllFilters ? VIDEO_FILTERS : VIDEO_FILTERS.slice(0, 4)).map((f) => {
               const active = currentFilter === f.id;
               return (
                 <Pressable
@@ -728,6 +729,13 @@ function ReelItem({
                 </Pressable>
               );
             })}
+            <Pressable
+              style={styles.filterChip}
+              onPress={() => { setShowAllFilters((s) => !s); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+            >
+              <Text style={styles.filterEmoji}>{showAllFilters ? "◀" : "▶"}</Text>
+              <Text style={styles.filterLabel}>{showAllFilters ? "Less" : "More"}</Text>
+            </Pressable>
           </ScrollView>
         </View>
       )}

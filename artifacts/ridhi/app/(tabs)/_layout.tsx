@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { Animated, Platform, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
+import { TooltipTour } from "@/components/TooltipTour";
 
 function AnimatedTabIcon({
   name,
@@ -74,96 +75,99 @@ export default function TabLayout() {
   const isWeb = Platform.OS === "web";
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        headerShown: false,
-        tabBarStyle: {
-          position: "absolute",
-          backgroundColor: isIOS ? "transparent" : colors.surface,
-          borderTopWidth: StyleSheet.hairlineWidth,
-          borderTopColor: colors.border,
-          elevation: 0,
-          height: isWeb ? 84 : 66,
-          paddingBottom: isWeb ? 34 : 12,
-          paddingTop: 6,
-        },
-        tabBarBackground: () =>
-          isIOS ? (
-            <BlurView
-              intensity={80}
-              tint="dark"
-              style={StyleSheet.absoluteFill}
-            />
-          ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]} />
-          ),
-        tabBarLabelStyle: { display: "none" },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon name="home" focused={focused} color={color} />
-          ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Home" focused={focused} />,
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.mutedForeground,
+          headerShown: false,
+          tabBarStyle: {
+            position: "absolute",
+            backgroundColor: isIOS ? "transparent" : colors.surface,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.border,
+            elevation: 0,
+            height: isWeb ? 84 : 66,
+            paddingBottom: isWeb ? 34 : 12,
+            paddingTop: 6,
+          },
+          tabBarBackground: () =>
+            isIOS ? (
+              <BlurView
+                intensity={80}
+                tint="dark"
+                style={StyleSheet.absoluteFill}
+              />
+            ) : (
+              <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.surface, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }]} />
+            ),
+          tabBarLabelStyle: { display: "none" },
         }}
-      />
-      <Tabs.Screen
-        name="reels"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon name="play" focused={focused} color={color} />
-          ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Reels" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="voice-reels"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon name="mic" focused={focused} color={color} />
-          ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Voice" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="match"
-        options={{
-          tabBarIcon: () => (
-            <LinearGradient
-              colors={["#E91E8C", "#7B2FBE"]}
-              style={styles.createBtn}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Feather name="heart" size={24} color="#fff" />
-            </LinearGradient>
-          ),
-          tabBarLabel: () => null,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon name="message-circle" focused={focused} color={color} />
-          ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Chat" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <AnimatedTabIcon name="user" focused={focused} color={color} />
-          ),
-          tabBarLabel: ({ focused }) => <TabLabel label="Profile" focused={focused} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="home" focused={focused} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => <TabLabel label="Home" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="reels"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="play" focused={focused} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => <TabLabel label="Reels" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="voice-reels"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="mic" focused={focused} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => <TabLabel label="Voice" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="match"
+          options={{
+            tabBarIcon: () => (
+              <LinearGradient
+                colors={["#E91E8C", "#7B2FBE"]}
+                style={styles.createBtn}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Feather name="heart" size={24} color="#fff" />
+              </LinearGradient>
+            ),
+            tabBarLabel: () => null,
+          }}
+        />
+        <Tabs.Screen
+          name="chat"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="message-circle" focused={focused} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => <TabLabel label="Chat" focused={focused} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="user" focused={focused} color={color} />
+            ),
+            tabBarLabel: ({ focused }) => <TabLabel label="Profile" focused={focused} />,
+          }}
+        />
+      </Tabs>
+      <TooltipTour />
+    </View>
   );
 }
 
