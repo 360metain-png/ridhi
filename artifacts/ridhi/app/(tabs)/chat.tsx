@@ -30,7 +30,7 @@ interface Conversation {
   } | null;
 }
 
-type Tab = "direct" | "groups";
+type Tab = "direct" | "friends" | "groups";
 
 export default function ChatScreen() {
   const colors = useColors();
@@ -97,7 +97,7 @@ export default function ChatScreen() {
       </View>
 
       <View style={[styles.tabRow, { borderBottomColor: colors.border }]}>
-        {([["direct", "Direct"], ["groups", "Groups"]] as [Tab, string][]).map(([t, label]) => (
+        {([["direct", "Direct"], ["friends", "Friends"], ["groups", "Groups"]] as [Tab, string][]).map(([t, label]) => (
           <Pressable
             key={t}
             onPress={() => setTab(t)}
@@ -110,7 +110,7 @@ export default function ChatScreen() {
         ))}
       </View>
 
-      {tab === "groups" ? (
+      {tab === "groups" && (
         <Pressable
           onPress={() => router.push("/chatrooms")}
           style={[styles.groupsShortcut, { backgroundColor: colors.card, borderColor: colors.border }]}
@@ -124,7 +124,53 @@ export default function ChatScreen() {
           </View>
           <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
         </Pressable>
-      ) : (
+      )}
+
+      {tab === "friends" && (
+        <>
+          <Pressable
+            onPress={() => router.push("/friend-requests")}
+            style={[styles.friendsShortcut, { backgroundColor: colors.card, borderColor: colors.border }]}
+          >
+            <View style={[styles.groupsIcon, { backgroundColor: colors.primary + "20" }]}>
+              <Feather name="user-plus" size={22} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.groupsTitle, { color: colors.foreground }]}>Friend Requests</Text>
+              <Text style={[styles.groupsSub, { color: colors.mutedForeground }]}>View pending & manage friends</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+          </Pressable>
+          <FlatList
+            data={filtered}
+            keyExtractor={(c) => c.id}
+            renderItem={({ item }) => (
+              <ChatItem
+                chat={item}
+                onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.id } })}
+              />
+            )}
+            ItemSeparatorComponent={() => (
+              <View style={[styles.separator, { backgroundColor: colors.border }]} />
+            )}
+            contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
+            removeClippedSubviews={Platform.OS !== "web"}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={12}
+            keyboardShouldPersistTaps="handled"
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Feather name="users" size={40} color={colors.muted} />
+                <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>No friends yet</Text>
+                <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>Add friends from Explore or Match</Text>
+              </View>
+            }
+          />
+        </>
+      )}
+
+      {tab === "direct" && (
         <>
           <View style={[styles.searchBar, { backgroundColor: colors.muted, borderColor: colors.border }]}>
             <Feather name="search" size={16} color={colors.mutedForeground} />
@@ -197,6 +243,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
   },
+  friendsShortcut: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
   groupsIcon: { width: 46, height: 46, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   groupsTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   groupsSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
@@ -215,4 +272,5 @@ const styles = StyleSheet.create({
   separator: { height: StyleSheet.hairlineWidth, marginLeft: 78 },
   empty: { alignItems: "center", gap: 8, paddingTop: 60 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
+  emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 32, marginTop: 4 },
 });

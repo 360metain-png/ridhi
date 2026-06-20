@@ -29,6 +29,7 @@ import { AIMatchBadge } from "@/components/AIMatchBadge";
 import { useAIMatchSuggestions } from "@/hooks/useAIMatch";
 import { type AISuggestedMatch } from "@/data/aiMatchEngine";
 import { calculateCompatibility } from "@/data/aiMatchEngine";
+import { apiFetch } from "@/utils/api";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 32;
@@ -482,6 +483,23 @@ export default function MatchScreen() {
               onPress={() => setMatched(null)}
             >
               <Text style={[styles.matchBtnText, { color: "#fff" }]}>Send Message</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.matchBtn, { backgroundColor: "rgba(255,255,255,0.2)", borderWidth: 1.5, borderColor: "#fff" }]}
+              onPress={() => {
+                // Auto-send friend request on match
+                const matchedProfile = profiles.find((p) => p.id === matched.id);
+                if (matchedProfile) {
+                  apiFetch("/api/friend-requests/send", {
+                    method: "POST",
+                    body: JSON.stringify({ receiverId: matchedProfile.id }),
+                  }).catch(() => {});
+                }
+                setMatched(null);
+                Alert.alert("Friend Request Sent", "You can also chat directly!");
+              }}
+            >
+              <Text style={[styles.matchBtnText, { color: "#fff" }]}>Add Friend</Text>
             </Pressable>
           </View>
         </View>

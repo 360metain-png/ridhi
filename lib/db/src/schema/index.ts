@@ -1,6 +1,7 @@
 export * from "./kyc";
 export * from "./users";
 export * from "./follows";
+export * from "./friend_requests";
 export * from "./posts";
 export * from "./post_likes";
 export * from "./post_comments";

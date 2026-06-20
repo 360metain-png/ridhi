@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
   FlatList,
   Platform,
@@ -16,8 +17,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { Avatar } from "@/components/Avatar";
+import { apiFetch } from "@/utils/api";
 
 const { width } = Dimensions.get("window");
 const CARD_W = (width - 48) / 2;
@@ -60,6 +63,7 @@ export default function ExploreScreen() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"trending" | "people" | "hashtags">("trending");
   const [users, setUsers] = useState(INITIAL_USERS);
+  const { user } = useAuth();
   const { trackFollow, trackSearch, trackHashtag } = useAnalytics();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -93,6 +97,22 @@ export default function ExploreScreen() {
     );
     if (!isFollowing) {
       trackFollow(id);
+    }
+  };
+
+  const sendFriendRequest = async (id: string) => {
+    if (!user) {
+      Alert.alert("Login Required", "Please log in to send friend requests.");
+      return;
+    }
+    try {
+      await apiFetch("/api/friend-requests/send", {
+        method: "POST",
+        body: JSON.stringify({ receiverId: id }),
+      });
+      Alert.alert("Friend Request Sent", "They'll be notified!");
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Could not send friend request");
     }
   };
 
@@ -222,6 +242,13 @@ export default function ExploreScreen() {
                       {u.isFollowing ? "Following" : "Follow"}
                     </Text>
                   </Pressable>
+                  <Pressable
+                    onPress={() => sendFriendRequest(u.id)}
+                    style={[styles.friendBtn, { backgroundColor: colors.success + "15", borderColor: colors.success + "40" }]}
+                    accessibilityLabel={`Add ${u.name} as friend`}
+                  >
+                    <Feather name="user-plus" size={16} color={colors.success} />
+                  </Pressable>
                 </View>
               ))
             )}
@@ -318,6 +345,7 @@ const styles = StyleSheet.create({
   personName: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
   personMeta: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
   followBtn: { borderWidth: 1.5, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20 },
+  friendBtn: { borderWidth: 1.5, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 20, marginLeft: 8 },
   followText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   hashtagRow: {
     flexDirection: "row",

@@ -53,6 +53,7 @@ const SOCIAL_ICONS: Record<string, { icon: string; color: string }> = {
   comment: { icon: "message-circle", color: "#4A90E2" },
   coin:    { icon: "star",          color: "#FFB800" },
   follow:  { icon: "user-plus",     color: "#34C759" },
+  friend_request: { icon: "user-plus", color: "#4A90E2" },
   campaign_live:     { icon: "volume-2", color: "#22C55E" },
   campaign_rejected: { icon: "alert-circle", color: "#EF4444" },
   campaign_completed:{ icon: "check-circle", color: "#3B82F6" },
@@ -70,7 +71,8 @@ function getNavTarget(type: string): string {
     case "comment": return "/(tabs)";
     case "match":   return "/(tabs)/match";
     case "coin":    return "/wallet";
-    case "follow":  return "/(tabs)/profile";
+    case "follow":         return "/(tabs)/profile";
+    case "friend_request":   return "/friend-requests";
     case "campaign_live":
     case "campaign_rejected":
     case "campaign_completed": return "/ads-manager";
@@ -120,6 +122,7 @@ function SocialNotifCard({
           <Text style={[styles.timeText, { color: colors.mutedForeground }]}>{item.timeAgo}</Text>
           <Text style={[styles.actionText, { color: colors.primary }]}>
             {item.type === "follow"           ? "View Profile →" :
+             item.type === "friend_request"     ? "View Requests →" :
              item.type === "match"            ? "See Match →" :
              item.type === "coin"             ? "Open Wallet →" :
              item.type === "comment"          ? "View Post →" :

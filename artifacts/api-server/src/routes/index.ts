@@ -15,6 +15,7 @@ import pkBattleRouter from "./pk-battle";
 import analyticsConfigRouter from "./analytics-config";
 import downloadsRouter from "./downloads";
 import moderateRouter from "./moderate";
+import friendRequestsRouter from "./friend_requests";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(pkBattleRouter);
 router.use(analyticsConfigRouter);
 router.use(downloadsRouter);
 router.use(moderateRouter);
+router.use(friendRequestsRouter);
 
 export default router;

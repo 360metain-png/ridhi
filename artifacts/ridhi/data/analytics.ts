@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // ── Event Types ──
 export type ScreenName =
   | "home" | "reels" | "voice_reels" | "match" | "chat" | "profile" | "explore"
-  | "live" | "audio_room" | "random_call" | "chatroom" | "story"
+  | "live" | "audio_room" | "random_call" | "chatroom" | "story" | "friend_requests"
   | "create_post" | "settings" | "wallet" | "notifications" | "creator_dashboard"
   | "subscriptions" | "communities" | "report_history" | "scheduled_content"
   | "podcasts" | "vibe_stars" | "music_library" | "lead_form" | "gaming"

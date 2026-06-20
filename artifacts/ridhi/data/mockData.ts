@@ -808,6 +808,9 @@ export const NOTIFICATIONS = [
   { id: "n13", type: "deal_new",          actor: "MakeMyTrip",    content: "posted a new deal: \"Travel Vlog – ₹10K–₹40K\" — 3 slots left", timeAgo: "1h", read: false },
   { id: "n14", type: "deal_expiring",     actor: "Campus Sutra",  content: "deal \"Campus OOTD\" expires in 24 hours — pitch now before slots fill", timeAgo: "3h", read: true },
   { id: "n15", type: "connect_unlocked",  actor: "Mamaearth",     content: "contact unlocked! Brand will reach out within 48 hours", timeAgo: "1d", read: true },
+  // ── Friend Request notifications ──
+  { id: "n16", type: "friend_request", actor: "Priya Sharma", content: "sent you a friend request. Accept to chat for free!", timeAgo: "15m", read: false },
+  { id: "n17", type: "friend_request", actor: "Arjun Kumar", content: "sent you a friend request. Accept to chat for free!", timeAgo: "2h", read: false },
 ];
 
 export interface MarketingNotification {

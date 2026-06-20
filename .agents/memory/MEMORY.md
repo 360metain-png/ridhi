@@ -1,3 +1,6 @@
 - [Drizzle-kit push TTY](drizzle-kit-tty.md) — drizzle-kit push requires a TTY; use executeSql for schema migrations instead
 - [Mobile JWT auth gap](mobile-jwt-auth.md) — mobile app issued OTP tokens but never stored them in AsyncStorage; apiFetch now auto-attaches tokens
 - [AuditAction enum](audit-action-enum.md) — new audit actions must be added to the AuditAction union in audit.ts before use
+- [Friend Request System](friend-request-system.md) — full user-to-user friend request flow: send/accept/reject/cancel, auto-creates chat conversation on accept, friends list with free chat, integrated across Explore, Match, and Chat tabs
+- [Paid Download System](paid-download-system.md) — coin-based content download with 60% creator / 40% platform revenue split, backend transaction logging, and creator earnings tracking
+- [AI Content Moderation](ai-content-moderation.md) — client-side pattern-based + server-side moderation endpoint for Indian context, integrated into create-post flow
