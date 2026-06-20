@@ -585,7 +585,20 @@ export default function AdsManagerScreen() {
           </View>
         </Pressable>
         <Pressable
-          onPress={() => setTab("create")}
+          onPress={() => {
+            if (user?.isBrandRegistered) {
+              setTab("create");
+            } else {
+              Alert.alert(
+                "Brand Registration Required",
+                "You need to register your brand on Ridhi before running ads. It's a one-time fee of ₹1,000.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Register Brand", onPress: () => router.push("/brand-register") },
+                ]
+              );
+            }
+          }}
           style={[styles.tab, tab === "create" && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}
         >
           <Text style={[styles.tabLabel, { color: tab === "create" ? colors.primary : colors.mutedForeground }]}>Create New</Text>
@@ -611,14 +624,14 @@ export default function AdsManagerScreen() {
               <Feather name={"volume-2" as any} size={48} color={colors.mutedForeground} />
               <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No campaigns yet</Text>
               <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>Create your first ad campaign to reach thousands of Ridhi users.</Text>
-              <GradientButton label="Create Campaign" onPress={() => setTab("create")} style={{ marginTop: 16, width: 200 }} />
+              <GradientButton label="Create Campaign" onPress={() => user?.isBrandRegistered ? setTab("create") : router.push("/brand-register")} style={{ marginTop: 16, width: 200 }} />
             </View>
           }
         />
       )}
 
       {/* ── Create Campaign Tab ──────────────────────────────────────────── */}
-      {tab === "create" && (
+      {tab === "create" && user?.isBrandRegistered && (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 32 }}>
             {/* Step indicator */}
@@ -1038,6 +1051,60 @@ export default function AdsManagerScreen() {
         </KeyboardAvoidingView>
       )}
 
+      {/* ── Create Campaign Tab (Gated) ─────────────────────────────────────────── */}
+      {tab === "create" && !user?.isBrandRegistered && (
+        <ScrollView
+          contentContainerStyle={{
+            flex: 1,
+            padding: 24,
+            paddingTop: topPad + 20,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 16,
+          }}
+        >
+          <View style={[styles.gateCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={[styles.gateIcon, { backgroundColor: `${colors.primary}20` }]}>
+              <Feather name="briefcase" size={32} color={colors.primary} />
+            </View>
+            <Text style={[styles.gateTitle, { color: colors.foreground }]}>Brand Registration Required</Text>
+            <Text style={[styles.gateSub, { color: colors.mutedForeground }]}>
+              You need to register your brand on Ridhi before creating ad campaigns. Registration is a one-time ₹1,000 fee.
+            </Text>
+            <View style={{ width: "100%", gap: 10 }}>
+              <View style={[styles.gateRow, { borderColor: colors.border }]}>
+                <Feather name="check" size={14} color={colors.primary} />
+                <Text style={[styles.gateRowText, { color: colors.foreground }]}>Unlimited ad campaigns</Text>
+              </View>
+              <View style={[styles.gateRow, { borderColor: colors.border }]}>
+                <Feather name="check" size={14} color={colors.primary} />
+                <Text style={[styles.gateRowText, { color: colors.foreground }]}>Access to Creator Marketplace</Text>
+              </View>
+              <View style={[styles.gateRow, { borderColor: colors.border }]}>
+                <Feather name="check" size={14} color={colors.primary} />
+                <Text style={[styles.gateRowText, { color: colors.foreground }]}>Campaign analytics & reports</Text>
+              </View>
+              <View style={[styles.gateRow, { borderColor: colors.border }]}>
+                <Feather name="check" size={14} color={colors.primary} />
+                <Text style={[styles.gateRowText, { color: colors.foreground }]}>GST invoices for your business</Text>
+              </View>
+              <View style={[styles.gateRow, { borderColor: colors.border }]}>
+                <Feather name="check" size={14} color={colors.primary} />
+                <Text style={[styles.gateRowText, { color: colors.foreground }]}>Priority support (24-hr SLA)</Text>
+              </View>
+            </View>
+            <GradientButton
+              label="Register Brand ₹1,000"
+              onPress={() => router.push("/brand-register")}
+              style={{ width: "100%", marginTop: 8 }}
+            />
+            <Pressable onPress={() => setTab("campaigns")} style={{ alignItems: "center", paddingVertical: 8 }}>
+              <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>Back to My Campaigns</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      )}
+
       {/* Modals */}
       <CampaignDetailModal
         visible={showDetail}
@@ -1327,4 +1394,12 @@ const styles = StyleSheet.create({
   confirmBtnPrimaryText: { fontSize: 14, fontFamily: "Inter_700Bold", color: "#fff" },
 
   detailVideoLabel: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 8 },
+
+  // Brand gate
+  gateCard: { borderRadius: 24, borderWidth: 1, padding: 28, gap: 14, width: "100%", maxWidth: 400, alignItems: "center" },
+  gateIcon: { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center" },
+  gateTitle: { fontSize: 20, fontFamily: "Inter_700Bold", textAlign: "center" },
+  gateSub: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 19 },
+  gateRow: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 12, borderWidth: 1, padding: 12 },
+  gateRowText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 });

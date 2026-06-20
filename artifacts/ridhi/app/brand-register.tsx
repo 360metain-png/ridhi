@@ -104,7 +104,7 @@ export default function BrandRegisterScreen() {
   const [showCoinConfirm, setShowCoinConfirm] = useState(false);
   const [paymentDone, setPaymentDone] = useState(false);
 
-  const { user, deductCoins } = useAuth();
+  const { user, deductCoins, updateProfile } = useAuth();
   const coinBalance = user?.coins ?? 0;
 
   const togglePlatform = (p: string) => {
@@ -126,9 +126,19 @@ export default function BrandRegisterScreen() {
     setSubmitted(true);
   };
 
+  const markBrandRegistered = () => {
+    if (user) {
+      updateProfile({
+        isBrandRegistered: true,
+        brandRegisteredAt: new Date().toISOString(),
+      });
+    }
+  };
+
   const handlePaySuccess = () => {
     setShowPayment(false);
     setPaymentDone(true);
+    markBrandRegistered();
   };
 
   const handleCoinPay = () => {
@@ -142,6 +152,7 @@ export default function BrandRegisterScreen() {
     setShowCoinConfirm(false);
     deductCoins(BRAND_REGISTRATION_COINS);
     setPaymentDone(true);
+    markBrandRegistered();
   };
 
   const progress = (step + 1) / TOTAL_STEPS;

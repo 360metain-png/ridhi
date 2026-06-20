@@ -46,6 +46,8 @@ export interface UserProfile {
   isHost?: boolean;
   isAgent?: boolean;
   isAdUser?: boolean;
+  isBrandRegistered?: boolean;
+  brandRegisteredAt?: string;
   hostRegisteredAt?: string;
   agentRegisteredAt?: string;
   // Random Call Fake Profile
