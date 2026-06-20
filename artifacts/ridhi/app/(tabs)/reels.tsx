@@ -3,11 +3,14 @@ import {
   Animated,
   Easing,
   FlatList,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   ViewToken,
   useWindowDimensions,
@@ -463,12 +466,14 @@ function ReelItem({
   screenHeight,
   screenWidth,
   isFirst,
+  onComment,
 }: {
   reel: (typeof REELS)[0];
   isActive: boolean;
   screenHeight: number;
   screenWidth: number;
   isFirst: boolean;
+  onComment: () => void;
 }) {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
@@ -634,7 +639,7 @@ function ReelItem({
               {fmt(likeCount)}
             </Text>
           </Pressable>
-          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Comment">
+          <Pressable style={styles.reelAction} onPress={onComment} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Comment">
             <Feather name="message-circle" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.comments)}</Text>
           </Pressable>
@@ -744,6 +749,9 @@ export default function ReelsScreen() {
   const insets  = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [commentReel, setCommentReel] = useState<(typeof REELS)[0] | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [sentComments, setSentComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   useTrackScreen("reels");
 
@@ -782,6 +790,7 @@ export default function ReelsScreen() {
         screenHeight={screenHeight}
         screenWidth={screenWidth}
         isFirst={index === 0}
+        onComment={() => setCommentReel(item)}
       />
     ),
     [activeIndex, screenHeight, screenWidth]
@@ -810,6 +819,7 @@ export default function ReelsScreen() {
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>
         <Pressable
+          onPress={() => router.push("/create-post?type=reel")}
           hitSlop={ICON_HITSLOP}
           accessibilityRole="button"
           accessibilityLabel="Open camera"
@@ -834,6 +844,76 @@ export default function ReelsScreen() {
         windowSize={5}
         initialNumToRender={2}
       />
+
+      {/* ── Comment Modal ── */}
+      <Modal
+        visible={commentReel !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCommentReel(null)}
+      >
+        <Pressable style={styles.modalBackdrop} onPress={() => setCommentReel(null)} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.commentSheet}>
+          <View style={styles.commentSheetInner}>
+            <View style={styles.commentHeader}>
+              <Text style={styles.commentTitle}>Comments</Text>
+              <Pressable onPress={() => setCommentReel(null)}>
+                <Feather name="x" size={20} color="rgba(255,255,255,0.6)" />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.commentList} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
+              {[
+                { id: "d1", name: "Ananya Singh", text: "This is so cool! 🔥", timeAgo: "2m" },
+                { id: "d2", name: "Rahul Mehta", text: "Love this reel! ❤️", timeAgo: "5m" },
+                { id: "d3", name: "Kavya Reddy", text: "Amazing content! 👏", timeAgo: "12m" },
+              ].concat(sentComments[commentReel?.id ?? ""] ?? []).map((c) => (
+                <View key={c.id} style={styles.commentItem}>
+                  <Avatar name={c.name} size={32} />
+                  <View style={styles.commentBubble}>
+                    <View style={styles.commentBubbleInner}>
+                      <Text style={styles.commentName}>{c.name}</Text>
+                      <Text style={styles.commentText}>{c.text}</Text>
+                    </View>
+                    <Text style={styles.commentTime}>{c.timeAgo}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            <View style={styles.commentInputRow}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Add a comment…"
+                placeholderTextColor="rgba(255,255,255,0.45)"
+                value={commentText}
+                onChangeText={setCommentText}
+                returnKeyType="send"
+                onSubmitEditing={() => {
+                  if (!commentText.trim() || !commentReel) return;
+                  setSentComments((prev) => ({
+                    ...prev,
+                    [commentReel.id]: [...(prev[commentReel.id] ?? []), { id: Date.now().toString(), name: "You", text: commentText.trim(), timeAgo: "just now" }],
+                  }));
+                  setCommentText("");
+                }}
+              />
+              <Pressable
+                onPress={() => {
+                  if (!commentText.trim() || !commentReel) return;
+                  setSentComments((prev) => ({
+                    ...prev,
+                    [commentReel.id]: [...(prev[commentReel.id] ?? []), { id: Date.now().toString(), name: "You", text: commentText.trim(), timeAgo: "just now" }],
+                  }));
+                  setCommentText("");
+                }}
+                disabled={!commentText.trim()}
+                style={[styles.sendBtn, { backgroundColor: commentText.trim() ? "#E91E8C" : "rgba(255,255,255,0.2)" }]}
+              >
+                <Feather name="send" size={14} color="#fff" />
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </Animated.View>
   );
 }
@@ -963,5 +1043,61 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.85)",
     fontSize: 10,
     fontFamily: "Inter_500Medium",
+  },
+
+  // Comment modal
+  modalBackdrop: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)" },
+  commentSheet: { position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 50, justifyContent: "flex-end" },
+  commentSheetInner: {
+    backgroundColor: "#1A1A2E",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    maxHeight: "70%",
+    paddingBottom: 20,
+  },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
+  },
+  commentTitle: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+  commentList: { paddingHorizontal: 16, paddingTop: 12, maxHeight: 400 },
+  commentItem: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  commentBubble: { flex: 1, gap: 4 },
+  commentBubbleInner: { backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, gap: 2 },
+  commentName: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  commentText: { color: "#fff", fontSize: 13, fontFamily: "Inter_400Regular" },
+  commentTime: { color: "rgba(255,255,255,0.5)", fontSize: 11, fontFamily: "Inter_500Medium" },
+  commentInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
