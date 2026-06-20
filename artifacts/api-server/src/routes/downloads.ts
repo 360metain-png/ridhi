@@ -7,7 +7,7 @@ const router = Router();
 
 // ── POST /api/downloads — record a paid download transaction ───────────────
 router.post(
-  "/api/downloads",
+  "/downloads",
   apiRateLimit,
   requireUser,
   async (req: AuthenticatedRequest, res) => {
@@ -56,7 +56,7 @@ router.post(
 
 // ── GET /api/downloads/history — list user's download history ────────────
 router.get(
-  "/api/downloads/history",
+  "/downloads/history",
   apiRateLimit,
   requireUser,
   async (req: AuthenticatedRequest, res) => {

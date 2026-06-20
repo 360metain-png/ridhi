@@ -106,7 +106,7 @@ function moderate(text: string): ModerationResult {
   };
 }
 
-router.post("/api/moderate", apiRateLimit, (req, res) => {
+router.post("/moderate", apiRateLimit, (req, res) => {
   const text = typeof req.body?.text === "string" ? req.body.text : "";
   if (!text || text.length > 5000) {
     res.status(400).json({ success: false, error: "Text required, max 5000 chars" });
