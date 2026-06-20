@@ -39,8 +39,6 @@ export function DownloadService({
   const [success, setSuccess] = useState(false);
 
   const price = DOWNLOAD_PRICING[contentType]?.price ?? 5;
-  const creatorShare = Math.floor(price * 0.6);
-  const platformShare = price - creatorShare;
 
   const handleDownload = useCallback(async () => {
     if (!user) {
@@ -75,7 +73,7 @@ export function DownloadService({
       return;
     }
 
-    // Credit creator via API (60% goes to creator)
+    // Credit creator via API (backend handles revenue split)
     try {
       const { apiFetch } = await import("@/utils/api");
       await apiFetch("/api/downloads", {
@@ -84,11 +82,6 @@ export function DownloadService({
       });
     } catch {
       // API logging failed, but coins already deducted — continue
-    }
-
-    // If downloading own content, credit self
-    if (user.id === ownerId) {
-      await recordDownloadEarning(creatorShare);
     }
 
     // Record download transaction in AsyncStorage
@@ -102,8 +95,6 @@ export function DownloadService({
         ownerName,
         ownerId,
         price,
-        creatorShare,
-        platformShare,
         timestamp: new Date().toISOString(),
       };
       const raw = await AsyncStorage.getItem("ridhi_downloads");
@@ -123,10 +114,10 @@ export function DownloadService({
       onDownloadComplete?.();
       Alert.alert(
         "Download Complete",
-        `${contentTitle} downloaded successfully!\n\n• ${price} coins deducted\n• ${ownerName} earned ${creatorShare} coins\n• Ridhi fee: ${platformShare} coins`,
+        `${contentTitle} downloaded successfully!\n\n${price} coins deducted from your balance.`,
       );
     }, 1200);
-  }, [user, deductCoins, contentId, contentType, contentTitle, ownerName, ownerId, price, creatorShare, platformShare, onClose, onDownloadComplete]);
+  }, [user, deductCoins, contentId, contentType, contentTitle, ownerName, ownerId, price, onClose, onDownloadComplete]);
 
   if (success) {
     return (
@@ -153,21 +144,11 @@ export function DownloadService({
         <Text style={styles.title}>Download Content</Text>
         <Text style={styles.subtitle} numberOfLines={1}>{contentTitle}</Text>
 
-        {/* Price breakdown */}
+        {/* Price */}
         <View style={styles.priceCard}>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Download Price</Text>
             <Text style={styles.priceValue}>{price} coins</Text>
-          </View>
-          <View style={styles.splitRow}>
-            <Feather name="user" size={14} color="#8E8E93" />
-            <Text style={styles.splitText}>{ownerName} (creator)</Text>
-            <Text style={styles.splitValue}>+{creatorShare} coins</Text>
-          </View>
-          <View style={styles.splitRow}>
-            <Feather name="box" size={14} color="#8E8E93" />
-            <Text style={styles.splitText}>Ridhi platform</Text>
-            <Text style={styles.splitValue}>+{platformShare} coins</Text>
           </View>
         </View>
 
@@ -271,22 +252,10 @@ const styles = StyleSheet.create({
     color: "#E91E8C",
     fontWeight: "700",
   },
-  splitRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 6,
-  },
-  splitText: {
-    fontSize: 13,
-    color: "#8E8E93",
-    flex: 1,
-  },
-  splitValue: {
-    fontSize: 13,
-    color: "#34C759",
-    fontWeight: "600",
-  },
+  // unused styles (kept for backwards compat)
+  splitRow: { display: "none" },
+  splitText: { display: "none" },
+  splitValue: { display: "none" },
   balanceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
