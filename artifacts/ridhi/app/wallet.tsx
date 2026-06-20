@@ -577,6 +577,7 @@ export default function WalletScreen() {
         amount={pendingPack ? parseInt(String(pendingPack.price).replace(/[^0-9]/g, "")) : 0}
         label={pendingPack ? pendingPack.label : ""}
         sublabel={pendingPack ? `${pendingPack.coins}${(pendingPack as any).bonus ? ` + ${(pendingPack as any).bonus} bonus` : ""} coins` : ""}
+        noGst={true}
       />
     </View>
   );
