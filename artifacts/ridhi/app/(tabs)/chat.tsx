@@ -148,6 +148,7 @@ export default function ChatScreen() {
               <ChatItem
                 chat={item}
                 onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.id } })}
+                onProfile={(userId) => router.push({ pathname: "/user-profile/[userId]", params: { userId: userId || item.id } })}
               />
             )}
             ItemSeparatorComponent={() => (
@@ -195,6 +196,7 @@ export default function ChatScreen() {
               <ChatItem
                 chat={item}
                 onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.id } })}
+                onProfile={(userId) => router.push({ pathname: "/user-profile/[userId]", params: { userId: userId || item.id } })}
               />
             )}
             ItemSeparatorComponent={() => (

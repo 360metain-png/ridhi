@@ -25,13 +25,13 @@ const { width, height } = Dimensions.get("window");
 
 const STORIES = [
   {
-    id: "s1", user: "Ananya Singh", city: "Delhi", timeAgo: "2h",
+    id: "s1", userId: "u1", user: "Ananya Singh", city: "Delhi", timeAgo: "2h",
     bgColors: ["#E91E8C", "#7B2FBE"] as [string, string],
     text: "Amazing evening at India Gate! ✨",
     reactions: ["❤️", "🔥", "😍", "🥰", "👏", "💯"],
   },
   {
-    id: "s2", user: "Rahul Mehta", city: "Mumbai", timeAgo: "4h",
+    id: "s2", userId: "u2", user: "Rahul Mehta", city: "Mumbai", timeAgo: "4h",
     bgColors: ["#FF6B35", "#E91E8C"] as [string, string],
     text: "Marine Drive vibes forever 🌊",
     reactions: ["😮", "❤️", "👏", "😍", "🤩", "🙏"],
@@ -149,11 +149,13 @@ export default function StoryViewerScreen() {
           </View>
 
           <View style={styles.storyHeader}>
-            <Avatar name={story.user} size={38} hasStory />
-            <View style={{ flex: 1 }}>
+            <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: story.userId || story.id } })} accessibilityRole="button" accessibilityLabel={`View ${story.user}'s profile`}>
+              <Avatar name={story.user} size={38} hasStory />
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: story.userId || story.id } })} accessibilityRole="button" accessibilityLabel={`View ${story.user}'s profile`}>
               <Text style={styles.storyUser}>{story.user}</Text>
               <Text style={styles.storyMeta}>{story.city} · {story.timeAgo}</Text>
-            </View>
+            </Pressable>
             <Pressable onPress={() => router.back()} style={styles.closeBtn}>
               <Feather name="x" size={22} color="#fff" />
             </Pressable>

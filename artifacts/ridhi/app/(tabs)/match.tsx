@@ -385,10 +385,11 @@ export default function MatchScreen() {
                 </Animated.View>
 
                 <View style={styles.cardInfo}>
-                  <View style={styles.cardNameRow}>
-                    <Text style={styles.cardName}>
-                      {current.name}, {current.age}
-                    </Text>
+                  <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: current.id } })} accessibilityRole="button" accessibilityLabel={`View ${current.name}'s profile`}>
+                    <View style={styles.cardNameRow}>
+                      <Text style={styles.cardName}>
+                        {current.name}, {current.age}
+                      </Text>
                     <AIMatchBadge
                       score={current.compatibilityScore ?? current.matchPercent ?? 75}
                       reasons={[]}
@@ -396,6 +397,7 @@ export default function MatchScreen() {
                       compact
                     />
                   </View>
+                  </Pressable>
                   {current.vipTier && (
                     <SubscriptionBadge tier={current.vipTier} size="sm" style={{ marginBottom: 6, alignSelf: "flex-start" }} />
                   )}

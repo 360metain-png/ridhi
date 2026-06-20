@@ -34,6 +34,7 @@ import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 const REELS = [
   {
     id: "r1",
+    userId: "u1",
     userName: "Ananya Singh",
     userCity: "Delhi",
     caption: "Street food diaries — the paranthas were unreal! 🔥",
@@ -46,6 +47,7 @@ const REELS = [
   },
   {
     id: "r2",
+    userId: "u2",
     userName: "Rahul Mehta",
     userCity: "Mumbai",
     caption: "Sunrise at Marine Drive never disappoints. Peace ✨",
@@ -106,6 +108,7 @@ const REELS = [
   },
   {
     id: "r7",
+    userId: "u6",
     userName: "Dev Patel",
     userCity: "Ahmedabad",
     caption: "Navratri colors, Garba energy, pure bliss! 🎉",
@@ -600,13 +603,15 @@ function ReelItem({
           ]}
         >
           <View style={styles.reelUserRow}>
-            <Avatar name={reel.userName} size={36} />
-            <View style={{ flex: 1 }}>
+            <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
+              <Avatar name={reel.userName} size={36} />
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
               <Text style={styles.reelUserName} numberOfLines={1}>
                 {reel.userName}
               </Text>
               <Text style={styles.reelCity}>{reel.userCity}</Text>
-            </View>
+            </Pressable>
             <Pressable
               style={styles.followBtn}
               hitSlop={ICON_HITSLOP}

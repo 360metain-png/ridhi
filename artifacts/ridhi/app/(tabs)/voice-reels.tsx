@@ -23,6 +23,7 @@ import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 const VOICE_REELS = [
   {
     id: "v1",
+    userId: "u8",
     userName: "Rohan Joshi",
     userCity: "Mumbai",
     caption: "Why every Indian family has a WhatsApp group called 'Family' 😂",
@@ -415,13 +416,15 @@ function VoiceReelItem({
       >
         <View style={styles.reelInfo}>
           <View style={styles.reelUserRow}>
-            <Avatar name={reel.userName} size={36} />
-            <View style={{ flex: 1 }}>
+            <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
+              <Avatar name={reel.userName} size={36} />
+            </Pressable>
+            <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
               <Text style={styles.reelUserName} numberOfLines={1}>
                 {reel.userName}
               </Text>
               <Text style={styles.reelCity}>{reel.userCity}</Text>
-            </View>
+            </Pressable>
             <Pressable style={styles.followBtn} hitSlop={ICON_HITSLOP}>
               <Text style={styles.followText}>Follow</Text>
             </Pressable>

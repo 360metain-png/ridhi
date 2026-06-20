@@ -211,10 +211,10 @@ export default function ExploreScreen() {
             ) : (
               filteredUsers.map((u) => (
                 <View key={u.id} style={[styles.personRow, { borderBottomColor: colors.border }]}>
-                  <Pressable onPress={() => router.push("/(tabs)/profile" as any)}>
+                  <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: u.id } })}>
                     <Avatar name={u.name} size={48} />
                   </Pressable>
-                  <Pressable style={{ flex: 1 }} onPress={() => router.push("/(tabs)/profile" as any)}>
+                  <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: u.id } })}>
                     <View style={styles.nameRow}>
                       <Text style={[styles.personName, { color: colors.foreground }]}>{u.name}</Text>
                       {u.isVerified && <Feather name="check-circle" size={14} color={colors.primary} />}

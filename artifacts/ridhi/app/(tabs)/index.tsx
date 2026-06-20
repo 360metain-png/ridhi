@@ -982,7 +982,7 @@ export default function FeedScreen() {
               post={item.post}
               onLike={handleLike}
               onComment={handleOpenComments}
-              onProfile={emptyFn}
+              onProfile={(userId) => router.push({ pathname: "/user-profile/[userId]", params: { userId: userId || item.post.userId || item.post.id } })}
               onMenuPress={handleMenuPress}
               onRepost={handleRepost}
             />

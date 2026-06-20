@@ -20,9 +20,10 @@ export interface ChatPreview {
 interface ChatItemProps {
   chat: ChatPreview;
   onPress: (id: string) => void;
+  onProfile?: (userId: string) => void;
 }
 
-export function ChatItem({ chat, onPress }: ChatItemProps) {
+export function ChatItem({ chat, onPress, onProfile }: ChatItemProps) {
   const colors = useColors();
 
   return (
@@ -31,7 +32,9 @@ export function ChatItem({ chat, onPress }: ChatItemProps) {
       onPress={() => onPress(chat.id)}
     >
       <View style={styles.avatarWrap}>
-        <Avatar name={chat.userName} uri={chat.userAvatar} size={50} />
+        <Pressable onPress={() => onProfile?.(chat.userId)}>
+          <Avatar name={chat.userName} uri={chat.userAvatar} size={50} />
+        </Pressable>
         {chat.isOnline && (
           <View style={[styles.onlineDot, { backgroundColor: colors.success, borderColor: colors.surface }]} />
         )}
