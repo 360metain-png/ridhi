@@ -217,67 +217,6 @@ export default function CreatorDashboardScreen() {
           </Pressable>
         </View>
 
-        {/* ── My Leads ── */}
-        <View style={[styles.section, { paddingBottom: 4 }]}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>My Leads</Text>
-            <Pressable onPress={() => router.push("/lead-form-builder" as any)}
-              style={[styles.sectionAction, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "40" }]}>
-              <Feather name="plus" size={13} color={colors.primary} />
-              <Text style={[styles.sectionActionText, { color: colors.primary }]}>New Form</Text>
-            </Pressable>
-          </View>
-
-          {/* Stats row */}
-          <View style={styles.leadsStatRow}>
-            {[
-              { val: "312",   label: "Total Leads",     color: "#2196F3", icon: "user-plus" },
-              { val: "48",    label: "This Week",        color: "#34C759", icon: "trending-up" },
-              { val: "12.4%", label: "Conv. Rate",       color: "#FFB800", icon: "percent" },
-            ].map(({ val, label, color, icon }) => (
-              <View key={label} style={[styles.leadStat, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <View style={[styles.leadStatIcon, { backgroundColor: color + "18" }]}>
-                  <Feather name={icon as any} size={16} color={color} />
-                </View>
-                <Text style={[styles.leadStatVal, { color: colors.foreground }]}>{val}</Text>
-                <Text style={[styles.leadStatLabel, { color: colors.mutedForeground }]}>{label}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Recent leads */}
-          <View style={[styles.leadsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.leadsCardTitle, { color: colors.foreground }]}>Recent Submissions</Text>
-            {[
-              { name: "Rahul Kumar",   city: "Delhi",     form: "Tech Consultation", time: "2h ago",  phone: "+91 98765 43210" },
-              { name: "Ananya Mehta",  city: "Pune",      form: "Tech Consultation", time: "4h ago",  phone: "+91 87654 32109" },
-              { name: "Kavya K.",      city: "Chennai",   form: "Tech Consultation", time: "Yesterday",phone: "+91 76543 21098" },
-            ].map((lead, i) => (
-              <View key={i} style={[styles.leadRow, { borderBottomColor: colors.border }]}>
-                <View style={[styles.leadAvatar, { backgroundColor: "#2196F320" }]}>
-                  <Text style={[styles.leadAvatarText, { color: "#2196F3" }]}>{lead.name[0]}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.leadName, { color: colors.foreground }]}>{lead.name}</Text>
-                  <Text style={[styles.leadMeta, { color: colors.mutedForeground }]}>{lead.city} · {lead.form}</Text>
-                </View>
-                <View style={{ alignItems: "flex-end", gap: 3 }}>
-                  <Text style={[styles.leadTime, { color: colors.mutedForeground }]}>{lead.time}</Text>
-                  <Pressable style={[styles.contactBtn, { backgroundColor: "#2196F320", borderColor: "#2196F340" }]}>
-                    <Feather name="phone" size={11} color="#2196F3" />
-                    <Text style={styles.contactBtnText}>Call</Text>
-                  </Pressable>
-                </View>
-              </View>
-            ))}
-            <Pressable onPress={() => router.push("/lead-form-builder" as any)}
-              style={[styles.viewAllBtn, { borderColor: colors.border }]}>
-              <Text style={[styles.viewAllText, { color: colors.primary }]}>View All Leads & Forms</Text>
-              <Feather name="arrow-right" size={14} color={colors.primary} />
-            </Pressable>
-          </View>
-        </View>
-
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Creator Tools</Text>
           <View style={styles.toolsGrid}>
@@ -287,7 +226,7 @@ export default function CreatorDashboardScreen() {
               { icon: "bar-chart-2",  label: "Analytics",       color: "#4A90E2", route: "/creator-dashboard" },
               { icon: "calendar",     label: "Scheduled",     color: "#34C759", route: "/scheduled-content" },
               { icon: "users",        label: "Fan Club",         color: "#7B2FBE", route: "/communities" },
-              { icon: "user-plus",    label: "Lead Forms",       color: "#2196F3", route: "/lead-form-builder" },
+              { icon: "edit-3",      label: "Create Post",      color: "#2196F3", route: "/create-post" },
               { icon: "trending-up",  label: "Boost & Ads",      color: "#FF9500", route: "/subscription" },
             ].map((tool) => (
               <Pressable
