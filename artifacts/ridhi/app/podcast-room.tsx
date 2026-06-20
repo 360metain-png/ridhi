@@ -8,9 +8,11 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   View,
   Image,
 } from "react-native";
@@ -119,7 +121,7 @@ function SpeakerCard({ speaker, large = false }: { speaker: PodcastSpeaker; larg
   );
 }
 
-function ChatBubble({ msg }: { msg: PodcastChatMsg }) {
+function ChatBubble({ msg, onReply }: { msg: PodcastChatMsg; onReply?: () => void }) {
   const accentColor =
     msg.type === "priority" ? "#E91E8C"
     : msg.type === "question" ? "#7B2FBE"
@@ -127,7 +129,8 @@ function ChatBubble({ msg }: { msg: PodcastChatMsg }) {
     : "transparent";
   const hasBorder = msg.type !== "chat" && msg.type !== "join";
   return (
-    <View
+    <Pressable
+      onLongPress={onReply}
       style={[
         styles.chatBubble,
         hasBorder && { borderLeftWidth: 2.5, borderLeftColor: accentColor, backgroundColor: accentColor + "14" },
@@ -145,9 +148,19 @@ function ChatBubble({ msg }: { msg: PodcastChatMsg }) {
           )}
           <Text style={styles.chatTime}>{msg.time}</Text>
         </View>
+        {msg.replyTo && (
+          <View style={{ backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 6, marginBottom: 4 }}>
+            <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontFamily: "Inter_500Medium" }}>
+              Replying to {msg.replyTo.user}
+            </Text>
+            <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontFamily: "Inter_400Regular" }} numberOfLines={1}>
+              {msg.replyTo.text}
+            </Text>
+          </View>
+        )}
         <Text style={styles.chatText} numberOfLines={3}>{msg.text}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -165,6 +178,7 @@ export default function PodcastRoomScreen() {
   const [handRaised, setHandRaised] = useState(false);
   const [following, setFollowing] = useState(false);
   const [chatMsg, setChatMsg] = useState("");
+  const [replyTo, setReplyTo] = useState<PodcastChatMsg | null>(null);
   const [messages, setMessages] = useState<PodcastChatMsg[]>(PODCAST_ROOM_CHAT);
   const [listenerCount, setListenerCount] = useState(INITIAL_LISTENERS);
   const [coinBalance, setCoinBalance] = useState(320);
@@ -202,9 +216,11 @@ export default function PodcastRoomScreen() {
       text: chatMsg.trim(),
       type: "chat",
       time: "now",
+      replyTo: replyTo ? { user: replyTo.user, text: replyTo.text } : undefined,
     };
     setMessages((prev) => [...prev, newMsg]);
     setChatMsg("");
+    setReplyTo(null);
     setTimeout(() => chatRef.current?.scrollToEnd({ animated: true }), 80);
   };
 
@@ -231,6 +247,29 @@ export default function PodcastRoomScreen() {
     setCoinsOpen(false);
     if (!chatOpen) setChatOpen(true);
     setTimeout(() => chatRef.current?.scrollToEnd({ animated: true }), 150);
+  };
+
+  const handleShareRoom = async () => {
+    try {
+      await Share.share({
+        message: `🎤 Join me in "${ROOM_TITLE}" on Ridhi! ${listenerCount.toLocaleString("en-IN")} people listening right now. \n\nDownload Ridhi and join the room!`,
+        url: "https://ridhi.app/podcast/room-live",
+        title: ROOM_TITLE,
+      });
+    } catch (err) {
+      // User cancelled
+    }
+  };
+
+  const handleFollow = () => {
+    setFollowing((f) => {
+      const next = !f;
+      const msg = next ? "Now following the host!" : "Unfollowed the host";
+      if (Platform.OS === "android") {
+        ToastAndroid.show(msg, ToastAndroid.SHORT);
+      }
+      return next;
+    });
   };
 
   const host = PODCAST_ROOM_SPEAKERS.find((s) => s.isHost)!;
@@ -263,7 +302,7 @@ export default function PodcastRoomScreen() {
             </Text>
           </View>
         </View>
-        <Pressable style={styles.headerBtn} onPress={() => {}}>
+        <Pressable style={styles.headerBtn} onPress={handleShareRoom}>
           <Feather name="share" size={20} color="#fff" />
         </Pressable>
       </View>
@@ -398,7 +437,12 @@ export default function PodcastRoomScreen() {
             ref={chatRef}
             data={messages}
             keyExtractor={(m) => m.id}
-            renderItem={({ item }) => <ChatBubble msg={item} />}
+            renderItem={({ item }) => (
+              <ChatBubble
+                msg={item}
+                onReply={() => { setReplyTo(item); setChatOpen(true); }}
+              />
+            )}
             contentContainerStyle={{ padding: 12, gap: 8 }}
             showsVerticalScrollIndicator={false}
             onContentSizeChange={() => chatRef.current?.scrollToEnd({ animated: false })}
@@ -406,22 +450,39 @@ export default function PodcastRoomScreen() {
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            <View style={[styles.chatInputRow, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
-              <TextInput
-                style={[styles.chatInput, { backgroundColor: colors.input, borderColor: colors.border, color: colors.text }]}
-                placeholder="Say something..."
-                placeholderTextColor={colors.mutedForeground}
-                value={chatMsg}
-                onChangeText={setChatMsg}
-                returnKeyType="send"
-                onSubmitEditing={sendMessage}
-              />
-              <Pressable
-                onPress={sendMessage}
-                style={[styles.sendBtn, { backgroundColor: chatMsg.trim() ? "#7B2FBE" : colors.muted }]}
-              >
-                <Feather name="send" size={15} color={chatMsg.trim() ? "#fff" : colors.mutedForeground} />
-              </Pressable>
+            <View style={{ borderTopColor: colors.border, backgroundColor: colors.surface }}>
+              {replyTo && (
+                <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingTop: 6, gap: 8 }}>
+                  <View style={{ flex: 1, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 8, padding: 6, paddingHorizontal: 10 }}>
+                    <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontFamily: "Inter_500Medium" }}>
+                      Replying to {replyTo.user}
+                    </Text>
+                    <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontFamily: "Inter_400Regular" }} numberOfLines={1}>
+                      {replyTo.text}
+                    </Text>
+                  </View>
+                  <Pressable onPress={() => setReplyTo(null)}>
+                    <Feather name="x" size={16} color="rgba(255,255,255,0.5)" />
+                  </Pressable>
+                </View>
+              )}
+              <View style={[styles.chatInputRow, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
+                <TextInput
+                  style={[styles.chatInput, { backgroundColor: colors.input, borderColor: colors.border, color: colors.text }]}
+                  placeholder={replyTo ? `Reply to ${replyTo.user}...` : "Say something..."}
+                  placeholderTextColor={colors.mutedForeground}
+                  value={chatMsg}
+                  onChangeText={setChatMsg}
+                  returnKeyType="send"
+                  onSubmitEditing={sendMessage}
+                />
+                <Pressable
+                  onPress={sendMessage}
+                  style={[styles.sendBtn, { backgroundColor: chatMsg.trim() ? "#7B2FBE" : colors.muted }]}
+                >
+                  <Feather name="send" size={15} color={chatMsg.trim() ? "#fff" : colors.mutedForeground} />
+                </Pressable>
+              </View>
             </View>
           </KeyboardAvoidingView>
         </Animated.View>
@@ -465,16 +526,16 @@ export default function PodcastRoomScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => setFollowing((f) => !f)}
+          onPress={handleFollow}
           style={[styles.barItem, following && styles.barItemActive]}
         >
-          <Feather name="heart" size={24} color={following ? "#E91E8C" : "rgba(255,255,255,0.7)"} />
+          <Feather name={following ? "user-check" : "user-plus"} size={24} color={following ? "#E91E8C" : "rgba(255,255,255,0.7)"} />
           <Text style={[styles.barLabel, following && { color: "#E91E8C" }]}>
             {following ? "Following" : "Follow"}
           </Text>
         </Pressable>
 
-        <Pressable style={styles.barItem} onPress={() => {}}>
+        <Pressable style={styles.barItem} onPress={handleShareRoom}>
           <Feather name="share" size={24} color="rgba(255,255,255,0.7)" />
           <Text style={styles.barLabel}>Share</Text>
         </Pressable>

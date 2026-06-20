@@ -407,6 +407,7 @@ export interface PodcastChatMsg {
   coins?: number;
   type: "chat" | "question" | "priority" | "join" | "pin";
   time: string;
+  replyTo?: { user: string; text: string };
 }
 
 export const PODCAST_ROOM_SPEAKERS: PodcastSpeaker[] = [
