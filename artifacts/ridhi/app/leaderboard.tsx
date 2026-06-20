@@ -18,7 +18,7 @@ import { useTrackScreen } from "@/hooks/useAnalytics";
 import { Avatar } from "@/components/Avatar";
 
 type Period = "daily" | "weekly" | "monthly";
-type Category = "creators" | "gifters" | "earners" | "streamers";
+type Category = "creators" | "hosts" | "gifters" | "earners" | "streamers";
 
 const LEADERBOARD_DATA = {
   creators: [
@@ -32,6 +32,18 @@ const LEADERBOARD_DATA = {
     { rank: 8, name: "Riya Das", city: "Kolkata", value: 32100, badge: null, language: "Bengali" },
     { rank: 9, name: "Vikram Rao", city: "Pune", value: 29800, badge: null, language: "Marathi" },
     { rank: 10, name: "Nisha Iyer", city: "Chennai", value: 26400, badge: null, language: "Tamil" },
+  ],
+  hosts: [
+    { rank: 1, name: "Ravi Teja", city: "Hyderabad", value: 284700, badge: "diamond", language: "Telugu" },
+    { rank: 2, name: "Priya Sharma", city: "Mumbai", value: 198400, badge: "gold", language: "Hindi" },
+    { rank: 3, name: "Kavya Reddy", city: "Hyderabad", value: 142800, badge: "silver", language: "Telugu" },
+    { rank: 4, name: "Dev Kumar", city: "Bangalore", value: 121000, badge: "bronze", language: "English" },
+    { rank: 5, name: "Meera Pillai", city: "Kochi", value: 98200, badge: null, language: "Malayalam" },
+    { rank: 6, name: "Sunita Joshi", city: "Jaipur", value: 84400, badge: null, language: "Hindi" },
+    { rank: 7, name: "Rohan Kapoor", city: "Delhi", value: 72100, badge: null, language: "Hindi" },
+    { rank: 8, name: "Anjali Rao", city: "Bangalore", value: 64800, badge: null, language: "Kannada" },
+    { rank: 9, name: "Kiran Nair", city: "Kochi", value: 52400, badge: null, language: "Malayalam" },
+    { rank: 10, name: "Nisha Iyer", city: "Chennai", value: 44200, badge: null, language: "Tamil" },
   ],
   gifters: [
     { rank: 1, name: "Rohan Kapoor", city: "Delhi", value: 48200, badge: "diamond", language: "Hindi" },
@@ -80,6 +92,7 @@ const BADGE_COLORS: Record<string, [string, string]> = {
 
 const CATEGORY_LABELS: Record<Category, { label: string; icon: string; unit: string }> = {
   creators: { label: "Top Creators", icon: "star", unit: "followers" },
+  hosts: { label: "Top Hosts", icon: "radio", unit: "coins received" },
   gifters: { label: "Top Gifters", icon: "gift", unit: "coins gifted" },
   earners: { label: "Top Earners", icon: "trending-up", unit: "coins earned" },
   streamers: { label: "Top Streamers", icon: "video", unit: "views" },
