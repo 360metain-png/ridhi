@@ -128,7 +128,7 @@ const HOST_SECTIONS: Section[] = [
       "Progress card: three bars showing Coins Earned, Stream Hours, and PK Wins — all tracking toward your next level",
       "Tabs: Overview · Earnings · Stream History",
       "Overview tab: quick stat cards for Total Earnings (₹), This Month (₹), Pending Payout (₹), Coin Balance, Gifts Today",
-      "Earnings tab: full breakdown — Gifts income, Creator Bonus, Tips income, with a 7-day earnings chart",
+      "Earnings tab: full breakdown — Gifts income, Download Earnings, Creator Bonus, Tips income, with a 7-day earnings chart",
       "Stream History tab: every past live session with date, duration, viewer count, gifts received, and coins earned",
       "KYC Status card: shows Verified ✓ / Pending ⏳ / Rejected ✗ with the KYC submission date",
       "Agent Info card: name, level, and contact details of your assigned agent (if any)",
@@ -177,7 +177,7 @@ const HOST_SECTIONS: Section[] = [
       "  → Rose 🌹 = 10 coins · Heart 💓 = 50 coins · Ring 💍 = 500 coins · Sports Car 🚗 = 5,000 coins · Castle 🏰 = 50,000 coins",
       "Gift animations appear on screen for both you and your viewers — larger gifts have longer, more dramatic animations",
       "100% of gift coin values are credited to your Host Coin Balance",
-      "Your Host Coin Balance converts to INR: 1 coin ≈ ₹0.07 (subject to platform rate)",
+      "Your Host Coin Balance converts to INR: 1 coin = ₹1.00 (rate set by Super Admin)",
       "Gift earnings accumulate in your coin wallet and are shown on the Host Dashboard",
       "Premium gifts and limited-edition gifts are added by the Super Admin for festivals and events",
       "Viewers can also send Tips (a text message + coin value) to show support",
@@ -193,19 +193,37 @@ const HOST_SECTIONS: Section[] = [
     subtitle: "Earn coins, stream hours, and PK wins to climb from Bronze to Crown",
     features: [
       "L1 · Bronze — Starting level. All new approved hosts begin here",
-      "  → Threshold: 50,000 coins earned · 50 stream hours · 3 PK wins",
-      "L2 · Bronze+ — Threshold: 200,000 coins · 200 hours · 8 PK wins",
-      "L3 · Silver — Threshold: 500,000 coins · 400 hours · 15 PK wins",
-      "L4 · Silver+ — Threshold: 1,000,000 coins · 600 hours · 22 PK wins",
-      "L5 · Gold — Threshold: 2,000,000 coins · 800 hours · 30 PK wins",
-      "L6 · Diamond — Threshold: 3,500,000 coins · 1,000 hours · 40 PK wins",
-      "L7 · Crown — Threshold: 10,000,000 coins · 2,000 hours · 60 PK wins",
+      "  → Threshold: 50,000 coins earned · 20 stream hours · 0 PK wins",
+      "L2 · Silver — Threshold: 200,000 coins · 60 hours · 2 PK wins",
+      "L3 · Gold — Threshold: 500,000 coins · 150 hours · 5 PK wins",
+      "L4 · Platinum — Threshold: 1,000,000 coins · 300 hours · 10 PK wins",
+      "L5 · Diamond — Threshold: 2,000,000 coins · 600 hours · 20 PK wins",
+      "L6 · Elite — Threshold: 3,500,000 coins · 1,000 hours · 35 PK wins",
+      "L7 · Royal Crown — Threshold: 5,000,000 coins · 1,500 hours · 50 PK wins",
       "Higher levels unlock: better earnings-share rate, featured placement in Live discovery, exclusive profile frames, priority in search results",
       "Auto-Promotion: system checks your stats daily at midnight. When you cross a threshold you receive a push notification — Admin reviews and approves the promotion",
       "Auto-Demotion: 30 days without streaming = level frozen. 60 days without any stream = demoted by 1 level",
       "Level progress bars are shown on your Host Dashboard for all three metrics (coins, hours, PK wins)",
     ],
     note: "Manual level promotion requests can be submitted through your Agent. The final approval is from the Admin or Super Admin team.",
+  },
+  {
+    id: "h-downloads",
+    icon: Download,
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+    title: "Paid Downloads — New Revenue Stream",
+    subtitle: "Users pay coins to download your content. You earn 60% of every download.",
+    features: [
+      "Download pricing: Reel = 5 coins · Post (photo/video) = 10 coins · Story = 3 coins · Live Recording = 20 coins · Audio Room = 8 coins",
+      "Revenue split: 60% to you (the creator), 40% to Ridhi platform",
+      "Example: a user downloads your post for 10 coins → you earn 6 coins, Ridhi keeps 4 coins",
+      "Download earnings are tracked in your Creator Dashboard → Download Earnings tab",
+      "Download count appears on each post/reel/story — shows how many users have downloaded it",
+      "All downloads are watermarked with the user's username to prevent unauthorized redistribution",
+      "Download transactions appear in your wallet history: +6 coins credited when a user downloads",
+    ],
+    note: "Downloads are a new monetisation feature. The more high-quality content you create, the more download revenue you earn. Reels and live recordings tend to generate the most downloads.",
   },
   {
     id: "h-pk",
@@ -276,7 +294,7 @@ const HOST_SECTIONS: Section[] = [
     features: [
       "Minimum withdrawal: ₹500 per request",
       "Payout processing time: 7 working days from approval",
-      "Coin-to-INR conversion: 1 coin ≈ ₹0.07 (rate set by Super Admin)",
+      "Coin-to-INR conversion: 1 coin = ₹1.00 (rate set by Super Admin)",
       "Payout methods: Bank Account (NEFT/IMPS) or UPI ID",
       "Withdrawal history: visible in Host Dashboard → Earnings tab",
       "TDS (Tax Deducted at Source) may apply as per Indian tax regulations on payouts above ₹10,000",
@@ -300,8 +318,9 @@ const HOST_SECTIONS: Section[] = [
       "Your agent can help you with: Host promotion requests, KYC issues, payout follow-ups, stream strategy",
       "If you were not recruited by an agent, the Agent Info card shows 'Unassigned' — the Admin team may assign you one",
       "You cannot change your assigned agent yourself — contact hello@ridhi.app if there is a dispute",
+      "If your agent leaves or is removed: your host account is automatically transferred to direct Admin oversight. You will NOT lose your earnings or level. The Admin team will assign a new agent or manage you directly.",
     ],
-    note: "Your Agent's commission does not reduce your earnings. You always receive 100% of the gift coin value — the agent's commission is paid separately by Ridhi.",
+    note: "Your Agent's commission does not reduce your earnings. You always receive 100% of the gift coin value — the agent's commission is paid separately by Ridhi. Hosts are never left without management.",
   },
   {
     id: "h-creator",
@@ -317,9 +336,10 @@ const HOST_SECTIONS: Section[] = [
       "Views chart: 7-day bar chart showing daily views",
       "Content types you can post: Text Posts, Photos, Videos, Reels (30-sec vertical), Stories (24 hrs), Polls",
       "Reels get extra algorithmic boost for Hosts — appear in the main Reels tab and Explore",
-      "Creator subscription tiers: Creator Basic (default for approved Hosts) → Creator Pro → Creator Elite",
+      "Creator subscription tiers: Creator Starter (₹199/mo) → Creator Pro (₹499/mo) → Creator Elite (₹999/mo)",
+      "Creator plans reduce Ridhi's platform fee: Starter 20%, Pro 13%, Elite 8% (default is 30%)",
       "Creator Elite: dedicated creator manager, unlimited monetisation, fan club features",
-      "Fan Club: set a monthly subscription fee for your exclusive content — fans pay to access Fan Club posts",
+      "Fan Club: set a monthly subscription fee for your exclusive content — tiers: Supporter 49 coins (₹49/mo), Super Fan 149 coins (₹149/mo), VIP Fan 499 coins (₹499/mo)",
     ],
   },
   {
@@ -420,9 +440,9 @@ const AGENT_SECTIONS: Section[] = [
     features: [
       "A1 · Starter Agent — Starting level. All new approved agents begin here",
       "  → Commission: 2% · Required: 5 active hosts · ₹50K monthly volume",
-      "A2 · Rising Agent — Commission: 3% · Required: 20 active hosts · ₹2L monthly volume",
-      "A3 · Pro Agent — Commission: 5% · Required: 50 active hosts · ₹5L monthly volume",
-      "A4 · Elite Agent — Commission: 7% · Required: 100 active hosts · ₹10L monthly volume",
+      "A2 · Senior Agent — Commission: 4% · Required: 20 active hosts · ₹2L monthly volume",
+      "A3 · Super Agent — Commission: 6% · Required: 60 active hosts · ₹5L monthly volume",
+      "A4 · Elite Agent — Commission: 8% · Required: 150 active hosts · ₹10L monthly volume",
       "A5 · Master Agent — Commission: 10% · Required: 250 active hosts · ₹25L monthly volume",
       "Auto-Promotion: system checks thresholds daily at midnight. When you qualify, a push notification is sent and Admin/SA approves the promotion",
       "Auto-Demotion trigger 1: active host rate drops below 40% for 2 consecutive months → demoted by 1 level",
@@ -440,7 +460,7 @@ const AGENT_SECTIONS: Section[] = [
     subtitle: "How your commission is calculated and when you get paid",
     features: [
       "Commission is calculated on the total INR value of gift coins earned by all your hosts each month",
-      "Example at A3 (5%): if your 50 hosts collectively earn ₹2,00,000 in a month → your commission = ₹10,000",
+      "Example at A3 (6%): if your 60 hosts collectively earn ₹2,00,000 in a month → your commission = ₹12,000",
       "Commission is credited to your Ridhi wallet at the end of each month",
       "Minimum payout: ₹500 per withdrawal request",
       "Payout method: Bank Transfer (NEFT/IMPS) or UPI ID",
@@ -875,7 +895,7 @@ const SA_SECTIONS: Section[] = [
       "COINS: edit recharge pack prices and coin amounts, add or remove packs, view full purchase log, create bonus campaigns (e.g. +20% coins this weekend)",
       "Refund handling: process coin refund requests by transaction ID lookup",
       "REVENUE: full revenue breakdown — in-app purchases, ads, subscriptions, platform fees. Daily and monthly charts with ad campaign performance",
-      "SUBSCRIPTIONS: manage VIP tiers (Silver / Gold / Platinum / Diamond Elite) and Creator plans (Basic / Pro / Elite) — edit pricing and features",
+      "SUBSCRIPTIONS: manage VIP tiers (Silver / Gold / Platinum / Diamond Elite) and Creator plans (Starter / Pro / Elite) — edit pricing and features",
       "Auto-Payout toggle: automatically process all pending payouts above the daily threshold — toggle in Settings",
     ],
     note: "Finance pages are completely hidden from Admin. If an Admin navigates to /payouts, /coins, /revenue, or /subscriptions they see an Access Denied screen.",
@@ -931,7 +951,7 @@ const SA_SECTIONS: Section[] = [
       "Sticker Packs tab: manage packs — name, emoji, free or premium type, coin price. Expand any pack to add individual stickers",
       "Badges & Frames tab: Achievement badges (auto-awarded, no price, SA sets criteria), Premium badges (coin purchase), Profile Frames (coin unlock price)",
       "Reel Filters tab: Beauty / AR Effect / Graphic Overlay / Color Grade — set free or premium tier with coin unlock price",
-      "All prices in Ridhi Coins. Rate reminder: 1 coin ≈ ₹0.07",
+      "All prices in Ridhi Coins. Rate reminder: 1 coin = ₹1.00",
       "Creative Assets are Super Admin only — Admin can view but cannot add, edit, or set prices",
     ],
   },
@@ -1139,7 +1159,7 @@ export default function HandbookPage() {
             Ridhi Platform Handbook
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.2.0
+            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.3.0
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1271,7 +1291,7 @@ export default function HandbookPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground border-t pt-4">
-        <p>Ridhi Platform Handbook · Version 3.2.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
+        <p>Ridhi Platform Handbook · Version 3.3.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
         <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · hello@ridhi.app</p>
       </div>
     </div>

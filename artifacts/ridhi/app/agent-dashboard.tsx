@@ -30,9 +30,9 @@ const { width } = Dimensions.get("window");
 
 const AGENT_LEVELS = [
   { level: "A1", label: "Starter Agent", hosts: 5, volume: "₹50K", bonus: "2%", color: "#8B7355" },
-  { level: "A2", label: "Rising Agent", hosts: 20, volume: "₹2L", bonus: "3%", color: "#C0C0C0" },
-  { level: "A3", label: "Pro Agent", hosts: 50, volume: "₹5L", bonus: "5%", color: "#FFB800" },
-  { level: "A4", label: "Elite Agent", hosts: 100, volume: "₹10L", bonus: "7%", color: "#E5E4E2" },
+  { level: "A2", label: "Senior Agent", hosts: 20, volume: "₹2L", bonus: "4%", color: "#C0C0C0" },
+  { level: "A3", label: "Super Agent", hosts: 60, volume: "₹5L", bonus: "6%", color: "#FFB800" },
+  { level: "A4", label: "Elite Agent", hosts: 150, volume: "₹10L", bonus: "8%", color: "#E5E4E2" },
   { level: "A5", label: "Master Agent", hosts: 250, volume: "₹25L", bonus: "10%", color: "#00BCD4" },
 ];
 
