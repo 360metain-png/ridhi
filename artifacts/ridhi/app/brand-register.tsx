@@ -28,7 +28,23 @@ const INDUSTRIES = [
   "Sports", "E-commerce", "Real Estate", "Other",
 ];
 
-const PLATFORMS = ["Ridhi", "Instagram", "YouTube Shorts", "Moj", "ShareChat", "Twitter/X"];
+const PLATFORMS = [
+  "Ridhi",
+  "Instagram",
+  "YouTube",
+  "YouTube Shorts",
+  "Facebook",
+  "Twitter/X",
+  "LinkedIn",
+  "TikTok",
+  "Moj",
+  "ShareChat",
+  "Snapchat",
+  "Pinterest",
+  "WhatsApp Status",
+  "Threads",
+  "Reddit",
+];
 
 const BUDGET_RANGES = [
   "₹5K – ₹25K / month",

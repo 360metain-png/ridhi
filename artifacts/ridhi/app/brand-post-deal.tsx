@@ -50,7 +50,23 @@ const FOLLOWER_TIERS = [
   { id: "mega",   label: "Mega",   range: "1M+",        sub: "Celebrity-tier" },
 ];
 
-const PLATFORMS = ["Ridhi", "Instagram", "YouTube Shorts", "Moj", "ShareChat"];
+const PLATFORMS = [
+  "Ridhi",
+  "Instagram",
+  "YouTube",
+  "YouTube Shorts",
+  "Facebook",
+  "Twitter/X",
+  "LinkedIn",
+  "TikTok",
+  "Moj",
+  "ShareChat",
+  "Snapchat",
+  "Pinterest",
+  "WhatsApp Status",
+  "Threads",
+  "Reddit",
+];
 
 const DEADLINES = ["3 days", "5 days", "7 days", "10 days", "14 days", "30 days"];
 
