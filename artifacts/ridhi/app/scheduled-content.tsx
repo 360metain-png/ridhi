@@ -162,6 +162,15 @@ export default function ScheduledContentScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <PrivateHead />
 
+      {/* Back button */}
+      <View style={[styles.headerRow, { paddingTop: Platform.OS === "web" ? 67 : insets.top }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Feather name="arrow-left" size={24} color={colors.foreground} />
+        </Pressable>
+        <Text style={[styles.headerTitle, { color: colors.foreground }]}>Scheduled Content</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       {/* Filter tabs */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
         {FILTER_TABS.map((tab) => {
@@ -214,6 +223,15 @@ export default function ScheduledContentScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 17, fontFamily: "Inter_700Bold" },
   tabsRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
   tabChip: {
     flexDirection: "row",
