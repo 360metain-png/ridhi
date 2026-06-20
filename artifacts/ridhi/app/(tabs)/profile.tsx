@@ -511,8 +511,8 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>EARN ON RIDHI</Text>
         <View style={styles.earnRow}>
-          {/* Host — only if registered */}
-          {user.isHost && (
+          {/* Host — active if registered, or show "Apply" if not */}
+          {user.isHost ? (
             <Pressable
               onPress={() => router.push("/host-profile" as any)}
               style={[styles.earnCard, { backgroundColor: colors.card, borderColor: "#FFB800" }]}
@@ -524,10 +524,23 @@ export default function ProfileScreen() {
               <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
               <View style={styles.activeDot} />
             </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => router.push("/kyc" as any)}
+              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
+                <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Host</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Apply</Text>
+              <View style={[styles.applyBadge, { backgroundColor: "#FFB800" }]}>
+                <Text style={{ color: "#fff", fontSize: 8, fontFamily: "Inter_600SemiBold" }}>NEW</Text>
+              </View>
+            </Pressable>
           )}
 
-          {/* Agent — only if registered */}
-          {user.isAgent && (
+          {/* Agent — active if registered, or show "Apply" if not */}
+          {user.isAgent ? (
             <Pressable
               onPress={() => router.push("/agent-dashboard" as any)}
               style={[styles.earnCard, { backgroundColor: colors.card, borderColor: "#00BCD4" }]}
@@ -538,6 +551,20 @@ export default function ProfileScreen() {
               <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Agent</Text>
               <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
               <View style={[styles.activeDot, { backgroundColor: "#00BCD4" }]} />
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => router.push("/kyc" as any)}
+              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <View style={[styles.earnIcon, { backgroundColor: "#00BCD420" }]}>
+                <Feather name="briefcase" size={20} color="#00BCD4" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Agent</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Apply</Text>
+              <View style={[styles.applyBadge, { backgroundColor: "#00BCD4" }]}>
+                <Text style={{ color: "#fff", fontSize: 8, fontFamily: "Inter_600SemiBold" }}>NEW</Text>
+              </View>
             </Pressable>
           )}
 
@@ -794,6 +821,7 @@ const styles = StyleSheet.create({
   earnCardTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
   earnCardSub: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center" },
   activeDot: { position: "absolute", top: 10, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: "#22C55E" },
+  applyBadge: { position: "absolute", top: 8, right: 8, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2 },
 
   // ── Menu groups ───────────────────────────────────────────────────────────
   menuGroup: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
