@@ -208,6 +208,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "create-post",  name: "Create Post (6 types)",   desc: "Text, photo, video, reel, story, poll — with hashtag suggestions",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "explore",      name: "Explore & Search",        desc: "Trending posts grid, suggested users, trending hashtags",                      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "communities",  name: "Communities",             desc: "Browse & join communities — 10 categories, join/leave, member count",          phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "saved-posts",  name: "Saved Posts & Collections", desc: "Bookmark posts with collection folders (20—unlimited by tier)",              phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "story-highlights", name: "Story Highlights",    desc: "Save stories permanently to profile highlights (2—unlimited by tier)",      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "promo-banner", name: "Promo Banner (Home Feed)","desc": "Auto-sliding gradient promo cards between feed posts (5 cards, 3s rotation)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "banner-ads",   name: "Inline Banner Ads",       desc: "Sponsored banner ads injected every 5th post in the feed",                    phase: "2", audience: "All Users",      status: "live",  enabled: true  },
     ],
@@ -221,6 +223,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "live-streams", name: "Live Streams",             desc: "Real-time broadcasting with gifts, chat, co-host & PK battles",              phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
       { id: "random-calls", name: "Random Video / Audio Calls","desc": "Stranger matching for coin-based random calls",                           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "audio-rooms",  name: "Audio Rooms",              desc: "Multi-user audio rooms — podcast, Q&A, karaoke style",                      phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
+      { id: "super-like",   name: "Super Like & Backtrack",   desc: "Stand out in dating with Super Like (5 coins) and undo last swipe (1 coin)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "profile-prompts", name: "Profile Prompts",       desc: "Desi dating icebreakers — 10 prompts for better profile matching",         phase: "2", audience: "All Users",      status: "live",  enabled: true  },
     ],
   },
   {
@@ -244,6 +248,9 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "business-ads",      name: "Business Ads Manager",     desc: "Self-serve ad creation for businesses targeting Ridhi's audience",     phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
       { id: "special-ads",       name: "Special Client Popup Ads", desc: "Full-screen premium popup ads — Super Admin managed only",            phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "promotions",        name: "User Promotions & Boosts", desc: "Profile boost and visibility promotion tools for regular users",       phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "ridhi-shop",        name: "Ridhi Shop",               desc: "In-app product marketplace with exclusive merchandise, digital gifts, and creator merch", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "events",            name: "Events & Meetups",         desc: "Virtual and in-person events, meetups, dating events, and community gatherings", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "broadcast-channels", name: "Broadcast Channels",       desc: "One-to-many broadcast channels for creators, announcements, and fan engagement", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
       { id: "subscriptions",     name: "Creator Subscriptions",    desc: "Monthly fan subscription tiers for exclusive content (planned)",      phase: "3", audience: "Hosts/Creators", status: "testing", enabled: false },
     ],
   },
@@ -382,11 +389,15 @@ export default function SuperAdminPage() {
     autoGenEnabled:         true,
     missionDailyMax:        "360",
     superLikeCost:          "5",
+    backtrackCost:          "1",
     audioCallCostPerMin:    "10",
     videoCallCostPerMin:    "25",
     boostPostCostPerHr:     "50",
     unlockMsgCost:          "50",
     aiQueryCost:            "5",
+    shopItemCost:           "100",
+    eventCreationCost:      "50",
+    broadcastMsgCost:       "10",
     creatorRevShare:        "70",
     platformRevShare:       "20",
     agentRevShare:          "10",
@@ -2327,11 +2338,15 @@ export default function SuperAdminPage() {
                       </p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <NumField label="Super Like" field="superLikeCost" suffix="coins" min={1} />
+                        <NumField label="Backtrack" field="backtrackCost" suffix="coins" min={1} />
                         <NumField label="Audio Call" field="audioCallCostPerMin" suffix="coins/min" min={1} />
                         <NumField label="Video Call" field="videoCallCostPerMin" suffix="coins/min" min={1} />
                         <NumField label="Boost Post" field="boostPostCostPerHr" suffix="coins/hr" min={1} />
                         <NumField label="Unlock Message" field="unlockMsgCost" suffix="coins" min={1} />
                         <NumField label="AI Query" field="aiQueryCost" suffix="coins" min={1} />
+                        <NumField label="Shop Purchase" field="shopItemCost" suffix="coins" min={1} />
+                        <NumField label="Event Creation" field="eventCreationCost" suffix="coins" min={1} />
+                        <NumField label="Broadcast Msg" field="broadcastMsgCost" suffix="coins" min={1} />
                       </div>
                     </div>
 
@@ -2859,10 +2874,10 @@ export default function SuperAdminPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {([
-                  { tier: "Silver", weekly: 99, monthly: 199, yearly: 1999, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200" },
-                  { tier: "Gold", weekly: 199, monthly: 499, yearly: 4999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-                  { tier: "Platinum", weekly: 399, monthly: 999, yearly: 9999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-                  { tier: "Diamond", weekly: 999, monthly: 2499, yearly: 24999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                  { tier: "Silver", weekly: 49, monthly: 149, yearly: 1499, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200", features: "No ads, 20 saved posts, 2 story highlights, 2 Super Likes/day, join events" },
+                  { tier: "Gold", weekly: 99, monthly: 299, yearly: 2999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", features: "Silver + 50 saved posts, 5 highlights, 5 Super Likes/day, 5 profile prompts, broadcast join" },
+                  { tier: "Platinum", weekly: 199, monthly: 599, yearly: 5999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", features: "Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, shop discount" },
+                  { tier: "Diamond Elite", weekly: 299, monthly: 999, yearly: 9999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", features: "Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, broadcast create, event monetization" },
                 ] as const).map((plan) => (
                   <div key={plan.tier} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">
@@ -2886,6 +2901,10 @@ export default function SuperAdminPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-muted-foreground">Bonus Coins/mo</span>
                       <Input type="number" defaultValue={plan.coins} className="h-8 text-xs w-24 text-right" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] text-muted-foreground">Features</Label>
+                      <Input defaultValue={plan.features} className="h-8 text-xs" placeholder="Comma-separated features" />
                     </div>
                   </div>
                 ))}

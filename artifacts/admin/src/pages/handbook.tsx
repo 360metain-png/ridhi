@@ -336,6 +336,11 @@ const HOST_SECTIONS: Section[] = [
       "Views chart: 7-day bar chart showing daily views",
       "Content types you can post: Text Posts, Photos, Videos, Reels (30-sec vertical), Stories (24 hrs), Polls",
       "Reels get extra algorithmic boost for Hosts — appear in the main Reels tab and Explore",
+      "Saved Posts: bookmark any post into collections — free users get 5, Silver 20, Gold 50, Platinum 100, Diamond unlimited + smart folders",
+      "Story Highlights: save your best stories permanently to your profile — free users get 0, Silver 2, Gold 5, Platinum 10, Diamond unlimited",
+      "Broadcast Channels: create one-to-many broadcast channels for fans — send announcements, polls, and exclusive content. Diamond Elite hosts can monetise channels with paid entry",
+      "Ridhi Shop: sell creator merchandise (mugs, hoodies, stickers) and digital gifts directly to your followers. Diamond Elite gets 15% discount on all shop purchases",
+      "Events & Meetups: create virtual or in-person events for your followers — dating meetups, fan gatherings, community events. Platinum+ can create events; Diamond can monetise with ticket sales",
       "Creator subscription tiers: Creator Starter (₹199/mo) → Creator Pro (₹499/mo) → Creator Elite (₹999/mo)",
       "Creator plans reduce Ridhi's platform fee: Starter 20%, Pro 13%, Elite 8% (default is 30%)",
       "Creator Elite: dedicated creator manager, unlimited monetisation, fan club features",
@@ -1159,7 +1164,7 @@ export default function HandbookPage() {
             Ridhi Platform Handbook
           </h2>
           <p className="text-muted-foreground text-sm mt-1">
-            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.3.0
+            Complete playbook for Hosts, Agents, Admins, and Super Admins — Version 3.4.0
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -1291,7 +1296,7 @@ export default function HandbookPage() {
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground border-t pt-4">
-        <p>Ridhi Platform Handbook · Version 3.3.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
+        <p>Ridhi Platform Handbook · Version 3.4.0 · © 2026 Krilo Digitech Pvt. Ltd.</p>
         <p className="mt-1">Company: Krilo Digitech Pvt Ltd · Founder: Jadaprolu Hareesh · ridhi.app · hello@ridhi.app</p>
       </div>
     </div>
