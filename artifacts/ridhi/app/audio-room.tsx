@@ -653,11 +653,7 @@ export default function AudioRoomScreen() {
       </LinearGradient>
 
       {/* category filter */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.catScroll}
-      >
+      <View style={styles.catWrap}>
         {CATEGORIES.map((cat) => {
           const active = cat === category;
           return (
@@ -678,7 +674,7 @@ export default function AudioRoomScreen() {
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40, paddingTop: 8 }}>
         {filtered.map((room) => (
@@ -713,8 +709,8 @@ const styles = StyleSheet.create({
   heroWave:   { flexDirection: "row", alignItems: "center", marginTop: 8, height: 24 },
   heroIcon:   { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginLeft: 12 },
 
-  catScroll: { paddingHorizontal: 16, paddingBottom: 8, gap: 8, flexDirection: "row" },
-  catChip:   { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
+  catWrap:     { paddingHorizontal: 16, paddingBottom: 8, flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  catChip:     { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
   catChipText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
 
   // room card
