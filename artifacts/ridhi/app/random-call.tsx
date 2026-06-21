@@ -12,6 +12,7 @@ import {
   Image,
   Easing,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -145,10 +146,13 @@ export default function RandomCallScreen() {
   const matchGender = preferGender;
 
   // ── WebSocket ───────────────────────────────────────────────────────────────────────
-  const connectWebSocket = useCallback(() => {
+  const connectWebSocket = useCallback(async () => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     try {
-      const ws = new WebSocket(getWsUrl());
+      const token = await AsyncStorage.getItem("ridhi_token").catch(() => null);
+      const base = getWsUrl();
+      const wsUrl = token ? `${base}?token=${encodeURIComponent(token)}` : base;
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {

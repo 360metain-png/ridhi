@@ -78,20 +78,28 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
 
     switch (msg.type) {
       case "join": {
-        const { name, gender, language, category, avatar, city, age, bio, preferGender, acceptAudio, acceptVideo, callType } = msg.payload as {
-          name: string;
-          gender: CallGender;
-          language: string;
-          category: CallCategory;
-          avatar?: string;
-          city?: string;
-          age?: number;
-          bio?: string;
-          preferGender?: "Any" | "Male" | "Female";
-          acceptAudio?: boolean;
-          acceptVideo?: boolean;
-          callType?: "audio" | "video";
-        };
+        // NOTE: coinRate is intentionally NOT destructured from the payload.
+        // The coin rate is always resolved server-side by resolveCoinRate(callType)
+        // in matchEngine.ts; any client-supplied coinRate is silently dropped here.
+        const payload = msg.payload as Record<string, unknown>;
+        const name = typeof payload["name"] === "string" ? payload["name"] : "";
+        const gender = (["male", "female", "other"].includes(payload["gender"] as string)
+          ? payload["gender"] : "other") as CallGender;
+        const language = typeof payload["language"] === "string" ? payload["language"] : "Any";
+        const category = (["any","art","dance","songs","romantic","technology","comedy","poetry","gaming","food","travel"].includes(payload["category"] as string)
+          ? payload["category"] : "any") as CallCategory;
+        const avatar = typeof payload["avatar"] === "string" ? payload["avatar"] : undefined;
+        const city   = typeof payload["city"]   === "string" ? payload["city"]   : undefined;
+        const age    = typeof payload["age"]    === "number" ? payload["age"]    : undefined;
+        const bio    = typeof payload["bio"]    === "string" ? payload["bio"]    : undefined;
+        const preferGender = (["Any","Male","Female"].includes(payload["preferGender"] as string)
+          ? payload["preferGender"] : "Any") as "Any" | "Male" | "Female";
+        const acceptAudio = payload["acceptAudio"] !== false;
+        const acceptVideo = payload["acceptVideo"] !== false;
+        // Validate callType server-side: only "audio" or "video" are accepted;
+        // any other value is treated as "audio" (the cheaper default, not exploitable
+        // because the rate is resolved by the server, not trusted from the client).
+        const callType: "audio" | "video" = payload["callType"] === "video" ? "video" : "audio";
 
         // Always use the server-authenticated identity, never the client-supplied userId
         const userId = authenticatedUserId;
@@ -110,12 +118,13 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
           acceptAudio,
           acceptVideo,
           socketId,
-        }, callType ?? "audio");
+        }, callType);
 
         if (match) {
           // We found a match! Server-authoritative billing: deduct upfront before starting call.
+          // coinRate is resolved inside startCallWithDeduct → resolveCoinRate(callType);
+          // the client-supplied value is never used.
           const callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          const callType = msg.payload.callType ?? "audio";
           const deductResult = await startCallWithDeduct(
             callId,
             match,
