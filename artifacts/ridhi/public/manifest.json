@@ -1,0 +1,25 @@
+{
+  "name": "Ridhi — India's #1 Social & Dating App",
+  "short_name": "Ridhi",
+  "description": "India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0F",
+  "theme_color": "#E91E8C",
+  "lang": "en-IN",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ridhi_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

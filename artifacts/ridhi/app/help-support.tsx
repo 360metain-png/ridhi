@@ -156,6 +156,26 @@ export default function HelpSupportScreen() {
       <SeoHead
         title="Help & Support — Ridhi App | FAQs, Contact & Troubleshooting"
         description="Get help with Ridhi — browse FAQs, contact support, report issues, and find solutions for live streaming, voice chat, payments, and account problems."
+        canonical="/help-support"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Help & Support — Ridhi App",
+            url: "https://ridhi.app/help-support",
+            inLanguage: "en-IN",
+            description: "Get help with Ridhi — FAQs, contact support, and troubleshooting guides.",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQS.map((faq) => ({
+              "@type": "Question",
+              name: faq.q,
+              acceptedAnswer: { "@type": "Answer", text: faq.a.replace(/\n/g, " ").replace(/•\s*/g, "").trim() },
+            })),
+          },
+        ]}
       />
       <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky header */}

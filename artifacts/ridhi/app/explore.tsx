@@ -121,6 +121,15 @@ export default function ExploreScreen() {
       <SeoHead
         title="Explore Ridhi — Trending Hashtags, Top Creators & Viral Reels | India"
         description="Discover what's trending on Ridhi — top hashtags, viral posts, popular creators, and live streams. Explore content in 13 Indian languages. Join the conversation!"
+        canonical="/explore"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Explore Ridhi — Trending Hashtags, Top Creators & Viral Reels",
+          url: "https://ridhi.app/explore",
+          inLanguage: "en-IN",
+          description: "Discover what's trending on Ridhi — top hashtags, viral posts, popular creators, and live streams in 13 Indian languages.",
+        }}
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View

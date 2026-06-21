@@ -131,6 +131,15 @@ export default function PodcastsScreen() {
       <SeoHead
         title="Ridhi Podcasts — AI Podcasts, Live Audio Shows & Creator Episodes | India"
         description="Discover podcasts on Ridhi — AI-generated shows, live audio episodes, creator podcasts, and trending audio content in 13 Indian languages."
+        canonical="/podcasts"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Ridhi Podcasts — AI Podcasts, Live Audio Shows & Creator Episodes",
+          url: "https://ridhi.app/podcasts",
+          inLanguage: "en-IN",
+          description: "Discover podcasts on Ridhi — AI-generated shows, live audio episodes, creator podcasts, and trending audio content in 13 Indian languages.",
+        }}
       />
       <View style={[styles.root, { backgroundColor: colors.background }]}>
       {/* Floating header on scroll */}

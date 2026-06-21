@@ -345,6 +345,15 @@ export default function PrivacyPolicyScreen() {
         title="Privacy Policy — Ridhi App | Data Protection & User Privacy"
         description="Read Ridhi's Privacy Policy — how we collect, use, and protect your personal data. Learn about cookies, data rights, and security measures."
         robots="index, follow, noarchive"
+        canonical="/privacy-policy"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Privacy Policy — Ridhi App",
+          url: "https://ridhi.app/privacy-policy",
+          inLanguage: "en-IN",
+          description: "Ridhi's Privacy Policy — how we collect, use, and protect your personal data.",
+        }}
       />
       <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky header */}

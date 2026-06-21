@@ -51,28 +51,7 @@ const APP_SCHEMA = {
   ],
 };
 
-// ── JSON-LD: WebPage ───────────────────────────────────────────────────────
-const WEBPAGE_SCHEMA = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  name: "Ridhi App – Live Streaming, Voice Chat Rooms & Social Dating",
-  description:
-    "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and find your match—all in one powerful app.",
-  url: "https://ridhi.app",
-  inLanguage: "en-IN",
-  mainEntity: { "@type": "SoftwareApplication", name: "Ridhi" },
-  speakable: { "@type": "SpeakableSpecification", cssSelector: ["h1", "h2", ".tagline"] },
-  about: [
-    { "@type": "Thing", name: "Live Streaming App" },
-    { "@type": "Thing", name: "Voice Chat Rooms" },
-    { "@type": "Thing", name: "Dating App India" },
-    { "@type": "Thing", name: "Social Networking App" },
-    { "@type": "Thing", name: "Virtual Gifts App" },
-    { "@type": "Thing", name: "Audio Chat App India" },
-  ],
-};
-
-// ── JSON-LD: Organization ─────────────────────────────────────────────────
+// ── JSON-LD: Organization — global, appears on every page ─────────────────
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -97,46 +76,6 @@ const ORG_SCHEMA = {
     "Ridhi Technologies builds India-first live streaming, social networking, and dating experiences for the next billion users.",
 };
 
-// ── JSON-LD: FAQPage ──────────────────────────────────────────────────────
-const FAQ_SCHEMA = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "What is Ridhi app?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Ridhi is an all-in-one Indian app for live streaming, voice chat rooms, social networking, virtual gifts, and dating. It supports 13 Indian languages.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How do I earn money on Ridhi?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "You can earn on Ridhi by going live and receiving virtual gifts from viewers, creating content to earn coins, and withdrawing your earnings to UPI or bank account.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Is Ridhi available for free?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, Ridhi is free to download and use on Android and iOS. Sign up in 30 seconds with your phone number.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What languages does Ridhi support?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Ridhi supports 13 Indian languages: Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Punjabi, Malayalam, Odia, Assamese, Urdu, and English.",
-      },
-    },
-  ],
-};
-
 // ─── Inlined critical CSS — prevents FOUC, applied before JS executes ────────
 const CRITICAL_CSS = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -155,13 +94,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        {/* ── Primary SEO ─────────────────────────────────────────────── */}
-        <title>Ridhi App – Live Streaming, Voice Chat Rooms &amp; Social | India</title>
-        <meta
-          name="description"
-          content="Ridhi is India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download."
-        />
-        <meta name="robots"       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        {/* ── Site-wide meta (non-page-specific) ──────────────────────── */}
         <meta name="theme-color"  content="#E91E8C" />
         <meta name="application-name" content="Ridhi" />
         <meta name="author"       content="Ridhi Technologies" />
@@ -181,15 +114,6 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="geo.country"   content="India" />
         <meta name="ICBM"          content="20.5937,78.9629" />
         <meta name="geo.placename" content="India" />
-
-        {/* ── Canonical & hreflang ─────────────────────────────────── */}
-        <link rel="canonical" href="https://ridhi.app" />
-        <link rel="alternate" hrefLang="en-IN" href="https://ridhi.app" />
-        <link rel="alternate" hrefLang="hi"    href="https://ridhi.app/hi" />
-        <link rel="alternate" hrefLang="ta"    href="https://ridhi.app/ta" />
-        <link rel="alternate" hrefLang="te"    href="https://ridhi.app/te" />
-        <link rel="alternate" hrefLang="bn"    href="https://ridhi.app/bn" />
-        <link rel="alternate" hrefLang="x-default" href="https://ridhi.app" />
 
         {/* ── Performance: DNS prefetch & preconnect ────────────────── */}
         <link rel="dns-prefetch"  href="https://fonts.googleapis.com" />
@@ -218,30 +142,22 @@ export default function Root({ children }: PropsWithChildren) {
           />
         </noscript>
 
-        {/* ── Open Graph ──────────────────────────────────────────────── */}
+        {/* ── Open Graph — site-level fallbacks (page-specific values    */}
+        {/*    are injected per-route by SeoHead)                        */}
         <meta property="og:type"              content="website" />
         <meta property="og:site_name"         content="Ridhi" />
-        <meta property="og:title"             content="Ridhi App – Live Streaming, Voice Chat Rooms & Social" />
-        <meta property="og:description"       content="India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download." />
-        <meta property="og:image"             content="https://ridhi.app/ridhi_logo.png" />
+        <meta property="og:image"             content="https://ridhi.app/og-image.png" />
         <meta property="og:image:width"       content="1200" />
         <meta property="og:image:height"      content="630" />
         <meta property="og:image:alt"         content="Ridhi live streaming and social app" />
-        <meta property="og:url"               content="https://ridhi.app" />
         <meta property="og:locale"            content="en_IN" />
-        <meta property="og:locale:alternate"  content="hi_IN" />
-        <meta property="og:locale:alternate"  content="ta_IN" />
-        <meta property="og:locale:alternate"  content="te_IN" />
-        <meta property="og:locale:alternate"  content="bn_IN" />
 
-        {/* ── Twitter / X Card ───────────────────────────────────────── */}
-        <meta name="twitter:card"        content="summary_large_image" />
-        <meta name="twitter:site"        content="@ridhiapp" />
-        <meta name="twitter:creator"     content="@ridhiapp" />
-        <meta name="twitter:title"       content="Ridhi App – Live Streaming, Voice Chat Rooms & Social | India" />
-        <meta name="twitter:description" content="India's #1 app for live streaming, voice chat rooms, and social networking. Free download on Android & iOS." />
-        <meta name="twitter:image"       content="https://ridhi.app/ridhi_logo.png" />
-        <meta name="twitter:image:alt"   content="Ridhi App – Live Streaming, Voice Chat & Social" />
+        {/* ── Twitter / X Card — site-level fallbacks ───────────────── */}
+        <meta name="twitter:card"    content="summary_large_image" />
+        <meta name="twitter:site"    content="@ridhiapp" />
+        <meta name="twitter:creator" content="@ridhiapp" />
+        <meta name="twitter:image"   content="https://ridhi.app/og-image.png" />
+        <meta name="twitter:image:alt" content="Ridhi App – Live Streaming, Voice Chat & Social" />
 
         {/* ── App Store Smart Banners ────────────────────────────────── */}
         <meta name="apple-itunes-app"  content="app-id=YOUR_APP_ID, app-argument=https://ridhi.app" />
@@ -255,16 +171,15 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="msapplication-TileColor"             content="#E91E8C" />
         <meta name="msapplication-config"                content="/browserconfig.xml" />
 
-        {/* ── Favicons ───────────────────────────────────────────────── */}
+        {/* ── Favicons & install assets ───────────────────────────────── */}
         <link rel="icon"             href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest"         href="/manifest.json" />
 
-        {/* ── JSON-LD structured data ─────────────────────────────────── */}
+        {/* ── Global JSON-LD structured data (truly sitewide) ──────────
+            Page-specific WebPage, FAQPage, etc. are injected per-route */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(APP_SCHEMA) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }} />
 
         {/* ── Expo Router ScrollView reset ───────────────────────────── */}
         <ScrollViewStyleReset />

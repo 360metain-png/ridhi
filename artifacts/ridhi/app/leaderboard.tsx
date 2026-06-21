@@ -116,6 +116,15 @@ export default function LeaderboardScreen() {
       <SeoHead
         title="Ridhi Leaderboard — Top Creators, Streamers & Gifters | India"
         description="See who's topping the Ridhi charts — top creators, biggest gifters, highest earners, and best streamers. Compete and climb the ranks today!"
+        canonical="/leaderboard"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Ridhi Leaderboard — Top Creators, Streamers & Gifters",
+          url: "https://ridhi.app/leaderboard",
+          inLanguage: "en-IN",
+          description: "See who's topping the Ridhi charts — top creators, biggest gifters, highest earners, and best streamers.",
+        }}
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
       <LinearGradient

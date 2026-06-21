@@ -377,6 +377,15 @@ export default function TermsScreen() {
         title="Terms of Service — Ridhi App | User Agreement & Community Guidelines"
         description="Read Ridhi's Terms of Service — user agreement, community guidelines, content policies, and platform rules for live streaming, voice chat, and social features."
         robots="index, follow, noarchive"
+        canonical="/terms"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Terms of Service — Ridhi App",
+          url: "https://ridhi.app/terms",
+          inLanguage: "en-IN",
+          description: "Ridhi's Terms of Service — user agreement, community guidelines, content policies, and platform rules.",
+        }}
       />
       <View style={[s.root, { backgroundColor: colors.background }]}>
       {/* Sticky header */}

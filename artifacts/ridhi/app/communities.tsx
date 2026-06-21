@@ -147,6 +147,15 @@ export default function CommunitiesScreen() {
       <SeoHead
         title="Ridhi Communities — Join Interest Groups, Local Circles & Fan Clubs | India"
         description="Join 50+ communities on Ridhi — local city groups, language circles, hobby clubs, and fan communities. Connect with like-minded people across India."
+        canonical="/communities"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Ridhi Communities — Join Interest Groups, Local Circles & Fan Clubs",
+          url: "https://ridhi.app/communities",
+          inLanguage: "en-IN",
+          description: "Join 50+ communities on Ridhi — local city groups, language circles, hobby clubs, and fan communities.",
+        }}
       />
       <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
