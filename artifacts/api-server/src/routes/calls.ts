@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { WebSocket } from "ws";
+import { logger } from "../lib/logger";
 import {
   joinQueue,
   removeFromQueue,
@@ -307,6 +308,7 @@ setInterval(() => {
     }
     // Notify both users of calls terminated by insufficient balance
     for (const t of terminated) {
+      logger.warn({ callId: t.callId, userAId: t.userAId, userBId: t.userBId }, "call terminated: insufficient_balance");
       sendTo(t.userASocketId, {
         type: "call_ended",
         payload: { reason: "insufficient_balance", endedBy: "system" },
@@ -316,7 +318,9 @@ setInterval(() => {
         payload: { reason: "insufficient_balance", endedBy: "system" },
       });
     }
-  }).catch(() => {});
+  }).catch((err: unknown) => {
+    logger.error({ err }, "coin tick billing error");
+  });
 }, 30000);
 
 export default router;

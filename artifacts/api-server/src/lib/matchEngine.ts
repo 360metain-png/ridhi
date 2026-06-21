@@ -397,27 +397,20 @@ export async function tickAndChargeCoins(): Promise<{
       const bFailed = !bResult.success;
 
       if (aFailed || bFailed) {
-        // At least one user ran out — terminate the call now
-        if (!call.finalized) {
-          call.finalized = true;
-          // Record debt for the user who couldn't pay
-          if (aFailed) {
-            callDebt.push({ callId: call.callId, userId: call.userA.id, owedCoins: increment, recordedAt: Date.now(), reason: aResult.error ?? "tick_insufficient" });
-          }
-          if (bFailed) {
-            callDebt.push({ callId: call.callId, userId: call.userB.id, owedCoins: increment, recordedAt: Date.now(), reason: bResult.error ?? "tick_insufficient" });
-          }
-          // End the call record
-          endCall(call.callId, "system_balance_cutoff");
-          terminated.push({
-            callId: call.callId,
-            endedBy: "insufficient_balance",
-            userAId: call.userA.id,
-            userBId: call.userB.id,
-            userASocketId: call.userA.socketId,
-            userBSocketId: call.userB.socketId,
-          });
-        }
+        // At least one user ran out — terminate via finalizeCall so
+        // settleCall() reconciliation (refund/shortfall) always runs first.
+        // Capture identifiers before finalizeCall removes call from activeCalls.
+        const { callId: cid, userA, userB } = call;
+        // finalizeCall is idempotent; if already finalized by another path, it's a no-op.
+        await finalizeCall(cid, "system_balance_cutoff");
+        terminated.push({
+          callId: cid,
+          endedBy: "insufficient_balance",
+          userAId: userA.id,
+          userBId: userB.id,
+          userASocketId: userA.socketId,
+          userBSocketId: userB.socketId,
+        });
         return; // skip UI update for this call — it's being terminated
       }
 
