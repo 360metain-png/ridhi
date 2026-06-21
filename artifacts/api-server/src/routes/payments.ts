@@ -129,11 +129,14 @@ async function fulfillOrder(orderId: string, userId: string) {
   if (!meta) return;
   // Resolve entitlement from server-side canonical SKU table (never trust client metadata)
   const canonical = resolveEntitlement(meta.sku);
-  const paise = (meta as any).amount ?? 0;
-  const coins = canonical.coins > 0 ? canonical.coins : Math.floor(paise / 100);
-  if (coins > 0) {
-    await creditCoins(userId, coins + canonical.bonusCoins, `payment_${meta.sku}`);
+  // Coin packs: credit base coins + bonus once
+  if (canonical.coins > 0) {
+    await creditCoins(userId, canonical.coins + canonical.bonusCoins, `payment_${meta.sku}`);
+  } else if (canonical.bonusCoins > 0 && !canonical.planId) {
+    // Pure bonus credit (not tied to a plan)
+    await creditCoins(userId, canonical.bonusCoins, `payment_${meta.sku}`);
   }
+  // Plan subscriptions: activate plan (bonus coins applied inside activatePlan, not here)
   if (canonical.planId && canonical.planBilling) {
     await activatePlan(userId, canonical.planId, canonical.planBilling, canonical.bonusCoins);
   }

@@ -216,7 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
-        setUser(parsed);
+        // Do not trust local monetization state before server confirmation
+        setUser({ ...parsed, coins: 0, plan: "free" });
         // Mandatory server-authoritative sync for monetization state (coins, plan)
         try {
           const resp = await apiFetch<{ coins?: number; plan?: string }>("/api/wallet");
@@ -224,15 +225,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const updated: Partial<UserProfile> = {};
             if (resp.coins !== undefined) updated.coins = resp.coins;
             if (resp.plan !== undefined) updated.plan = resp.plan as UserProfile["plan"];
-            setUser((prev) => {
-              if (!prev) return prev;
-              const u = { ...prev, ...updated };
-              AsyncStorage.setItem("ridhi_user", JSON.stringify(u));
-              return u;
-            });
+            const authoritative = { ...parsed, ...updated };
+            setUser(authoritative);
+            AsyncStorage.setItem("ridhi_user", JSON.stringify(authoritative));
           }
         } catch {
-          // offline: keep local state
+          // Wallet sync failed — stay in safe mode (free/0 coins)
+          // Non-monetization state (profile, name, etc.) is still usable
         }
         // Sync KYC status from backend on app load
         try {
@@ -350,32 +349,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const deductCoins = useCallback(async (amount: number): Promise<boolean> => {
+    // Server-first: only deduct locally after server confirms
     let success = false;
-    setUser((prev) => {
-      if (!prev || prev.coins < amount) return prev;
-      success = true;
-      const updated = { ...prev, coins: prev.coins - amount };
-      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-      return updated;
-    });
-    await new Promise((r) => setTimeout(r, 50));
-    if (!success) return false;
-    // Server-side deduct
     try {
       const resp = await apiFetch<{ success: boolean; coins: number; error?: string }>("/api/wallet/coins/deduct", {
         method: "POST",
         body: JSON.stringify({ amount, reason: "client" }),
       });
-      if (!resp.success && resp.error) {
-        // Server rejected: roll back local state
-        setUser((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev, coins: prev.coins + amount };
-          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-          return updated;
-        });
+      if (!resp.success || resp.error) {
         return false;
       }
+      success = true;
       if (resp.coins !== undefined) {
         setUser((prev) => {
           if (!prev) return prev;
@@ -385,7 +369,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch {
-      // offline: keep optimistic local state
+      // offline: cannot verify server deduction — reject
+      return false;
     }
     return success;
   }, []);
