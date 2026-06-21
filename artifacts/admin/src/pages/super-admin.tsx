@@ -232,6 +232,10 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "audio-rooms",  name: "Audio Rooms",              desc: "Multi-user audio rooms — podcast, Q&A, karaoke style",                      phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
       { id: "super-like",   name: "Super Like & Backtrack",   desc: "Stand out in dating with Super Like (5 coins) and undo last swipe (1 coin)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "profile-prompts", name: "Profile Prompts",       desc: "Desi dating icebreakers — 10 prompts for better profile matching",         phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "voice-reels",  name: "Voice Reels (Audio Tab)",  desc: "Voice-only reels with tappable playback, progress bar, and animated waveform", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "group-chat",   name: "Group Chat",               desc: "Create and manage group chats with friends and communities",               phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "chatrooms",    name: "Chatrooms",                desc: "Public themed chatrooms for community discussion and real-time messaging",   phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "friend-requests", name: "Friend Requests",      desc: "Send and manage friend connection requests with approval flow",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
     ],
   },
   {
@@ -256,6 +260,26 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "special-ads",       name: "Special Client Popup Ads", desc: "Full-screen premium popup ads — Super Admin managed only",            phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "promotions",        name: "User Promotions & Boosts", desc: "Profile boost and visibility promotion tools for regular users",       phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "ridhi-shop",        name: "Ridhi Shop",               desc: "In-app product marketplace with exclusive merchandise, digital gifts, and creator merch", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "ridhi-shop-cart",   name: "Shop Cart & Checkout",   desc: "Add to cart, quantity adjust, bulk checkout with coins. Cart persistence via AsyncStorage", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "coin-store",        name: "Coin Store",             desc: "Dedicated coin purchase screen with ₹49–₹4999 recharge packs and bonus coins",        phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "missions",          name: "Daily Missions & Rewards", desc: "Task-based coin earning: daily check-in, streak rewards, referral missions, and achievement badges", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "referral",          name: "Referral Program",       desc: "Invite friends with unique code and earn bonus coins when they join and verify",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "withdraw",          name: "Withdrawal & Payouts",   desc: "Request earnings withdrawal to bank or UPI with KYC verification and admin approval", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "kyc",               name: "E-KYC Verification",     desc: "Aadhaar/PAN identity verification for hosts, creators & high earners",          phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "brand-register",    name: "Brand Registration",     desc: "Business registration for advertisers to run self-serve ads and branded content",  phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
+      { id: "ads-manager",       name: "Ads Manager",            desc: "Self-serve campaign creation, budget management, and performance analytics for brands", phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
+      { id: "creator-marketplace", name: "Creator Marketplace",  desc: "Platform for creators to find brand deals, sponsorships, and collaboration opportunities", phase: "2", audience: "Creators",       status: "beta",  enabled: false  },
+      { id: "podcasts",          name: "Podcasts & Audio Content", desc: "Podcast channel creation, episode management, and audio streaming platform",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "events",            name: "Events & Meetups",         desc: "Virtual and in-person events, meetups, dating events, and community gatherings", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "pk-battle",         name: "PK Battles",             desc: "Livestream competition between two hosts where viewers vote with gifts",        phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
+      { id: "vibe-stars",        name: "Vibe Stars",             desc: "Curated influencer discovery and trending creator showcase with match integration", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "host-dashboard",    name: "Host Dashboard",         desc: "Full host management: analytics, earnings, stream history, KYC, and agent info", phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
+      { id: "host-profile",      name: "Host Profile",           desc: "Public host profile page with live status, stats, bio, and follower interaction", phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
+      { id: "music-library",     name: "Music Library",          desc: "In-app music browsing, trending tracks, and background music for reels/posts",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "scheduled-content", name: "Scheduled Posts",        desc: "Schedule posts, reels, and stories to publish at a future date and time",        phase: "2", audience: "Creators",       status: "live",  enabled: true  },
+      { id: "stitch-record",     name: "Stitch & Duet",         desc: "React to existing content with side-by-side video or stitched response reels",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "lead-form-builder", name: "Lead Form Builder",      desc: "Create custom lead capture forms for ads and brand campaigns with builder UI",  phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
+      { id: "ai-assistant",      name: "AI Assistant (Priya AI)", desc: "In-app AI chat for user support, icebreakers & content suggestions",            phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
       { id: "events",            name: "Events & Meetups",         desc: "Virtual and in-person events, meetups, dating events, and community gatherings", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "broadcast-channels", name: "Broadcast Channels",       desc: "One-to-many broadcast channels for creators, announcements, and fan engagement", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
       { id: "subscriptions",     name: "Creator Subscriptions",    desc: "Monthly fan subscription tiers for exclusive content (planned)",      phase: "3", audience: "Hosts/Creators", status: "testing", enabled: false },
@@ -1823,13 +1847,13 @@ export default function SuperAdminPage() {
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={[
-                    { name: "Mon", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 42000, "Profile Prompts": 0, "Ridhi Shop": 5800, "Events": 3100, "Broadcast": 31000 },
-                    { name: "Tue", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 48000, "Profile Prompts": 0, "Ridhi Shop": 7200, "Events": 2800, "Broadcast": 33000 },
-                    { name: "Wed", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 51000, "Profile Prompts": 0, "Ridhi Shop": 6500, "Events": 4500, "Broadcast": 29000 },
-                    { name: "Thu", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 45000, "Profile Prompts": 0, "Ridhi Shop": 8900, "Events": 3200, "Broadcast": 35000 },
-                    { name: "Fri", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 55000, "Profile Prompts": 0, "Ridhi Shop": 9500, "Events": 5100, "Broadcast": 38000 },
-                    { name: "Sat", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 62000, "Profile Prompts": 0, "Ridhi Shop": 12000, "Events": 7800, "Broadcast": 42000 },
-                    { name: "Sun", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 58000, "Profile Prompts": 0, "Ridhi Shop": 10500, "Events": 6200, "Broadcast": 39000 },
+                    { name: "Mon", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 42000, "Profile Prompts": 0, "Ridhi Shop": 5800, "Shop Cart": 4200, "Events": 3100, "Broadcast": 31000 },
+                    { name: "Tue", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 48000, "Profile Prompts": 0, "Ridhi Shop": 7200, "Shop Cart": 5100, "Events": 2800, "Broadcast": 33000 },
+                    { name: "Wed", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 51000, "Profile Prompts": 0, "Ridhi Shop": 6500, "Shop Cart": 3800, "Events": 4500, "Broadcast": 29000 },
+                    { name: "Thu", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 45000, "Profile Prompts": 0, "Ridhi Shop": 8900, "Shop Cart": 6200, "Events": 3200, "Broadcast": 35000 },
+                    { name: "Fri", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 55000, "Profile Prompts": 0, "Ridhi Shop": 9500, "Shop Cart": 7100, "Events": 5100, "Broadcast": 38000 },
+                    { name: "Sat", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 62000, "Profile Prompts": 0, "Ridhi Shop": 12000, "Shop Cart": 9800, "Events": 7800, "Broadcast": 42000 },
+                    { name: "Sun", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 58000, "Profile Prompts": 0, "Ridhi Shop": 10500, "Shop Cart": 8400, "Events": 6200, "Broadcast": 39000 },
                   ]}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -1839,6 +1863,7 @@ export default function SuperAdminPage() {
                     <Bar dataKey="Super Likes" fill="#F59E0B" radius={[4,4,0,0]} />
                     <Bar dataKey="Broadcast" fill="#7B2FBE" radius={[4,4,0,0]} />
                     <Bar dataKey="Ridhi Shop" fill="#06B6D4" radius={[4,4,0,0]} />
+                    <Bar dataKey="Shop Cart" fill="#0D9488" radius={[4,4,0,0]} />
                     <Bar dataKey="Events" fill="#F43F5E" radius={[4,4,0,0]} />
                     <Bar dataKey="Saved Posts" fill="#94A3B8" radius={[4,4,0,0]} />
                     <Bar dataKey="Story Highlights" fill="#6366F1" radius={[4,4,0,0]} />
@@ -1915,6 +1940,7 @@ export default function SuperAdminPage() {
                     { label: "Audio Calls", coins: 245000, revenue: 245000, pct: 14, color: "bg-emerald-500", icon: Phone },
                     { label: "Video Calls", coins: 198000, revenue: 198000, pct: 11, color: "bg-blue-500", icon: Video },
                     { label: "Shop Purchases", coins: 156000, revenue: 156000, pct: 9, color: "bg-teal-500", icon: ShoppingBag },
+                    { label: "Shop Cart (Bulk)", coins: 89000, revenue: 89000, pct: 5, color: "bg-teal-700", icon: ShoppingBag },
                     { label: "Event Creation", coins: 98000, revenue: 98000, pct: 6, color: "bg-rose-500", icon: Calendar },
                     { label: "Backtracks", coins: 72000, revenue: 72000, pct: 4, color: "bg-orange-500", icon: ArrowRightLeft },
                     { label: "Boost Posts", coins: 65000, revenue: 65000, pct: 4, color: "bg-indigo-500", icon: TrendingUpIcon },
@@ -1945,6 +1971,7 @@ export default function SuperAdminPage() {
                       { label: "Audio Calls", coins: 245000, revenue: 245000, pct: 14 },
                       { label: "Video Calls", coins: 198000, revenue: 198000, pct: 11 },
                       { label: "Shop Purchases", coins: 156000, revenue: 156000, pct: 9 },
+                      { label: "Shop Cart (Bulk)", coins: 89000, revenue: 89000, pct: 5 },
                       { label: "Event Creation", coins: 98000, revenue: 98000, pct: 6 },
                       { label: "Backtracks", coins: 72000, revenue: 72000, pct: 4 },
                       { label: "Boost Posts", coins: 65000, revenue: 65000, pct: 4 },
@@ -1992,6 +2019,7 @@ export default function SuperAdminPage() {
                       { feature: "Story Highlights", icon: Image, free: "0", silver: "2.8K", gold: "5.6K", platinum: "3.4K", diamond: "1.8K", total: "13.6K", revenue: "0", uptake: "24%", color: "text-indigo-600" },
                       { feature: "Profile Prompts", icon: HelpCircle, free: "0", silver: "1.2K", gold: "3.8K", platinum: "2.9K", diamond: "1.5K", total: "9.4K", revenue: "0", uptake: "18%", color: "text-violet-600" },
                       { feature: "Ridhi Shop", icon: ShoppingBag, free: "0.8K", silver: "2.1K", gold: "4.2K", platinum: "2.6K", diamond: "1.4K", total: "11.1K", revenue: "1,56,000", uptake: "38%", color: "text-teal-600" },
+                    { feature: "Shop Cart", icon: ShoppingBag, free: "0.4K", silver: "1.2K", gold: "2.5K", platinum: "1.8K", diamond: "1.1K", total: "7.0K", revenue: "89,000", uptake: "31%", color: "text-teal-700" },
                       { feature: "Events", icon: Calendar, free: "0", silver: "1.5K", gold: "2.8K", platinum: "1.6K", diamond: "0.9K", total: "6.8K", revenue: "98,000", uptake: "28%", color: "text-rose-600" },
                       { feature: "Broadcast Channels", icon: RadioIcon, free: "0", silver: "0", gold: "1.2K", platinum: "0.8K", diamond: "0.5K", total: "2.5K", revenue: "3,10,000", uptake: "22%", color: "text-purple-600" },
                     ].map((row, i) => (
@@ -2029,6 +2057,7 @@ export default function SuperAdminPage() {
                     { feature: "Story Highlights", free: "0", silver: "2.8K", gold: "5.6K", platinum: "3.4K", diamond: "1.8K", total: "13.6K", revenue: "0", uptake: "24%" },
                     { feature: "Profile Prompts", free: "0", silver: "1.2K", gold: "3.8K", platinum: "2.9K", diamond: "1.5K", total: "9.4K", revenue: "0", uptake: "18%" },
                     { feature: "Ridhi Shop", free: "0.8K", silver: "2.1K", gold: "4.2K", platinum: "2.6K", diamond: "1.4K", total: "11.1K", revenue: "1,56,000", uptake: "38%" },
+                    { feature: "Shop Cart", free: "0.4K", silver: "1.2K", gold: "2.5K", platinum: "1.8K", diamond: "1.1K", total: "7.0K", revenue: "89,000", uptake: "31%" },
                     { feature: "Events", free: "0", silver: "1.5K", gold: "2.8K", platinum: "1.6K", diamond: "0.9K", total: "6.8K", revenue: "98,000", uptake: "28%" },
                     { feature: "Broadcast Channels", free: "0", silver: "0", gold: "1.2K", platinum: "0.8K", diamond: "0.5K", total: "2.5K", revenue: "3,10,000", uptake: "22%" },
                   ];
@@ -3195,8 +3224,8 @@ export default function SuperAdminPage() {
                 {([
                   { tier: "Silver", weekly: 49, monthly: 149, yearly: 1499, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200", features: "No ads, 20 saved posts, 2 story highlights, 2 Super Likes/day, join events" },
                   { tier: "Gold", weekly: 99, monthly: 299, yearly: 2999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", features: "Silver + 50 saved posts, 5 highlights, 5 Super Likes/day, 5 profile prompts, broadcast join" },
-                  { tier: "Platinum", weekly: 199, monthly: 599, yearly: 5999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", features: "Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, shop discount" },
-                  { tier: "Diamond Elite", weekly: 299, monthly: 999, yearly: 9999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", features: "Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, broadcast create, event monetization" },
+                  { tier: "Platinum", weekly: 199, monthly: 599, yearly: 5999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", features: "Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, 10% shop discount, cart checkout" },
+                  { tier: "Diamond Elite", weekly: 299, monthly: 999, yearly: 9999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", features: "Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, bulk cart checkout, broadcast create, event monetization" },
                 ] as const).map((plan) => (
                   <div key={plan.tier} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">
