@@ -1,13 +1,22 @@
 import { Router } from "express";
 import crypto from "crypto";
+import { db } from "@workspace/db";
+import { users } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import {
   getPaymentConfig,
   getProviderAvailability,
   type PaymentProvider,
 } from "../lib/paymentConfig";
-import { requireUser, type AuthenticatedRequest } from "../lib/auth";
+import { requireUser, type AuthenticatedRequest, getUserId } from "../lib/auth";
 import { paymentRateLimit } from "../lib/rateLimit";
 import { auditFromRequest } from "../lib/audit";
+import { logger } from "../lib/logger";
+
+// The JWT sub is the phone number (not UUID), so all lookups go by users.phone.
+function userBySub(sub: string) {
+  return eq(users.phone, sub);
+}
 
 const router = Router();
 
@@ -35,8 +44,67 @@ function isTestMode(): boolean {
 
 // ── Server-side order stores ─────────────────────────────────────────────────
 // createdOrders: orderId → { userId, provider } (binds each order to the authenticated user)
-const createdOrders  = new Map<string, { userId: string; provider: string }>();
+const createdOrders  = new Map<string, { userId: string; provider: string; sku: string; bonusCoins: number; planId: string | null }>();
 const verifiedOrders = new Map<string, string>();
+const consumedOrders = new Set<string>();
+
+// ── Internal: credit coins to user after verified payment ─────────────
+async function creditCoins(userId: string, amount: number, reason: string) {
+  try {
+    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
+    if (!user) return;
+    const newBalance = user.coins + amount;
+    await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
+    logger.info({ userId, amount, reason, newBalance }, "coins credited from payment");
+  } catch (err: any) {
+    logger.error({ err: err.message }, "creditCoins error");
+  }
+}
+
+// ── Internal: activate plan after verified payment ────────────────────
+async function activatePlan(userId: string, planId: string, billing: string, bonusCoins: number) {
+  const validPlans = ["free", "silver", "gold", "platinum", "diamond"];
+  const validBilling = ["weekly", "monthly", "yearly"];
+  const validCreator = ["creator_starter", "creator_pro", "creator_elite"];
+  const isCreator = planId.startsWith("creator_");
+  if (!isCreator && !validPlans.includes(planId)) return;
+  if (isCreator && !validCreator.includes(planId)) return;
+  if (!validBilling.includes(billing)) return;
+  try {
+    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
+    if (!user) return;
+    const newCoins = user.coins + bonusCoins;
+    const now = new Date();
+    let expiresAt: Date;
+    if (billing === "weekly") { expiresAt = new Date(now); expiresAt.setDate(expiresAt.getDate() + 7); }
+    else if (billing === "yearly") { expiresAt = new Date(now); expiresAt.setFullYear(expiresAt.getFullYear() + 1); }
+    else { expiresAt = new Date(now); expiresAt.setMonth(expiresAt.getMonth() + 1); }
+    const planValue = isCreator ? ("creator" as any) : (planId as any);
+    await db.update(users).set({
+      plan: planValue,
+      coins: newCoins,
+    }).where(userBySub(userId));
+    logger.info({ userId, planId, billing, bonusCoins, newCoins }, "plan activated from payment");
+  } catch (err: any) {
+    logger.error({ err: err.message }, "activatePlan error");
+  }
+}
+
+// ── Internal: auto-fulfill verified order (coins + plan) ────────────────
+async function fulfillOrder(orderId: string, userId: string) {
+  if (consumedOrders.has(orderId)) return; // already consumed
+  const meta = createdOrders.get(orderId);
+  if (!meta) return;
+  const paise = (meta as any).amount ?? 0;
+  const coins = Math.floor(paise / 100); // 1 coin = 1 rupee
+  if (coins > 0) {
+    await creditCoins(userId, coins + meta.bonusCoins, `payment_${meta.sku}`);
+  }
+  if (meta.planId) {
+    await activatePlan(userId, meta.planId, "monthly", meta.bonusCoins);
+  }
+  consumedOrders.add(orderId);
+}
 
 // ── Provider-specific order creation ────────────────────────────────────────
 interface OrderResponse {
@@ -292,8 +360,15 @@ router.post("/payments/create-order", requireUser, paymentRateLimit, async (req:
       res.status(401).json({ error: "Authentication required" });
       return;
     }
-    createdOrders.set(order.id, { userId, provider });
-    req.log.info({ orderId: order.id, amount, provider, userId }, `${provider} order created`);
+    const { sku, bonusCoins, planId } = req.body as { sku?: string; bonusCoins?: number; planId?: string };
+    createdOrders.set(order.id, {
+      userId, provider,
+      sku: sku || "coins",
+      bonusCoins: bonusCoins || 0,
+      planId: planId || null,
+      amount,
+    } as any);
+    req.log.info({ orderId: order.id, amount, provider, userId, sku }, `${provider} order created`);
     res.json({ ...order, provider });
   } catch (err) {
     req.log.error({ err, provider }, "Failed to create payment order");
@@ -430,12 +505,17 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
 
   if (verified) {
     verifiedOrders.set(resolvedOrderId, resolvedPaymentId);
+    const orderMeta = createdOrders.get(resolvedOrderId);
+    const userId = orderMeta?.userId || req.user?.sub || "";
+    if (userId && orderMeta) {
+      await fulfillOrder(resolvedOrderId, userId);
+    }
     auditFromRequest(req, "payment_verify", resolvedOrderId, "payment", {
       paymentId: resolvedPaymentId,
       provider: activeProvider,
       amount: req.body?.amount,
     });
-    req.log.info({ paymentId: resolvedPaymentId, provider: activeProvider }, "Payment verified");
+    req.log.info({ paymentId: resolvedPaymentId, provider: activeProvider, userId }, "Payment verified and fulfilled");
     res.json({ success: true, testMode: false, paymentId: resolvedPaymentId, provider: activeProvider });
   } else {
     req.log.warn({ orderId: resolvedOrderId }, "Payment verification failed");
@@ -609,7 +689,12 @@ router.get("/payments/callback", paymentRateLimit, async (req, res) => {
 
   if (verified) {
     verifiedOrders.set(resolvedOrderId, resolvedPaymentId);
-    req.log.info({ orderId: resolvedOrderId, paymentId: resolvedPaymentId, provider: activeProvider }, "Payment verified via callback");
+    const orderMeta = createdOrders.get(resolvedOrderId);
+    const userId = orderMeta?.userId || "";
+    if (userId && orderMeta) {
+      await fulfillOrder(resolvedOrderId, userId);
+    }
+    req.log.info({ orderId: resolvedOrderId, paymentId: resolvedPaymentId, provider: activeProvider, userId }, "Payment verified and fulfilled via callback");
   } else {
     req.log.warn({ orderId: resolvedOrderId, provider: activeProvider }, "Callback payment verification failed");
   }

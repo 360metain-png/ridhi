@@ -80,7 +80,7 @@ export default function CoinStoreScreen() {
   useTrackScreen("coin_store");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins } = useAuth();
+  const { user, addCoins, deductCoins } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [activeTab, setActiveTab] = useState("all");
@@ -105,7 +105,7 @@ export default function CoinStoreScreen() {
       );
       return;
     }
-    addCoins(-gift.coins);
+    deductCoins(gift.coins);
     setSentGift(gift);
     setTimeout(() => setSentGift(null), 2200);
   };

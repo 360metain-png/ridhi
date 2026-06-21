@@ -68,7 +68,7 @@ export function DownloadService({
       const { apiFetch } = await import("@/utils/api");
       resp = await apiFetch<{ success: boolean; data?: { coins?: number } }>("/api/downloads", {
         method: "POST",
-        body: JSON.stringify({ contentId, contentType, ownerId, price }),
+        body: JSON.stringify({ contentId, contentType }),
       });
     } catch (err: any) {
       setProcessing(false);

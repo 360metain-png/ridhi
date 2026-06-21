@@ -131,7 +131,7 @@ export default function LiveStreamScreen() {
   useTrackScreen("live");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins, updateProfile } = useAuth();
+  const { user, addCoins, deductCoins, updateProfile } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
   const { trackChat } = useAnalytics();
   // Block screenshots & screen recordings during live streams (native only)
@@ -207,7 +207,7 @@ export default function LiveStreamScreen() {
 
   const sendGift = (gift: typeof LIVE_GIFTS[0]) => {
     if ((user?.coins ?? 0) < gift.cost) return;
-    addCoins(-gift.cost);
+    deductCoins(gift.cost);
     const newMsg = {
       id: `m${Date.now()}`,
       user: user?.name?.split(" ")[0] ?? "You",

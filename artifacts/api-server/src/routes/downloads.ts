@@ -13,7 +13,21 @@ function userBySub(sub: string) {
   return eq(users.phone, sub);
 }
 
-// ── POST /api/downloads — record a paid download transaction ───────────────
+// ── Canonical download pricing (server-side truth; never trust client price) ───────
+const CANONICAL_DOWNLOAD_PRICES: Record<string, number> = {
+  reel: 5,
+  post: 10,
+  story: 3,
+  live: 20,
+  audio: 8,
+  post_download: 10,
+};
+
+function getDownloadPrice(contentType: string): number {
+  return CANONICAL_DOWNLOAD_PRICES[contentType] || 0;
+}
+
+// ── POST /api/downloads ──────────────────────────────────────────────
 router.post(
   "/downloads",
   apiRateLimit,
@@ -21,15 +35,10 @@ router.post(
   async (req: AuthenticatedRequest, res) => {
     const body = req.body;
     const contentId = typeof body?.contentId === "string" ? body.contentId : "";
-    const contentType = ["reel", "post", "story", "live", "audio"].includes(body?.contentType) ? body.contentType : "";
-    const ownerId = typeof body?.ownerId === "string" ? body.ownerId : "";
-    const price = typeof body?.price === "number" && body.price > 0 ? body.price : 0;
+    const contentType = ["reel", "post", "story", "live", "audio", "post_download"].includes(body?.contentType) ? body.contentType : "";
 
-    if (!contentId || !contentType || !ownerId || price <= 0) {
-      res.status(400).json({
-        success: false,
-        error: "Invalid download payload",
-      });
+    if (!contentId || !contentType) {
+      res.status(400).json({ success: false, error: "Invalid download payload" });
       return;
     }
 
@@ -39,7 +48,13 @@ router.post(
       return;
     }
 
-    // Server-side coin balance check
+    // Server-side canonical price lookup (never trust client-provided price)
+    const price = getDownloadPrice(contentType);
+    if (price <= 0) {
+      res.status(400).json({ success: false, error: "Unsupported content type for download" });
+      return;
+    }
+
     try {
       const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
       if (!user) {
@@ -50,11 +65,9 @@ router.post(
         res.status(402).json({ error: "Insufficient coins", coins: user.coins });
         return;
       }
-      // Deduct coins server-side
       const newBalance = user.coins - price;
       await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
 
-      // Revenue split: 60% creator, 40% platform
       const creatorShare = Math.floor(price * 0.6);
       const platformShare = price - creatorShare;
 
@@ -72,7 +85,6 @@ router.post(
           price,
           creatorShare,
           platformShare,
-          ownerId,
           coins: newBalance,
           downloadedAt: new Date().toISOString(),
         },
@@ -84,7 +96,7 @@ router.post(
   }
 );
 
-// ── GET /api/downloads/history — list user's download history ────────────
+// ── GET /api/downloads/history ──────────────────────────────────────────────
 router.get(
   "/downloads/history",
   apiRateLimit,
@@ -93,8 +105,6 @@ router.get(
     const userId = getUserId(req);
     const limit = Math.min(Number(req.query.limit) || 20, 100);
 
-    // In production: query from database
-    // For now: return empty history
     res.status(200).json({
       success: true,
       data: {

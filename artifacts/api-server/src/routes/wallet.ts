@@ -34,37 +34,6 @@ router.get("/wallet", requireUser, async (req: AuthenticatedRequest, res) => {
   }
 });
 
-// ── POST /api/wallet/coins/add ──────────────────────────────────────────────
-router.post("/wallet/coins/add", requireUser, apiRateLimit, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
-  const amount = typeof req.body?.amount === "number" ? Math.max(0, Math.floor(req.body.amount)) : 0;
-  const reason = typeof req.body?.reason === "string" ? req.body.reason : "";
-
-  if (!userId) {
-    res.status(401).json({ error: "Authentication required" });
-    return;
-  }
-  if (amount <= 0) {
-    res.status(400).json({ error: "Invalid amount" });
-    return;
-  }
-
-  try {
-    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-    const newBalance = user.coins + amount;
-    await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
-    logger.info({ userId, amount, reason, newBalance }, "coins added");
-    res.json({ success: true, coins: newBalance });
-  } catch (err: any) {
-    logger.error({ err: err.message }, "coins add error");
-    res.status(500).json({ error: "Failed to add coins" });
-  }
-});
-
 // ── POST /api/wallet/coins/deduct ──────────────────────────────────────────────
 router.post("/wallet/coins/deduct", requireUser, apiRateLimit, async (req: AuthenticatedRequest, res) => {
   const userId = getUserId(req);

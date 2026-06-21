@@ -209,7 +209,8 @@ export default function WalletScreen() {
       const result = await purchasePackage(pkg);
       if (result.success) {
         const total = pack.coins + ((pack as any).bonus ?? 0);
-        addCoins(total);
+        // Sync authoritative server wallet state after IAP success (server auto-credits)
+        syncWallet().catch(() => {});
         fire({ type: "credit", amount: total, label: "Recharge", sublabel: pack.label, large: total >= 500, bottom: 200 });
         trackCoinRecharge(total);
       } else if (result.error && result.error !== "User cancelled") {
@@ -231,11 +232,10 @@ export default function WalletScreen() {
   const handlePaySuccess = () => {
     if (!pendingPack) return;
     const total = pendingPack.coins + ((pendingPack as any).bonus ?? 0);
-    addCoins(total);
+    // Sync authoritative server wallet state after payment success (server auto-credits)
+    syncWallet().catch(() => {});
     fire({ type: "credit", amount: total, label: "Recharge", sublabel: pendingPack.label, large: total >= 500, bottom: 200 });
     trackCoinRecharge(total);
-    // Sync authoritative server wallet state after payment success
-    syncWallet().catch(() => {});
     setPendingPack(null);
   };
 

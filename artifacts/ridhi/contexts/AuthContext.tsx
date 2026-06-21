@@ -106,7 +106,6 @@ interface AuthContextValue {
   addCoins: (amount: number) => Promise<void>;
   claimDailyReward: () => Promise<boolean>;
   deductCoins: (amount: number) => Promise<boolean>;
-  subscribePlan: (planId: string, billing: string, bonusCoins: number) => Promise<void>;
   cancelPlan: () => Promise<void>;
   syncKycStatus: (userId: string) => Promise<void>;
   syncPkBattleStatus: (userId: string) => Promise<void>;
@@ -301,30 +300,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addCoins = useCallback(async (amount: number) => {
-    // Optimistic local update
+    // Server-authoritative: coins are only added after verified payment on the server.
+    // For non-payment credits (missions, rewards, daily bonus), update locally.
+    // For payment-related credits, the server auto-credits after /api/payments/verify or callback.
+    if (amount < 0) {
+      throw new Error("addCoins does not support negative amounts. Use deductCoins instead.");
+    }
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, coins: prev.coins + amount };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
-    // Attempt server-side sync; if it fails, log and continue
-    try {
-      const resp = await apiFetch<{ success: boolean; coins: number }>("/api/wallet/coins/add", {
-        method: "POST",
-        body: JSON.stringify({ amount, reason: "client" }),
-      });
-      if (resp?.coins !== undefined) {
-        setUser((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev, coins: resp.coins };
-          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-          return updated;
-        });
-      }
-    } catch {
-      // offline: keep optimistic local state
-    }
   }, []);
 
   const claimDailyReward = useCallback(async (): Promise<boolean> => {
@@ -384,42 +371,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // offline: keep optimistic local state
     }
     return success;
-  }, []);
-
-  const subscribePlan = useCallback(async (planId: string, billing: string, bonusCoins: number) => {
-    const now = new Date();
-    let expiresAt: Date;
-    if (billing === "weekly")  { expiresAt = new Date(now); expiresAt.setDate(expiresAt.getDate() + 7); }
-    else if (billing === "yearly") { expiresAt = new Date(now); expiresAt.setFullYear(expiresAt.getFullYear() + 1); }
-    else { expiresAt = new Date(now); expiresAt.setMonth(expiresAt.getMonth() + 1); }
-
-    const isCreator = planId.startsWith("creator_");
-    // Optimistic local update
-    setUser((prev) => {
-      if (!prev) return prev;
-      const updated: UserProfile = isCreator
-        ? { ...prev, creatorPlan: planId as UserProfile["creatorPlan"], creatorPlanExpiresAt: expiresAt.toISOString(), coins: prev.coins + bonusCoins }
-        : { ...prev, plan: planId as UserProfile["plan"], planBillingPeriod: billing as UserProfile["planBillingPeriod"], planExpiresAt: expiresAt.toISOString(), coins: prev.coins + bonusCoins };
-      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-      return updated;
-    });
-    // Server-side sync
-    try {
-      const resp = await apiFetch<{ success: boolean; plan: string; coins: number }>("/api/plan/subscribe", {
-        method: "POST",
-        body: JSON.stringify({ plan: planId, billing, bonusCoins }),
-      });
-      if (resp.coins !== undefined) {
-        setUser((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev, coins: resp.coins };
-          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-          return updated;
-        });
-      }
-    } catch {
-      // offline: keep optimistic local state
-    }
   }, []);
 
   const cancelPlan = useCallback(async () => {
@@ -636,7 +587,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile,
-        addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan,
+        addCoins, claimDailyReward, deductCoins, cancelPlan,
         syncKycStatus, syncPkBattleStatus, recordDownloadEarning, syncWallet,
         savePost, unsavePost, addCollection,
         useSuperLike, useBacktrack,

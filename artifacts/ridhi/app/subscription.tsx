@@ -1112,7 +1112,7 @@ export default function SubscriptionScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const topPad  = Platform.OS === "web" ? 67 : insets.top;
-  const { user, subscribePlan, cancelPlan, syncWallet } = useAuth();
+  const { user, cancelPlan, syncWallet } = useAuth();
 
   const [section,      setSection]      = useState<Section>("plans");
   const [billing,      setBilling]      = useState<BillingPeriod>("monthly");
@@ -1169,9 +1169,8 @@ export default function SubscriptionScreen() {
   };
 
   const handlePlanSuccess = async (txnId: string) => {
-    await subscribePlan(pendingPlanId, pendingBilling, pendingBonus);
-    // Sync authoritative server wallet state after payment success
-    syncWallet().catch(() => {});
+    // Server auto-activates plan after verified payment. Sync from server.
+    await syncWallet();
     const planName = pendingPlanId.startsWith("creator_")
       ? CREATOR_PLANS.find(p => p.id === pendingPlanId)?.name ?? pendingPlanId
       : PLANS.find(p => p.id === pendingPlanId)?.name ?? pendingPlanId;
