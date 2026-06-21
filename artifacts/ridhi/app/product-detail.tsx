@@ -19,19 +19,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
+const CART_KEY = "ridhi_cart";
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, deductCoins } = useAuth();
-  
+
   const product = PRODUCTS.find((p) => p.id === id);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [inCart, setInCart] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     checkWishlist();
+    checkCart();
   }, [id]);
 
   const checkWishlist = async () => {
@@ -40,6 +43,28 @@ export default function ProductDetailScreen() {
       const wishlist = raw ? JSON.parse(raw) : [];
       setIsWishlisted(wishlist.includes(id));
     } catch (e) {}
+  };
+
+  const checkCart = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(CART_KEY);
+      const cart = raw ? JSON.parse(raw) : [];
+      setInCart(cart.some((item: any) => item.id === id));
+    } catch { setInCart(false); }
+  };
+
+  const toggleCart = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(CART_KEY);
+      let cart: any[] = raw ? JSON.parse(raw) : [];
+      if (inCart) {
+        cart = cart.filter((item: any) => item.id !== id);
+      } else {
+        cart.push({ id, quantity: 1, addedAt: new Date().toISOString() });
+      }
+      await AsyncStorage.setItem(CART_KEY, JSON.stringify(cart));
+      setInCart(!inCart);
+    } catch {}
   };
 
   const toggleWishlist = async () => {
@@ -119,6 +144,9 @@ export default function ProductDetailScreen() {
               <Feather name="arrow-left" size={22} color="#fff" />
             </Pressable>
             <View style={{ flexDirection: "row", gap: 12 }}>
+              <Pressable onPress={toggleCart} style={[styles.circleBtn, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
+                <Feather name="shopping-cart" size={22} color={inCart ? "#FF9500" : "#fff"} />
+              </Pressable>
               <Pressable onPress={toggleWishlist} style={[styles.circleBtn, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
                 <Feather name="heart" size={22} color={isWishlisted ? "#FF3B30" : "#fff"} fill={isWishlisted ? "#FF3B30" : "transparent"} />
               </Pressable>
@@ -190,15 +218,25 @@ export default function ProductDetailScreen() {
             <Text style={[styles.balanceValue, { color: colors.foreground }]}>{user?.coins ?? 0}</Text>
           </View>
         </View>
-        <Pressable 
-          style={[styles.buyButton, { backgroundColor: colors.primary }]}
-          onPress={handleBuy}
-          disabled={loading}
-        >
-          <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.buyGradient}>
-            <Text style={styles.buyButtonText}>{loading ? "Processing..." : "Buy with Coins"}</Text>
-          </LinearGradient>
-        </Pressable>
+        <View style={{ flexDirection: "row", gap: 10, flex: 2 }}>
+          <Pressable
+            style={[styles.addCartBtn, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "50" }]}
+            onPress={toggleCart}
+          >
+            <Text style={[styles.addCartText, { color: colors.primary }]}>
+              {inCart ? "Added" : "+ Cart"}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.buyButton, { backgroundColor: colors.primary }]}
+            onPress={handleBuy}
+            disabled={loading}
+          >
+            <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.buyGradient}>
+              <Text style={styles.buyButtonText}>{loading ? "Processing..." : "Buy with Coins"}</Text>
+            </LinearGradient>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -236,6 +274,8 @@ const styles = StyleSheet.create({
   balanceRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   coinIcon: { width: 16, height: 16 },
   balanceValue: { fontSize: 16, fontFamily: "Inter_700Bold" },
+  addCartBtn: { flex: 1, height: 50, borderRadius: 14, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
+  addCartText: { fontSize: 14, fontFamily: "Inter_700Bold" },
   buyButton: { flex: 2, height: 50, borderRadius: 14, overflow: "hidden" },
   buyGradient: { flex: 1, alignItems: "center", justifyContent: "center" },
   buyButtonText: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },

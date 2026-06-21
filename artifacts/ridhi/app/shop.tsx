@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Dimensions,
   FlatList,
@@ -16,8 +16,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { PRODUCTS } from "@/data/mockData";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
+const CART_KEY = "ridhi_cart";
 
 const CATEGORIES = ["All", "Fashion", "Beauty", "Electronics", "Home"];
 
@@ -26,10 +28,25 @@ export default function ShopScreen() {
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [cartCount, setCartCount] = useState(0);
+
+  const loadCartCount = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(CART_KEY);
+      const cart = raw ? JSON.parse(raw) : [];
+      setCartCount(cart.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0));
+    } catch { setCartCount(0); }
+  }, []);
+
+  useEffect(() => {
+    loadCartCount();
+    const interval = setInterval(loadCartCount, 2000);
+    return () => clearInterval(interval);
+  }, [loadCartCount]);
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((p) => {
-      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                            p.category.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
@@ -71,8 +88,13 @@ export default function ShopScreen() {
           <Feather name="arrow-left" size={24} color={colors.foreground} />
         </Pressable>
         <Text style={[styles.headerTitle, { color: colors.foreground }]}>Ridhi Shop</Text>
-        <Pressable onPress={() => {}} style={styles.cartBtn}>
+        <Pressable onPress={() => router.push("/cart")} style={styles.cartBtn}>
           <Feather name="shopping-cart" size={22} color={colors.foreground} />
+          {cartCount > 0 && (
+            <View style={[styles.cartBadge, { backgroundColor: colors.secondary }]}>
+              <Text style={styles.cartBadgeText}>{cartCount > 99 ? "99+" : cartCount}</Text>
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -136,7 +158,9 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingBottom: 15, borderBottomWidth: StyleSheet.hairlineWidth },
   backBtn: { padding: 4 },
   headerTitle: { flex: 1, fontSize: 18, fontFamily: "Inter_700Bold", textAlign: "center" },
-  cartBtn: { padding: 4 },
+  cartBtn: { padding: 4, position: "relative" },
+  cartBadge: { position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
+  cartBadgeText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" },
   searchContainer: { padding: 16 },
   searchBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, height: 44, borderRadius: 12, borderWidth: 1, gap: 8 },
   searchInput: { flex: 1, height: "100%", fontSize: 15, fontFamily: "Inter_400Regular" },
