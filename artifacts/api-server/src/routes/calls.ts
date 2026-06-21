@@ -7,6 +7,7 @@ import {
   endCall,
   startCallWithDeduct,
   settleCall,
+  finalizeCall,
   getQueueStats,
   getCallByUser,
   getCategories,
@@ -222,9 +223,9 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
         const { callId } = msg.payload as { callId: string };
         const call = getCallByUser(authenticatedUserId);
         if (call && call.callId === callId) {
-          // Settle remaining coins server-side before ending
-          await settleCall(callId);
-          const ended = endCall(callId, authenticatedUserId);
+          // Idempotent finalize: settle -> end. Guards against double-settle
+          // if the socket also closes immediately after disconnect.
+          const ended = await finalizeCall(callId, authenticatedUserId);
           if (ended) {
             sendTo(ended.userA.socketId, {
               type: "call_ended",
@@ -262,13 +263,15 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
     for (const [callId, call] of getActiveCalls()) {
       if (call.userA.socketId === socketId || call.userB.socketId === socketId) {
         const endedBy = call.userA.socketId === socketId ? call.userA.id : call.userB.id;
-        // Fire-and-forget settlement — server-side coins must be deducted
-        settleCall(callId).catch(() => {});
-        endCall(callId, endedBy);
-        const otherSocketId = call.userA.socketId === socketId ? call.userB.socketId : call.userA.socketId;
-        sendTo(otherSocketId, {
-          type: "call_ended",
-          payload: { reason: "peer_disconnected", endedBy },
+        // Idempotent finalize: if a disconnect message already finalized, this is a no-op.
+        finalizeCall(callId, endedBy).then((ended) => {
+          if (ended) {
+            const otherSocketId = call.userA.socketId === socketId ? call.userB.socketId : call.userA.socketId;
+            sendTo(otherSocketId, {
+              type: "call_ended",
+              payload: { reason: "peer_disconnected", endedBy },
+            });
+          }
         });
       }
     }

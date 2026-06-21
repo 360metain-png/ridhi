@@ -48,6 +48,7 @@ export interface ActiveCall {
   userBCoinsSpent: number; // display-only: shown to client for UI ticker
   userADeducted: number;   // authoritative: actual coins deducted from wallet
   userBDeducted: number;   // authoritative: actual coins deducted from wallet
+  finalized: boolean;      // guards against double-settle on disconnect+close race
   type: "audio" | "video";
   category: CallCategory;
 }
@@ -238,6 +239,7 @@ export function startCall(
     userBCoinsSpent: 0,
     userADeducted: 0,
     userBDeducted: 0,
+    finalized: false,
     type,
     category: userA.category !== "any" ? userA.category : userB.category,
   };
@@ -275,7 +277,7 @@ export async function startCallWithDeduct(
   return { call, ok: true };
 }
 
-/** Settle remaining coins at call end */
+/** Settle remaining coins at call end. Idempotent: no-op if already settled. */
 export async function settleCall(callId: string): Promise<{ settledA: number; settledB: number } | null> {
   const call = activeCalls.get(callId);
   if (!call) return null;
@@ -283,6 +285,7 @@ export async function settleCall(callId: string): Promise<{ settledA: number; se
   const totalDue = durationMin * call.coinRate;
   const settleA = Math.max(0, totalDue - call.userADeducted);
   const settleB = Math.max(0, totalDue - call.userBDeducted);
+  if (settleA <= 0 && settleB <= 0) return { settledA: call.userADeducted, settledB: call.userBDeducted };
   const [aResult, bResult] = await Promise.all([
     settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : { success: true, newBalance: 0 } as any,
     settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : { success: true, newBalance: 0 } as any,
@@ -290,6 +293,22 @@ export async function settleCall(callId: string): Promise<{ settledA: number; se
   if (aResult.success) call.userADeducted += settleA;
   if (bResult.success) call.userBDeducted += settleB;
   return { settledA: call.userADeducted, settledB: call.userBDeducted };
+}
+
+/**
+ * Idempotent call teardown: settle then end.
+ * Ensures only one path settles a call, preventing double-deduction
+ * on the disconnect+close race.
+ */
+export async function finalizeCall(callId: string, endedByUserId: string): Promise<ActiveCall | null> {
+  const call = activeCalls.get(callId);
+  if (!call) return null;
+  if (call.finalized) return null; // already settled/ended by another path
+  call.finalized = true;
+
+  // Settle first so endCall() sees the final deducted totals
+  await settleCall(callId);
+  return endCall(callId, endedByUserId);
 }
 
 /** End a call and record history */
