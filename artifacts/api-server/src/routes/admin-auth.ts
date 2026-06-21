@@ -263,8 +263,12 @@ router.post("/admin/:id/password", requireAuth, adminRateLimit, async (req: Auth
     return;
   }
 
-  // Self must provide current password
-  if (actorId === id && currentPassword) {
+  // Self must provide and verify current password; super admins resetting another admin's password are exempt
+  if (actorId === id) {
+    if (!currentPassword) {
+      res.status(400).json({ success: false, error: "Current password is required to change your own password" });
+      return;
+    }
     const valid = await bcrypt.compare(currentPassword, admin.passwordHash);
     if (!valid) {
       res.status(401).json({ success: false, error: "Current password is incorrect" });
