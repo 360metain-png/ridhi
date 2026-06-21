@@ -670,6 +670,7 @@ const ADMIN_SECTIONS: Section[] = [
     features: [
       "Pending Applications (Super Admin only) — host applications are reviewed exclusively by Super Admin. SA selects the dedicated Agent to assign the host to; the Admin is auto-derived from that agent's chain. The approval dialog shows the full chain: SA → Admin → Agent → Host before confirming.",
       "Admins and Agents do NOT see or approve pending host applications — the queue is visible to Super Admin only",
+      "Cross-role eligibility block — if a pending host applicant is already registered as an active Agent, their card is highlighted red with an 'Ineligible — Already an Agent' badge and the Approve & Assign button is permanently disabled. The approval dialog also surfaces a hard error banner preventing approval. Only Reject is available for such applicants.",
       "All Hosts table: shows name, current level (L1–L7), city, total coins earned, active sessions, KYC status, and assigned agent",
       "Filter by: Level, City, KYC Status, Active/Inactive/Suspended",
       "Host Detail page: full application info, stream history, earnings overview, KYC documents, agent info",
@@ -691,6 +692,7 @@ const ADMIN_SECTIONS: Section[] = [
     features: [
       "Pending Applications (Super Admin only) — agent applications are reviewed exclusively by Super Admin. SA selects the starting level (A1–A5) and the dedicated Admin the agent will report to. The approval dialog previews the chain: SA → Admin → Agent before confirming.",
       "Admins do NOT see or approve pending agent applications — the queue is visible to Super Admin only",
+      "Cross-role eligibility block — if a pending agent applicant is already registered as an active Host, their card is highlighted red with an 'Ineligible — Already a Host' badge and the Approve & Assign button is permanently disabled. The approval dialog also surfaces a hard error banner preventing approval. Only Reject is available for such applicants.",
       "All Agents table: name, level (A1–A5), city, active hosts managed, active host rate %, commission tier, total earnings",
       "Filter by: Level, City, Active/Inactive, Host Count",
       "Agent Detail page: full registration info, managed host list, per-host performance, commission breakdown, level progress",

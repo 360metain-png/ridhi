@@ -74,12 +74,19 @@ const INITIAL_AGENTS: Agent[] = [
   { id: "a6", name: "Preethi Nair",  city: "Chennai",   phone: "+91 98006 66666", level: "A2", hosts: 24,  activeHosts: 16,  commission: 4,  totalHostEarnings:  950000, earned: 38000,  pendingPayout: 0,     status: "suspended", joinDate: "Apr 2024", topHost: "Kiran N",      adminId: "adm3" },
 ];
 
+// Names of all active hosts — used to block cross-role applications
+const ACTIVE_HOST_NAMES = new Set([
+  "Sneha Kapoor", "Kavya Iyer", "Rohit Varma", "Deepika Choudhary", "Arjun Singh",
+  "Nisha Patel", "Kiran Nair", "Mehak Arora", "Ananya Sen", "Rohan Mishra",
+]);
+
 const PENDING_AGENTS = [
   { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years talent & influencer mgmt"   },
   { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 yrs live experience"   },
   { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform, event manager"     },
   { id: "pa4", name: "Tanvir Ahmed",    city: "Lucknow",   phone: "+91 91234 56789", appliedAt: "1 day ago",    hosts: 5,  experience: "Social media manager, 3 yrs"        },
   { id: "pa5", name: "Reena Kapoor",    city: "Jaipur",    phone: "+91 80123 45678", appliedAt: "2 days ago",   hosts: 18, experience: "Ran independent streaming studio"   },
+  { id: "pa6", name: "Sneha Kapoor",    city: "Mumbai",    phone: "+91 98887 77777", appliedAt: "20 min ago",   hosts: 0,  experience: "Currently an active host on Ridhi"  },
 ];
 
 // ── Agent Complaints (from hosts) ──────────────────────────────────────────
@@ -338,22 +345,37 @@ function ApproveAgentDialog({
   const [selectedAdminId, setSelectedAdminId] = useState("");
   const [selectedLevel,   setSelectedLevel]   = useState("A1");
   if (!app) return null;
+  const isAlreadyHost = ACTIVE_HOST_NAMES.has(app.name);
   const selectedAdmin = admins.find(a => a.id === selectedAdminId);
   return (
     <Dialog open={open} onOpenChange={() => { setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            {isAlreadyHost
+              ? <XCircle className="w-5 h-5 text-red-500" />
+              : <CheckCircle className="w-5 h-5 text-green-500" />}
             Approve & Assign Agent
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-1">
+          {/* Ineligibility block */}
+          {isAlreadyHost && (
+            <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+              <XCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-red-800">Ineligible — Already a Host</p>
+                <p className="text-xs text-red-700 mt-0.5">This person is currently registered as an active Host on the platform. A user cannot hold both Host and Agent roles simultaneously. Reject this application.</p>
+              </div>
+            </div>
+          )}
           {/* SA note */}
-          <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
-            <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
-            <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this agent application and assign them to a dedicated admin.</p>
-          </div>
+          {!isAlreadyHost && (
+            <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+              <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
+              <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this agent application and assign them to a dedicated admin.</p>
+            </div>
+          )}
           {/* Applicant info */}
           <div className="flex items-center gap-3 bg-muted rounded-xl p-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
@@ -420,7 +442,7 @@ function ApproveAgentDialog({
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => { setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>Cancel</Button>
           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1"
-            disabled={!selectedAdminId}
+            disabled={!selectedAdminId || isAlreadyHost}
             onClick={() => { onApprove(app.id, selectedAdminId, selectedLevel); setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>
             <CheckCircle className="w-3.5 h-3.5" /> Approve & Assign
           </Button>
@@ -717,13 +739,22 @@ export default function AgentsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
-            {pending.map(app => (
-              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-violet-100 p-3 shadow-sm">
+            {pending.map(app => {
+              const alreadyHost = ACTIVE_HOST_NAMES.has(app.name);
+              return (
+              <div key={app.id} className={`flex items-center gap-3 bg-white rounded-xl border p-3 shadow-sm ${alreadyHost ? "border-red-200 bg-red-50/30" : "border-violet-100"}`}>
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {app.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{app.name}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-sm">{app.name}</p>
+                    {alreadyHost && (
+                      <Badge className="bg-red-100 text-red-700 border border-red-200 text-[10px] h-4 px-1.5 gap-1 font-semibold">
+                        <XCircle className="w-2.5 h-2.5" /> Ineligible — Already a Host
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
@@ -737,13 +768,16 @@ export default function AgentsPage() {
                     onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
                     <XCircle className="w-3 h-3" /> Reject
                   </Button>
-                  <Button size="sm" className="h-7 text-xs gap-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0"
-                    onClick={() => setApproveTarget(app)}>
+                  <Button size="sm"
+                    className={`h-7 text-xs gap-1 text-white border-0 ${alreadyHost ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"}`}
+                    disabled={alreadyHost}
+                    onClick={() => !alreadyHost && setApproveTarget(app)}>
                     <CheckCircle className="w-3 h-3" /> Approve & Assign
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}

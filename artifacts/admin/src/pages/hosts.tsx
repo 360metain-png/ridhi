@@ -94,6 +94,7 @@ const PENDING_HOSTS = [
   { id: "ph3", name: "Nandita Pillai", city: "Chennai",   phone: "+91 77665 54433", appliedAt: "5 hours ago",  language: "Tamil",     followers: 5400, experience: "Singer, 3 yrs YouTube, 420K subs"         },
   { id: "ph4", name: "Gaurav Tiwari",  city: "Varanasi",  phone: "+91 66554 43322", appliedAt: "1 day ago",    language: "Hindi",     followers: 920,  experience: "Gaming streamer, first platform attempt"   },
   { id: "ph5", name: "Shweta Menon",   city: "Kochi",     phone: "+91 55443 32211", appliedAt: "2 days ago",   language: "Malayalam", followers: 7200, experience: "Fitness & wellness content, 4 yrs"         },
+  { id: "ph6", name: "Vikram Rao",     city: "Delhi",     phone: "+91 98001 11111", appliedAt: "10 min ago",   language: "Hindi",     followers: 11200, experience: "Wants to try hosting after years as agent" },
 ];
 
 const hostEarningsData = [
@@ -269,23 +270,38 @@ function ApproveHostDialog({
 }) {
   const [selectedAgentId, setSelectedAgentId] = useState("");
   if (!app) return null;
-  const selectedAgent = AGENTS_META.find(a => a.id === selectedAgentId);
-  const derivedAdmin  = getLiveAdmins().find(a => a.id === selectedAgent?.adminId);
+  const isAlreadyAgent = AGENTS_META.some(a => a.name === app.name);
+  const selectedAgent  = AGENTS_META.find(a => a.id === selectedAgentId);
+  const derivedAdmin   = getLiveAdmins().find(a => a.id === selectedAgent?.adminId);
   return (
     <Dialog open={open} onOpenChange={() => { setSelectedAgentId(""); onClose(); }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-500" />
+            {isAlreadyAgent
+              ? <XCircle className="w-5 h-5 text-red-500" />
+              : <CheckCircle className="w-5 h-5 text-green-500" />}
             Approve & Assign Host
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-1">
+          {/* Ineligibility block */}
+          {isAlreadyAgent && (
+            <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+              <XCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-red-800">Ineligible — Already an Agent</p>
+                <p className="text-xs text-red-700 mt-0.5">This person is currently registered as an active Agent on the platform. A user cannot hold both Host and Agent roles simultaneously. Reject this application.</p>
+              </div>
+            </div>
+          )}
           {/* SA note */}
-          <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
-            <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
-            <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this host application and assign them to a dedicated agent.</p>
-          </div>
+          {!isAlreadyAgent && (
+            <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+              <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
+              <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this host application and assign them to a dedicated agent.</p>
+            </div>
+          )}
           {/* Applicant info */}
           <div className="flex items-center gap-3 bg-muted rounded-xl p-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
@@ -342,7 +358,7 @@ function ApproveHostDialog({
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => { setSelectedAgentId(""); onClose(); }}>Cancel</Button>
           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1"
-            disabled={!selectedAgentId}
+            disabled={!selectedAgentId || isAlreadyAgent}
             onClick={() => { onApprove(app.id, selectedAgentId); setSelectedAgentId(""); onClose(); }}>
             <CheckCircle className="w-3.5 h-3.5" /> Approve & Assign
           </Button>
@@ -716,13 +732,22 @@ export default function HostsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
-            {scopedPending.map(app => (
-              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-violet-100 p-3 shadow-sm">
+            {scopedPending.map(app => {
+              const alreadyAgent = AGENTS_META.some(a => a.name === app.name);
+              return (
+              <div key={app.id} className={`flex items-center gap-3 bg-white rounded-xl border p-3 shadow-sm ${alreadyAgent ? "border-red-200 bg-red-50/30" : "border-violet-100"}`}>
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {app.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{app.name}</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-sm">{app.name}</p>
+                    {alreadyAgent && (
+                      <Badge className="bg-red-100 text-red-700 border border-red-200 text-[10px] h-4 px-1.5 gap-1 font-semibold">
+                        <XCircle className="w-2.5 h-2.5" /> Ineligible — Already an Agent
+                      </Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
@@ -739,13 +764,16 @@ export default function HostsPage() {
                     onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
                     <XCircle className="w-3 h-3" /> Reject
                   </Button>
-                  <Button size="sm" className="h-7 text-xs gap-1 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 text-white border-0"
-                    onClick={() => setApproveTarget(app)}>
+                  <Button size="sm"
+                    className={`h-7 text-xs gap-1 text-white border-0 ${alreadyAgent ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700"}`}
+                    disabled={alreadyAgent}
+                    onClick={() => !alreadyAgent && setApproveTarget(app)}>
                     <CheckCircle className="w-3 h-3" /> Approve & Assign
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}
