@@ -38,18 +38,22 @@ interface AdminRecord {
   lastLogin: string | null;
 }
 
-// Seed default Super Admin
-const SA_PASSWORD = "Ridhi@2025";
-const SA_EMAIL = "admin.sneha@ridhi.app";
+// Seed default Super Admin — credentials must be provided via environment variables
+// so they are never hardcoded in the source. If not set, no seed admin is created.
+const SA_EMAIL = process.env["ADMIN_SA_EMAIL"] || null;
+const SA_PASSWORD = process.env["ADMIN_SA_PASSWORD"] || null;
 
-// Initialize seed admin
 async function seedAdmin() {
+  if (!SA_EMAIL || !SA_PASSWORD) {
+    logger.warn("ADMIN_SA_EMAIL and ADMIN_SA_PASSWORD env vars not set. Seed admin skipped.");
+    return;
+  }
   const hash = await bcrypt.hash(SA_PASSWORD, 12);
   adminStore.set("adm-sa", {
     id: "adm-sa",
     email: SA_EMAIL,
     passwordHash: hash,
-    name: "Sneha Sharma",
+    name: "System Administrator",
     role: "super_admin",
     adminId: "adm-sa",
     status: "active",
@@ -57,6 +61,7 @@ async function seedAdmin() {
     createdAt: new Date().toISOString(),
     lastLogin: null,
   });
+  logger.info("Seed admin created successfully");
 }
 seedAdmin();
 

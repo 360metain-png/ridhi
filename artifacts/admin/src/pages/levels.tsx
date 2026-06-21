@@ -83,7 +83,7 @@ const AGENT_DEMOTION_RISK = [
 // Pending manual promo requests (submitted by agents / admins for SA approval)
 const PENDING_PROMOS = [
   { id: "pp1", type: "host",  name: "Dev Kumar",   currentLevel: "L4", targetLevel: "L5", requestedBy: "agent.rahul@ridhi.app",  reason: "Met all thresholds, event host partner",       date: "Dec 20" },
-  { id: "pp2", type: "agent", name: "Deepak Singh", currentLevel: "A3", targetLevel: "A4", requestedBy: "admin.sneha@ridhi.app", reason: "Consistently 80%+ active rate past 3 months", date: "Dec 19" },
+  { id: "pp2", type: "agent", name: "Deepak Singh", currentLevel: "A3", targetLevel: "A4", requestedBy: "super-admin@ridhi.app", reason: "Consistently 80%+ active rate past 3 months", date: "Dec 19" },
   { id: "pp3", type: "host",  name: "Meera Pillai", currentLevel: "L3", targetLevel: "L4", requestedBy: "agent.rahul@ridhi.app", reason: "Brand tie-up, needs L4 for fan club unlock",  date: "Dec 17" },
 ];
 

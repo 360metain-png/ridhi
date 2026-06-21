@@ -103,7 +103,7 @@ export default function Settings() {
       {/* Status bar */}
       <div className="flex items-center gap-3 rounded-xl bg-green-50 border border-green-200 px-4 py-3">
         <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-        <p className="text-sm text-green-700">All systems operational · Last config change: <strong>Dec 20, 2025 at 10:42 AM</strong> by arjun@ridhi.app</p>
+        <p className="text-sm text-green-700">All systems operational · Last config change: <strong>Dec 20, 2025 at 10:42 AM</strong></p>
       </div>
 
       <Tabs defaultValue="general">

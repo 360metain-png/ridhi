@@ -120,7 +120,7 @@ const buildPermMap = (perms: string[]): Record<string, boolean> =>
 // ── Mock data ──────────────────────────────────────────────────────────────
 const INITIAL_ADMINS: AdminAccount[] = [
   {
-    id: "a1", name: "Sneha Patel",   email: "sneha@ridhi.app",   phone: "+91 98765 43210",
+    id: "a1", name: "Sneha Patel", email: "sneha@ridhi.app", phone: "+91 98765 43210",
     role: "Content Admin",   status: "active",    lastLogin: "1h ago",  joinedAt: "Jan 2025",
     actionsToday: 34, actionsTotal: 2840, city: "Bangalore",
     permissions: buildPermMap(PRESETS.content_admin.perms),

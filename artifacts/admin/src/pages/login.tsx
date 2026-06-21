@@ -115,7 +115,6 @@ export default function Login() {
                   <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-red-600 font-medium leading-relaxed">{error}</p>
-                    <p className="text-[10px] text-red-500/80 mt-1">Super Admin: admin.sneha@ridhi.app / Ridhi@2025</p>
                   </div>
                 </div>
               )}

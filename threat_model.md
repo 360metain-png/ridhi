@@ -24,7 +24,7 @@ Ridhi is a public-facing social networking and dating application deployed on Re
 
 - **Production entry points**: `artifacts/ridhi/app`, `artifacts/api-server/src/index.ts`, `artifacts/api-server/src/routes/*.ts`, `artifacts/admin/src/App.tsx`
 - **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/ridhi/app/wallet.tsx`, `artifacts/ridhi/app/subscription.tsx`
-- **Public vs authenticated surfaces**: `/api/*` is publicly reachable; current app “authentication” is largely client-side; `/admin/` is publicly reachable but appears mostly mock/local-state
+- **Public vs authenticated surfaces**: `/api/*` is publicly reachable; user authentication uses OTP + JWT; admin authentication uses password + JWT with role-based access control; `/admin/` is publicly reachable but requires a valid JWT token enforced server-side
 - **Usually ignore unless reachability changes**: `artifacts/mockup-sandbox`, build scripts, placeholder/mock-data-only pages with no trusted backend effect
 
 ## Threat Categories
@@ -49,4 +49,4 @@ Public OTP and payment endpoints are reachable without authentication. These flo
 
 ### Elevation of Privilege
 
-Any privileged surface, especially `/admin/`, must enforce authorization in a trusted backend rather than relying on localStorage, hidden routes, or client-side role flags. Likewise, payment verification must not trust client-supplied flags or other user-controlled assertions that can elevate a non-paying user into a paid role.
+Any privileged surface must enforce authorization in a trusted backend. The admin panel (`/admin/`) now requires JWT authentication for all protected routes, and admin endpoints are protected by `requireAdmin`, `requireSuperAdmin`, and `requireAdminOrSuper` middleware. The default seed admin credentials are no longer hardcoded; they must be set via `ADMIN_SA_EMAIL` and `ADMIN_SA_PASSWORD` environment variables. Payment verification must not trust client-supplied flags or other user-controlled assertions that can elevate a non-paying user into a paid role.

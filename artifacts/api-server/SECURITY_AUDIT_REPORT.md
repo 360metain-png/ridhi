@@ -152,9 +152,10 @@ req.user = { sub: decoded.sub, type: decoded.type };
 - Admin CRUD restricted to Super Admin
 - Default Super Admin seeded on startup
 
-**Default credentials (must be changed in production):**
-- Email: `admin.sneha@ridhi.app`
-- Password: `Ridhi@2025`
+**Default credentials removed.** Super Admin seed credentials must be supplied via environment variables:
+- `ADMIN_SA_EMAIL` — the seed super admin email
+- `ADMIN_SA_PASSWORD` — the seed super admin password
+If these env vars are not set, no seed admin is created and the admin auth system requires a super admin to be created via direct database access or another bootstrap method.
 
 **Files:** `routes/admin-auth.ts`, `lib/auth.ts`
 
@@ -266,7 +267,7 @@ Before deploying to production, ensure:
 - [ ] Set `JWT_SECRET` to a strong random string (256+ bits)
 - [ ] Set `ENCRYPTION_KEY` to a 64-character hex string (32 bytes)
 - [ ] Set `SESSION_SECRET` to a strong random string
-- [ ] Change default Super Admin password (`Ridhi@2025`)
+- [ ] Set `ADMIN_SA_EMAIL` and `ADMIN_SA_PASSWORD` env vars for the seed Super Admin
 - [ ] Remove or disable demo OTP mode (`PURE_DEMO_MODE`)
 - [ ] Configure MSG91 API keys for production OTP
 - [ ] Set up Razorpay production keys
