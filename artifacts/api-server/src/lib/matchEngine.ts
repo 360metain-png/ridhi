@@ -286,30 +286,41 @@ export async function startCallWithDeduct(
   return { call, ok: true };
 }
 
-/** Settle remaining coins at call end. Records unpaid debt if deduction fails. */
+/**
+ * Reconcile billing at call end.
+ * Single source of truth: totalDue = ceil(durationSec / 60) * coinRate.
+ * - If userDeducted < totalDue: charge the shortfall (debt if fails).
+ * - If userDeducted > totalDue: refund the over-deduction atomically.
+ * - If equal: no-op.
+ */
 export async function settleCall(callId: string): Promise<{ settledA: number; settledB: number } | null> {
   const call = activeCalls.get(callId);
   if (!call) return null;
-  const durationMin = Math.ceil((Date.now() - call.startedAt) / 60000);
+
+  const durationSec = Math.max(1, Math.floor((Date.now() - call.startedAt) / 1000));
+  const durationMin = Math.ceil(durationSec / 60);
   const totalDue = durationMin * call.coinRate;
-  const settleA = Math.max(0, totalDue - call.userADeducted);
-  const settleB = Math.max(0, totalDue - call.userBDeducted);
-  if (settleA <= 0 && settleB <= 0) return { settledA: call.userADeducted, settledB: call.userBDeducted };
-  const [aResult, bResult] = await Promise.all([
-    settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : Promise.resolve({ success: true, newBalance: 0 }),
-    settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : Promise.resolve({ success: true, newBalance: 0 }),
+
+  async function reconcileUser(userId: string, deducted: number): Promise<number> {
+    const delta = totalDue - deducted; // positive = owe more; negative = over-charged
+    if (delta === 0) return deducted;
+    const result = await deductCoinsFromUser(userId, delta); // negative delta = refund
+    if (result.success) return deducted + delta; // = totalDue
+    // delta > 0 means charge failed (insufficient balance at end): record debt
+    if (delta > 0) {
+      callDebt.push({ callId, userId, owedCoins: delta, recordedAt: Date.now(), reason: "error" in result ? result.error : "settlement_failed" });
+    }
+    // delta < 0 means refund failed: log but don't penalise user (rare DB error)
+    return deducted; // unchanged — keep the over-deducted amount as-is
+  }
+
+  const [finalA, finalB] = await Promise.all([
+    reconcileUser(call.userA.id, call.userADeducted),
+    reconcileUser(call.userB.id, call.userBDeducted),
   ]);
-  if (aResult.success) {
-    call.userADeducted += settleA;
-  } else if (settleA > 0) {
-    callDebt.push({ callId, userId: call.userA.id, owedCoins: settleA, recordedAt: Date.now(), reason: "error" in aResult ? aResult.error : "settlement_failed" });
-  }
-  if (bResult.success) {
-    call.userBDeducted += settleB;
-  } else if (settleB > 0) {
-    callDebt.push({ callId, userId: call.userB.id, owedCoins: settleB, recordedAt: Date.now(), reason: "error" in bResult ? bResult.error : "settlement_failed" });
-  }
-  return { settledA: call.userADeducted, settledB: call.userBDeducted };
+  call.userADeducted = finalA;
+  call.userBDeducted = finalB;
+  return { settledA: finalA, settledB: finalB };
 }
 
 /**
