@@ -43,7 +43,7 @@ export interface ActiveCall {
   userA: MatchUser;
   userB: MatchUser;
   startedAt: number;
-  coinRate: number; // coins per minute
+  coinRate: number; // coins per minute (server-authoritative)
   userACoinsSpent: number;
   userBCoinsSpent: number;
   type: "audio" | "video";
@@ -163,14 +163,53 @@ export function removeFromQueue(userId: string) {
   if (idx >= 0) waitingQueue.splice(idx, 1);
 }
 
-/** Create an active call record */
+const AUDIO_RATE = 10;
+const VIDEO_RATE = 25;
+
+/** Resolve coin rate server-side; never trust client payload */
+function resolveCoinRate(type: "audio" | "video"): number {
+  return type === "audio" ? AUDIO_RATE : VIDEO_RATE;
+}
+
+/**
+ * Deduct coins from user for call charges.
+ * Returns { success, newBalance } or { success: false, error }.
+ * Uses atomic conditional SQL to prevent double-spend.
+ */
+export async function deductCoinsFromUser(
+  userId: string,
+  amount: number,
+): Promise<{ success: true; newBalance: number } | { success: false; error: string }> {
+  if (amount <= 0) return { success: true, newBalance: 0 }; // no-op
+  try {
+    const { db } = await import("@workspace/db");
+    const { users } = await import("@workspace/db");
+    const { eq, and, gte, sql } = await import("drizzle-orm");
+    const result = await db.update(users)
+      .set({ coins: sql`${users.coins} - ${amount}` })
+      .where(and(eq(users.phone, userId), gte(users.coins, amount)))
+      .returning({ coins: users.coins });
+    if (result.length === 0) {
+      // Check if user exists or just insufficient
+      const [user] = await db.select({ coins: users.coins }).from(users).where(eq(users.phone, userId));
+      if (!user) return { success: false, error: "User not found" };
+      return { success: false, error: "Insufficient coins" };
+    }
+    return { success: true, newBalance: result[0].coins };
+  } catch {
+    return { success: false, error: "Database error" };
+  }
+}
+
+/** Create an active call record. coinRate is server-authoritative, never from client. */
 export function startCall(
   callId: string,
   userA: MatchUser,
   userB: MatchUser,
   type: "audio" | "video",
-  coinRate: number,
+  _legacyCoinRate?: number, // deprecated: ignored; server resolves from type
 ): ActiveCall {
+  const coinRate = resolveCoinRate(type);
   const call: ActiveCall = {
     callId,
     userA,
@@ -184,6 +223,48 @@ export function startCall(
   };
   activeCalls.set(callId, call);
   return call;
+}
+
+/** Pre-deduct coins at call start (deterrent for free riders) */
+export async function startCallWithDeduct(
+  callId: string,
+  userA: MatchUser,
+  userB: MatchUser,
+  type: "audio" | "video",
+): Promise<{ call: ActiveCall; ok: true } | { ok: false; error: string }> {
+  const rate = resolveCoinRate(type);
+  const upfront = Math.max(rate, 5); // deduct 1 minute worth upfront
+  const [aDeduction, bDeduction] = await Promise.all([
+    deductCoinsFromUser(userA.id, upfront),
+    deductCoinsFromUser(userB.id, upfront),
+  ]);
+  if (!aDeduction.success) {
+    return { ok: false, error: `User A failed: ${aDeduction.error}` };
+  }
+  if (!bDeduction.success) {
+    return { ok: false, error: `User B failed: ${bDeduction.error}` };
+  }
+  const call = startCall(callId, userA, userB, type);
+  call.userACoinsSpent = upfront;
+  call.userBCoinsSpent = upfront;
+  return { call, ok: true };
+}
+
+/** Settle remaining coins at call end */
+export async function settleCall(callId: string): Promise<{ settledA: number; settledB: number } | null> {
+  const call = activeCalls.get(callId);
+  if (!call) return null;
+  const durationMin = Math.ceil((Date.now() - call.startedAt) / 60000);
+  const totalDue = durationMin * call.coinRate;
+  const settleA = Math.max(0, totalDue - call.userACoinsSpent);
+  const settleB = Math.max(0, totalDue - call.userBCoinsSpent);
+  const [aResult, bResult] = await Promise.all([
+    settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : { success: true, newBalance: 0 } as any,
+    settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : { success: true, newBalance: 0 } as any,
+  ]);
+  if (aResult.success) call.userACoinsSpent += settleA;
+  if (bResult.success) call.userBCoinsSpent += settleB;
+  return { settledA: call.userACoinsSpent, settledB: call.userBCoinsSpent };
 }
 
 /** End a call and record history */

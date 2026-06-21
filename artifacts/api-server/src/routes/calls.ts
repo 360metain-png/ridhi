@@ -5,6 +5,8 @@ import {
   removeFromQueue,
   startCall,
   endCall,
+  startCallWithDeduct,
+  settleCall,
   getQueueStats,
   getCallByUser,
   getCategories,
@@ -112,19 +114,38 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
         }, callType ?? "audio");
 
         if (match) {
-          // We found a match! Notify both users
+          // We found a match! Server-authoritative billing: deduct upfront before starting call.
           const callId = `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          const call = startCall(callId, match, {
-            id: userId,
-            name,
-            gender,
-            language,
-            category,
-            avatar,
-            city,
-            socketId,
-            joinedAt: Date.now(),
-          }, msg.payload.callType ?? "audio", msg.payload.coinRate ?? 10);
+          const callType = msg.payload.callType ?? "audio";
+          const deductResult = await startCallWithDeduct(
+            callId,
+            match,
+            {
+              id: userId,
+              name,
+              gender,
+              language,
+              category,
+              avatar,
+              city,
+              socketId,
+              joinedAt: Date.now(),
+            },
+            callType,
+          );
+          if (!deductResult.ok) {
+            // One or both users couldn't pay ↔ notify both and end
+            sendTo(match.socketId, {
+              type: "call_ended",
+              payload: { reason: "insufficient_coins", message: "Call cancelled: insufficient coins" },
+            });
+            sendTo(socketId, {
+              type: "call_ended",
+              payload: { reason: "insufficient_coins", message: "Call cancelled: insufficient coins" },
+            });
+            return;
+          }
+          const call = deductResult.call;
 
           // Send peer info back to both users. Only expose fields they chose to share.
           const aliasA = match.name?.trim() ? match.name : `Ridhi ${Math.floor(Math.random() * 1000) + 1}`;
