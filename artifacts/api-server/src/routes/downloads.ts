@@ -1,9 +1,17 @@
 import { Router } from "express";
+import { db } from "@workspace/db";
+import { users } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { requireUser, type AuthenticatedRequest, getUserId } from "../lib/auth";
 import { apiRateLimit } from "../lib/rateLimit";
 import { logger } from "../lib/logger";
 
 const router = Router();
+
+// The JWT sub is the phone number (not UUID), so all lookups go by users.phone.
+function userBySub(sub: string) {
+  return eq(users.phone, sub);
+}
 
 // ── POST /api/downloads — record a paid download transaction ───────────────
 router.post(
@@ -26,31 +34,53 @@ router.post(
     }
 
     const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
 
-    // Revenue split: 60% creator, 40% platform
-    const creatorShare = Math.floor(price * 0.6);
-    const platformShare = price - creatorShare;
+    // Server-side coin balance check
+    try {
+      const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      if (user.coins < price) {
+        res.status(402).json({ error: "Insufficient coins", coins: user.coins });
+        return;
+      }
+      // Deduct coins server-side
+      const newBalance = user.coins - price;
+      await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
 
-    logger.info(
-      { userId, contentId, contentType, price, creatorShare, platformShare },
-      "Download transaction"
-    );
+      // Revenue split: 60% creator, 40% platform
+      const creatorShare = Math.floor(price * 0.6);
+      const platformShare = price - creatorShare;
 
-    // In production: persist to database, update creator wallet, verify coins
-    // For now: return success with split details
-    res.status(200).json({
-      success: true,
-      data: {
-        transactionId: `dl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        contentId,
-        contentType,
-        price,
-        creatorShare,
-        platformShare,
-        ownerId,
-        downloadedAt: new Date().toISOString(),
-      },
-    });
+      logger.info(
+        { userId, contentId, contentType, price, creatorShare, platformShare, newBalance },
+        "Download transaction"
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          transactionId: `dl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          contentId,
+          contentType,
+          price,
+          creatorShare,
+          platformShare,
+          ownerId,
+          coins: newBalance,
+          downloadedAt: new Date().toISOString(),
+        },
+      });
+    } catch (err: any) {
+      logger.error({ err: err.message }, "download transaction error");
+      res.status(500).json({ error: "Failed to process download" });
+    }
   }
 );
 

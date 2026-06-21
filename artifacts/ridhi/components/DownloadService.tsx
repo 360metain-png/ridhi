@@ -34,7 +34,7 @@ export function DownloadService({
   ownerId,
   onDownloadComplete,
 }: DownloadServiceProps) {
-  const { user, deductCoins, recordDownloadEarning } = useAuth();
+  const { user, deductCoins, recordDownloadEarning, updateProfile } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -62,26 +62,34 @@ export function DownloadService({
     setProcessing(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    // Simulate API call delay
-    await new Promise((r) => setTimeout(r, 800));
-
-    // Deduct from downloader
-    const deducted = await deductCoins(price);
-    if (!deducted) {
+    // Server-side deduct first (authoritative); if it fails, don't deduct locally
+    let resp: { success?: boolean; data?: { coins?: number } } = {};
+    try {
+      const { apiFetch } = await import("@/utils/api");
+      resp = await apiFetch<{ success: boolean; data?: { coins?: number } }>("/api/downloads", {
+        method: "POST",
+        body: JSON.stringify({ contentId, contentType, ownerId, price }),
+      });
+    } catch (err: any) {
+      setProcessing(false);
+      if (err?.message?.includes("402")) {
+        Alert.alert("Not Enough Coins", "You need more coins to download this content.");
+      } else {
+        Alert.alert("Error", "Could not process payment. Please try again.");
+      }
+      return;
+    }
+    if (!resp.success) {
       setProcessing(false);
       Alert.alert("Error", "Could not process payment. Please try again.");
       return;
     }
 
-    // Credit creator via API (backend handles revenue split)
-    try {
-      const { apiFetch } = await import("@/utils/api");
-      await apiFetch("/api/downloads", {
-        method: "POST",
-        body: JSON.stringify({ contentId, contentType, ownerId, price }),
-      });
-    } catch {
-      // API logging failed, but coins already deducted — continue
+    // Reflect server-side deduction in local state
+    if (resp.data?.coins !== undefined) {
+      await updateProfile({ coins: resp.data.coins });
+    } else {
+      await deductCoins(price);
     }
 
     // Record download transaction in AsyncStorage

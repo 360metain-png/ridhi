@@ -16,6 +16,8 @@ import analyticsConfigRouter from "./analytics-config";
 import downloadsRouter from "./downloads";
 import moderateRouter from "./moderate";
 import friendRequestsRouter from "./friend_requests";
+import walletRouter from "./wallet";
+import plansRouter from "./plans";
 
 const router: IRouter = Router();
 
@@ -36,5 +38,7 @@ router.use(analyticsConfigRouter);
 router.use(downloadsRouter);
 router.use(moderateRouter);
 router.use(friendRequestsRouter);
+router.use(walletRouter);
+router.use(plansRouter);
 
 export default router;

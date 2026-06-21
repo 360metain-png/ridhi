@@ -112,6 +112,8 @@ const PLATFORM_APIS = [
   { id: "chat", name: "Chat & Messaging API", path: "/api/chat", category: "Social", status: "active", version: "v2", calls: "65K/h", latency: "22ms", enabled: true },
   { id: "calls", name: "Audio/Video Calls API", path: "/api/calls", category: "Social", status: "active", version: "v1", calls: "3.4K/h", latency: "210ms", enabled: true },
   { id: "coins", name: "Coins & Wallet API", path: "/api/coins", category: "Finance", status: "active", version: "v2", calls: "5.8K/h", latency: "67ms", enabled: true },
+  { id: "wallet", name: "Wallet API", path: "/api/wallet", category: "Finance", status: "active", version: "v2", calls: "3.2K/h", latency: "42ms", enabled: true },
+  { id: "plan", name: "Plan Subscribe API", path: "/api/plan", category: "Finance", status: "active", version: "v2", calls: "1.1K/h", latency: "55ms", enabled: true },
   { id: "payouts", name: "Payouts API", path: "/api/payouts", category: "Finance", status: "active", version: "v1", calls: "320/h", latency: "890ms", enabled: true },
   { id: "notifications", name: "Notifications API", path: "/api/notifications", category: "Platform", status: "active", version: "v1", calls: "88K/h", latency: "95ms", enabled: true },
   { id: "kyc", name: "KYC / E-Verify API", path: "/api/kyc", category: "Platform", status: "active", version: "v1", calls: "210/h", latency: "1.2s", enabled: true },
@@ -253,6 +255,9 @@ const FEATURE_FLAGS: FeatureCategory[] = [
     icon: ShoppingBag, color: "text-yellow-600", bg: "bg-yellow-50", borderColor: "border-yellow-200",
     features: [
       { id: "coin-wallet",       name: "Coin Wallet & Recharge",   desc: "Ridhi Coins balance, daily reward, ₹49–₹499 recharge packs",           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "server-wallet",     name: "Server-Authoritative Wallet", desc: "All coin operations enforced server-side: add, deduct, balance query, plan activation", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "vip-subscriptions", name: "VIP Subscription Plans",    desc: "4-tier VIP (Silver/Gold/Platinum/Diamond) with weekly/monthly/yearly billing",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "creator-plans",     name: "Creator Plans",            desc: "3-tier Creator plans (Starter/Pro/Elite) with monthly billing and bonus coins", phase: "2", audience: "Creators",       status: "live",  enabled: true  },
       { id: "coin-fountain",     name: "Coin Fountain Animations", desc: "Burst & rain coin animations during gifts in live streams",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "creator-dashboard", name: "Creator Dashboard",        desc: "Analytics, views chart, top content, earnings breakdown & withdrawal", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
       { id: "marketplace",       name: "Marketplace",              desc: "Creator brand deals & sponsorships (not product marketplace)",       phase: "2", audience: "All Users",      status: "beta",  enabled: false  },

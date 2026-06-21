@@ -12,7 +12,7 @@ import {
   FileText, HelpCircle, Award, Sparkles, TrendingUp,
   Crown, Gift, Users, ToggleRight, Globe, Settings, ShoppingBag,
   Key, Webhook, AlertTriangle, Lock, CreditCard,
-  UsersRound, ClipboardList, Percent, DollarSign, Download} from "lucide-react";
+  UsersRound, ClipboardList, Percent, DollarSign, Download, Wallet} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -769,6 +769,25 @@ const ADMIN_SECTIONS: Section[] = [
       "Host & Agent analytics: top earners by coin volume, top agents by managed volume",
       "Revenue analytics (Super Admin only) are not shown on the Admin analytics view",
     ],
+  },
+  {
+    id: "a-wallet",
+    icon: Wallet,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    title: "Wallet & Plan Management",
+    subtitle: "Server-authoritative coin wallet and VIP plan activation — all mutations enforced by backend",
+    features: [
+      "Coin Wallet API: GET /api/wallet returns authenticated user's coin balance and active plan",
+      "Coin Add API: POST /api/wallet/coins/add — server-only coin credit (used after verified payment)",
+      "Coin Deduct API: POST /api/wallet/coins/deduct — server-side balance check, 402 if insufficient, atomic update",
+      "Plan Subscribe API: POST /api/plan/subscribe — activates VIP tier (Silver/Gold/Platinum/Diamond) with billing period and bonus coins",
+      "Plan Cancel API: POST /api/plan/cancel — reverts user to free tier",
+      "Download validation: POST /api/downloads now validates coin balance server-side before deducting; 402 if insufficient",
+      "Payment callback hardening: GET /api/payments/callback verifies provider status before marking orders verified; rejects unknown orders",
+      "All wallet mutations are logged with userId, amount, reason, and new balance for audit",
+    ],
+    note: "Client-side coin balance is purely for UI display. The server is the single source of truth. Any client attempt to bypass server validation will fail with 402 Insufficient Coins.",
   },
   {
     id: "a-ai-hub",

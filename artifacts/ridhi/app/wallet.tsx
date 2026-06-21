@@ -123,7 +123,7 @@ export default function WalletScreen() {
   useTrackScreen("wallet");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins, claimDailyReward } = useAuth();
+  const { user, addCoins, claimDailyReward, syncWallet } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -234,6 +234,8 @@ export default function WalletScreen() {
     addCoins(total);
     fire({ type: "credit", amount: total, label: "Recharge", sublabel: pendingPack.label, large: total >= 500, bottom: 200 });
     trackCoinRecharge(total);
+    // Sync authoritative server wallet state after payment success
+    syncWallet().catch(() => {});
     setPendingPack(null);
   };
 

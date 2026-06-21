@@ -34,7 +34,8 @@ function isTestMode(): boolean {
 }
 
 // ── Server-side order stores ─────────────────────────────────────────────────
-const createdOrders  = new Set<string>();
+// createdOrders: orderId → { userId, provider } (binds each order to the authenticated user)
+const createdOrders  = new Map<string, { userId: string; provider: string }>();
 const verifiedOrders = new Map<string, string>();
 
 // ── Provider-specific order creation ────────────────────────────────────────
@@ -286,8 +287,13 @@ router.post("/payments/create-order", requireUser, paymentRateLimit, async (req:
       receipt ?? `rcpt_${Date.now()}`,
       notes ?? {},
     );
-    createdOrders.add(order.id);
-    req.log.info({ orderId: order.id, amount, provider }, `${provider} order created`);
+    const userId = req.user?.sub;
+    if (!userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    createdOrders.set(order.id, { userId, provider });
+    req.log.info({ orderId: order.id, amount, provider, userId }, `${provider} order created`);
     res.json({ ...order, provider });
   } catch (err) {
     req.log.error({ err, provider }, "Failed to create payment order");
@@ -324,7 +330,8 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
   }
 
   // Reject unknown orders
-  if (!createdOrders.has(resolvedOrderId)) {
+  const orderMeta = createdOrders.get(resolvedOrderId);
+  if (!orderMeta) {
     req.log.warn({ orderId: resolvedOrderId }, "Verification rejected: unknown order ID");
     res.status(400).json({ error: "Unknown order" });
     return;
@@ -513,7 +520,7 @@ router.get("/payments/checkout", (req, res) => {
 
 // ── GET /api/payments/callback ───────────────────────────────────────────────
 // Handles redirect callbacks from redirect-based providers
-router.get("/payments/callback", (req, res) => {
+router.get("/payments/callback", paymentRateLimit, async (req, res) => {
   const { provider, order_id, transactionId, payment_id } = req.query as Record<string, string>;
   const resolvedOrderId = order_id || "";
   const resolvedPaymentId = transactionId || payment_id || "";
@@ -523,22 +530,108 @@ router.get("/payments/callback", (req, res) => {
     return;
   }
 
-  if (createdOrders.has(resolvedOrderId)) {
+  // Reject if the order is unknown (this implies it was created by the authenticated user)
+  const orderMeta = createdOrders.get(resolvedOrderId);
+  if (!orderMeta) {
+    res.status(400).send("Unknown order");
+    return;
+  }
+
+  // Verify payment status with the provider before marking verified
+  // Use the stored provider from when the order was created (never trust client-provided query params)
+  const activeProvider = orderMeta.provider as PaymentProvider;
+  let verified = false;
+
+  try {
+    switch (activeProvider) {
+      case "cashfree": {
+        const clientId = process.env["CASHFREE_CLIENT_ID"];
+        const clientSecret = process.env["CASHFREE_CLIENT_SECRET"];
+        if (clientId && clientSecret) {
+          const isProd = clientId.startsWith("CF") && !clientId.includes("TEST");
+          const baseUrl = isProd ? "https://api.cashfree.com/pg" : "https://sandbox.cashfree.com/pg";
+          const statusRes = await fetch(`${baseUrl}/orders/${resolvedOrderId}`, {
+            headers: { "x-client-id": clientId, "x-client-secret": clientSecret, "x-api-version": "2023-08-01" },
+          });
+          if (statusRes.ok) {
+            const data = await statusRes.json() as any;
+            verified = data.order_status === "PAID";
+          }
+        }
+        break;
+      }
+      case "phonepe": {
+        const merchantId = process.env["PHONEPE_MERCHANT_ID"];
+        const saltKey = process.env["PHONEPE_SALT_KEY"];
+        if (merchantId && saltKey) {
+          const isProd = !merchantId.startsWith("PGTEST");
+          const baseUrl = isProd ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/hermes";
+          const toHash = `/pg/v1/status/${merchantId}/${resolvedOrderId}` + saltKey;
+          const xVerify = crypto.createHash("sha256").update(toHash).digest("hex") + "###1";
+          const statusRes = await fetch(`${baseUrl}/pg/v1/status/${merchantId}/${resolvedOrderId}`, {
+            headers: { "Content-Type": "application/json", "X-VERIFY": xVerify, "X-MERCHANT-ID": merchantId },
+          });
+          if (statusRes.ok) {
+            const data = await statusRes.json() as any;
+            verified = data.code === "PAYMENT_SUCCESS";
+          }
+        }
+        break;
+      }
+      case "instamojo": {
+        const apiKey = process.env["INSTAMOJO_API_KEY"];
+        const authToken = process.env["INSTAMOJO_AUTH_TOKEN"];
+        if (apiKey && authToken) {
+          const isProd = !authToken.startsWith("test_");
+          const baseUrl = isProd ? "https://www.instamojo.com/api/1.1" : "https://test.instamojo.com/api/1.1";
+          const statusRes = await fetch(`${baseUrl}/payment-requests/${resolvedOrderId}/`, {
+            headers: { "X-Api-Key": apiKey, "X-Auth-Token": authToken },
+          });
+          if (statusRes.ok) {
+            const data = await statusRes.json() as any;
+            verified = data.payment_request?.status === "Completed";
+          }
+        }
+        break;
+      }
+      case "razorpay": {
+        const rzp = await getRazorpay();
+        if (rzp) {
+          const order = await rzp.orders.fetch(resolvedOrderId);
+          verified = order.status === "paid";
+        }
+        break;
+      }
+    }
+  } catch (err) {
+    req.log.error({ err, provider: activeProvider }, "Callback payment verification error");
+  }
+
+  if (verified) {
     verifiedOrders.set(resolvedOrderId, resolvedPaymentId);
+    req.log.info({ orderId: resolvedOrderId, paymentId: resolvedPaymentId, provider: activeProvider }, "Payment verified via callback");
+  } else {
+    req.log.warn({ orderId: resolvedOrderId, provider: activeProvider }, "Callback payment verification failed");
   }
 
   // Sanitize user-controlled values before embedding in HTML
   const escapeHtml = (str: string) => str.replace(/[&<>"']/g, (m) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]!));
   const safePaymentId = escapeHtml(resolvedPaymentId);
 
+  const title = verified ? "✅ Payment Received" : "❌ Payment Failed";
+  const color = verified ? "#34C759" : "#FF3B30";
+  const subtitle = verified
+    ? `Transaction: ${safePaymentId}`
+    : "We could not verify your payment with the provider. Please try again or contact support.";
+
   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>body{font-family:sans-serif;background:#0d0d0d;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
 .logo{font-size:28px;font-weight:800;background:linear-gradient(135deg,#E91E8C,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.success{color:#34C759;font-size:20px;font-weight:700;margin:16px 0}
+.status{color:${color};font-size:20px;font-weight:700;margin:16px 0}
 .close{color:#888;font-size:14px;margin-top:16px}</style></head>
-<body><div class="logo">Ridhi</div><div class="success">✅ Payment Received</div>
-<p>Transaction: ${safePaymentId}</p><p class="close">You can close this tab.</p></body></html>`;
+<body><div class="logo">Ridhi</div><div class="status">${title}</div>
+<p>${subtitle}</p><p class="close">You can close this tab.</p></body></html>`;
 
   res.setHeader("Content-Type", "text/html");
   res.send(html);

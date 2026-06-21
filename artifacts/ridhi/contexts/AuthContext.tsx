@@ -111,6 +111,7 @@ interface AuthContextValue {
   syncKycStatus: (userId: string) => Promise<void>;
   syncPkBattleStatus: (userId: string) => Promise<void>;
   recordDownloadEarning: (amount: number) => Promise<void>;
+  syncWallet: () => Promise<void>;
   // Saved posts
   savePost: (postId: string) => Promise<void>;
   unsavePost: (postId: string) => Promise<void>;
@@ -300,12 +301,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addCoins = useCallback(async (amount: number) => {
+    // Optimistic local update
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, coins: prev.coins + amount };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
+    // Attempt server-side sync; if it fails, log and continue
+    try {
+      const resp = await apiFetch<{ success: boolean; coins: number }>("/api/wallet/coins/add", {
+        method: "POST",
+        body: JSON.stringify({ amount, reason: "client" }),
+      });
+      if (resp?.coins !== undefined) {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, coins: resp.coins };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch {
+      // offline: keep optimistic local state
+    }
   }, []);
 
   const claimDailyReward = useCallback(async (): Promise<boolean> => {
@@ -336,6 +355,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
     await new Promise((r) => setTimeout(r, 50));
+    if (!success) return false;
+    // Server-side deduct
+    try {
+      const resp = await apiFetch<{ success: boolean; coins: number; error?: string }>("/api/wallet/coins/deduct", {
+        method: "POST",
+        body: JSON.stringify({ amount, reason: "client" }),
+      });
+      if (!resp.success && resp.error) {
+        // Server rejected: roll back local state
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, coins: prev.coins + amount };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+        return false;
+      }
+      if (resp.coins !== undefined) {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, coins: resp.coins };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch {
+      // offline: keep optimistic local state
+    }
     return success;
   }, []);
 
@@ -347,6 +394,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     else { expiresAt = new Date(now); expiresAt.setMonth(expiresAt.getMonth() + 1); }
 
     const isCreator = planId.startsWith("creator_");
+    // Optimistic local update
     setUser((prev) => {
       if (!prev) return prev;
       const updated: UserProfile = isCreator
@@ -355,15 +403,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
+    // Server-side sync
+    try {
+      const resp = await apiFetch<{ success: boolean; plan: string; coins: number }>("/api/plan/subscribe", {
+        method: "POST",
+        body: JSON.stringify({ plan: planId, billing, bonusCoins }),
+      });
+      if (resp.coins !== undefined) {
+        setUser((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, coins: resp.coins };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } catch {
+      // offline: keep optimistic local state
+    }
   }, []);
 
   const cancelPlan = useCallback(async () => {
+    // Optimistic local update
     setUser((prev) => {
       if (!prev) return prev;
       const updated: UserProfile = { ...prev, plan: "free", planExpiresAt: undefined, planBillingPeriod: undefined };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
+    // Server-side sync
+    try {
+      await apiFetch<{ success: boolean; plan: string }>("/api/plan/cancel", { method: "POST" });
+    } catch {
+      // offline: keep optimistic local state
+    }
   }, []);
 
   const syncKycStatus = useCallback(async (userId: string) => {
@@ -385,6 +457,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return updated;
         });
       }
+    } catch {
+      // offline: keep local state
+    }
+  }, []);
+
+  const syncWallet = useCallback(async () => {
+    try {
+      const resp = await apiFetch<{ coins?: number; plan?: string }>("/api/wallet");
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev };
+        if (resp.coins !== undefined) updated.coins = resp.coins;
+        if (resp.plan !== undefined) updated.plan = resp.plan as UserProfile["plan"];
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      });
     } catch {
       // offline: keep local state
     }
@@ -549,7 +637,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile,
         addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan,
-        syncKycStatus, syncPkBattleStatus, recordDownloadEarning,
+        syncKycStatus, syncPkBattleStatus, recordDownloadEarning, syncWallet,
         savePost, unsavePost, addCollection,
         useSuperLike, useBacktrack,
         addProfilePrompt, removeProfilePrompt,
