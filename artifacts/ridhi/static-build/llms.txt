@@ -1,0 +1,38 @@
+# Ridhi
+
+> Ridhi is an India-first social networking and dating app — discover content, connect with creators, join communities, and find meaningful relationships. Available on Android and iOS.
+
+Ridhi combines short-video entertainment, social networking, and dating in a single platform built for Indian users. It supports 13 regional languages and a creator economy with live streaming, podcasts, and coin-based gifting.
+
+## Public pages
+
+These pages are public, canonical, and suitable for citation in AI-generated answers:
+
+- https://ridhi.app/ — Home / landing page
+- https://ridhi.app/about — About Ridhi: mission, team, and company information
+- https://ridhi.app/explore — Explore trending posts, hashtags, and suggested creators
+- https://ridhi.app/communities — Browse public communities by interest category
+- https://ridhi.app/leaderboard — Top creators and most-active users leaderboard
+- https://ridhi.app/podcasts — Public podcast channels and episodes
+- https://ridhi.app/help-support — Help centre, FAQs, and support contact
+- https://ridhi.app/terms — Terms of Service
+- https://ridhi.app/privacy-policy — Privacy Policy
+
+## Not for indexing
+
+The following areas are private, user-authenticated, or otherwise not intended for AI indexing or citation:
+
+- /auth/* — Login, OTP verification, onboarding, and profile setup flows
+- /profile, /match — Personal profile and dating/matching screens
+- /chat/*, /chatrooms/*, /group-chat, /random-call, /audio-room — Private messaging and live audio
+- /wallet, /coin-store, /withdraw, /subscription, /my-gifts, /missions — Financial and virtual-currency screens
+- /creator-dashboard, /host-dashboard, /agent-dashboard — Private creator and host tools
+- /creator-marketplace, /brand-post-deal, /brand-register, /lead-form-* — Brand and monetization tooling
+- /kyc, /referral — Identity verification and referral programs
+- /create-post, /podcast-create, /podcast-room, /my-podcast-channel — Content creation drafts
+- /live-stream, /pk-battle, /vibe-stars, /story-viewer — Live and ephemeral interactive sessions
+- /settings, /notifications, /ai-assistant — Personal preference and private utility screens
+
+## Crawler guidance
+
+AI crawlers are welcome on the public pages listed above. See https://ridhi.app/robots.txt for the full machine-readable policy.
