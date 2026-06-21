@@ -377,10 +377,24 @@ export async function tickAndChargeCoins(): Promise<{
   await Promise.all(
     calls.map(async (call) => {
       const increment = Math.ceil(call.coinRate / 2); // half a minute worth per 30s tick
+
+      // Pre-deduction guard: skip if call was finalized/ended between snapshot and now.
+      // Node.js is single-threaded so this synchronous check catches any finalizeCall
+      // that ran before this async task resumed.
+      if (call.finalized || !activeCalls.has(call.callId)) return;
+
       const [aResult, bResult] = await Promise.all([
         deductCoinsFromUser(call.userA.id, increment),
         deductCoinsFromUser(call.userB.id, increment),
       ]);
+
+      // Post-deduction guard: if call was finalized while deductions were in-flight,
+      // refund both users and bail — settleCall will not run again for this call.
+      if (call.finalized || !activeCalls.has(call.callId)) {
+        if (aResult.success) await deductCoinsFromUser(call.userA.id, -increment).catch(() => {});
+        if (bResult.success) await deductCoinsFromUser(call.userB.id, -increment).catch(() => {});
+        return;
+      }
 
       // Update display-only counters unconditionally (UI stays responsive)
       call.userACoinsSpent += increment;
