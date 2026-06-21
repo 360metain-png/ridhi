@@ -73,6 +73,30 @@ export function isAdminLoggedIn(): boolean {
   return !!getToken() && !!getAdminRole();
 }
 
+/**
+ * Verify the stored JWT token against the server.
+ * Returns the verified role on success, or null if the token is absent,
+ * expired, or rejected by the backend.
+ */
+export async function verifyAdminToken(): Promise<{
+  role: "admin" | "super_admin";
+  name: string;
+} | null> {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/admin/me`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.success || !data.admin?.role) return null;
+    return { role: data.admin.role, name: data.admin.name ?? "" };
+  } catch {
+    return null;
+  }
+}
+
 export function saveAdminSession(token: string, role: "admin" | "super_admin", name: string): void {
   localStorage.setItem("ridhi_admin_token", token);
   localStorage.setItem("ridhi_admin_role", role);

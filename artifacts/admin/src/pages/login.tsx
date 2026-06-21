@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Eye, EyeOff, AlertCircle, Lock, Mail } from "lucide-react";
-import { adminLogin, saveAdminSession } from "@/lib/admin-api";
+import { adminLogin } from "@/lib/admin-api";
+import { useAdminAuth } from "@/lib/admin-auth-context";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { setAuthenticated } = useAdminAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -32,7 +34,7 @@ export default function Login() {
     }
 
     if (result.token && result.role && result.name) {
-      saveAdminSession(result.token, result.role, result.name);
+      setAuthenticated(result.token, result.role, result.name);
       setLocation("/");
     } else {
       setError("Login failed. Please try again.");

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ShieldOff, Lock } from "lucide-react";
+import { ShieldOff, Lock, Loader2 } from "lucide-react";
 
 import NotFound      from "@/pages/not-found";
 import Login         from "@/pages/login";
@@ -56,7 +56,7 @@ import AdminManagement     from "@/pages/admin-management";
 import PkBattleApprovals   from "@/pages/pk-battle-approvals";
 import AdminLayout         from "@/components/layout/admin-layout";
 
-import { isAdminLoggedIn, getAdminRole, clearAdminSession } from "@/lib/admin-api";
+import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth-context";
 
 const queryClient = new QueryClient();
 
@@ -116,8 +116,7 @@ const ROLE_LABEL: Record<string, string> = {
   admin:       "Admin",
 };
 
-function AccessDenied({ route }: { route: string }) {
-  const role      = getAdminRole() ?? "";
+function AccessDenied({ route, role }: { route: string; role: AdminRole | "" }) {
   const allowed   = ROUTE_ROLES[route] ?? [];
   const minRole   = allowed[0] ? ROLE_LABEL[allowed[0]] : "higher role";
   return (
@@ -141,20 +140,39 @@ function AccessDenied({ route }: { route: string }) {
 }
 
 function RoleRoute({ component: Component, path }: { component: React.ComponentType<any>; path: string }) {
-  const [location, setLocation] = useLocation();
+  const { status, role } = useAdminAuth();
+  const [, setLocation] = useLocation();
 
+  // Redirect to login when the server has confirmed the token is invalid/absent.
   useEffect(() => {
-    if (!isAdminLoggedIn()) {
+    if (status === "unauthenticated") {
       setLocation("/login");
     }
-  }, [location, setLocation]);
+  }, [status, setLocation]);
 
-  const role    = (getAdminRole() ?? "") as AdminRole;
+  // While the server is verifying the token, show a neutral loading screen.
+  // This prevents ANY admin content from rendering before the JWT is confirmed.
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  // Token rejected — render nothing while the useEffect redirect fires.
+  if (status === "unauthenticated") {
+    return null;
+  }
+
+  // Confirmed authenticated — use the server-verified role from context (not
+  // localStorage) so a client-side tamper cannot escalate role permissions.
   const allowed = ROUTE_ROLES[path] ?? ["super_admin"];
+  const verifiedRole = (role ?? "") as AdminRole;
 
   return (
     <AdminLayout>
-      {allowed.includes(role) ? <Component /> : <AccessDenied route={path} />}
+      {allowed.includes(verifiedRole) ? <Component /> : <AccessDenied route={path} role={verifiedRole} />}
     </AdminLayout>
   );
 }
@@ -225,7 +243,9 @@ function App() {
           <meta name="title" content="Ridhi" />
         </Helmet>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
+          <AdminAuthProvider>
+            <Router />
+          </AdminAuthProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
