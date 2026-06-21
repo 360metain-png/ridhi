@@ -13,8 +13,9 @@ import {
   Search, Radio, Award, Crown, Zap, ShieldCheck,
   XCircle, Clock, Phone, MapPin, ShieldAlert, Briefcase,
   Trash2, ShieldOff, Info, Lock, Network, ChevronRight, UserCheck,
-  Rocket, Wrench, Download,
+  Rocket, Wrench, Download, UserPlus, Plus,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { downloadCSV } from "@/lib/utils";
 import { getSharedAdmins, useSharedAdmins } from "@/lib/admin-store";
@@ -256,9 +257,135 @@ function AssignHostDialog({
   );
 }
 
-// ── Approve Host & Assign Dialog (Super Admin only) ──────────────────────────
+// ── Nominate Host Dialog (Admin on behalf of Agent → SA approval) ─────────────
 
-type PendingHost = typeof PENDING_HOSTS[0];
+interface PendingHost {
+  id: string;
+  name: string;
+  city: string;
+  phone: string;
+  appliedAt: string;
+  language: string;
+  followers: number;
+  experience: string;
+  nominationType?: "self" | "agent";
+  nominatedBy?: string;
+}
+
+const NOMINATION_LANGUAGES = ["Hindi","English","Tamil","Telugu","Kannada","Malayalam","Bengali","Marathi","Punjabi","Gujarati","Odia","Urdu","Bhojpuri"];
+
+function NominateHostDialog({
+  open, onClose, onSubmit, agentsForAdmin,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (c: Omit<PendingHost, "id">) => void;
+  agentsForAdmin: typeof AGENTS_META;
+}) {
+  const [name,       setName]       = useState("");
+  const [city,       setCity]       = useState("");
+  const [phone,      setPhone]      = useState("");
+  const [language,   setLanguage]   = useState("Hindi");
+  const [followers,  setFollowers]  = useState("");
+  const [experience, setExperience] = useState("");
+  const [agentId,    setAgentId]    = useState(agentsForAdmin[0]?.id ?? "");
+
+  const reset = () => { setName(""); setCity(""); setPhone(""); setFollowers(""); setExperience(""); setLanguage("Hindi"); setAgentId(agentsForAdmin[0]?.id ?? ""); };
+
+  const selectedAgent = agentsForAdmin.find(a => a.id === agentId);
+
+  return (
+    <Dialog open={open} onOpenChange={() => { reset(); onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-pink-500" />
+            Nominate Host Candidate
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          <div className="flex items-start gap-2 bg-pink-50 border border-pink-200 rounded-lg px-3 py-2.5">
+            <Info className="w-4 h-4 text-pink-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-pink-800">
+              Submit a host nomination on behalf of one of your agents.
+              <strong className="text-pink-900"> Super Admin will review and approve</strong> before the candidate is onboarded.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Nominating Agent *</Label>
+              <Select value={agentId} onValueChange={setAgentId}>
+                <SelectTrigger className="mt-1 h-8 text-sm">
+                  <SelectValue placeholder="Select agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agentsForAdmin.map(a => (
+                    <SelectItem key={a.id} value={a.id}>{a.name} · {a.level}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Candidate Full Name *</Label>
+              <Input className="mt-1 h-8 text-sm" placeholder="Candidate's full name" value={name} onChange={e => setName(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">City</Label>
+                <Input className="mt-1 h-8 text-sm" placeholder="City" value={city} onChange={e => setCity(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Phone *</Label>
+                <Input className="mt-1 h-8 text-sm" placeholder="+91 XXXXX XXXXX" value={phone} onChange={e => setPhone(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Language</Label>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {NOMINATION_LANGUAGES.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Social Followers</Label>
+                <Input type="number" className="mt-1 h-8 text-sm" placeholder="e.g. 5000" value={followers} onChange={e => setFollowers(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Why this candidate?</Label>
+              <Textarea className="mt-1 text-sm min-h-[64px]" placeholder="Content background, language skills, audience…" value={experience} onChange={e => setExperience(e.target.value)} />
+            </div>
+          </div>
+          {selectedAgent && (
+            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+              <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <p className="text-xs text-emerald-800 font-medium">
+                Nominated by agent: <strong>{selectedAgent.name} ({selectedAgent.level})</strong> · Awaiting SA review
+              </p>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => { reset(); onClose(); }}>Cancel</Button>
+          <Button size="sm"
+            className="bg-gradient-to-r from-pink-600 to-violet-600 hover:from-pink-700 hover:to-violet-700 text-white gap-1 border-0"
+            disabled={!name.trim() || !phone.trim() || !agentId}
+            onClick={() => {
+              onSubmit({ name: name.trim(), city: city.trim(), phone: phone.trim(), appliedAt: "Just now", language, followers: parseInt(followers) || 0, experience: experience.trim() || "Nominated by Agent", nominationType: "agent", nominatedBy: selectedAgent?.name ?? "Agent" });
+              reset(); onClose();
+            }}>
+            <UserPlus className="w-3.5 h-3.5" /> Submit Nomination
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Approve Host & Assign Dialog (Super Admin only) ──────────────────────────
 
 function ApproveHostDialog({
   app, open, onClose, onApprove,
@@ -518,16 +645,22 @@ export default function HostsPage() {
   const myAgentId = isAgent ? "a5" : null; // demo: Rajan Pillai
 
   const [hosts, setHosts]           = useState<Host[]>(INITIAL_HOSTS);
-  const [pending, setPending]        = useState(PENDING_HOSTS);
+  const [pending, setPending]        = useState<PendingHost[]>(PENDING_HOSTS as PendingHost[]);
   const [search, setSearch]          = useState("");
   const [levelFilter, setLevelFilter]= useState("all");
   const [agentFilter, setAgentFilter]= useState("all");
   const [adminFilter, setAdminFilter]= useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [detailHost, setDetailHost]  = useState<Host | null>(null);
-  const [removeTarget, setRemoveTarget] = useState<Host | null>(null);
-  const [assignTarget, setAssignTarget] = useState<Host | null>(null);
-  const [approveTarget, setApproveTarget] = useState<PendingHost | null>(null);
+  const [removeTarget,    setRemoveTarget]    = useState<Host | null>(null);
+  const [assignTarget,    setAssignTarget]    = useState<Host | null>(null);
+  const [approveTarget,   setApproveTarget]   = useState<PendingHost | null>(null);
+  const [showNominateHost, setShowNominateHost] = useState(false);
+
+  // Agents available to this admin for the nomination form
+  const agentsForNomination = isAdmin
+    ? AGENTS_META.filter(a => a.adminId === myAdminId)
+    : isSA ? AGENTS_META : [];
 
   // ── Role-based data scoping ──────────────────────────────────────────────
   const scopedHosts = (() => {
@@ -718,6 +851,32 @@ export default function HostsPage() {
         </div>
       )}
 
+      {/* ── Admin / Agent: Nominate Host Candidate ── */}
+      {(isAdmin || isAgent) && (
+        <Card className="border-pink-200 bg-gradient-to-br from-pink-50/60 to-violet-50/40">
+          <CardContent className="px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-pink-100 flex items-center justify-center flex-shrink-0">
+                <UserPlus className="w-5 h-5 text-pink-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-pink-900">Nominate a Host Candidate</p>
+                <p className="text-xs text-pink-700">
+                  {isAdmin
+                    ? "Submit a nomination on behalf of one of your agents — Super Admin reviews & approves."
+                    : "Propose a host candidate to your Admin chain — Super Admin reviews & approves."}
+                </p>
+              </div>
+            </div>
+            <Button size="sm"
+              className="bg-gradient-to-r from-pink-600 to-violet-600 hover:from-pink-700 hover:to-violet-700 text-white gap-1.5 border-0 flex-shrink-0"
+              onClick={() => setShowNominateHost(true)}>
+              <Plus className="w-3.5 h-3.5" /> Nominate
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* ── Pending Host Approvals (Super Admin only) ── */}
       {isSA && scopedPending.length > 0 && (
         <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-pink-50/40">
@@ -745,6 +904,11 @@ export default function HostsPage() {
                     {alreadyAgent && (
                       <Badge className="bg-red-100 text-red-700 border border-red-200 text-[10px] h-4 px-1.5 gap-1 font-semibold">
                         <XCircle className="w-2.5 h-2.5" /> Ineligible — Already an Agent
+                      </Badge>
+                    )}
+                    {app.nominationType === "agent" && app.nominatedBy && (
+                      <Badge className="bg-blue-100 text-blue-700 border border-blue-200 text-[10px] h-4 px-1.5 gap-1">
+                        <UserPlus className="w-2.5 h-2.5" /> Nominated by {app.nominatedBy}
                       </Badge>
                     )}
                   </div>
@@ -1158,6 +1322,16 @@ export default function HostsPage() {
       <ApproveHostDialog
         app={approveTarget} open={!!approveTarget}
         onClose={() => setApproveTarget(null)} onApprove={handleApproveHost}
+      />
+      <NominateHostDialog
+        open={showNominateHost}
+        onClose={() => setShowNominateHost(false)}
+        agentsForAdmin={agentsForNomination}
+        onSubmit={(candidate) => {
+          const entry: PendingHost = { ...candidate, id: `ph-nom-${Date.now()}` };
+          setPending(prev => [entry, ...prev]);
+          toast({ title: "Nomination submitted", description: `${candidate.name} added to the SA review queue.` });
+        }}
       />
     </div>
   );

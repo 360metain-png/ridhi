@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -329,9 +330,96 @@ function RecruitDialog({
   );
 }
 
-// ── Approve Agent & Assign Dialog (Super Admin only) ─────────────────────────
+// ── Nominate Agent Dialog (Admin → SA approval) ───────────────────────────────
 
-type PendingAgent = typeof PENDING_AGENTS[0];
+interface PendingAgent {
+  id: string;
+  name: string;
+  city: string;
+  phone: string;
+  appliedAt: string;
+  hosts: number;
+  experience: string;
+  nominationType?: "self" | "admin";
+  nominatedBy?: string;
+}
+
+function NominateAgentDialog({
+  open, onClose, onSubmit, adminName,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (c: Omit<PendingAgent, "id">) => void;
+  adminName: string;
+}) {
+  const [name,       setName]       = useState("");
+  const [city,       setCity]       = useState("");
+  const [phone,      setPhone]      = useState("");
+  const [experience, setExperience] = useState("");
+
+  const reset = () => { setName(""); setCity(""); setPhone(""); setExperience(""); };
+
+  return (
+    <Dialog open={open} onOpenChange={() => { reset(); onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-blue-500" />
+            Nominate Agent Candidate
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-800">
+              As Admin, you can nominate a candidate for the Agent role.
+              <strong className="text-blue-900"> Super Admin will review and approve</strong> before they are onboarded.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Full Name *</Label>
+              <Input className="mt-1 h-8 text-sm" placeholder="Candidate's full name" value={name} onChange={e => setName(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">City</Label>
+                <Input className="mt-1 h-8 text-sm" placeholder="City" value={city} onChange={e => setCity(e.target.value)} />
+              </div>
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Phone *</Label>
+                <Input className="mt-1 h-8 text-sm" placeholder="+91 XXXXX XXXXX" value={phone} onChange={e => setPhone(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Why this candidate?</Label>
+              <Textarea className="mt-1 text-sm min-h-[72px]" placeholder="Relevant experience, network size, background…" value={experience} onChange={e => setExperience(e.target.value)} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <p className="text-xs text-emerald-800 font-medium">
+              Nominated by: <strong>{adminName || "You (Admin)"}</strong> · Awaiting SA review
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => { reset(); onClose(); }}>Cancel</Button>
+          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1"
+            disabled={!name.trim() || !phone.trim()}
+            onClick={() => {
+              onSubmit({ name: name.trim(), city: city.trim(), phone: phone.trim(), appliedAt: "Just now", hosts: 0, experience: experience.trim() || "Nominated by Admin", nominationType: "admin", nominatedBy: adminName });
+              reset(); onClose();
+            }}>
+            <UserPlus className="w-3.5 h-3.5" /> Submit Nomination
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Approve Agent & Assign Dialog (Super Admin only) ─────────────────────────
 
 function ApproveAgentDialog({
   app, admins, open, onClose, onApprove,
@@ -472,7 +560,7 @@ export default function AgentsPage() {
   const isAdmin = role === "admin";
 
   const [agents, setAgents]         = useState<Agent[]>(INITIAL_AGENTS);
-  const [pending, setPending]        = useState(PENDING_AGENTS);
+  const [pending, setPending]        = useState<PendingAgent[]>(PENDING_AGENTS as PendingAgent[]);
   const [search, setSearch]          = useState("");
   const [adminFilter, setAdminFilter]= useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -480,7 +568,12 @@ export default function AgentsPage() {
   const [removeTarget, setRemoveTarget] = useState<Agent | null>(null);
   const [showRecruit, setShowRecruit] = useState(false);
   const [showHierarchy, setShowHierarchy] = useState(false);
-  const [approveTarget, setApproveTarget] = useState<PendingAgent | null>(null);
+  const [approveTarget,     setApproveTarget]     = useState<PendingAgent | null>(null);
+  const [showNominateAgent, setShowNominateAgent] = useState(false);
+
+  const myAdminDisplayName = isAdmin
+    ? (liveAdmins.find(a => a.email === myAdminEmail)?.name ?? "Admin")
+    : "Super Admin";
 
   // Role-based data scope
   const scopedAgents = isSA
@@ -754,6 +847,11 @@ export default function AgentsPage() {
                         <XCircle className="w-2.5 h-2.5" /> Ineligible — Already a Host
                       </Badge>
                     )}
+                    {app.nominationType === "admin" && (
+                      <Badge className="bg-blue-100 text-blue-700 border border-blue-200 text-[10px] h-4 px-1.5 gap-1">
+                        <UserPlus className="w-2.5 h-2.5" /> Admin Nomination
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
@@ -786,6 +884,27 @@ export default function AgentsPage() {
           <CheckCircle className="w-5 h-5 text-green-600" />
           <p className="text-sm text-green-700 font-medium">No pending agent applications — queue is clear.</p>
         </div>
+      )}
+
+      {/* ── Admin: Nominate Agent Candidate ── */}
+      {isAdmin && (
+        <Card className="border-blue-200 bg-gradient-to-br from-blue-50/60 to-indigo-50/40">
+          <CardContent className="px-4 py-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <UserPlus className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-blue-900">Nominate an Agent Candidate</p>
+                <p className="text-xs text-blue-700">Submit a candidate for the Agent role — Super Admin reviews &amp; approves.</p>
+              </div>
+            </div>
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5 flex-shrink-0"
+              onClick={() => setShowNominateAgent(true)}>
+              <Plus className="w-3.5 h-3.5" /> Nominate
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
       {/* ── KPI ── */}
@@ -1118,6 +1237,16 @@ export default function AgentsPage() {
       <ApproveAgentDialog
         app={approveTarget} admins={liveAdmins} open={!!approveTarget}
         onClose={() => setApproveTarget(null)} onApprove={handleApproveAgent}
+      />
+      <NominateAgentDialog
+        open={showNominateAgent}
+        onClose={() => setShowNominateAgent(false)}
+        adminName={myAdminDisplayName}
+        onSubmit={(candidate) => {
+          const entry: PendingAgent = { ...candidate, id: `pa-nom-${Date.now()}` };
+          setPending(prev => [entry, ...prev]);
+          toast({ title: "Nomination submitted", description: `${candidate.name} added to the SA review queue.` });
+        }}
       />
     </div>
   );
