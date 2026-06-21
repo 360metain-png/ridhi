@@ -27,10 +27,8 @@ function isValidIfsc(v: unknown): v is string {
 // ── POST /api/kyc/submit — user submits KYC ─────────────────────────────────────────────
 router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) => {
   const body = req.body as any;
-  if (!body?.userId || typeof body.userId !== "string") {
-    res.status(400).json({ success: false, error: "userId is required" });
-    return;
-  }
+  // Always derive userId from the verified JWT; never trust client-supplied userId
+  const userId = req.user!.sub;
   if (!isValidRoles(body.roles) || body.roles.length === 0) {
     res.status(400).json({ success: false, error: "Select at least one role (host/agent/creator)" });
     return;
@@ -42,7 +40,7 @@ router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) =
   }
 
   try {
-    const existing = await db.select().from(kycRecords).where(eq(kycRecords.userId, body.userId)).limit(1);
+    const existing = await db.select().from(kycRecords).where(eq(kycRecords.userId, userId)).limit(1);
 
     // Roles are permanently locked on first submission. Changing roles requires deleting the account.
     if (existing.length > 0 && existing[0].roles?.length > 0) {
@@ -68,7 +66,7 @@ router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) =
       bankHolderName: typeof body.bankHolderName === "string" ? body.bankHolderName : undefined,
     });
     const record: any = {
-      userId: body.userId,
+      userId,
       roles: body.roles,
       aadhaarFrontImage: body.aadhaarFrontImage || undefined,
       aadhaarBackImage: body.aadhaarBackImage || undefined,
@@ -82,12 +80,12 @@ router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) =
     };
 
     if (existing.length > 0) {
-      await db.update(kycRecords).set(record).where(eq(kycRecords.userId, body.userId));
+      await db.update(kycRecords).set(record).where(eq(kycRecords.userId, userId));
     } else {
       await db.insert(kycRecords).values(record);
     }
 
-    req.log.info({ userId: body.userId, roles: body.roles }, "KYC submitted for review");
+    req.log.info({ userId, roles: body.roles }, "KYC submitted for review");
     res.json({
       success: true,
       status: "pending",
@@ -103,6 +101,11 @@ router.post("/kyc/submit", requireUser, async (req: AuthenticatedRequest, res) =
 // ── GET /api/kyc/status/:userId ──────────────────────────────────────────────
 router.get("/kyc/status/:userId", requireUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.params.userId as string;
+  // Users may only read their own KYC record
+  if (req.user!.sub !== userId) {
+    res.status(403).json({ success: false, error: "You can only view your own KYC status." });
+    return;
+  }
   try {
     const rows = await db.select().from(kycRecords).where(eq(kycRecords.userId, userId)).limit(1);
     if (rows.length === 0) {

@@ -13,6 +13,7 @@ import {
   type CallGender,
   type CallCategory,
 } from "../lib/matchEngine";
+import { requireUser, type AuthenticatedRequest, getUserId } from "../lib/auth";
 
 const router = Router();
 
@@ -30,17 +31,40 @@ router.get("/calls/categories", (_req, res) => {
 });
 
 // ── GET /api/calls/active/:userId ─────────────────────────────────
-router.get("/calls/active/:userId", (req, res) => {
-  const call = getCallByUser(req.params.userId);
+// Requires authentication; callers may only query their own active call state.
+router.get("/calls/active/:userId", requireUser, (req: AuthenticatedRequest, res) => {
+  const requestedUserId = req.params.userId;
+  const authenticatedUserId = getUserId(req);
+
+  if (authenticatedUserId !== requestedUserId) {
+    res.status(403).json({ error: "You can only query your own active call state." });
+    return;
+  }
+
+  const call = getCallByUser(requestedUserId);
   if (call) {
-    res.json({ active: true, call });
+    // Return only the data needed by the caller; omit internal socketId values
+    res.json({
+      active: true,
+      call: {
+        callId: call.callId,
+        startedAt: call.startedAt,
+        coinRate: call.coinRate,
+        type: call.type,
+        category: call.category,
+        peer: call.userA.id === requestedUserId
+          ? { id: call.userB.id, name: call.userB.name, gender: call.userB.gender, language: call.userB.language, avatar: call.userB.avatar, city: call.userB.city, age: call.userB.age }
+          : { id: call.userA.id, name: call.userA.name, gender: call.userA.gender, language: call.userA.language, avatar: call.userA.avatar, city: call.userA.city, age: call.userA.age },
+      },
+    });
   } else {
     res.json({ active: false });
   }
 });
 
 // ── WebSocket message handler ────────────────────────────────────────────────
-export function handleCallSocket(ws: WebSocket, socketId: string) {
+// authenticatedUserId is derived from the verified JWT at connection time in index.ts
+export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedUserId: string) {
   sockets.set(socketId, ws);
 
   ws.on("message", (raw) => {
@@ -53,8 +77,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
     switch (msg.type) {
       case "join": {
-        const { userId, name, gender, language, category, avatar, city, age, bio, preferGender, acceptAudio, acceptVideo, callType } = msg.payload as {
-          userId: string;
+        const { name, gender, language, category, avatar, city, age, bio, preferGender, acceptAudio, acceptVideo, callType } = msg.payload as {
           name: string;
           gender: CallGender;
           language: string;
@@ -68,6 +91,9 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
           acceptVideo?: boolean;
           callType?: "audio" | "video";
         };
+
+        // Always use the server-authenticated identity, never the client-supplied userId
+        const userId = authenticatedUserId;
 
         const match = joinQueue({
           id: userId,
@@ -151,9 +177,9 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
       case "accept": {
         const { callId } = msg.payload as { callId: string };
-        // Notify both that call is starting
-        const call = getCallByUser(msg.payload.userId);
-        if (call) {
+        // Verify the authenticated user is actually a participant in this call
+        const call = getCallByUser(authenticatedUserId);
+        if (call && call.callId === callId) {
           sendTo(call.userA.socketId, { type: "call_starting", payload: { callId } });
           sendTo(call.userB.socketId, { type: "call_starting", payload: { callId } });
         }
@@ -162,8 +188,9 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
       case "connected": {
         const { callId } = msg.payload as { callId: string };
-        const call = getCallByUser(msg.payload.userId);
-        if (call) {
+        // Verify the authenticated user is actually a participant in this call
+        const call = getCallByUser(authenticatedUserId);
+        if (call && call.callId === callId) {
           sendTo(call.userA.socketId, { type: "call_connected", payload: { callId, startedAt: call.startedAt } });
           sendTo(call.userB.socketId, { type: "call_connected", payload: { callId, startedAt: call.startedAt } });
         }
@@ -171,27 +198,31 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
       }
 
       case "disconnect": {
-        const { callId, userId } = msg.payload as { callId: string; userId: string };
-        const call = endCall(callId, userId);
-        if (call) {
-          sendTo(call.userA.socketId, {
-            type: "call_ended",
-            payload: {
-              reason: "user_disconnected",
-              endedBy: userId,
-              durationSec: Math.floor((Date.now() - call.startedAt) / 1000),
-              coinsSpent: call.userACoinsSpent,
-            },
-          });
-          sendTo(call.userB.socketId, {
-            type: "call_ended",
-            payload: {
-              reason: "user_disconnected",
-              endedBy: userId,
-              durationSec: Math.floor((Date.now() - call.startedAt) / 1000),
-              coinsSpent: call.userBCoinsSpent,
-            },
-          });
+        const { callId } = msg.payload as { callId: string };
+        // Use the server-authenticated identity; never trust client-supplied userId
+        const call = getCallByUser(authenticatedUserId);
+        if (call && call.callId === callId) {
+          const ended = endCall(callId, authenticatedUserId);
+          if (ended) {
+            sendTo(ended.userA.socketId, {
+              type: "call_ended",
+              payload: {
+                reason: "user_disconnected",
+                endedBy: authenticatedUserId,
+                durationSec: Math.floor((Date.now() - ended.startedAt) / 1000),
+                coinsSpent: ended.userACoinsSpent,
+              },
+            });
+            sendTo(ended.userB.socketId, {
+              type: "call_ended",
+              payload: {
+                reason: "user_disconnected",
+                endedBy: authenticatedUserId,
+                durationSec: Math.floor((Date.now() - ended.startedAt) / 1000),
+                coinsSpent: ended.userBCoinsSpent,
+              },
+            });
+          }
         }
         break;
       }
@@ -205,7 +236,7 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
 
   ws.on("close", () => {
     sockets.delete(socketId);
-    // Try to find and end any active call for this socket
+    // End any active call that this authenticated user is part of
     for (const [callId, call] of getActiveCalls()) {
       if (call.userA.socketId === socketId || call.userB.socketId === socketId) {
         const endedBy = call.userA.socketId === socketId ? call.userA.id : call.userB.id;
@@ -217,9 +248,6 @@ export function handleCallSocket(ws: WebSocket, socketId: string) {
         });
       }
     }
-    // Remove from queue
-    // We need to iterate to find the user by socketId
-    // The matchEngine doesn't expose socketId lookup, so we rely on the client re-joining
   });
 }
 

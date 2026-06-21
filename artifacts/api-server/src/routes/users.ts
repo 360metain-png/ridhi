@@ -41,7 +41,7 @@ router.get("/users/:id", async (req: AuthenticatedRequest, res) => {
 
     // Check if current user follows this user
     let isFollowing = false;
-    if (currentUserId) {
+    if (currentUserId && currentUserId !== userId) {
       const existing = await db
         .select()
         .from(follows)
@@ -49,13 +49,39 @@ router.get("/users/:id", async (req: AuthenticatedRequest, res) => {
       isFollowing = existing.length > 0;
     }
 
-    res.json({
-      ...user,
+    const isOwner = currentUserId === userId;
+
+    // Public profile: only expose non-sensitive fields.
+    // Sensitive fields (phone, coins, plan, pkBattle fields, timestamps) are
+    // restricted to the authenticated owner.
+    const publicProfile = {
+      id: user.id,
+      name: user.name,
+      avatar: user.avatar,
+      bio: user.bio,
+      city: user.city,
+      gender: user.gender,
+      interests: user.interests,
+      language: user.language,
       followers,
       following,
       postsCount,
       isFollowing,
-    });
+    };
+
+    if (isOwner) {
+      // Return additional private fields to the authenticated owner
+      res.json({
+        ...publicProfile,
+        phone: user.phone,
+        coins: user.coins,
+        plan: user.plan,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      });
+    } else {
+      res.json(publicProfile);
+    }
   } catch (err: any) {
     req.log.error(err, "get user error");
     res.status(500).json({ error: "Failed to fetch user" });
