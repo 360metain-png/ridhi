@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { getAuthHeaders } from "@/lib/admin-api";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -570,7 +571,9 @@ export default function ApiIntegrationsPage() {
   useEffect(() => {
     async function loadConfig() {
       try {
-        const res = await fetch(`${API_BASE}/admin/analytics-config`);
+        const res = await fetch(`${API_BASE}/admin/analytics-config`, {
+          headers: getAuthHeaders(),
+        });
         if (!res.ok) return;
         const data = await res.json();
         setServices((prev) =>

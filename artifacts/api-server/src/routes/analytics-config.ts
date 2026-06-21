@@ -10,8 +10,8 @@ import { adminRateLimit } from "../lib/rateLimit";
 const router = Router();
 
 // ── GET /api/admin/analytics-config ──
-// Read current analytics configuration (admin view)
-router.get("/admin/analytics-config", (req, res) => {
+// Read current analytics configuration (Super Admin only)
+router.get("/admin/analytics-config", requireSuperAdmin, adminRateLimit, (req, res) => {
   const cfg = getAnalyticsConfig();
   res.json({
     ...cfg,
@@ -78,7 +78,24 @@ router.post("/admin/analytics-config", requireSuperAdmin, adminRateLimit, (req, 
     { googleEnabled: cfg.googleAnalytics.enabled, fbEnabled: cfg.facebookPixel.enabled },
     "Analytics config updated"
   );
-  res.json({ success: true, config: cfg });
+
+  res.json({
+    success: true,
+    config: {
+      googleAnalytics: {
+        enabled: cfg.googleAnalytics.enabled,
+        measurementId: cfg.googleAnalytics.measurementId,
+        apiSecret: cfg.googleAnalytics.apiSecret ? "••••••••" : "",
+      },
+      facebookPixel: {
+        enabled: cfg.facebookPixel.enabled,
+        pixelId: cfg.facebookPixel.pixelId,
+        accessToken: cfg.facebookPixel.accessToken ? "••••••••" : "",
+      },
+      lastChangedAt: cfg.lastChangedAt,
+      changedBy: cfg.changedBy,
+    },
+  });
 });
 
 export default router;

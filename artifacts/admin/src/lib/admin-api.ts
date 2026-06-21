@@ -9,7 +9,7 @@ function getToken(): string | null {
   return localStorage.getItem("ridhi_admin_token");
 }
 
-function getAuthHeaders(): Record<string, string> {
+export function getAuthHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
