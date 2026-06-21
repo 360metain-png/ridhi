@@ -3,15 +3,12 @@ import { WebSocket } from "ws";
 import {
   joinQueue,
   removeFromQueue,
-  startCall,
-  endCall,
   startCallWithDeduct,
-  settleCall,
   finalizeCall,
   getQueueStats,
   getCallByUser,
   getCategories,
-  tickCoins,
+  tickAndChargeCoins,
   type MatchUser,
   type CallGender,
   type CallCategory,
@@ -291,22 +288,35 @@ function getActiveCalls() {
   return activeCalls as Map<string, any>;
 }
 
-// Coin tick loop (every 30 seconds)
+// Coin tick loop (every 30 seconds) — deducts real wallet coins; terminates on low balance
 setInterval(() => {
-  const updates = tickCoins();
-  for (const up of updates) {
-    const call = getCallByUser(up.userAId);
-    if (call) {
-      sendTo(call.userA.socketId, {
-        type: "coin_tick",
-        payload: { coinsSpent: up.userASpent, coinsEarned: up.userBSpent },
+  tickAndChargeCoins().then(({ updates, terminated }) => {
+    // Send UI ticker to ongoing calls
+    for (const up of updates) {
+      const call = getCallByUser(up.userAId);
+      if (call) {
+        sendTo(call.userA.socketId, {
+          type: "coin_tick",
+          payload: { coinsSpent: up.userASpent },
+        });
+        sendTo(call.userB.socketId, {
+          type: "coin_tick",
+          payload: { coinsSpent: up.userBSpent },
+        });
+      }
+    }
+    // Notify both users of calls terminated by insufficient balance
+    for (const t of terminated) {
+      sendTo(t.userASocketId, {
+        type: "call_ended",
+        payload: { reason: "insufficient_balance", endedBy: "system" },
       });
-      sendTo(call.userB.socketId, {
-        type: "coin_tick",
-        payload: { coinsSpent: up.userBSpent, coinsEarned: up.userASpent },
+      sendTo(t.userBSocketId, {
+        type: "call_ended",
+        payload: { reason: "insufficient_balance", endedBy: "system" },
       });
     }
-  }
+  }).catch(() => {});
 }, 30000);
 
 export default router;

@@ -66,6 +66,15 @@ const callHistory: Array<{
   endedBy: string;
 }> = [];
 
+// Debt ledger: records unpaid coins when settlement fails at call end
+const callDebt: Array<{
+  callId: string;
+  userId: string;
+  owedCoins: number;
+  recordedAt: number;
+  reason: string;
+}> = [];
+
 // Anonymous alias counter for "Ridhi 1", "Ridhi 2", etc.
 let aliasCounter = 0;
 
@@ -277,7 +286,7 @@ export async function startCallWithDeduct(
   return { call, ok: true };
 }
 
-/** Settle remaining coins at call end. Idempotent: no-op if already settled. */
+/** Settle remaining coins at call end. Records unpaid debt if deduction fails. */
 export async function settleCall(callId: string): Promise<{ settledA: number; settledB: number } | null> {
   const call = activeCalls.get(callId);
   if (!call) return null;
@@ -287,11 +296,19 @@ export async function settleCall(callId: string): Promise<{ settledA: number; se
   const settleB = Math.max(0, totalDue - call.userBDeducted);
   if (settleA <= 0 && settleB <= 0) return { settledA: call.userADeducted, settledB: call.userBDeducted };
   const [aResult, bResult] = await Promise.all([
-    settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : { success: true, newBalance: 0 } as any,
-    settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : { success: true, newBalance: 0 } as any,
+    settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : Promise.resolve({ success: true, newBalance: 0 }),
+    settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : Promise.resolve({ success: true, newBalance: 0 }),
   ]);
-  if (aResult.success) call.userADeducted += settleA;
-  if (bResult.success) call.userBDeducted += settleB;
+  if (aResult.success) {
+    call.userADeducted += settleA;
+  } else if (settleA > 0) {
+    callDebt.push({ callId, userId: call.userA.id, owedCoins: settleA, recordedAt: Date.now(), reason: "error" in aResult ? aResult.error : "settlement_failed" });
+  }
+  if (bResult.success) {
+    call.userBDeducted += settleB;
+  } else if (settleB > 0) {
+    callDebt.push({ callId, userId: call.userB.id, owedCoins: settleB, recordedAt: Date.now(), reason: "error" in bResult ? bResult.error : "settlement_failed" });
+  }
   return { settledA: call.userADeducted, settledB: call.userBDeducted };
 }
 
@@ -333,28 +350,77 @@ export function endCall(callId: string, endedByUserId: string): ActiveCall | nul
   return call;
 }
 
-/** Tick coin counters for all active calls (called every 30 seconds) */
-export function tickCoins(): Array<{
-  callId: string;
-  userAId: string;
-  userBId: string;
-  userASpent: number;
-  userBSpent: number;
+/**
+ * Charge coins for all active calls (called every 30 seconds).
+ * Deducts real wallet coins per tick; terminates calls with insufficient balance.
+ * Returns UI ticker updates and a list of calls forcibly terminated due to low balance.
+ */
+export async function tickAndChargeCoins(): Promise<{
+  updates: Array<{ callId: string; userAId: string; userBId: string; userASpent: number; userBSpent: number }>;
+  terminated: Array<{ callId: string; endedBy: "insufficient_balance"; userAId: string; userBId: string; userASocketId: string; userBSocketId: string }>;
 }> {
-  const updates: ReturnType<typeof tickCoins> = [];
-  for (const call of activeCalls.values()) {
-    const increment = Math.ceil(call.coinRate / 2); // per 30-sec tick
-    call.userACoinsSpent += increment;
-    call.userBCoinsSpent += increment;
-    updates.push({
-      callId: call.callId,
-      userAId: call.userA.id,
-      userBId: call.userB.id,
-      userASpent: call.userACoinsSpent,
-      userBSpent: call.userBCoinsSpent,
-    });
-  }
-  return updates;
+  const updates: Array<{ callId: string; userAId: string; userBId: string; userASpent: number; userBSpent: number }> = [];
+  const terminated: Array<{ callId: string; endedBy: "insufficient_balance"; userAId: string; userBId: string; userASocketId: string; userBSocketId: string }> = [];
+
+  const calls = Array.from(activeCalls.values()).filter((c) => !c.finalized);
+  await Promise.all(
+    calls.map(async (call) => {
+      const increment = Math.ceil(call.coinRate / 2); // half a minute worth per 30s tick
+      const [aResult, bResult] = await Promise.all([
+        deductCoinsFromUser(call.userA.id, increment),
+        deductCoinsFromUser(call.userB.id, increment),
+      ]);
+
+      // Update display-only counters unconditionally (UI stays responsive)
+      call.userACoinsSpent += increment;
+      call.userBCoinsSpent += increment;
+
+      if (aResult.success) {
+        call.userADeducted += increment;
+      }
+      if (bResult.success) {
+        call.userBDeducted += increment;
+      }
+
+      const aFailed = !aResult.success;
+      const bFailed = !bResult.success;
+
+      if (aFailed || bFailed) {
+        // At least one user ran out — terminate the call now
+        if (!call.finalized) {
+          call.finalized = true;
+          // Record debt for the user who couldn't pay
+          if (aFailed) {
+            callDebt.push({ callId: call.callId, userId: call.userA.id, owedCoins: increment, recordedAt: Date.now(), reason: aResult.error ?? "tick_insufficient" });
+          }
+          if (bFailed) {
+            callDebt.push({ callId: call.callId, userId: call.userB.id, owedCoins: increment, recordedAt: Date.now(), reason: bResult.error ?? "tick_insufficient" });
+          }
+          // End the call record
+          endCall(call.callId, "system_balance_cutoff");
+          terminated.push({
+            callId: call.callId,
+            endedBy: "insufficient_balance",
+            userAId: call.userA.id,
+            userBId: call.userB.id,
+            userASocketId: call.userA.socketId,
+            userBSocketId: call.userB.socketId,
+          });
+        }
+        return; // skip UI update for this call — it's being terminated
+      }
+
+      updates.push({
+        callId: call.callId,
+        userAId: call.userA.id,
+        userBId: call.userB.id,
+        userASpent: call.userACoinsSpent,
+        userBSpent: call.userBCoinsSpent,
+      });
+    })
+  );
+
+  return { updates, terminated };
 }
 
 /** Get waiting queue stats */
@@ -379,4 +445,4 @@ export function getCategories() {
   return Object.entries(CATEGORY_META).map(([key, val]) => ({ id: key, ...val }));
 }
 
-export { activeCalls, callHistory };
+export { activeCalls, callHistory, callDebt };
