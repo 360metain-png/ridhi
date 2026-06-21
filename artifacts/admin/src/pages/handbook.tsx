@@ -750,6 +750,7 @@ const ADMIN_SECTIONS: Section[] = [
       "Flag a specific call for review if reported by a user",
       "Monitor per-user call frequency to detect abuse patterns (mass random calls, harassment)",
       "Recordings page: call recordings flagged by users — review and take action (Dismiss / Warn / Suspend)",
+      "Server-side billing enforcement: coinRate (audio=10, video=25) is resolved server-side from call type. Client cannot override. Upfront coins deducted at match start; remaining balance settled on call end via atomic SQL conditional update.",
     ],
   },
   {

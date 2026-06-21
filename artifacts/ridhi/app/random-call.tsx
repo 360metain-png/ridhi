@@ -100,7 +100,7 @@ export default function RandomCallScreen() {
   useTrackScreen("random_call");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins, deductCoins } = useAuth();
+  const { user, syncWallet } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   // ── State ───────────────────────────────────────────────────────────────
@@ -153,12 +153,12 @@ export default function RandomCallScreen() {
 
       ws.onopen = () => {
         // Send join message — use persona or stay anonymous
+        // Server does NOT trust coinRate or userId from client; uses auth identity.
         const p = user?.callPersona;
         const showName = p?.name?.trim() || false;
         ws.send(JSON.stringify({
           type: "join",
           payload: {
-            userId: user?.id ?? "anonymous",
             name: showName ? p!.name!.trim() : "",
             gender: user?.gender ?? "other",
             language: preferLanguage === "Any Language" ? "Any" : preferLanguage,
@@ -171,7 +171,6 @@ export default function RandomCallScreen() {
             acceptAudio: user?.hostCallPrefs?.acceptAudio ?? true,
             acceptVideo: user?.hostCallPrefs?.acceptVideo ?? true,
             callType,
-            coinRate: rate,
           },
         }));
       };
@@ -203,6 +202,8 @@ export default function RandomCallScreen() {
           case "call_ended": {
             const { reason, endedBy, durationSec, coinsSpent: cs } = msg.payload ?? {};
             setCoinsSpent(cs ?? 0);
+            // Refresh wallet from server after server-side deduction
+            syncWallet().catch(() => {});
             // If user disconnected, auto-rematch after 1.5s
             if (reason === "user_disconnected" && endedBy === user?.id) {
               setMode("idle");
@@ -221,7 +222,6 @@ export default function RandomCallScreen() {
                   wsRef.current.send(JSON.stringify({
                     type: "join",
                     payload: {
-                      userId: user?.id ?? "anonymous",
                       name: user?.name ?? "Ridhi User",
                       gender: user?.gender ?? "other",
                       language: preferLanguage === "Any Language" ? "Any" : preferLanguage,
@@ -232,7 +232,6 @@ export default function RandomCallScreen() {
                       acceptAudio: user?.hostCallPrefs?.acceptAudio ?? true,
                       acceptVideo: user?.hostCallPrefs?.acceptVideo ?? true,
                       callType,
-                      coinRate: rate,
                     },
                   }));
                 }
@@ -448,22 +447,12 @@ export default function RandomCallScreen() {
   };
 
   const endCall = async (): Promise<boolean> => {
-    // Deduct spent coins FIRST — block call teardown if server rejects
-    if (coinsSpent > 0) {
-      const deducted = await deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
-      if (!deducted) {
-        Alert.alert(
-          "Call Charge Failed",
-          `We could not deduct ${coinsSpent} coins for this call. Please recharge your wallet and try again.`
-        );
-        return false; // Hard failure: do not end the call until payment succeeds
-      }
-    }
-
+    // Server handles coin deduction — client only sends disconnect. The server
+    // deducts from the wallet in the websocket handler before ending the call.
     if (callId && wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "disconnect",
-        payload: { callId, userId: user?.id },
+        payload: { callId },
       }));
     }
     setMode("idle");

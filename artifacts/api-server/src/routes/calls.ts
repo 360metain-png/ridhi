@@ -69,7 +69,7 @@ router.get("/calls/active/:userId", requireUser, (req: AuthenticatedRequest, res
 export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedUserId: string) {
   sockets.set(socketId, ws);
 
-  ws.on("message", (raw) => {
+  ws.on("message", async (raw) => {
     let msg: any;
     try {
       msg = JSON.parse(raw.toString());
@@ -220,9 +220,10 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
 
       case "disconnect": {
         const { callId } = msg.payload as { callId: string };
-        // Use the server-authenticated identity; never trust client-supplied userId
         const call = getCallByUser(authenticatedUserId);
         if (call && call.callId === callId) {
+          // Settle remaining coins server-side before ending
+          await settleCall(callId);
           const ended = endCall(callId, authenticatedUserId);
           if (ended) {
             sendTo(ended.userA.socketId, {
@@ -261,6 +262,8 @@ export function handleCallSocket(ws: WebSocket, socketId: string, authenticatedU
     for (const [callId, call] of getActiveCalls()) {
       if (call.userA.socketId === socketId || call.userB.socketId === socketId) {
         const endedBy = call.userA.socketId === socketId ? call.userA.id : call.userB.id;
+        // Fire-and-forget settlement — server-side coins must be deducted
+        settleCall(callId).catch(() => {});
         endCall(callId, endedBy);
         const otherSocketId = call.userA.socketId === socketId ? call.userB.socketId : call.userA.socketId;
         sendTo(otherSocketId, {
