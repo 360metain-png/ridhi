@@ -166,6 +166,7 @@ export default function FeedScreen() {
   const [commentPostId, setCommentPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [localComments, setLocalComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
+  const [hiddenCommentIds, setHiddenCommentIds] = useState<Record<string, Set<string>>>({});
   const [storyViewId, setStoryViewId] = useState<string | null>(null);
 
   // ── Special Client Ads ────────────────────────────────────────────────────
@@ -341,6 +342,45 @@ export default function FeedScreen() {
   const handleOpenComments = useCallback((postId: string) => {
     setCommentPostId(postId);
     setCommentText("");
+  }, []);
+
+  const handleLongPressComment = useCallback((postId: string, commentId: string, commentName: string) => {
+    Alert.alert(
+      "Comment Options",
+      `Comment by ${commentName}`,
+      [
+        {
+          text: "Delete Comment",
+          style: "destructive",
+          onPress: () => {
+            setLocalComments((prev) => ({
+              ...prev,
+              [postId]: (prev[postId] ?? []).filter((c) => c.id !== commentId),
+            }));
+            setHiddenCommentIds((prev) => {
+              const cur = prev[postId] ? new Set(prev[postId]) : new Set<string>();
+              cur.add(commentId);
+              return { ...prev, [postId]: cur };
+            });
+          },
+        },
+        {
+          text: "Hide Comment",
+          onPress: () => {
+            setHiddenCommentIds((prev) => {
+              const cur = prev[postId] ? new Set(prev[postId]) : new Set<string>();
+              cur.add(commentId);
+              return { ...prev, [postId]: cur };
+            });
+          },
+        },
+        {
+          text: "Report",
+          onPress: () => Alert.alert("Reported", "This comment has been reported for review. Thank you."),
+        },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
   }, []);
 
   // ── Post menu handlers ────────────────────────────────────────────────────
@@ -1040,8 +1080,15 @@ export default function FeedScreen() {
                 { id: "d2", name: "Rahul Mehta", text: "Totally agree with this! ❤️", timeAgo: "5m" },
                 { id: "d3", name: "Kavya Reddy", text: "Wow, amazing post! Keep it up 🔥", timeAgo: "12m" },
                 { id: "d4", name: "Arjun Kumar", text: "भाई, क्या बात है! 👏", timeAgo: "18m" },
-              ].concat(localComments[commentPostId ?? ""] ?? []).map((c) => (
-                <View key={c.id} style={styles.commentItem}>
+              ].concat(localComments[commentPostId ?? ""] ?? [])
+               .filter((c) => !hiddenCommentIds[commentPostId ?? ""]?.has(c.id))
+               .map((c) => (
+                <Pressable
+                  key={c.id}
+                  onLongPress={() => handleLongPressComment(commentPostId ?? "", c.id, c.name)}
+                  delayLongPress={400}
+                  style={styles.commentItem}
+                >
                   <Avatar name={c.name} size={32} />
                   <View style={styles.commentBubble}>
                     <View style={[styles.commentBubbleInner, { backgroundColor: colors.muted }]}>
@@ -1056,7 +1103,7 @@ export default function FeedScreen() {
                       </Pressable>
                     </View>
                   </View>
-                </View>
+                </Pressable>
               ))}
             </ScrollView>
             <View style={[styles.commentInputRow, { borderTopColor: colors.border, backgroundColor: colors.card }]}>

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   FlatList,
@@ -793,7 +794,47 @@ export default function ReelsScreen() {
   const [commentReel, setCommentReel] = useState<(typeof REELS)[0] | null>(null);
   const [commentText, setCommentText] = useState("");
   const [sentComments, setSentComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
+  const [hiddenReelComments, setHiddenReelComments] = useState<Record<string, Set<string>>>({});
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  const handleLongPressReelComment = useCallback((reelId: string, commentId: string, commentName: string) => {
+    Alert.alert(
+      "Comment Options",
+      `Comment by ${commentName}`,
+      [
+        {
+          text: "Delete Comment",
+          style: "destructive",
+          onPress: () => {
+            setSentComments((prev) => ({
+              ...prev,
+              [reelId]: (prev[reelId] ?? []).filter((c) => c.id !== commentId),
+            }));
+            setHiddenReelComments((prev) => {
+              const cur = prev[reelId] ? new Set(prev[reelId]) : new Set<string>();
+              cur.add(commentId);
+              return { ...prev, [reelId]: cur };
+            });
+          },
+        },
+        {
+          text: "Hide Comment",
+          onPress: () => {
+            setHiddenReelComments((prev) => {
+              const cur = prev[reelId] ? new Set(prev[reelId]) : new Set<string>();
+              cur.add(commentId);
+              return { ...prev, [reelId]: cur };
+            });
+          },
+        },
+        {
+          text: "Report",
+          onPress: () => Alert.alert("Reported", "This comment has been reported for review. Thank you."),
+        },
+        { text: "Cancel", style: "cancel" },
+      ]
+    );
+  }, []);
   useTrackScreen("reels");
 
   // ── Screen entry — entire screen slides up from below ─────────────────────
@@ -907,8 +948,15 @@ export default function ReelsScreen() {
                 { id: "d1", name: "Ananya Singh", text: "This is so cool! 🔥", timeAgo: "2m" },
                 { id: "d2", name: "Rahul Mehta", text: "Love this reel! ❤️", timeAgo: "5m" },
                 { id: "d3", name: "Kavya Reddy", text: "Amazing content! 👏", timeAgo: "12m" },
-              ].concat(sentComments[commentReel?.id ?? ""] ?? []).map((c) => (
-                <View key={c.id} style={styles.commentItem}>
+              ].concat(sentComments[commentReel?.id ?? ""] ?? [])
+               .filter((c) => !hiddenReelComments[commentReel?.id ?? ""]?.has(c.id))
+               .map((c) => (
+                <Pressable
+                  key={c.id}
+                  onLongPress={() => handleLongPressReelComment(commentReel?.id ?? "", c.id, c.name)}
+                  delayLongPress={400}
+                  style={styles.commentItem}
+                >
                   <Avatar name={c.name} size={32} />
                   <View style={styles.commentBubble}>
                     <View style={styles.commentBubbleInner}>
@@ -917,7 +965,7 @@ export default function ReelsScreen() {
                     </View>
                     <Text style={styles.commentTime}>{c.timeAgo}</Text>
                   </View>
-                </View>
+                </Pressable>
               ))}
             </ScrollView>
             <View style={styles.commentInputRow}>
