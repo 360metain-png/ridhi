@@ -5,6 +5,8 @@ import { signUserToken } from "../lib/auth";
 import { otpRateLimit } from "../lib/rateLimit";
 import { auditFromRequest } from "../lib/audit";
 import { logger } from "../lib/logger";
+import { db } from "@workspace/db";
+import { users } from "@workspace/db";
 
 const router = Router();
 
@@ -17,6 +19,18 @@ const otpStore = new Map<string, { otp: string; expiresAt: number }>();
 
 function generateOtp(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+/** Ensure user row exists in DB, then mint a JWT. Safe to call on every login. */
+async function upsertUserAndMintToken(contact: string): Promise<string> {
+  try {
+    await db.insert(users)
+      .values({ phone: contact, name: contact, coins: 100 })
+      .onConflictDoNothing();
+  } catch (err) {
+    logger.warn({ err, contact }, "user upsert warning (non-fatal)");
+  }
+  return signUserToken(contact);
 }
 
 function normalisePhone(contact: string): string {
@@ -188,8 +202,7 @@ router.post("/auth/verify-otp", async (req, res) => {
     }
     otpStore.delete(contact);
     req.log.info({ contact }, "OTP verified (local store)");
-    // Generate JWT token for the user
-    const token = signUserToken(contact);
+    const token = await upsertUserAndMintToken(contact);
     auditFromRequest(req, "admin_login", contact, "user", { provider: "local" });
     res.json({ success: true, message: "OTP verified", token });
     return;
@@ -202,7 +215,9 @@ router.post("/auth/verify-otp", async (req, res) => {
       const result = await msg91Verify(mobile, otp);
       if (result.success) {
         req.log.info({ mobile }, "Phone OTP verified via MSG91");
-        res.json({ success: true, message: "OTP verified" });
+        const token = await upsertUserAndMintToken(contact);
+        auditFromRequest(req, "admin_login", contact, "user", { provider: "msg91" });
+        res.json({ success: true, message: "OTP verified", token });
         return;
       }
       res.status(400).json({ success: false, error: "Incorrect OTP. Please try again." });
@@ -246,7 +261,7 @@ router.post("/auth/firebase-verify", async (req, res) => {
   }
 
   req.log.info({ contact, uid: result.uid }, "Firebase OTP verified");
-  const token = signUserToken(contact);
+  const token = await upsertUserAndMintToken(contact);
   auditFromRequest(req, "admin_login", contact, "user", { provider: "firebase", uid: result.uid });
   res.json({ success: true, provider: "firebase", uid: result.uid, message: "OTP verified via Firebase", token });
 });
