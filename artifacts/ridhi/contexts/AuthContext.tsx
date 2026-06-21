@@ -83,6 +83,16 @@ export interface UserProfile {
   streakCount?: number;
   lastPostDate?: string;
   downloadEarnings?: number;
+  // Saved posts / Collections
+  savedPosts?: string[];
+  savedCollections?: { id: string; name: string; coverUri?: string; postIds: string[]; createdAt?: string }[];
+  // Story highlights
+  storyHighlights?: { id: string; title: string; coverUri?: string; storyIds: string[]; createdAt: string }[];
+  // Dating features
+  superLikesRemaining?: number;
+  backtracksRemaining?: number;
+  // Profile prompts
+  profilePrompts?: { question: string; answer: string }[];
 }
 
 interface AuthContextValue {
@@ -101,6 +111,16 @@ interface AuthContextValue {
   syncKycStatus: (userId: string) => Promise<void>;
   syncPkBattleStatus: (userId: string) => Promise<void>;
   recordDownloadEarning: (amount: number) => Promise<void>;
+  // Saved posts
+  savePost: (postId: string) => Promise<void>;
+  unsavePost: (postId: string) => Promise<void>;
+  addCollection: (name: string) => Promise<void>;
+  // Super likes & backtracks
+  useSuperLike: () => Promise<boolean>;
+  useBacktrack: () => Promise<boolean>;
+  // Profile prompts
+  addProfilePrompt: (question: string, answer: string) => Promise<void>;
+  removeProfilePrompt: (index: number) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -127,6 +147,12 @@ const DEFAULT_USER: UserProfile = {
   streakCount: 3,
   lastPostDate: new Date().toISOString(),
   downloadEarnings: 0,
+  savedPosts: [],
+  savedCollections: [],
+  storyHighlights: [],
+  superLikesRemaining: 2,
+  backtracksRemaining: 1,
+  profilePrompts: [],
   createdAt: new Date().toISOString(),
 };
 
@@ -405,9 +431,129 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const savePost = useCallback(async (postId: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const saved = prev.savedPosts ?? [];
+      if (saved.includes(postId)) return prev;
+      const updated: UserProfile = { ...prev, savedPosts: [...saved, postId] };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const unsavePost = useCallback(async (postId: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const saved = prev.savedPosts ?? [];
+      const updated: UserProfile = { ...prev, savedPosts: saved.filter((id) => id !== postId) };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const addCollection = useCallback(async (name: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const collections = prev.savedCollections ?? [];
+      const updated: UserProfile = {
+        ...prev,
+        savedCollections: [...collections, { id: `col_${Date.now()}`, name, postIds: [], createdAt: new Date().toISOString() }],
+      };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const useSuperLike = useCallback(async (): Promise<boolean> => {
+    let success = false;
+    setUser((prev) => {
+      if (!prev) return prev;
+      
+      const plan = prev.plan || "free";
+      const freeLimit = plan === "diamond" ? 10 : plan === "platinum" ? 5 : plan === "gold" ? 2 : 0;
+      const remainingFree = prev.superLikesRemaining ?? 0;
+      
+      if (remainingFree > 0) {
+        success = true;
+        const updated: UserProfile = { ...prev, superLikesRemaining: remainingFree - 1 };
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      }
+      
+      if (prev.coins >= 5) {
+        success = true;
+        const updated: UserProfile = { ...prev, coins: prev.coins - 5 };
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      }
+      
+      return prev;
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    return success;
+  }, []);
+
+  const useBacktrack = useCallback(async (): Promise<boolean> => {
+    let success = false;
+    setUser((prev) => {
+      if (!prev) return prev;
+      
+      const plan = prev.plan || "free";
+      const freeLimit = plan === "diamond" ? Infinity : plan === "platinum" ? 3 : plan === "gold" ? 1 : 0;
+      const remainingFree = prev.backtracksRemaining ?? 0;
+      
+      if (plan === "diamond" || remainingFree > 0) {
+        success = true;
+        const updated: UserProfile = { ...prev, backtracksRemaining: plan === "diamond" ? remainingFree : Math.max(0, remainingFree - 1) };
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      }
+      
+      if (prev.coins >= 1) {
+        success = true;
+        const updated: UserProfile = { ...prev, coins: prev.coins - 1 };
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      }
+      
+      return prev;
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    return success;
+  }, []);
+
+  const addProfilePrompt = useCallback(async (question: string, answer: string) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const prompts = prev.profilePrompts ?? [];
+      if (prompts.length >= 5) return prev;
+      const updated: UserProfile = { ...prev, profilePrompts: [...prompts, { question, answer }] };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const removeProfilePrompt = useCallback(async (index: number) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const prompts = prev.profilePrompts ?? [];
+      const updated: UserProfile = { ...prev, profilePrompts: prompts.filter((_, i) => i !== index) };
+      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile, addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan, syncKycStatus, syncPkBattleStatus, recordDownloadEarning }}
+      value={{
+        user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile,
+        addCoins, claimDailyReward, deductCoins, subscribePlan, cancelPlan,
+        syncKycStatus, syncPkBattleStatus, recordDownloadEarning,
+        savePost, unsavePost, addCollection,
+        useSuperLike, useBacktrack,
+        addProfilePrompt, removeProfilePrompt,
+      }}
     >
       {children}
     </AuthContext.Provider>

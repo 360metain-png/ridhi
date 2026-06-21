@@ -108,7 +108,7 @@ export const SPEND_CATEGORIES: SpendCategory[] = [
   { id: "sc9", label: "Download",         icon: "download",     color: "#34C759", desc: "Download videos & posts",  cost: "3-20 coins",          route: "/(tabs)/reels" },
 ];
 
-export type ContentType = "reel" | "post" | "story" | "live" | "audio";
+export type ContentType = "reel" | "post" | "story" | "live" | "audio" | "post_download";
 
 export interface DownloadPrice {
   type: ContentType;
@@ -117,11 +117,12 @@ export interface DownloadPrice {
 }
 
 export const DOWNLOAD_PRICING: Record<ContentType, DownloadPrice> = {
-  reel:   { type: "reel",   price: 5,  label: "Reel" },
-  post:   { type: "post",   price: 10, label: "Post" },
-  story:  { type: "story",  price: 3,  label: "Story" },
-  live:   { type: "live",   price: 20, label: "Live Recording" },
-  audio:  { type: "audio",  price: 8,  label: "Audio Room" },
+  reel:          { type: "reel",          price: 5,  label: "Reel" },
+  post:          { type: "post",          price: 10, label: "Post" },
+  post_download: { type: "post_download", price: 10, label: "Post Download" },
+  story:         { type: "story",         price: 3,  label: "Story" },
+  live:          { type: "live",          price: 20, label: "Live Recording" },
+  audio:         { type: "audio",         price: 8,  label: "Audio Room" },
 };
 
 export const REVENUE_SPLIT = {

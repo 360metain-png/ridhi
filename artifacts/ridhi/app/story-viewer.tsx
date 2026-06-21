@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Platform,
@@ -20,6 +21,7 @@ import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { DownloadService } from "@/components/DownloadService";
+import { useAuth } from "@/contexts/AuthContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -56,6 +58,7 @@ export default function StoryViewerScreen() {
   useTrackScreen("story_viewer");
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { user, updateProfile } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reply, setReply] = useState("");
@@ -118,6 +121,83 @@ export default function StoryViewerScreen() {
       Animated.timing(reactionAnim, { toValue: 0, duration: 400, useNativeDriver: true }),
     ]).start();
   };
+
+  const handleHighlight = () => {
+    if (!user) return;
+    setPaused(true);
+
+    const highlights = user.storyHighlights || [];
+    const storyId = STORIES[currentIndex].id;
+
+    const options = [
+      {
+        text: "Create New Highlight",
+        onPress: () => {
+          if (Platform.OS === 'web') {
+            const name = prompt("Enter a name for your highlight");
+            if (name) {
+              const newHighlight = {
+                id: `h_${Date.now()}`,
+                title: name,
+                coverUri: "", // first story's background will be used in viewer
+                storyIds: [storyId],
+                createdAt: new Date().toISOString(),
+              };
+              updateProfile({ storyHighlights: [...highlights, newHighlight] });
+            }
+            setPaused(false);
+          } else {
+            Alert.prompt(
+              "New Highlight",
+              "Enter a name for your highlight",
+              [
+                { text: "Cancel", style: "cancel", onPress: () => setPaused(false) },
+                {
+                  text: "Create",
+                  onPress: (name: string | undefined) => {
+                    if (name) {
+                      const newHighlight = {
+                        id: `h_${Date.now()}`,
+                        title: name,
+                        coverUri: "",
+                        storyIds: [storyId],
+                        createdAt: new Date().toISOString(),
+                      };
+                      updateProfile({ storyHighlights: [...highlights, newHighlight] });
+                    }
+                    setPaused(false);
+                  },
+                },
+              ],
+              "plain-text"
+            );
+          }
+        },
+      },
+    ];
+
+    highlights.forEach((h) => {
+      options.push({
+        text: `Add to "${h.title}"`,
+        onPress: () => {
+          const updated = highlights.map((item) => {
+            if (item.id === h.id) {
+              return { ...item, storyIds: Array.from(new Set([...item.storyIds, storyId])) };
+            }
+            return item;
+          });
+          updateProfile({ storyHighlights: updated });
+          setPaused(false);
+        },
+      });
+    });
+
+    options.push({ text: "Cancel", onPress: () => setPaused(false) });
+
+    Alert.alert("Add to Highlight", "Choose a highlight or create a new one", options as any);
+  };
+
+  const isMyStory = user?.id === story.userId;
 
   return (
     <>
@@ -230,6 +310,11 @@ export default function StoryViewerScreen() {
               <Pressable style={styles.replyActionBtn} onPress={() => setShowDownload(true)}>
                 <Feather name="download" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
+              {isMyStory && (
+                <Pressable style={styles.replyActionBtn} onPress={handleHighlight}>
+                  <Feather name="plus-circle" size={22} color="rgba(255,255,255,0.9)" />
+                </Pressable>
+              )}
             </View>
           )}
         </View>

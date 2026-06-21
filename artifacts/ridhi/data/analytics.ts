@@ -27,7 +27,7 @@ export type EventType =
   | "search" | "hashtag_click" | "community_join" | "community_leave"
   | "ad_impression" | "ad_click" | "ad_conversion";
 
-export type ContentType = "post" | "reel" | "voice_reel" | "story" | "live" | "audio" | "chat" | "profile" | "user" | "community" | "ad" | "search" | "hashtag";
+export type ContentType = "post" | "reel" | "voice_reel" | "story" | "live" | "audio" | "chat" | "profile" | "user" | "community" | "ad" | "search" | "hashtag" | "post_download";
 
 export interface AnalyticsEvent {
   id: string;

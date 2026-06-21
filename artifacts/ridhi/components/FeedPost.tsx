@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -10,7 +11,9 @@ import { useWatermark } from "@/hooks/useWatermark";
 import { SubscriptionBadge, VipTier } from "./SubscriptionBadge";
 import { ShareWithWatermark } from "./ShareWithWatermark";
 import { DownloadService } from "./DownloadService";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { Alert } from "react-native";
 
 export interface Post {
   id: string;
@@ -47,6 +50,7 @@ export interface Post {
   soundId?: string;
   soundTitle?: string;
   soundArtist?: string;
+  taggedProduct?: { id: string; name: string; price: number; image: string };
 }
 
 interface FeedPostProps {
@@ -140,6 +144,8 @@ export const FeedPost = React.memo(function FeedPost({
   const colors = useColors();
   const { saveWithWatermark, saving, saved } = useWatermark();
   const { trackShare, trackSave } = useAnalytics();
+  const { user, savePost, unsavePost } = useAuth();
+  const isSaved = user?.savedPosts?.includes(post.id) ?? false;
   const [showBurst, setShowBurst] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
@@ -278,6 +284,23 @@ export const FeedPost = React.memo(function FeedPost({
           </View>
         ) : null}
 
+        {/* Tagged Product Card */}
+        {post.taggedProduct && (
+          <Pressable
+            style={[styles.productCard, { backgroundColor: colors.muted, borderColor: colors.border }]}
+            onPress={() => router.push({ pathname: "/product-detail", params: { id: post.taggedProduct?.id } })}
+          >
+            <Image source={{ uri: post.taggedProduct.image }} style={styles.productThumb} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.productName, { color: colors.foreground }]} numberOfLines={1}>{post.taggedProduct.name}</Text>
+              <Text style={[styles.productPrice, { color: colors.primary }]}>{post.taggedProduct.price} Coins</Text>
+            </View>
+            <View style={[styles.shopNowBtn, { backgroundColor: colors.primary }]}>
+              <Text style={styles.shopNowText}>Shop Now</Text>
+            </View>
+          </Pressable>
+        )}
+
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
         {/* ── Actions ── */}
@@ -339,7 +362,28 @@ export const FeedPost = React.memo(function FeedPost({
           <View style={{ flex: 1 }} />
 
           <Pressable
-            onPress={() => { trackSave(post.id, "post"); setShowDownload(true); }}
+            style={styles.action}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              if (isSaved) {
+                unsavePost(post.id);
+                Alert.alert("Removed", "Removed from collection");
+              } else {
+                savePost(post.id);
+                trackSave(post.id, "post");
+                Alert.alert("Saved", "Saved to collection");
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={isSaved ? "Remove from saved" : "Save post"}
+          >
+            <View style={[styles.actionIcon, { backgroundColor: isSaved ? colors.primary + "20" : colors.muted }]}>
+              <Feather name="bookmark" size={14} color={isSaved ? colors.primary : colors.mutedForeground} />
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => { trackSave(post.id, "post_download"); setShowDownload(true); }}
             accessibilityRole="button"
             accessibilityLabel="Download post"
           >
@@ -450,4 +494,11 @@ const styles = StyleSheet.create({
   carouselDot:   { width: 6, height: 6, borderRadius: 3 },
   carouselCount: { position: "absolute", top: 10, right: 14, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
   carouselCountText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  // Product Card
+  productCard: { flexDirection: "row", alignItems: "center", marginHorizontal: 14, marginTop: 4, marginBottom: 12, padding: 8, borderRadius: 12, borderWidth: 1, gap: 10 },
+  productThumb: { width: 44, height: 44, borderRadius: 8 },
+  productName: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  productPrice: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  shopNowBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  shopNowText: { color: "#fff", fontSize: 11, fontFamily: "Inter_700Bold" },
 });

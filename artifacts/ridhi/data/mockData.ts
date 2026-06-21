@@ -1,6 +1,109 @@
 import { Post } from "@/components/FeedPost";
 import { ChatPreview } from "@/components/ChatItem";
 
+export const PRODUCTS = [
+  {
+    id: "prod1",
+    name: "Classic Silk Kurta Set",
+    price: 1200,
+    category: "Fashion",
+    image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?w=500",
+    description: "Elegant silk kurta set with intricate embroidery, perfect for festive occasions.",
+    rating: 4.8,
+    reviews: 124,
+  },
+  {
+    id: "prod2",
+    name: "Canvas Sneakers",
+    price: 850,
+    category: "Fashion",
+    image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500",
+    description: "Comfortable and stylish canvas sneakers for everyday wear.",
+    rating: 4.5,
+    reviews: 89,
+  },
+  {
+    id: "prod3",
+    name: "Aviator Sunglasses",
+    price: 450,
+    category: "Fashion",
+    image: "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=500",
+    description: "Timeless aviator design with UV protection lenses.",
+    rating: 4.2,
+    reviews: 56,
+  },
+  {
+    id: "prod4",
+    name: "Matte Lipstick Set",
+    price: 600,
+    category: "Beauty",
+    image: "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=500",
+    description: "Long-lasting matte lipsticks in 5 trending shades.",
+    rating: 4.7,
+    reviews: 210,
+  },
+  {
+    id: "prod5",
+    name: "Organic Face Serum",
+    price: 750,
+    category: "Beauty",
+    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500",
+    description: "Vitamin C enriched serum for glowing and healthy skin.",
+    rating: 4.6,
+    reviews: 145,
+  },
+  {
+    id: "prod6",
+    name: "Wireless Earbuds",
+    price: 1500,
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",
+    description: "Noise-cancelling earbuds with 24-hour battery life.",
+    rating: 4.4,
+    reviews: 320,
+  },
+  {
+    id: "prod7",
+    name: "Premium Phone Case",
+    price: 350,
+    category: "Electronics",
+    image: "https://images.unsplash.com/photo-1586105251261-72a756657fd1?w=500",
+    description: "Durable and slim case for ultimate phone protection.",
+    rating: 4.9,
+    reviews: 78,
+  },
+  {
+    id: "prod8",
+    name: "Canvas Tote Bag",
+    price: 250,
+    category: "Fashion",
+    image: "https://images.unsplash.com/photo-1544816153-39ad03578334?w=500",
+    description: "Spacious eco-friendly tote bag for all your essentials.",
+    rating: 4.3,
+    reviews: 42,
+  },
+  {
+    id: "prod9",
+    name: "Scented Soy Candle",
+    price: 300,
+    category: "Home",
+    image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500",
+    description: "Lavender scented hand-poured soy candle for a relaxing ambiance.",
+    rating: 4.8,
+    reviews: 65,
+  },
+  {
+    id: "prod10",
+    name: "Ceramic Coffee Mug",
+    price: 200,
+    category: "Home",
+    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500",
+    description: "Minimalist ceramic mug with a comfortable grip.",
+    rating: 4.5,
+    reviews: 34,
+  },
+];
+
 export const STORIES = [
   { id: "s1", userId: "u1", userName: "Ananya S", hasUnseen: true },
   { id: "s2", userId: "u2", userName: "Rahul M", hasUnseen: true },
@@ -479,6 +582,10 @@ export const MATCH_PROFILES = [
     zodiacSign: "Leo",
     vibeStar: 5,
     compatibilityScore: 92,
+    profilePrompts: [
+      { question: "My ideal weekend looks like...", answer: "Dance class in the morning, chai at Carter Road, and a sunset walk at Marine Drive 🌅" },
+      { question: "The best chai I've ever had was...", answer: "At this tiny stall in Juhu — they add masala that hits different ☕" },
+    ],
   },
   {
     id: "m2",
@@ -1321,4 +1428,270 @@ export const AD_VARIANTS: AdVariant[] = [
   { id: "av3", campaignId: "uc1", name: "Summer Sale C", headline: "🔥 Flash: 40% Off Ends Tonight", body: "Don't miss out. Biggest discount of the season.", ctr: 3.12, impressions: 15200, isWinner: false },
   { id: "av4", campaignId: "uc2", name: "Ethnic Wear A", headline: "New Collection Launch — Ethnic Wear", body: "Handcrafted ethnic wear from India's finest artisans.", ctr: 3.05, impressions: 18700, isWinner: true },
   { id: "av5", campaignId: "uc2", name: "Ethnic Wear B", headline: "Ethnic Fashion — Free Shipping", body: "Discover premium ethnic wear. First order free delivery.", ctr: 2.71, impressions: 16500, isWinner: false },
+];
+
+export interface EventAttendee {
+  id: string;
+  name: string;
+  avatar?: string;
+}
+
+export interface RidhiEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  city: string;
+  description: string;
+  image: string;
+  attendees: EventAttendee[];
+  isOnline: boolean;
+  category: "Music" | "Food" | "Sports" | "Tech" | "Art" | "Social" | "Dating";
+  isTrending?: boolean;
+}
+
+export const MOCK_EVENTS: RidhiEvent[] = [
+  {
+    id: "e1",
+    title: "Delhi Food Festival",
+    date: "25 Oct 2026",
+    time: "12:00 PM",
+    location: "Jawaharlal Nehru Stadium, Delhi",
+    city: "Delhi",
+    description: "Experience the best street food and gourmet delights from across India in the heart of Delhi.",
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800",
+    attendees: [{ id: "u1", name: "Ananya S" }, { id: "u2", name: "Rahul M" }, { id: "u3", name: "Kavya R" }],
+    isOnline: false,
+    category: "Food",
+    isTrending: true,
+  },
+  {
+    id: "e2",
+    title: "Mumbai Tech Meetup",
+    date: "10 Nov 2026",
+    time: "06:30 PM",
+    location: "WeWork BKC, Mumbai",
+    city: "Mumbai",
+    description: "Network with the brightest minds in Mumbai's tech ecosystem. Talks on AI, Web3, and scaling startups.",
+    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800",
+    attendees: [{ id: "u4", name: "Arjun K" }, { id: "u5", name: "Meera P" }],
+    isOnline: false,
+    category: "Tech",
+    isTrending: true,
+  },
+  {
+    id: "e3",
+    title: "Bangalore Music Night",
+    date: "05 Dec 2026",
+    time: "08:00 PM",
+    location: "Hard Rock Cafe, Bangalore",
+    city: "Bangalore",
+    description: "Live indie music performance featuring local Bangalore bands. A night of rhythm and soul.",
+    image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800",
+    attendees: [{ id: "u6", name: "Dev T" }, { id: "u1", name: "Ananya S" }],
+    isOnline: false,
+    category: "Music",
+    isTrending: true,
+  },
+  {
+    id: "e4",
+    title: "Art & Sip Hyderabad",
+    date: "20 Oct 2026",
+    time: "04:00 PM",
+    location: "The Gallery, Hyderabad",
+    city: "Hyderabad",
+    description: "Unleash your creativity with a guided painting session while enjoying premium drinks.",
+    image: "https://images.unsplash.com/photo-1460661419201-fd4ce18a8024?w=800",
+    attendees: [{ id: "u3", name: "Kavya R" }, { id: "u7", name: "Priyanka N" }],
+    isOnline: false,
+    category: "Art",
+  },
+  {
+    id: "e5",
+    title: "Speed Dating Delhi",
+    date: "14 Feb 2027",
+    time: "07:00 PM",
+    location: "Cafe 10, CP, Delhi",
+    city: "Delhi",
+    description: "Find your match this Valentine's! A curated speed dating event for young professionals.",
+    image: "https://images.unsplash.com/photo-1516724562728-afc824a36e84?w=800",
+    attendees: [{ id: "u1", name: "Ananya S" }, { id: "u8", name: "Siddharth J" }],
+    isOnline: false,
+    category: "Dating",
+  },
+  {
+    id: "e6",
+    title: "IPL Finals Screening",
+    date: "28 May 2026",
+    time: "07:30 PM",
+    location: "SMAAASH, Mumbai",
+    city: "Mumbai",
+    description: "Watch the IPL finals on the big screen with fellow cricket fans. Food, drinks, and cheers!",
+    image: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800",
+    attendees: [{ id: "u2", name: "Rahul M" }, { id: "u4", name: "Arjun K" }],
+    isOnline: false,
+    category: "Sports",
+  },
+  {
+    id: "e7",
+    title: "Startup Founders Social",
+    date: "15 Nov 2026",
+    time: "05:00 PM",
+    location: "Indiranagar Hub, Bangalore",
+    city: "Bangalore",
+    description: "An informal mixer for startup founders to share experiences and build collaborations.",
+    image: "https://images.unsplash.com/photo-1528605248644-14dd04cb21c7?w=800",
+    attendees: [{ id: "u4", name: "Arjun K" }, { id: "u6", name: "Dev T" }],
+    isOnline: false,
+    category: "Social",
+  },
+  {
+    id: "e8",
+    title: "Virtual Yoga Session",
+    date: "21 Oct 2026",
+    time: "07:00 AM",
+    location: "Zoom Video Call",
+    city: "Online",
+    description: "Start your morning with a refreshing virtual yoga session from the comfort of your home.",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
+    attendees: [{ id: "u5", name: "Meera P" }, { id: "u3", name: "Kavya R" }],
+    isOnline: true,
+    category: "Social",
+  },
+  {
+    id: "e9",
+    title: "Photography Walk Jaipur",
+    date: "12 Dec 2026",
+    time: "06:00 AM",
+    location: "Hawa Mahal, Jaipur",
+    city: "Jaipur",
+    description: "Capture the pink city at sunrise. A guided walk for photography enthusiasts of all levels.",
+    image: "https://images.unsplash.com/photo-1477233534935-f5e6fe7c1159?w=800",
+    attendees: [{ id: "u8", name: "Siddharth J" }, { id: "u7", name: "Priyanka N" }],
+    isOnline: false,
+    category: "Art",
+  },
+  {
+    id: "e10",
+    title: "Pune Comedy Night",
+    date: "02 Nov 2026",
+    time: "08:00 PM",
+    location: "Classic Rock Cafe, Pune",
+    city: "Pune",
+    description: "A lineup of top stand-up comedians for a night full of laughter and joy.",
+    image: "https://images.unsplash.com/photo-1514525253361-bee24387052b?w=800",
+    attendees: [{ id: "u6", name: "Dev T" }, { id: "u5", name: "Meera P" }],
+    isOnline: false,
+    category: "Music",
+  },
+  {
+    id: "e11",
+    title: "Gamer's Meetup Chennai",
+    date: "20 Nov 2026",
+    time: "11:00 AM",
+    location: "Gaming Zone, Chennai",
+    city: "Chennai",
+    description: "Casual gaming tournament and networking for Chennai's gaming community.",
+    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800",
+    attendees: [{ id: "u4", name: "Arjun K" }, { id: "u2", name: "Rahul M" }],
+    isOnline: false,
+    category: "Social",
+  },
+  {
+    id: "e12",
+    title: "Wine Tasting Nashik",
+    date: "10 Dec 2026",
+    time: "01:00 PM",
+    location: "Sula Vineyards, Nashik",
+    city: "Nashik",
+    description: "Enjoy a day at the vineyards with premium wine tasting and a tour of the winery.",
+    image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800",
+    attendees: [{ id: "u2", name: "Rahul M" }, { id: "u5", name: "Meera P" }],
+    isOnline: false,
+    category: "Food",
+  },
+];
+
+export interface BroadcastChannel {
+  id: string;
+  name: string;
+  description: string;
+  creatorName: string;
+  creatorAvatar?: string;
+  subscribers: number;
+  category: "General" | "Creator" | "Dating" | "Community";
+  messages: { id: string; text: string; time: string; reactions: { emoji: string; count: number }[] }[];
+  lastMessage?: string;
+  lastMessageTime?: string;
+}
+
+export const MOCK_CHANNELS: BroadcastChannel[] = [
+  {
+    id: "c1",
+    name: "Ridhi Updates",
+    description: "Official updates and news from the Ridhi team.",
+    creatorName: "Ridhi Team",
+    subscribers: 15400,
+    category: "General",
+    messages: [
+      { id: "m1", text: "Welcome to the official Ridhi updates channel! 🚀", time: "10:00 AM", reactions: [{ emoji: "❤️", count: 450 }, { emoji: "🔥", count: 200 }] },
+      { id: "m2", text: "New 'Events' feature is now live! Go check it out. 📅", time: "11:30 AM", reactions: [{ emoji: "🙌", count: 320 }, { emoji: "🎉", count: 180 }] },
+    ],
+    lastMessage: "New 'Events' feature is now live! Go check it out. 📅",
+    lastMessageTime: "11:30 AM",
+  },
+  {
+    id: "c2",
+    name: "Creator Tips",
+    description: "Daily tips on how to grow your presence and earn more as a creator on Ridhi.",
+    creatorName: "Meera Patel",
+    subscribers: 8200,
+    category: "Creator",
+    messages: [
+      { id: "m1", text: "Tip #1: Post consistently at 7 PM for maximum engagement! 📈", time: "Yesterday", reactions: [{ emoji: "💡", count: 120 }, { emoji: "👍", count: 90 }] },
+      { id: "m2", text: "Engage with your top fans in the comments to build loyalty.", time: "9:00 AM", reactions: [{ emoji: "✅", count: 150 }] },
+    ],
+    lastMessage: "Engage with your top fans in the comments to build loyalty.",
+    lastMessageTime: "9:00 AM",
+  },
+  {
+    id: "c3",
+    name: "Dating Advice",
+    description: "Weekly live sessions and tips for a better dating experience.",
+    creatorName: "Ananya Singh",
+    subscribers: 5600,
+    category: "Dating",
+    messages: [
+      { id: "m1", text: "First date jitters? Just be yourself! ✨", time: "Monday", reactions: [{ emoji: "❤️", count: 200 }] },
+    ],
+    lastMessage: "First date jitters? Just be yourself! ✨",
+    lastMessageTime: "Monday",
+  },
+  {
+    id: "c4",
+    name: "Foodies Hub",
+    description: "Discover hidden gems and best street food across India.",
+    creatorName: "Rahul Mehta",
+    subscribers: 12000,
+    category: "Community",
+    messages: [
+      { id: "m1", text: "Best Vada Pav in Mumbai? Definitely near Dadar station! 🥙", time: "2:00 PM", reactions: [{ emoji: "😋", count: 500 }, { emoji: "📍", count: 120 }] },
+    ],
+    lastMessage: "Best Vada Pav in Mumbai? Definitely near Dadar station! 🥙",
+    lastMessageTime: "2:00 PM",
+  },
+  {
+    id: "c5",
+    name: "Tech Talk",
+    description: "Discuss the latest in technology, AI, and Gadgets.",
+    creatorName: "Arjun Kumar",
+    subscribers: 3400,
+    category: "Community",
+    messages: [
+      { id: "m1", text: "Has anyone tried the new AR glasses? 🕶️", time: "10:00 AM", reactions: [{ emoji: "🤔", count: 50 }] },
+    ],
+    lastMessage: "Has anyone tried the new AR glasses? 🕶️",
+    lastMessageTime: "10:00 AM",
+  },
 ];

@@ -52,6 +52,27 @@ const INTERESTS = [
   "Spirituality", "Pets", "Business",
 ];
 
+const QUICK_PROMPTS = [
+  "My ideal weekend looks like...",
+  "The best chai I've ever had was...",
+  "One thing on my bucket list...",
+  "My superpower would be...",
+  "The most desi thing about me...",
+  "Dating me is like...",
+  "My guilty pleasure...",
+  "A cause I care about...",
+  "My perfect date would be...",
+  "The song that describes my life...",
+];
+
+const PROMPT_GRADIENTS = [
+  ["#FF3B30", "#FF9500"],
+  ["#7B2FBE", "#E91E8C"],
+  ["#007AFF", "#5AC8FA"],
+  ["#34C759", "#00C7BE"],
+  ["#FF9500", "#FFCC00"],
+];
+
 // All 28 Indian States + 8 Union Territories
 const INDIAN_STATES = [
   // ── States ──────────────────────────────────────────
@@ -149,7 +170,7 @@ function detectStateFromGeocode(addr: Location.LocationGeocodedAddress): string 
   return null;
 }
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 // ─── screen ───────────────────────────────────────────────────────────────────
 
@@ -221,6 +242,11 @@ export default function ProfileSetupScreen() {
   const [locError, setLocError] = useState("");
   // step 5 — interests
   const [interests, setInterests] = useState<string[]>([]);
+  // step 6 — prompts
+  const [profilePrompts, setProfilePrompts] = useState<{ question: string; answer: string }[]>([]);
+  const [activePrompt, setActivePrompt] = useState<string | null>(null);
+  const [promptAnswer, setPromptAnswer] = useState("");
+
   const [loading, setLoading]     = useState(false);
 
   const toggleInterest = (interest: string) => {
@@ -236,6 +262,7 @@ export default function ProfileSetupScreen() {
     !!(photoUri || avatarUri), // must choose photo or avatar
     !!state,
     interests.length >= 3,
+    true, // Optional: profile prompts
   ][step];
 
   const handleNext = async () => {
@@ -253,6 +280,7 @@ export default function ProfileSetupScreen() {
       state,
       language,
       interests,
+      profilePrompts,
       avatar: resolvedAvatar,
       coins: 100,
       locationCoords: coords ?? undefined,
@@ -892,4 +920,22 @@ const styles = StyleSheet.create({
   avatarNote:     { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center", paddingHorizontal: 20 },
 
   footer: { paddingHorizontal: 24, paddingTop: 12 },
+
+  // ── Profile Prompts ────────────────────────────────────────────────────────
+  setupPromptCard: { flexDirection: "row", alignItems: "center", borderRadius: 12, padding: 12, gap: 10 },
+  setupPromptQuestion: { color: "rgba(255,255,255,0.8)", fontSize: 11, fontFamily: "Inter_500Medium" },
+  setupPromptAnswer: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold", marginTop: 2 },
+  setupPromptRemove: { width: 24, height: 24, borderRadius: 12, backgroundColor: "rgba(0,0,0,0.2)", alignItems: "center", justifyContent: "center" },
+  quickPromptBtn: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 1 },
+  quickPromptText: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  activePromptBox: { padding: 16, borderRadius: 16, borderWidth: 1.5, marginTop: 10 },
+  activePromptQuestion: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 8 },
+  activePromptInput: { fontSize: 16, fontFamily: "Inter_500Medium", paddingVertical: 8, borderBottomWidth: 1 },
+  promptActionBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
+  promptActionText: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  promptsLimitBox: { flexDirection: "row", alignItems: "center", gap: 10, padding: 16, borderRadius: 14, borderWidth: 1 },
+  promptsLimitText: { flex: 1, fontSize: 13, fontFamily: "Inter_500Medium" },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  chip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1.5 },
+  chipText: { fontSize: 14, fontFamily: "Inter_500Medium" },
 });

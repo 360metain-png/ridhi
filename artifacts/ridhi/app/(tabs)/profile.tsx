@@ -71,11 +71,22 @@ const POST_COLORS = [
   ["#006064","#00838F"], ["#880E4F","#C2185B"], ["#1A237E","#3949AB"],
 ];
 
+const PROMPT_GRADIENTS = [
+  ["#FF3B30", "#FF9500"],
+  ["#7B2FBE", "#E91E8C"],
+  ["#007AFF", "#5AC8FA"],
+  ["#34C759", "#00C7BE"],
+  ["#FF9500", "#FFCC00"],
+];
+
 // ── Menu sections (grouped like iOS Settings) ──────────────────────────────
 const MENU_SECTIONS = [
   {
     title: "Content",
     items: [
+      { icon: "calendar",    label: "Events & Meetups",route: "/events",              color: "#FF9500" },
+      { icon: "rss",         label: "Broadcasts",      route: "/broadcast",           color: "#5856D6" },
+      { icon: "bookmark",    label: "Saved Posts",  route: "/saved-posts",         color: "#FF9500" },
       { icon: "globe",       label: "Explore",      route: "/explore",             color: "#5AC8FA" },
       { icon: "users",       label: "Communities",  route: "/communities",         color: "#7B2FBE" },
       { icon: "mic",         label: "Podcasts",     route: "/podcasts",            color: "#E91E8C" },
@@ -477,6 +488,45 @@ export default function ProfileScreen() {
           {user.bio ? (
             <Text style={[styles.bio, { color: colors.mutedForeground }]}>{user.bio}</Text>
           ) : null}
+
+          {/* Profile Prompts */}
+          {user.profilePrompts && user.profilePrompts.length > 0 ? (
+            <View style={styles.promptsSection}>
+              {user.profilePrompts.map((p, i) => (
+                <LinearGradient
+                  key={i}
+                  colors={PROMPT_GRADIENTS[i % PROMPT_GRADIENTS.length] as [string, string]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.promptCard}
+                >
+                  <Text style={styles.promptQuestion}>{p.question}</Text>
+                  <Text style={styles.promptAnswer}>{p.answer}</Text>
+                </LinearGradient>
+              ))}
+              <Pressable 
+                onPress={() => router.push("/profile-prompts")}
+                style={[styles.editPromptsBtn, { borderColor: colors.border }]}
+              >
+                <Feather name="edit-3" size={14} color={colors.primary} />
+                <Text style={[styles.editPromptsText, { color: colors.primary }]}>Edit Prompts</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable 
+              onPress={() => router.push("/profile-prompts")}
+              style={[styles.addPromptsCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
+              <View style={[styles.addPromptsIcon, { backgroundColor: colors.primary + "18" }]}>
+                <Feather name="plus" size={20} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.addPromptsTitle, { color: colors.foreground }]}>Add Profile Prompts</Text>
+                <Text style={[styles.addPromptsSub, { color: colors.mutedForeground }]}>Help others get to know you better</Text>
+              </View>
+              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+            </Pressable>
+          )}
         </View>
 
         {/* Stats */}
@@ -485,13 +535,14 @@ export default function ProfileScreen() {
             { label: "Posts",     value: user.posts,     key: "posts"     },
             { label: "Followers", value: user.followers, key: "followers" },
             { label: "Following", value: user.following, key: "following" },
+            { label: "Super Likes", value: 12,           key: null        },
           ] as { label: string; value: number; key: SheetType }[]).map((stat, i) => (
             <Pressable
               key={stat.label}
-              onPress={() => setSheet(stat.key)}
-              style={[styles.stat, i < 2 && { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }]}
+              onPress={() => stat.key && setSheet(stat.key)}
+              style={[styles.stat, i < 3 && { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }]}
             >
-              <Text style={[styles.statValue, { color: colors.foreground }]}>{stat.value.toLocaleString()}</Text>
+              <Text style={[styles.statValue, { color: stat.label === "Super Likes" ? colors.gold : colors.foreground }]}>{stat.value.toLocaleString()}</Text>
               <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{stat.label}</Text>
             </Pressable>
           ))}
@@ -505,6 +556,35 @@ export default function ProfileScreen() {
             <CoinBadge amount={user.coins} size="sm" />
           </Pressable>
         </View>
+
+        {/* Highlights Row */}
+        {user.storyHighlights && user.storyHighlights.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.highlightsContainer}
+          >
+            {user.storyHighlights.map((highlight) => (
+              <Pressable
+                key={highlight.id}
+                style={styles.highlightItem}
+                onPress={() => router.push({ pathname: "/highlight-viewer", params: { highlightId: highlight.id } })}
+              >
+                <View style={[styles.highlightThumb, { borderColor: colors.border }]}>
+                  <LinearGradient
+                    colors={["#E91E8C", "#7B2FBE"]}
+                    style={styles.highlightThumbGradient}
+                  >
+                    <Feather name="play" size={16} color="#fff" />
+                  </LinearGradient>
+                </View>
+                <Text style={[styles.highlightTitleText, { color: colors.foreground }]} numberOfLines={1}>
+                  {highlight.title}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
       </LinearGradient>
 
       {/* ── EARN ON RIDHI ─────────────────────────────────────────────────── */}
@@ -794,6 +874,13 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", gap: 8, marginTop: 14, alignItems: "center" },
   walletBtn: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 7, borderWidth: 1, justifyContent: "center" },
 
+  // Highlights
+  highlightsContainer: { paddingHorizontal: 16, paddingVertical: 12, gap: 16 },
+  highlightItem: { alignItems: "center", width: 64 },
+  highlightThumb: { width: 64, height: 64, borderRadius: 32, borderWidth: 2, padding: 2, marginBottom: 4 },
+  highlightThumbGradient: { flex: 1, borderRadius: 28, alignItems: "center", justifyContent: "center" },
+  highlightTitleText: { fontSize: 11, fontFamily: "Inter_500Medium", textAlign: "center" },
+
   // ── Section wrapper ───────────────────────────────────────────────────────
   section: { paddingHorizontal: 16, paddingTop: 22 },
   sectionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8, marginBottom: 8 },
@@ -897,4 +984,16 @@ const styles = StyleSheet.create({
   mutualText: { fontSize: 10, fontFamily: "Inter_600SemiBold" },
   followBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
   followBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  
+  // ── Profile Prompts ────────────────────────────────────────────────────────
+  promptsSection: { marginTop: 16, gap: 12 },
+  promptCard: { borderRadius: 16, padding: 16 },
+  promptQuestion: { color: "rgba(255,255,255,0.8)", fontSize: 12, fontFamily: "Inter_500Medium", marginBottom: 4 },
+  promptAnswer: { color: "#fff", fontSize: 15, fontFamily: "Inter_700Bold" },
+  editPromptsBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 12, borderWidth: 1, marginTop: 4 },
+  editPromptsText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  addPromptsCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 18, borderWidth: 1, marginTop: 16 },
+  addPromptsIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  addPromptsTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  addPromptsSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 });

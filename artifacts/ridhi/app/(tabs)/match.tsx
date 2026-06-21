@@ -35,7 +35,15 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH - 32;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.28;
 
-type Profile = typeof MATCH_PROFILES[0];
+const PROMPT_GRADIENTS = [
+  ["#FF3B30", "#FF9500"],
+  ["#7B2FBE", "#E91E8C"],
+  ["#007AFF", "#5AC8FA"],
+  ["#34C759", "#00C7BE"],
+  ["#FF9500", "#FFCC00"],
+];
+
+type Profile = typeof MATCH_PROFILES[0] & { profilePrompts?: { question: string; answer: string }[] };
 
 const GENDER_OPTIONS = ["Everyone", "Women", "Men", "Non-binary"];
 
@@ -179,11 +187,15 @@ export default function MatchScreen() {
   };
 
   const [profiles, setProfiles] = useState<Profile[]>(() => buildPool(smartShowMe, userLanguage));
+  const [history, setHistory] = useState<Profile[]>([]);
+  const [superLikedIds, setSuperLikedIds] = useState<Set<string>>(new Set());
   const [matched, setMatched] = useState<Profile | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<DiscoverFilters>(initialFilters);
   const [draft, setDraft] = useState<DiscoverFilters>(initialFilters);
   const [showAI, setShowAI] = useState(true);
+
+  const starAnim = useRef(new Animated.Value(0)).current;
 
   const aiSuggestions = useAIMatchSuggestions(5);
 
@@ -222,25 +234,112 @@ export default function MatchScreen() {
     },
   });
 
-  const swipe = (dir: "left" | "right") => {
-    const toX = dir === "right" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const swipe = (dir: "left" | "right" | "super") => {
+    const toX = dir === "right" || dir === "super" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
+    const toY = dir === "super" ? -SCREEN_HEIGHT * 0.5 : 0;
+    
+    Haptics.impactAsync(dir === "super" ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium);
     // Track swipe
     const currentProfile = profiles[0];
     if (currentProfile) {
-      trackMatch(dir, currentProfile.id);
+      trackMatch(dir === "super" ? "right" : dir, currentProfile.id);
+      setHistory(prev => [currentProfile, ...prev].slice(0, 10));
     }
     Animated.timing(position, {
-      toValue: { x: toX, y: 0 },
+      toValue: { x: toX, y: toY },
       duration: 300,
       useNativeDriver: false,
     }).start(() => {
       position.setValue({ x: 0, y: 0 });
-      if (dir === "right" && profiles.length > 0 && Math.random() > 0.4) {
+      if ((dir === "right" || dir === "super") && profiles.length > 0 && Math.random() > 0.4) {
         setMatched(profiles[0]);
       }
       setProfiles((prev) => prev.slice(1));
     });
+  };
+
+  const backtrack = async () => {
+    if (history.length === 0) return;
+    
+    const { useBacktrack } = require("@/contexts/AuthContext").useAuth();
+    const success = await useBacktrack();
+    
+    if (success) {
+      const prevProfile = history[0];
+      setProfiles(prev => [prevProfile, ...prev]);
+      setHistory(prev => prev.slice(1));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } else {
+      Alert.alert(
+        "Not enough coins",
+        "Backtrack costs 1 coin. Recharge your wallet!",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Recharge", onPress: () => router.push("/wallet") },
+        ]
+      );
+    }
+  };
+
+  const superLike = async () => {
+    const currentProfile = profiles[0];
+    if (!currentProfile) return;
+
+    Alert.alert(
+      "Super Like",
+      `Super Like ${currentProfile.name}? (5 coins or 1 free)`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Confirm",
+          onPress: async () => {
+            const { useSuperLike } = require("@/contexts/AuthContext").useAuth();
+            const success = await useSuperLike();
+            if (success) {
+              setSuperLikedIds(prev => new Set(prev).add(currentProfile.id));
+              
+              // Dramatic animation
+              starAnim.setValue(0);
+              Animated.sequence([
+                Animated.spring(starAnim, {
+                  toValue: 1,
+                  friction: 3,
+                  tension: 40,
+                  useNativeDriver: true,
+                }),
+                Animated.timing(starAnim, {
+                  toValue: 0,
+                  duration: 500,
+                  delay: 800,
+                  useNativeDriver: true,
+                })
+              ]).start();
+
+              // Send notification (mock)
+              apiFetch("/api/notifications/send", {
+                method: "POST",
+                body: JSON.stringify({
+                  receiverId: currentProfile.id,
+                  type: "super_like",
+                  message: `${user?.name || "Someone"} Super Liked you!`
+                }),
+              }).catch(() => {});
+
+              swipe("super");
+            } else {
+              Alert.alert(
+                "Not enough coins",
+                "Super Like costs 5 coins. Recharge your wallet!",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Recharge", onPress: () => router.push("/wallet") },
+                ]
+              );
+            }
+          }
+        }
+      ]
+    );
   };
 
   const openFilters = () => {
@@ -377,6 +476,13 @@ export default function MatchScreen() {
                 <Image source={{ uri: current.imageUri }} style={StyleSheet.absoluteFill} contentFit="cover" />
                 <LinearGradient colors={["transparent", "rgba(0,0,0,0.8)"]} style={styles.cardGrad} />
 
+                {superLikedIds.has(current.id) && (
+                  <View style={styles.superLikedBadge}>
+                    <Feather name="star" size={20} color={colors.gold} />
+                    <Text style={[styles.superLikedBadgeText, { color: colors.gold }]}>SUPER LIKED</Text>
+                  </View>
+                )}
+
                 <Animated.View style={[styles.likeStamp, { opacity: likeOpacity }]}>
                   <Text style={styles.likeStampText}>LIKE</Text>
                 </Animated.View>
@@ -409,6 +515,25 @@ export default function MatchScreen() {
                     </View>
                   </View>
                   <Text style={styles.cardBio} numberOfLines={2}>{current.bio}</Text>
+                  
+                  {/* Profile Prompts */}
+                  {current.profilePrompts && current.profilePrompts.length > 0 && (
+                    <View style={styles.cardPrompts}>
+                      {current.profilePrompts.slice(0, 2).map((p, i) => (
+                        <LinearGradient
+                          key={i}
+                          colors={PROMPT_GRADIENTS[i % PROMPT_GRADIENTS.length] as [string, string]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={styles.cardPrompt}
+                        >
+                          <Text style={styles.cardPromptQuestion} numberOfLines={1}>{p.question}</Text>
+                          <Text style={styles.cardPromptAnswer} numberOfLines={1}>{p.answer}</Text>
+                        </LinearGradient>
+                      ))}
+                    </View>
+                  )}
+
                   <View style={styles.cardTags}>
                     {current.interests.slice(0, 3).map((tag) => (
                       <View key={tag} style={styles.cardTag}>
@@ -425,44 +550,65 @@ export default function MatchScreen() {
 
       {/* ── SWIPE BUTTONS ──────────────────────────────────────────────────── */}
       {profiles.length > 0 && (
-        <View style={[styles.buttons, { paddingBottom: bottomPad + 20 }]}>
-          <Pressable
-            onPress={() => swipe("left")}
-            style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            <Feather name="x" size={28} color="#FF3B30" />
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              const SUPER_LIKE_COST = 5;
-              if ((user?.coins ?? 0) < SUPER_LIKE_COST) {
-                Alert.alert(
-                  "Not enough coins",
-                  `Super Like costs ${SUPER_LIKE_COST} coins. Recharge your wallet!`,
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Recharge", onPress: () => router.push("/wallet") },
-                  ]
-                );
-                return;
-              }
-              addCoins(-SUPER_LIKE_COST);
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-              swipe("right");
-            }}
-            style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
-          >
-            <Image source={COIN_IMAGE} style={{ width: 22, height: 22 }} resizeMode="contain" />
-            <Text style={[styles.superCost, { color: colors.gold }]}>5</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => swipe("right")}
-            style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            <Feather name="heart" size={28} color={colors.primary} />
-          </Pressable>
+        <View style={[styles.buttonsContainer, { paddingBottom: bottomPad + 20 }]}>
+          <View style={styles.countsRow}>
+            <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
+              Backtracks: {user?.backtracksRemaining ?? 0}
+            </Text>
+            <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
+              Super Likes: {user?.superLikesRemaining ?? 0}
+            </Text>
+          </View>
+          <View style={styles.buttons}>
+            <Pressable
+              onPress={backtrack}
+              disabled={history.length === 0}
+              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: history.length === 0 ? 0.5 : 1 }]}
+            >
+              <Feather name="corner-up-left" size={24} color={colors.foreground} />
+            </Pressable>
+            <Pressable
+              onPress={() => swipe("left")}
+              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Feather name="x" size={28} color="#FF3B30" />
+            </Pressable>
+            <Pressable
+              onPress={superLike}
+              style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
+            >
+              <Feather name="star" size={28} color={colors.gold} />
+            </Pressable>
+            <Pressable
+              onPress={() => swipe("right")}
+              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Feather name="heart" size={28} color={colors.primary} />
+            </Pressable>
+          </View>
         </View>
       )}
+
+      {/* ── ANIMATIONS ────────────────────────────────────────────────────── */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.animationContainer,
+          {
+            opacity: starAnim,
+            transform: [
+              { scale: starAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 2] }) },
+            ],
+          },
+        ]}
+      >
+        <Feather name="star" size={100} color={colors.gold} />
+        <View style={styles.heartBurst}>
+          <Feather name="heart" size={40} color="#FF2D55" style={styles.burstHeart} />
+          <Feather name="heart" size={40} color="#FF2D55" style={[styles.burstHeart, { transform: [{ rotate: "45deg" }, { translateX: 30 }] }]} />
+          <Feather name="heart" size={40} color="#FF2D55" style={[styles.burstHeart, { transform: [{ rotate: "-45deg" }, { translateX: -30 }] }]} />
+        </View>
+      </Animated.View>
 
       {/* ── MATCH OVERLAY ──────────────────────────────────────────────────── */}
       {matched && (
@@ -767,7 +913,11 @@ const styles = StyleSheet.create({
     borderColor: "rgba(233,30,140,0.5)",
   },
   cardLangText: { color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  cardBio: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  cardBio: { color: "rgba(255,255,255,0.9)", fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 20, marginBottom: 12 },
+  cardPrompts: { gap: 8, marginBottom: 12 },
+  cardPrompt: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8 },
+  cardPromptQuestion: { color: "rgba(255,255,255,0.7)", fontSize: 10, fontFamily: "Inter_500Medium" },
+  cardPromptAnswer: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
   aiToggle: {
     flexDirection: "row",
     alignItems: "center",
@@ -781,6 +931,56 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   aiToggleText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  // New Styles
+  buttonsContainer: {
+    paddingHorizontal: 16,
+    width: "100%",
+  },
+  countsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    paddingHorizontal: 20,
+  },
+  countLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+  },
+  superLikedBadge: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#FFD700",
+    zIndex: 10,
+  },
+  superLikedBadgeText: {
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+    marginLeft: 4,
+  },
+  animationContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  heartBurst: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  burstHeart: {
+    position: "absolute",
+  },
   cardTags: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   cardTag: { backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   cardTagText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },

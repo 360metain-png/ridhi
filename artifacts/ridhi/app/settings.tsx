@@ -237,6 +237,7 @@ export default function SettingsScreen() {
 
         <SectionHeader title="Account" />
         <View style={[styles.section, { borderColor: colors.border }]}>
+          <SettingRow icon="edit-3" label="Profile Prompts" subtitle="Add icebreakers to your profile" onPress={() => router.push("/profile-prompts")} />
           <SettingRow icon="credit-card" label="Subscription" subtitle="Free plan" onPress={() => router.push("/subscription")} />
           <SettingRow icon="download" label="Download My Data" onPress={() => Alert.alert("Download My Data", "Your full data export includes posts, chats, matches, and settings.", [{ text: "Cancel", style: "cancel" }, { text: "Request Export", onPress: () => Alert.alert("Export Requested ✓", "You'll receive a download link within 24 hours.", [{ text: "OK" }]) }])} />
         </View>

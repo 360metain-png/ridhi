@@ -4,6 +4,7 @@ import {
   Animated,
   Dimensions,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -23,6 +24,7 @@ import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
 import { GradientButton } from "@/components/GradientButton";
+import { PRODUCTS } from "@/data/mockData";
 import { apiFetch, ApiError } from "@/utils/api";
 import { moderateContent, type ModerationResult } from "@/utils/contentModeration";
 
@@ -136,6 +138,8 @@ export default function CreatePostScreen() {
   const [location, setLocation] = useState<string | null>(null);
   const [feeling, setFeeling] = useState<string | null>(null);
   const [taggedPeople, setTaggedPeople] = useState<string[]>([]);
+  const [taggedProduct, setTaggedProduct] = useState<any | null>(null);
+  const [showProductPicker, setShowProductPicker] = useState(false);
 
   const [showCaptionPanel, setShowCaptionPanel] = useState(false);
   const [captionTone, setCaptionTone] = useState<Tone>("casual");
@@ -323,6 +327,15 @@ export default function CreatePostScreen() {
     ]);
   };
 
+  const openProductPicker = () => {
+    setShowProductPicker(true);
+  };
+
+  const pickProduct = (prod: any) => {
+    setTaggedProduct(prod);
+    setShowProductPicker(false);
+  };
+
   const { trackCreate } = useAnalytics();
 
   const handlePost = async () => {
@@ -394,6 +407,14 @@ export default function CreatePostScreen() {
         body.autoCaptions = {
           enabled: true,
           language: captionLanguage,
+        };
+      }
+      if (taggedProduct) {
+        body.taggedProduct = {
+          id: taggedProduct.id,
+          name: taggedProduct.name,
+          price: taggedProduct.price,
+          image: taggedProduct.image,
         };
       }
       const res = await apiFetch<{ success: boolean; post?: any }>("/api/posts", {
@@ -700,8 +721,15 @@ export default function CreatePostScreen() {
           </Pressable>
         )}
 
-        {(location || feeling || taggedPeople.length > 0) && (
+        {(location || feeling || taggedPeople.length > 0 || taggedProduct) && (
           <View style={[styles.metaTagsRow, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+            {taggedProduct && (
+              <Pressable onPress={() => setTaggedProduct(null)} style={[styles.metaTag, { backgroundColor: colors.primary + "18" }]}>
+                <Feather name="shopping-bag" size={12} color={colors.primary} />
+                <Text style={[styles.metaTagText, { color: colors.primary }]}>{taggedProduct.name}</Text>
+                <Feather name="x" size={10} color={colors.primary} />
+              </Pressable>
+            )}
             {location && (
               <Pressable onPress={() => setLocation(null)} style={[styles.metaTag, { backgroundColor: colors.primary + "18" }]}>
                 <Feather name="map-pin" size={12} color={colors.primary} />
@@ -771,6 +799,7 @@ export default function CreatePostScreen() {
             { icon: "tag", label: taggedPeople.length > 0 ? `${taggedPeople.length} tagged` : "Tag", active: taggedPeople.length > 0, onPress: handleTagPeople },
             { icon: "smile", label: feeling ? feeling.split(" ")[0] : "Feeling", active: !!feeling, onPress: handleFeelingTag },
             { icon: "calendar", label: isScheduled ? "Scheduled" : "Schedule", active: isScheduled, onPress: handleSchedule },
+            { icon: "shopping-bag", label: taggedProduct ? "1 product" : "Product", active: !!taggedProduct, onPress: openProductPicker },
           ].map((tool) => (
             <Pressable
               key={tool.icon}
@@ -1092,6 +1121,38 @@ export default function CreatePostScreen() {
           </View>
         </Animated.View>
       )}
+
+      {showProductPicker && (
+        <Modal visible={true} transparent animationType="slide" onRequestClose={() => setShowProductPicker(false)}>
+          <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+            <View style={[styles.productPickerSheet, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+              <View style={styles.panelHeader}>
+                <Feather name="shopping-bag" size={20} color={colors.primary} />
+                <Text style={[styles.panelTitle, { color: colors.foreground, marginLeft: 8 }]}>Tag a Product</Text>
+                <Pressable onPress={() => setShowProductPicker(false)}>
+                  <Feather name="x" size={20} color={colors.mutedForeground} />
+                </Pressable>
+              </View>
+              <ScrollView style={{ maxHeight: 500 }}>
+                {PRODUCTS.map((prod) => (
+                  <Pressable
+                    key={prod.id}
+                    onPress={() => pickProduct(prod)}
+                    style={[styles.productPickerItem, { borderBottomColor: colors.border }]}
+                  >
+                    <Image source={{ uri: prod.image }} style={styles.productPickerThumb} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.productPickerName, { color: colors.foreground }]}>{prod.name}</Text>
+                      <Text style={[styles.productPickerPrice, { color: colors.primary }]}>{prod.price} Coins</Text>
+                    </View>
+                    <Feather name="plus" size={20} color={colors.primary} />
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -1213,4 +1274,11 @@ const styles = StyleSheet.create({
   ttsVoiceText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   ttsPreviewBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 12, borderRadius: 14, borderWidth: 1, marginTop: 4 },
   ttsPreviewText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  // Product Picker
+  modalOverlay: { flex: 1, justifyContent: "flex-end" },
+  productPickerSheet: { padding: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1 },
+  productPickerItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, gap: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  productPickerThumb: { width: 50, height: 50, borderRadius: 8 },
+  productPickerName: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  productPickerPrice: { fontSize: 12, fontFamily: "Inter_700Bold", marginTop: 2 },
 });
