@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   FlatList,
@@ -331,6 +332,8 @@ function VoiceReelItem({
   const insets = useSafeAreaInsets();
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likes);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [commentCount, setCommentCount] = useState(reel.comments);
   const [playing, setPlaying] = useState(isActive);
   const [progress, setProgress] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -356,7 +359,7 @@ function VoiceReelItem({
     return () => progressAnim.removeListener(listener);
   }, [progressAnim]);
 
-  const { trackLike, trackUnlike, trackShare } = useAnalytics();
+  const { trackLike, trackUnlike, trackShare, trackFollow, trackUnfollow, trackComment } = useAnalytics();
 
   const handleLike = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -373,6 +376,56 @@ function VoiceReelItem({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     trackShare(reel.id, "voice_reel");
   }, [reel.id, trackShare]);
+
+  const handleFollow = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsFollowing((f) => {
+      const next = !f;
+      if (next) {
+        trackFollow(reel.userId || reel.id);
+      } else {
+        trackUnfollow(reel.userId || reel.id);
+      }
+      return next;
+    });
+  }, [reel.userId, reel.id, trackFollow, trackUnfollow]);
+
+  const handleComment = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    trackComment(reel.id, "voice_reel");
+    // Simple inline comment — prompt for text and increment count
+    if (Platform.OS === "web") {
+      const text = window.prompt("Add a comment...");
+      if (text && text.trim()) {
+        setCommentCount((c) => c + 1);
+      }
+    } else {
+      Alert.prompt(
+        "Comment",
+        "Add a comment on this voice reel",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Post",
+            onPress: (text?: string) => {
+              if (text && text.trim()) {
+                setCommentCount((c) => c + 1);
+              }
+            },
+          },
+        ],
+        "plain-text"
+      );
+    }
+  }, [reel.id, trackComment]);
+
+  const handleReply = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push({
+      pathname: "/create-post",
+      params: { type: "audio", replyTo: reel.id, replyToUser: reel.userName, replyToCaption: reel.caption },
+    });
+  }, [reel.id, reel.userName, reel.caption]);
 
   const fmt = useCallback(
     (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
@@ -425,8 +478,10 @@ function VoiceReelItem({
               </Text>
               <Text style={styles.reelCity}>{reel.userCity}</Text>
             </Pressable>
-            <Pressable style={styles.followBtn} hitSlop={ICON_HITSLOP}>
-              <Text style={styles.followText}>Follow</Text>
+            <Pressable style={styles.followBtn} onPress={handleFollow} hitSlop={ICON_HITSLOP}>
+              <Text style={[styles.followText, isFollowing && { color: "#22C55E" }]}>
+                {isFollowing ? "Following" : "Follow"}
+              </Text>
             </Pressable>
           </View>
           <Text style={styles.reelCaption} numberOfLines={2}>
@@ -445,15 +500,15 @@ function VoiceReelItem({
               {fmt(likeCount)}
             </Text>
           </Pressable>
-          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP}>
+          <Pressable style={styles.reelAction} onPress={handleComment} hitSlop={ICON_HITSLOP}>
             <Feather name="message-circle" size={28} color="#fff" />
-            <Text style={styles.reelActionCount}>{fmt(reel.comments)}</Text>
+            <Text style={styles.reelActionCount}>{fmt(commentCount)}</Text>
           </Pressable>
           <Pressable style={styles.reelAction} onPress={handleShare} hitSlop={ICON_HITSLOP}>
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
           </Pressable>
-          <Pressable style={styles.reelAction} hitSlop={ICON_HITSLOP}>
+          <Pressable style={styles.reelAction} onPress={handleReply} hitSlop={ICON_HITSLOP}>
             <Feather name="mic" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>Reply</Text>
           </Pressable>
