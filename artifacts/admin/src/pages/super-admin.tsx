@@ -13,6 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { downloadCSV } from "@/lib/utils";
 import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  PieChart, Pie, Cell, AreaChart, Area
+} from "recharts";
+import {
   Shield, Users, Server, Activity, AlertTriangle, CheckCircle, XCircle,
   RefreshCw, Lock, Globe, Database, Cpu, Wifi, CreditCard, Eye, EyeOff,
   Star, Briefcase, Key, UserCheck, UserX, Clock, ShieldCheck,
@@ -24,7 +28,10 @@ import {
   PhoneCall, Mic, Cast, SlidersHorizontal, ClipboardCheck, BadgeCheck,
   Banknote, ArrowRightLeft, Sliders, Wallet,
   LayoutTemplate, TrendingUp, MousePointer, Pause, Play, Target,
-  Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2, Download} from "lucide-react";
+  Monitor, Palette, ArrowRight, Sparkles, Search, Crown, Trash2, Download,
+  Bookmark, Image, HelpCircle, Calendar, Radio as RadioIcon,
+  Award, EyeOff as EyeOffIcon, TrendingUp as TrendingUpIcon, MapPin,
+  Smile, Star as StarIcon} from "lucide-react";
 
 const ADMIN_ROLES = [
   { id: 1, name: "Arjun Mehta", email: "arjun@ridhi.app", role: "Super Admin", status: "active", lastLogin: "2 min ago", permissions: "all" },
@@ -646,6 +653,9 @@ export default function SuperAdminPage() {
           </TabsTrigger>
           <TabsTrigger value="features" className="text-xs gap-1.5">
             <Flame className="w-3.5 h-3.5" /> Features
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs gap-1.5">
+            <BarChart2 className="w-3.5 h-3.5" /> Feature Analytics
           </TabsTrigger>
           <TabsTrigger value="apikeys" className="text-xs gap-1.5">
             <Key className="w-3.5 h-3.5" /> API Keys & Config
@@ -1776,6 +1786,315 @@ export default function SuperAdminPage() {
             </p>
           </div>
 
+        </TabsContent>
+
+        {/* ─────────────────────────────────────────────────────────────────────
+            FEATURE ANALYTICS TAB
+        ───────────────────────────────────────────────────────────────────── */}
+        <TabsContent value="analytics" className="mt-4 space-y-6">
+          {/* Feature Analytics Dashboard */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Feature Revenue (7d)",    value: "₹32.4L",   icon: Banknote,     color: "text-emerald-600 bg-emerald-50" },
+              { label: "Coin Spend (7d)",       value: "1.85M",    icon: Coins,        color: "text-yellow-600 bg-yellow-50" },
+              { label: "Avg Revenue/Feature",  value: "₹1.35L",   icon: IndianRupee,  color: "text-purple-600 bg-purple-50" },
+              { label: "Top Converting",        value: "Super Like", icon: Award,        color: "text-amber-600 bg-amber-50" },
+            ].map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${stat.color}`}><stat.icon className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Feature Revenue Chart */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-purple-600" /> Feature Revenue — Last 7 Days
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={[
+                    { name: "Mon", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 42000, "Profile Prompts": 0, "Ridhi Shop": 5800, "Events": 3100, "Broadcast": 31000 },
+                    { name: "Tue", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 48000, "Profile Prompts": 0, "Ridhi Shop": 7200, "Events": 2800, "Broadcast": 33000 },
+                    { name: "Wed", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 51000, "Profile Prompts": 0, "Ridhi Shop": 6500, "Events": 4500, "Broadcast": 29000 },
+                    { name: "Thu", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 45000, "Profile Prompts": 0, "Ridhi Shop": 8900, "Events": 3200, "Broadcast": 35000 },
+                    { name: "Fri", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 55000, "Profile Prompts": 0, "Ridhi Shop": 9500, "Events": 5100, "Broadcast": 38000 },
+                    { name: "Sat", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 62000, "Profile Prompts": 0, "Ridhi Shop": 12000, "Events": 7800, "Broadcast": 42000 },
+                    { name: "Sun", "Saved Posts": 0, "Story Highlights": 0, "Super Likes": 58000, "Profile Prompts": 0, "Ridhi Shop": 10500, "Events": 6200, "Broadcast": 39000 },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} />
+                    <Tooltip formatter={v => [`₹${Number(v).toLocaleString()}`, ""]} />
+                    <Legend />
+                    <Bar dataKey="Super Likes" fill="#F59E0B" radius={[4,4,0,0]} />
+                    <Bar dataKey="Broadcast" fill="#7B2FBE" radius={[4,4,0,0]} />
+                    <Bar dataKey="Ridhi Shop" fill="#06B6D4" radius={[4,4,0,0]} />
+                    <Bar dataKey="Events" fill="#F43F5E" radius={[4,4,0,0]} />
+                    <Bar dataKey="Saved Posts" fill="#94A3B8" radius={[4,4,0,0]} />
+                    <Bar dataKey="Story Highlights" fill="#6366F1" radius={[4,4,0,0]} />
+                    <Bar dataKey="Profile Prompts" fill="#8B5CF6" radius={[4,4,0,0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Feature Revenue by Tier */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-blue-600" /> Revenue by User Tier
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={[
+                        { name: "Free Users", value: 12, color: "#94A3B8" },
+                        { name: "Silver VIP", value: 18, color: "#9E9E9E" },
+                        { name: "Gold VIP", value: 24, color: "#F59E0B" },
+                        { name: "Platinum VIP", value: 28, color: "#7B2FBE" },
+                        { name: "Diamond Elite", value: 18, color: "#E91E8C" },
+                      ]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, value }) => `${name}: ${value}%`}>
+                        {[
+                          { name: "Free Users", value: 12, color: "#94A3B8" },
+                          { name: "Silver VIP", value: 18, color: "#9E9E9E" },
+                          { name: "Gold VIP", value: 24, color: "#F59E0B" },
+                          { name: "Platinum VIP", value: 28, color: "#7B2FBE" },
+                          { name: "Diamond Elite", value: 18, color: "#E91E8C" },
+                        ].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-5 gap-2 mt-3">
+                  {[
+                    { label: "Free", value: "12%", color: "bg-gray-400" },
+                    { label: "Silver", value: "18%", color: "bg-gray-500" },
+                    { label: "Gold", value: "24%", color: "bg-amber-500" },
+                    { label: "Platinum", value: "28%", color: "bg-purple-600" },
+                    { label: "Diamond", value: "18%", color: "bg-pink-600" },
+                  ].map((tier) => (
+                    <div key={tier.label} className="text-center">
+                      <div className={`w-3 h-3 rounded-full mx-auto mb-1 ${tier.color}`} />
+                      <p className="text-xs font-medium">{tier.label}</p>
+                      <p className="text-xs text-muted-foreground">{tier.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Coin Spend by Feature */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-yellow-600" /> Coin Spend by Feature
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { label: "Super Likes", coins: 482000, revenue: 482000, pct: 28, color: "bg-amber-500", icon: StarIcon },
+                    { label: "Broadcast Messages", coins: 310000, revenue: 310000, pct: 18, color: "bg-purple-600", icon: RadioIcon },
+                    { label: "Audio Calls", coins: 245000, revenue: 245000, pct: 14, color: "bg-emerald-500", icon: Phone },
+                    { label: "Video Calls", coins: 198000, revenue: 198000, pct: 11, color: "bg-blue-500", icon: Video },
+                    { label: "Shop Purchases", coins: 156000, revenue: 156000, pct: 9, color: "bg-teal-500", icon: ShoppingBag },
+                    { label: "Event Creation", coins: 98000, revenue: 98000, pct: 6, color: "bg-rose-500", icon: Calendar },
+                    { label: "Backtracks", coins: 72000, revenue: 72000, pct: 4, color: "bg-orange-500", icon: ArrowRightLeft },
+                    { label: "Boost Posts", coins: 65000, revenue: 65000, pct: 4, color: "bg-indigo-500", icon: TrendingUpIcon },
+                    { label: "AI Queries", coins: 42000, revenue: 42000, pct: 3, color: "bg-cyan-500", icon: Cpu },
+                    { label: "Unlock Messages", coins: 28000, revenue: 28000, pct: 2, color: "bg-pink-500", icon: MessageSquare },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center gap-3">
+                      <div className={`p-1.5 rounded-md ${row.color} bg-opacity-10`}>
+                        <row.icon className={`w-3.5 h-3.5 ${row.color.replace("bg-", "text-")}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium">{row.label}</span>
+                          <span className="text-muted-foreground">{row.coins.toLocaleString()} coins · ₹{row.revenue.toLocaleString()}</span>
+                        </div>
+                        <Progress value={row.pct} className="h-1.5 mt-1" />
+                      </div>
+                      <span className="text-xs font-semibold w-8 text-right">{row.pct}%</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Total coins spent: 1.85M · Total revenue: ₹32.4L</span>
+                  <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => {
+                    const rows = [
+                      { label: "Super Likes", coins: 482000, revenue: 482000, pct: 28 },
+                      { label: "Broadcast Messages", coins: 310000, revenue: 310000, pct: 18 },
+                      { label: "Audio Calls", coins: 245000, revenue: 245000, pct: 14 },
+                      { label: "Video Calls", coins: 198000, revenue: 198000, pct: 11 },
+                      { label: "Shop Purchases", coins: 156000, revenue: 156000, pct: 9 },
+                      { label: "Event Creation", coins: 98000, revenue: 98000, pct: 6 },
+                      { label: "Backtracks", coins: 72000, revenue: 72000, pct: 4 },
+                      { label: "Boost Posts", coins: 65000, revenue: 65000, pct: 4 },
+                      { label: "AI Queries", coins: 42000, revenue: 42000, pct: 3 },
+                      { label: "Unlock Messages", coins: 28000, revenue: 28000, pct: 2 },
+                    ];
+                    downloadCSV("feature_revenue.csv", rows);
+                  }}>
+                    <Download className="w-3 h-3" /> Export CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Feature Benefit Usage by Tier */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Users className="w-4 h-4 text-green-600" /> Feature Benefit Uptake by VIP Tier
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">How many users in each tier actively use their unlocked features</p>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/40">
+                    <tr className="text-xs text-muted-foreground">
+                      <th className="text-left p-3 font-medium">Feature</th>
+                      <th className="text-center p-3 font-medium">Free</th>
+                      <th className="text-center p-3 font-medium">Silver</th>
+                      <th className="text-center p-3 font-medium">Gold</th>
+                      <th className="text-center p-3 font-medium">Platinum</th>
+                      <th className="text-center p-3 font-medium">Diamond</th>
+                      <th className="text-right p-3 font-medium">Total Users</th>
+                      <th className="text-right p-3 font-medium">Revenue (₹)</th>
+                      <th className="text-right p-3 font-medium">Uptake %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { feature: "Super Likes", icon: StarIcon, free: "2.4K", silver: "8.2K", gold: "12.4K", platinum: "6.8K", diamond: "3.1K", total: "32.9K", revenue: "4,82,000", uptake: "68%", color: "text-amber-600" },
+                      { feature: "Backtrack", icon: ArrowRightLeft, free: "0", silver: "4.1K", gold: "6.2K", platinum: "3.8K", diamond: "1.9K", total: "16.0K", revenue: "72,000", uptake: "42%", color: "text-orange-600" },
+                      { feature: "Saved Posts", icon: Bookmark, free: "1.8K", silver: "5.4K", gold: "8.1K", platinum: "4.5K", diamond: "2.2K", total: "22.0K", revenue: "0", uptake: "31%", color: "text-slate-600" },
+                      { feature: "Story Highlights", icon: Image, free: "0", silver: "2.8K", gold: "5.6K", platinum: "3.4K", diamond: "1.8K", total: "13.6K", revenue: "0", uptake: "24%", color: "text-indigo-600" },
+                      { feature: "Profile Prompts", icon: HelpCircle, free: "0", silver: "1.2K", gold: "3.8K", platinum: "2.9K", diamond: "1.5K", total: "9.4K", revenue: "0", uptake: "18%", color: "text-violet-600" },
+                      { feature: "Ridhi Shop", icon: ShoppingBag, free: "0.8K", silver: "2.1K", gold: "4.2K", platinum: "2.6K", diamond: "1.4K", total: "11.1K", revenue: "1,56,000", uptake: "38%", color: "text-teal-600" },
+                      { feature: "Events", icon: Calendar, free: "0", silver: "1.5K", gold: "2.8K", platinum: "1.6K", diamond: "0.9K", total: "6.8K", revenue: "98,000", uptake: "28%", color: "text-rose-600" },
+                      { feature: "Broadcast Channels", icon: RadioIcon, free: "0", silver: "0", gold: "1.2K", platinum: "0.8K", diamond: "0.5K", total: "2.5K", revenue: "3,10,000", uptake: "22%", color: "text-purple-600" },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-t hover:bg-muted/20 transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <row.icon className={`w-3.5 h-3.5 ${row.color}`} />
+                            <span className="font-medium text-xs">{row.feature}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center text-xs">{row.free}</td>
+                        <td className="p-3 text-center text-xs">{row.silver}</td>
+                        <td className="p-3 text-center text-xs">{row.gold}</td>
+                        <td className="p-3 text-center text-xs">{row.platinum}</td>
+                        <td className="p-3 text-center text-xs">{row.diamond}</td>
+                        <td className="p-3 text-right text-xs font-semibold">{row.total}</td>
+                        <td className="p-3 text-right text-xs font-semibold">{row.revenue}</td>
+                        <td className="p-3 text-right text-xs">
+                          <Badge variant="outline" className={`text-xs ${row.uptake.replace("%", "") > "50" ? "bg-green-50 text-green-700 border-green-200" : row.uptake.replace("%", "") > "30" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-yellow-50 text-yellow-700 border-yellow-200"}`}>
+                            {row.uptake}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">Total users across all tiers: 1.24M active · Revenue: ₹32.4L (7-day)</p>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => {
+                  const rows = [
+                    { feature: "Super Likes", free: "2.4K", silver: "8.2K", gold: "12.4K", platinum: "6.8K", diamond: "3.1K", total: "32.9K", revenue: "4,82,000", uptake: "68%" },
+                    { feature: "Backtrack", free: "0", silver: "4.1K", gold: "6.2K", platinum: "3.8K", diamond: "1.9K", total: "16.0K", revenue: "72,000", uptake: "42%" },
+                    { feature: "Saved Posts", free: "1.8K", silver: "5.4K", gold: "8.1K", platinum: "4.5K", diamond: "2.2K", total: "22.0K", revenue: "0", uptake: "31%" },
+                    { feature: "Story Highlights", free: "0", silver: "2.8K", gold: "5.6K", platinum: "3.4K", diamond: "1.8K", total: "13.6K", revenue: "0", uptake: "24%" },
+                    { feature: "Profile Prompts", free: "0", silver: "1.2K", gold: "3.8K", platinum: "2.9K", diamond: "1.5K", total: "9.4K", revenue: "0", uptake: "18%" },
+                    { feature: "Ridhi Shop", free: "0.8K", silver: "2.1K", gold: "4.2K", platinum: "2.6K", diamond: "1.4K", total: "11.1K", revenue: "1,56,000", uptake: "38%" },
+                    { feature: "Events", free: "0", silver: "1.5K", gold: "2.8K", platinum: "1.6K", diamond: "0.9K", total: "6.8K", revenue: "98,000", uptake: "28%" },
+                    { feature: "Broadcast Channels", free: "0", silver: "0", gold: "1.2K", platinum: "0.8K", diamond: "0.5K", total: "2.5K", revenue: "3,10,000", uptake: "22%" },
+                  ];
+                  downloadCSV("feature_uptake_by_tier.csv", rows);
+                }}>
+                  <Download className="w-3 h-3" /> Export CSV
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Revenue Trend Over Time */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-green-600" /> Revenue Trend — Monthly Feature Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={[
+                    { month: "Jan", "Super Likes": 320, "Broadcast": 180, "Ridhi Shop": 45, "Events": 28, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "Feb", "Super Likes": 380, "Broadcast": 220, "Ridhi Shop": 58, "Events": 35, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "Mar", "Super Likes": 450, "Broadcast": 290, "Ridhi Shop": 72, "Events": 48, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "Apr", "Super Likes": 520, "Broadcast": 380, "Ridhi Shop": 88, "Events": 58, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "May", "Super Likes": 610, "Broadcast": 450, "Ridhi Shop": 105, "Events": 72, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "Jun", "Super Likes": 720, "Broadcast": 520, "Ridhi Shop": 120, "Events": 85, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                    { month: "Jul", "Super Likes": 850, "Broadcast": 590, "Ridhi Shop": 145, "Events": 98, "Profile Prompts": 0, "Story Highlights": 0, "Saved Posts": 0 },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={v => `₹${v}K`} />
+                    <Tooltip formatter={v => [`₹${Number(v).toLocaleString()}K`, ""]} />
+                    <Legend />
+                    <Area type="monotone" dataKey="Super Likes" stackId="1" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.6} />
+                    <Area type="monotone" dataKey="Broadcast" stackId="1" stroke="#7B2FBE" fill="#7B2FBE" fillOpacity={0.6} />
+                    <Area type="monotone" dataKey="Ridhi Shop" stackId="1" stroke="#06B6D4" fill="#06B6D4" fillOpacity={0.6} />
+                    <Area type="monotone" dataKey="Events" stackId="1" stroke="#F43F5E" fill="#F43F5E" fillOpacity={0.6} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Export Summary */}
+          <div className="flex items-center justify-between bg-muted/30 rounded-lg p-4">
+            <div>
+              <p className="text-sm font-semibold">Feature Analytics Report</p>
+              <p className="text-xs text-muted-foreground">All data is mock/demo for presentation. Connect to real API for live analytics.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="h-8 text-xs gap-1" onClick={() => {
+                const rows = [
+                  { metric: "Feature Revenue (7d)", value: "₹32.4L" },
+                  { metric: "Coin Spend (7d)", value: "1.85M" },
+                  { metric: "Top Converting Feature", value: "Super Likes (68% uptake)" },
+                  { metric: "Highest Revenue Feature", value: "Super Likes (₹4.82L)" },
+                  { metric: "Highest Revenue/Tier", value: "Platinum (28%)" },
+                ];
+                downloadCSV("feature_analytics_summary.csv", rows);
+              }}>
+                <Download className="w-3 h-3" /> Export Summary
+              </Button>
+            </div>
+          </div>
         </TabsContent>
 
         {/* ─────────────────────────────────────────────────────────────────────
