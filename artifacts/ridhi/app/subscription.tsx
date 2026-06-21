@@ -1779,6 +1779,7 @@ export default function SubscriptionScreen() {
         onSuccess={handlePlanSuccess}
         amount={payAmount}
         label={payLabel}
+        sku={pendingPlanId ? `${pendingPlanId}_${pendingBilling}` : undefined}
       />
 
       {/* ── Plan Activated Success Modal ── */}

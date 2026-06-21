@@ -25,14 +25,14 @@ const API_BASE = process.env["EXPO_PUBLIC_DOMAIN"]
   ? `https://${process.env["EXPO_PUBLIC_DOMAIN"]}/api`
   : "/api";
 
-async function createOrder(amountInPaise: number, label: string) {
+async function createOrder(amountInPaise: number, label: string, sku?: string) {
   try {
     const data = await apiFetch<{
       id: string; amount: number; testMode: boolean; keyId?: string;
       provider: string; checkoutUrl?: string;
     }>("/payments/create-order", {
       method: "POST",
-      body: JSON.stringify({ amount: amountInPaise, notes: { label } }),
+      body: JSON.stringify({ amount: amountInPaise, notes: { label }, sku }),
     });
     return data;
   } catch {
@@ -81,6 +81,7 @@ export interface PaymentSheetProps {
   sublabel?: string;
   walletBalance?: number;
   noGst?: boolean;
+  sku?: string;
 }
 
 // ── UPI Apps ───────────────────────────────────────────────────────────────────
@@ -141,7 +142,7 @@ function Spinner({ color }: { color: string }) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export function PaymentSheet({ visible, onClose, onSuccess, amount, label, sublabel, walletBalance = 2450, noGst = false }: PaymentSheetProps) {
+export function PaymentSheet({ visible, onClose, onSuccess, amount, label, sublabel, walletBalance = 2450, noGst = false, sku }: PaymentSheetProps) {
   const colors = useColors();
 
   const [step,        setStep]        = useState<PayStep>("select");
@@ -194,7 +195,7 @@ export function PaymentSheet({ visible, onClose, onSuccess, amount, label, subla
 
     // Try backend order creation first
     const amountInPaise = total * 100;  // backends use paise (₹1 = 100 paise)
-    const order = await createOrder(amountInPaise, label);
+    const order = await createOrder(amountInPaise, label, sku);
     const provider = order?.provider ?? "razorpay";
 
     if (order && !order.testMode) {

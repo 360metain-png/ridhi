@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { users } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { requireUser, type AuthenticatedRequest, getUserId } from "../lib/auth";
 import { apiRateLimit } from "../lib/rateLimit";
 import { logger } from "../lib/logger";
@@ -56,18 +56,21 @@ router.post(
     }
 
     try {
-      const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
+      // Atomic conditional update: deduct only if balance >= price
+      const result = await db.update(users)
+        .set({ coins: sql`${users.coins} - ${price}` })
+        .where(and(userBySub(userId), gte(users.coins, price)))
+        .returning({ coins: users.coins });
+      if (result.length === 0) {
+        const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
+        if (!user) {
+          res.status(404).json({ error: "User not found" });
+        } else {
+          res.status(402).json({ error: "Insufficient coins", coins: user.coins });
+        }
         return;
       }
-      if (user.coins < price) {
-        res.status(402).json({ error: "Insufficient coins", coins: user.coins });
-        return;
-      }
-      const newBalance = user.coins - price;
-      await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
-
+      const newBalance = result[0].coins;
       const creatorShare = Math.floor(price * 0.6);
       const platformShare = price - creatorShare;
 

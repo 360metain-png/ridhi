@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { users } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { requireUser, type AuthenticatedRequest, getUserId } from "../lib/auth";
 import { apiRateLimit } from "../lib/rateLimit";
 import { logger } from "../lib/logger";
@@ -50,19 +50,23 @@ router.post("/wallet/coins/deduct", requireUser, apiRateLimit, async (req: Authe
   }
 
   try {
-    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
+    // Atomic conditional update: deduct only if balance >= amount
+    const result = await db.update(users)
+      .set({ coins: sql`${users.coins} - ${amount}` })
+      .where(and(userBySub(userId), gte(users.coins, amount)))
+      .returning({ coins: users.coins });
+    if (result.length === 0) {
+      // Either user not found or insufficient coins
+      const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+      } else {
+        res.status(402).json({ error: "Insufficient coins", coins: user.coins });
+      }
       return;
     }
-    if (user.coins < amount) {
-      res.status(402).json({ error: "Insufficient coins", coins: user.coins });
-      return;
-    }
-    const newBalance = user.coins - amount;
-    await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
-    logger.info({ userId, amount, reason, newBalance }, "coins deducted");
-    res.json({ success: true, coins: newBalance });
+    logger.info({ userId, amount, reason, newBalance: result[0].coins }, "coins deducted");
+    res.json({ success: true, coins: result[0].coins });
   } catch (err: any) {
     logger.error({ err: err.message }, "coins deduct error");
     res.status(500).json({ error: "Failed to deduct coins" });

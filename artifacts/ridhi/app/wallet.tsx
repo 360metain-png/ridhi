@@ -581,6 +581,7 @@ export default function WalletScreen() {
         label={pendingPack ? pendingPack.label : ""}
         sublabel={pendingPack ? `${pendingPack.coins}${(pendingPack as any).bonus ? ` + ${(pendingPack as any).bonus} bonus` : ""} coins` : ""}
         noGst={true}
+        sku={pendingPack?.id}
       />
     </View>
   );

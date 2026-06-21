@@ -217,6 +217,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         setUser(parsed);
+        // Mandatory server-authoritative sync for monetization state (coins, plan)
+        try {
+          const resp = await apiFetch<{ coins?: number; plan?: string }>("/api/wallet");
+          if (resp.coins !== undefined || resp.plan !== undefined) {
+            const updated: Partial<UserProfile> = {};
+            if (resp.coins !== undefined) updated.coins = resp.coins;
+            if (resp.plan !== undefined) updated.plan = resp.plan as UserProfile["plan"];
+            setUser((prev) => {
+              if (!prev) return prev;
+              const u = { ...prev, ...updated };
+              AsyncStorage.setItem("ridhi_user", JSON.stringify(u));
+              return u;
+            });
+          }
+        } catch {
+          // offline: keep local state
+        }
         // Sync KYC status from backend on app load
         try {
           const resp = await apiFetch<{ success: boolean; kyc?: { status: string; aadhaarVerified: boolean; panVerified: boolean; bankVerified: boolean } }>(

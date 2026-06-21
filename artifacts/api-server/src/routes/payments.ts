@@ -2,7 +2,7 @@ import { Router } from "express";
 import crypto from "crypto";
 import { db } from "@workspace/db";
 import { users } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import {
   getPaymentConfig,
   getProviderAvailability,
@@ -44,18 +44,55 @@ function isTestMode(): boolean {
 
 // ── Server-side order stores ─────────────────────────────────────────────────
 // createdOrders: orderId → { userId, provider } (binds each order to the authenticated user)
-const createdOrders  = new Map<string, { userId: string; provider: string; sku: string; bonusCoins: number; planId: string | null }>();
+const createdOrders  = new Map<string, { userId: string; provider: string; sku: string; bonusCoins: number; planId: string | null; amount: number }>();
 const verifiedOrders = new Map<string, string>();
 const consumedOrders = new Set<string>();
 
-// ── Internal: credit coins to user after verified payment ─────────────
+// ── Canonical SKU → entitlement mapping (server-side truth; never trust client) ──
+const CANONICAL_SKUS: Record<string, { amount: number; coins: number; bonusCoins: number; planId: string | null; planBilling: string | null }> = {
+  // Coin packs (amount in paise)
+  "cp1":  { amount: 4900,   coins: 50,   bonusCoins: 0,   planId: null, planBilling: null },
+  "cp2":  { amount: 9900,   coins: 100,  bonusCoins: 0,   planId: null, planBilling: null },
+  "cp3":  { amount: 19900,  coins: 200,  bonusCoins: 0,   planId: null, planBilling: null },
+  "cp4":  { amount: 49900,  coins: 500,  bonusCoins: 0,   planId: null, planBilling: null },
+  "cp5":  { amount: 99900,  coins: 1000, bonusCoins: 0,   planId: null, planBilling: null },
+  "cp6":  { amount: 199900, coins: 2000, bonusCoins: 0,   planId: null, planBilling: null },
+  "cp7":  { amount: 499900, coins: 5000, bonusCoins: 0,   planId: null, planBilling: null },
+  // VIP plans (amount in paise)
+  "silver_weekly":    { amount: 4900,   coins: 0, bonusCoins: 15,  planId: "silver",    planBilling: "weekly" },
+  "silver_monthly":   { amount: 14900,  coins: 0, bonusCoins: 15,  planId: "silver",    planBilling: "monthly" },
+  "silver_yearly":    { amount: 99900,  coins: 0, bonusCoins: 15,  planId: "silver",    planBilling: "yearly" },
+  "gold_weekly":      { amount: 9900,   coins: 0, bonusCoins: 40,  planId: "gold",      planBilling: "weekly" },
+  "gold_monthly":     { amount: 29900,  coins: 0, bonusCoins: 40,  planId: "gold",      planBilling: "monthly" },
+  "gold_yearly":      { amount: 199900, coins: 0, bonusCoins: 40,  planId: "gold",      planBilling: "yearly" },
+  "platinum_weekly":  { amount: 19900,  coins: 0, bonusCoins: 100, planId: "platinum",  planBilling: "weekly" },
+  "platinum_monthly": { amount: 59900,  coins: 0, bonusCoins: 100, planId: "platinum",  planBilling: "monthly" },
+  "platinum_yearly":  { amount: 399900, coins: 0, bonusCoins: 100, planId: "platinum",  planBilling: "yearly" },
+  "diamond_weekly":   { amount: 34900,  coins: 0, bonusCoins: 300, planId: "diamond",   planBilling: "weekly" },
+  "diamond_monthly":  { amount: 99900,  coins: 0, bonusCoins: 300, planId: "diamond",   planBilling: "monthly" },
+  "diamond_yearly":   { amount: 699900, coins: 0, bonusCoins: 300, planId: "diamond",   planBilling: "yearly" },
+  // Creator plans
+  "creator_starter":  { amount: 29900,  coins: 0, bonusCoins: 50,  planId: "creator_starter", planBilling: "monthly" },
+  "creator_pro":      { amount: 99900,  coins: 0, bonusCoins: 200, planId: "creator_pro",     planBilling: "monthly" },
+  "creator_elite":    { amount: 299900, coins: 0, bonusCoins: 500, planId: "creator_elite",   planBilling: "monthly" },
+  // Fallback
+  "coins":            { amount: 0,      coins: 0, bonusCoins: 0,   planId: null, planBilling: null },
+};
+
+function resolveEntitlement(sku: string) {
+  const canonical = CANONICAL_SKUS[sku] || CANONICAL_SKUS["coins"];
+  return canonical;
+}
+
+// ── Internal: credit coins to user after verified payment (atomic) ─────
 async function creditCoins(userId: string, amount: number, reason: string) {
   try {
-    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-    if (!user) return;
-    const newBalance = user.coins + amount;
-    await db.update(users).set({ coins: newBalance }).where(userBySub(userId));
-    logger.info({ userId, amount, reason, newBalance }, "coins credited from payment");
+    const result = await db.update(users)
+      .set({ coins: sql`${users.coins} + ${amount}` })
+      .where(userBySub(userId))
+      .returning({ coins: users.coins });
+    if (result.length === 0) return;
+    logger.info({ userId, amount, reason, newBalance: result[0].coins }, "coins credited from payment");
   } catch (err: any) {
     logger.error({ err: err.message }, "creditCoins error");
   }
@@ -71,20 +108,15 @@ async function activatePlan(userId: string, planId: string, billing: string, bon
   if (isCreator && !validCreator.includes(planId)) return;
   if (!validBilling.includes(billing)) return;
   try {
-    const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-    if (!user) return;
-    const newCoins = user.coins + bonusCoins;
-    const now = new Date();
-    let expiresAt: Date;
-    if (billing === "weekly") { expiresAt = new Date(now); expiresAt.setDate(expiresAt.getDate() + 7); }
-    else if (billing === "yearly") { expiresAt = new Date(now); expiresAt.setFullYear(expiresAt.getFullYear() + 1); }
-    else { expiresAt = new Date(now); expiresAt.setMonth(expiresAt.getMonth() + 1); }
-    const planValue = isCreator ? ("creator" as any) : (planId as any);
-    await db.update(users).set({
-      plan: planValue,
-      coins: newCoins,
-    }).where(userBySub(userId));
-    logger.info({ userId, planId, billing, bonusCoins, newCoins }, "plan activated from payment");
+    const result = await db.update(users)
+      .set({
+        plan: isCreator ? ("creator" as any) : (planId as any),
+        coins: sql`${users.coins} + ${bonusCoins}`,
+      })
+      .where(userBySub(userId))
+      .returning({ coins: users.coins });
+    if (result.length === 0) return;
+    logger.info({ userId, planId, billing, bonusCoins, newCoins: result[0].coins }, "plan activated from payment");
   } catch (err: any) {
     logger.error({ err: err.message }, "activatePlan error");
   }
@@ -95,13 +127,15 @@ async function fulfillOrder(orderId: string, userId: string) {
   if (consumedOrders.has(orderId)) return; // already consumed
   const meta = createdOrders.get(orderId);
   if (!meta) return;
+  // Resolve entitlement from server-side canonical SKU table (never trust client metadata)
+  const canonical = resolveEntitlement(meta.sku);
   const paise = (meta as any).amount ?? 0;
-  const coins = Math.floor(paise / 100); // 1 coin = 1 rupee
+  const coins = canonical.coins > 0 ? canonical.coins : Math.floor(paise / 100);
   if (coins > 0) {
-    await creditCoins(userId, coins + meta.bonusCoins, `payment_${meta.sku}`);
+    await creditCoins(userId, coins + canonical.bonusCoins, `payment_${meta.sku}`);
   }
-  if (meta.planId) {
-    await activatePlan(userId, meta.planId, "monthly", meta.bonusCoins);
+  if (canonical.planId && canonical.planBilling) {
+    await activatePlan(userId, canonical.planId, canonical.planBilling, canonical.bonusCoins);
   }
   consumedOrders.add(orderId);
 }
@@ -360,14 +394,22 @@ router.post("/payments/create-order", requireUser, paymentRateLimit, async (req:
       res.status(401).json({ error: "Authentication required" });
       return;
     }
-    const { sku, bonusCoins, planId } = req.body as { sku?: string; bonusCoins?: number; planId?: string };
+    const { sku } = req.body as { sku?: string };
+    const resolvedSku = sku || "coins";
+    const canonical = resolveEntitlement(resolvedSku);
+    // Validate amount matches canonical SKU (reject mismatched amounts)
+    if (canonical.amount > 0 && amount !== canonical.amount) {
+      res.status(400).json({ error: "Amount does not match selected SKU" });
+      return;
+    }
+    // Server-side truth: ignore any client-provided bonusCoins or planId
     createdOrders.set(order.id, {
       userId, provider,
-      sku: sku || "coins",
-      bonusCoins: bonusCoins || 0,
-      planId: planId || null,
+      sku: resolvedSku,
+      bonusCoins: canonical.bonusCoins,
+      planId: canonical.planId,
       amount,
-    } as any);
+    });
     req.log.info({ orderId: order.id, amount, provider, userId, sku }, `${provider} order created`);
     res.json({ ...order, provider });
   } catch (err) {
