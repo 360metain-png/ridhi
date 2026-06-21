@@ -2,51 +2,64 @@
 
 ## Project Overview
 
-Ridhi is a public-facing social networking and dating application deployed on Replit. The production deployment serves three distinct surfaces: the Expo/React Native web/mobile artifact at `/`, an Express API at `/api`, and a React-based admin artifact at `/admin/`. The current backend is small and only exposes health, OTP auth, and Razorpay payment routes; most end-user identity, wallet, and subscription state is presently maintained client-side in local storage/AsyncStorage rather than in server-side records.
+Ridhi is a public-facing social networking and dating application deployed on Replit. The production deployment serves three distinct surfaces: the Expo/React Native client at `/`, an Express API at `/api`, and a React-based admin artifact at `/admin/`. The current backend is broader than the earlier baseline and now includes OTP auth, user profiles and feed data, chat and friend-request flows, KYC submission and review, payment initiation and verification, download logging, call matching and call-control websockets, and admin JWT authentication.
+
+A large portion of end-user identity, wallet, subscription, and premium-feature state is still maintained client-side in local storage or AsyncStorage rather than in durable server-side records. That makes trust-boundary mistakes between browser/mobile state and server-recognized authority the dominant production risk.
 
 ## Assets
 
-- **User identity claims** — phone numbers, email addresses, OTP codes, and any profile identity established during onboarding. If these are spoofed, users can be impersonated inside the app experience.
-- **Paid entitlements and virtual currency** — subscriptions, boosts, wallet balances, and creator-related perks. These represent monetized features and must not be grantable without verified payment.
-- **Payment integrity** — Razorpay order creation and payment verification flows. If payment success can be forged, users can obtain paid access or currency without paying.
-- **Application secrets and infrastructure details** — environment variables, payment keys, database URLs, and operational topology. Exposure would materially increase attack surface if any real values are shipped to clients.
-- **Admin-only operational views** — any control-panel functionality or backend observability intended for privileged operators.
+- **User identity claims** — phone numbers, email addresses, OTP codes, JWTs, and any profile identity established during onboarding.
+- **Highly sensitive KYC data** — Aadhaar numbers, PAN numbers, bank information, document images, review notes, and approval status.
+- **Paid entitlements and virtual currency** — subscriptions, coin balances, boosts, brand registration, creator perks, download rights, and other monetized features.
+- **Payment integrity** — payment order creation, provider verification, callback handling, and any client flow that treats a payment as completed.
+- **Call-session privacy and availability** — active-call metadata, websocket session identity, call-control events, and coin-rate state for live calls.
+- **Admin-only operational views** — privileged configuration, admin management, moderation data, KYC review surfaces, and internal observability.
+- **Application secrets and infrastructure details** — environment variables, payment credentials, analytics secrets, database URLs, and other configuration that would increase attack surface if exposed.
 
 ## Trust Boundaries
 
-- **Public client to API** — all `/api` requests cross from an untrusted client into the Express server. Request bodies, query parameters, and any client-provided flags must be treated as attacker-controlled.
-- **Client-local state to trusted business logic** — the mobile/web app stores user, wallet, and subscription state in AsyncStorage/local state. Any feature that treats this client-maintained state as authoritative crosses a critical trust boundary.
-- **API to payment provider** — the server creates and verifies Razorpay transactions using secret keys. Payment outcomes must be derived from server-side verification, not client assertions.
-- **Public to admin surface** — `/admin/` is publicly served. If it is intended to be privileged, access control must be enforced by a trusted backend rather than browser state.
-- **Production vs dev/demo behavior** — several flows include demo or mock behaviors. Because the deployment is public, any fallback that remains enabled in production must be assumed attacker-reachable.
+- **Public client to API** — all `/api` requests originate from an untrusted client. Request bodies, headers, query parameters, and path parameters must be treated as attacker-controlled.
+- **Client-local state to trusted business logic** — the mobile/web app stores user, wallet, subscription, premium, and some verification-related state locally. Any feature that treats that local state as authoritative crosses a critical trust boundary.
+- **Public websocket client to call-control backend** — `/ws/calls` is a public realtime entry point. Any user ID, call ID, or action provided over that channel must be bound to a server-authenticated identity before it can control a live session.
+- **API to payment provider** — the server creates and verifies provider orders using secrets. Payment success must come from server-side cryptographic validation or trusted provider status checks, not from client-visible callbacks or client assertions.
+- **Public to admin surface** — `/admin/` is publicly served. Access control for privileged admin operations must be enforced by trusted backend JWT verification rather than browser state alone.
+- **Production vs dev/demo behavior** — demo OTPs, test providers, mock data, and fallback flows are only acceptable if they are unreachable in production. Any production-reachable fallback that returns secrets, bypasses verification, or grants authority is in scope.
 
 ## Scan Anchors
 
-- **Production entry points**: `artifacts/ridhi/app`, `artifacts/api-server/src/index.ts`, `artifacts/api-server/src/routes/*.ts`, `artifacts/admin/src/App.tsx`
-- **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/ridhi/app/wallet.tsx`, `artifacts/ridhi/app/subscription.tsx`
-- **Public vs authenticated surfaces**: `/api/*` is publicly reachable; user authentication uses OTP + JWT; admin authentication uses password + JWT with role-based access control; `/admin/` is publicly reachable but requires a valid JWT token enforced server-side
-- **Usually ignore unless reachability changes**: `artifacts/mockup-sandbox`, build scripts, placeholder/mock-data-only pages with no trusted backend effect
+- **Production entry points**: `artifacts/ridhi/app`, `artifacts/ridhi/components`, `artifacts/api-server/src/index.ts`, `artifacts/api-server/src/routes/*.ts`, `artifacts/admin/src/App.tsx`, `artifacts/admin/src/lib/*.ts`
+- **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/api-server/src/routes/users.ts`, `artifacts/api-server/src/routes/kyc.ts`, `artifacts/api-server/src/routes/calls.ts`
+- **Public vs authenticated surfaces**:
+  - `/api/auth/*`, `/api/feed`, `/api/users`, `/api/users/:id`, `/api/posts/:id/comments`, `/api/calls/*`, and `/api/payments/config` have public reachability.
+  - User-protected routes rely on bearer JWTs issued from OTP verification.
+  - Admin-protected routes now rely on backend JWT verification via `/api/admin/me`; the earlier client-side-only admin auth issue is fixed.
+  - `/ws/calls` is publicly reachable and should be treated like an unauthenticated remote-control boundary unless token checks are added.
+- **Usually ignore unless reachability changes**: `artifacts/mockup-sandbox`, build scripts, static mock data with no server-trusted effect, and configuration endpoints that expose only blank placeholder fields or non-sensitive provider availability.
 
 ## Threat Categories
 
 ### Spoofing
 
-The application offers OTP-based login, but the current architecture does not establish server-side sessions or persistent user records. The system must ensure that any production authentication path does not fall back to attacker-observable demo codes and that successful verification results in a server-trusted identity before protecting data or capabilities.
+OTP weaknesses are reportable when they mint a server-trusted identity or otherwise unlock a protected backend capability. Demo or fallback OTP paths that return the code to the client and then issue a JWT are in scope because they cross the server trust boundary.
 
-For scan triage in the current build, OTP weaknesses should be reported when they unlock a server-trusted identity, protected backend data, or a non-local capability. If a weakness only affects local UI state in the mock-heavy client and does not cross a trusted backend boundary, treat it as below the reporting threshold unless reachability changes.
+Latent authentication weaknesses that require an unverified deployment misconfiguration should not be re-proposed unless the live deployment shows that the risky path is actually active.
 
 ### Tampering
 
-The largest current risk is client-side control over monetized state. Wallet balances, subscription plans, boosts, and similar entitlements must not be created, upgraded, or consumed solely from client-maintained state or client-reported payment outcomes. All paid feature grants must be derived from server-side verification and durable server-side records.
+The highest-risk tampering class remains monetization integrity. Wallet balances, subscription tiers, premium unlocks, and download rights must not be derived from client-maintained state or attacker-triggerable payment callbacks. All paid grants must come from durable server-side records tied to verified payments.
 
 ### Information Disclosure
 
-Because `/admin/` is publicly served, any real infrastructure details, secrets, or privileged operational data embedded in that bundle would be exposed to any visitor. The project must ensure that production client artifacts never ship real credentials, internal topology, or privileged observability data.
+Public user-profile routes, KYC status/data routes, call-state routes, and any admin-facing API can expose sensitive data if they return raw backend objects or decrypted fields. Real secrets, phone numbers, identity documents, banking data, websocket identifiers, and privileged moderation/admin metadata are in scope.
+
+Anonymous configuration reads are only reportable when they expose real secrets or privileged operational content, not merely blank fields or low-sensitivity provider availability.
 
 ### Denial of Service
 
-Public OTP and payment endpoints are reachable without authentication. These flows must bound request volume and avoid attacker-triggerable fallback modes that can be abused to spam third-party services or exhaust provider quotas.
+Public OTP, payment, and realtime call surfaces are reachable without network-level gating. These flows must avoid attacker-triggerable fallback modes, unbounded polling surfaces, and unauthenticated control messages that can terminate or interfere with live sessions.
 
 ### Elevation of Privilege
 
-Any privileged surface must enforce authorization in a trusted backend. The admin panel (`/admin/`) now requires JWT authentication for all protected routes, and admin endpoints are protected by `requireAdmin`, `requireSuperAdmin`, and `requireAdminOrSuper` middleware. The default seed admin credentials are no longer hardcoded; they must be set via `ADMIN_SA_EMAIL` and `ADMIN_SA_PASSWORD` environment variables. Payment verification must not trust client-supplied flags or other user-controlled assertions that can elevate a non-paying user into a paid role.
+Any privileged surface must enforce authorization in a trusted backend. The current admin UI now verifies a backend JWT before rendering protected routes, so the older client-side-only `/admin` exposure should remain treated as fixed unless that verification boundary regresses.
+
+The main elevation risks in the current build are backend IDORs, client-authoritative monetization state that upgrades a user into paid roles or features, and any callback or websocket path that accepts attacker-chosen identifiers without binding them to the authenticated subject.
