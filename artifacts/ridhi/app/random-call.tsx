@@ -447,7 +447,7 @@ export default function RandomCallScreen() {
     connectWebSocket();
   };
 
-  const endCall = async () => {
+  const endCall = async (): Promise<boolean> => {
     // Deduct spent coins FIRST — block call teardown if server rejects
     if (coinsSpent > 0) {
       const deducted = await deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
@@ -456,7 +456,7 @@ export default function RandomCallScreen() {
           "Call Charge Failed",
           `We could not deduct ${coinsSpent} coins for this call. Please recharge your wallet and try again.`
         );
-        return; // Hard failure: do not end the call until payment succeeds
+        return false; // Hard failure: do not end the call until payment succeeds
       }
     }
 
@@ -473,6 +473,7 @@ export default function RandomCallScreen() {
     setCoinsEarned(0);
     setCallId(null);
     disconnectWebSocket();
+    return true;
   };
 
   const handleCancelSearch = () => {
@@ -499,7 +500,7 @@ export default function RandomCallScreen() {
           colors={[colors.secondary + "30", colors.primary + "15", "transparent"]}
           style={[styles.header, { paddingTop: topPad + 10 }]}
         >
-          <Pressable onPress={async () => { await endCall(); router.back(); }} style={styles.headerBtn}>
+          <Pressable onPress={async () => { if (await endCall()) router.back(); }} style={styles.headerBtn}>
             <Feather name="arrow-left" size={24} color={colors.foreground} />
           </Pressable>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Random Calls</Text>
@@ -951,7 +952,7 @@ export default function RandomCallScreen() {
                 </Pressable>
               ))}
               <Pressable
-                onPress={async () => { await endCall(); setReportVisible(false); }}
+                onPress={async () => { if (await endCall()) setReportVisible(false); }}
                 style={[styles.blockBtn, { backgroundColor: colors.destructive + "18", borderColor: colors.destructive + "30" }]}
               >
                 <Feather name="slash" size={16} color={colors.destructive} />
