@@ -4,7 +4,7 @@
 
 Ridhi is a public-facing social networking and dating application deployed on Replit. The production deployment serves three distinct surfaces: the Expo/React Native client at `/`, an Express API at `/api`, and a React-based admin artifact at `/admin/`. The current backend is broader than the earlier baseline and now includes OTP auth, user profiles and feed data, chat and friend-request flows, KYC submission and review, payment initiation and verification, download logging, call matching and call-control websockets, and admin JWT authentication.
 
-A large portion of end-user identity, wallet, subscription, and premium-feature state is still maintained client-side in local storage or AsyncStorage rather than in durable server-side records. That makes trust-boundary mistakes between browser/mobile state and server-recognized authority the dominant production risk.
+The current backend now enforces wallet deductions, payment verification, and download pricing server-side in the main monetization paths, but the mobile client still caches substantial user state locally for UX. Trust-boundary mistakes between browser/mobile state and server-recognized authority remain important, though the highest-value remaining risks have shifted toward privileged admin actions and sensitive data handling.
 
 ## Assets
 
@@ -24,6 +24,7 @@ A large portion of end-user identity, wallet, subscription, and premium-feature 
 - **API to payment provider** — the server creates and verifies provider orders using secrets. Payment success must come from server-side cryptographic validation or trusted provider status checks, not from client-visible callbacks or client assertions.
 - **Public to admin surface** — `/admin/` is publicly served. Access control for privileged admin operations must be enforced by trusted backend JWT verification rather than browser state alone.
 - **Production vs dev/demo behavior** — demo OTPs, test providers, mock data, and fallback flows are only acceptable if they are unreachable in production. Any production-reachable fallback that returns secrets, bypasses verification, or grants authority is in scope.
+- **Broken production auth flows are not security controls** — the live MSG91 verification path currently returns success without minting a user JWT, which limits practical reachability of many user-protected routes. Treat that as an application bug, not as a mitigation for underlying authorization issues.
 
 ## Scan Anchors
 
@@ -31,7 +32,7 @@ A large portion of end-user identity, wallet, subscription, and premium-feature 
 - **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/api-server/src/routes/users.ts`, `artifacts/api-server/src/routes/kyc.ts`, `artifacts/api-server/src/routes/calls.ts`
 - **Public vs authenticated surfaces**:
   - `/api/auth/*`, `/api/feed`, `/api/users`, `/api/users/:id`, `/api/posts/:id/comments`, `/api/calls/*`, and `/api/payments/config` have public reachability.
-  - User-protected routes rely on bearer JWTs issued from OTP verification.
+  - User-protected routes rely on bearer JWTs issued from OTP verification. The live MSG91 success path currently does not mint that JWT, which reduces practical reachability but should not be relied on as a security boundary.
   - Admin-protected routes now rely on backend JWT verification via `/api/admin/me`; the earlier client-side-only admin auth issue is fixed.
   - `/ws/calls` is publicly reachable and should be treated like an unauthenticated remote-control boundary unless token checks are added.
 - **Usually ignore unless reachability changes**: `artifacts/mockup-sandbox`, build scripts, static mock data with no server-trusted effect, and configuration endpoints that expose only blank placeholder fields or non-sensitive provider availability.
@@ -62,4 +63,4 @@ Public OTP, payment, and realtime call surfaces are reachable without network-le
 
 Any privileged surface must enforce authorization in a trusted backend. The current admin UI now verifies a backend JWT before rendering protected routes, so the older client-side-only `/admin` exposure should remain treated as fixed unless that verification boundary regresses.
 
-The main elevation risks in the current build are backend IDORs, client-authoritative monetization state that upgrades a user into paid roles or features, and any callback or websocket path that accepts attacker-chosen identifiers without binding them to the authenticated subject.
+The main elevation risks in the current build are backend IDORs, privileged admin endpoints that skip step-up verification for sensitive actions, and any callback or websocket path that accepts attacker-chosen identifiers without binding them to the authenticated subject.
