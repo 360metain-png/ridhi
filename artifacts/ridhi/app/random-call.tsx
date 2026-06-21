@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
+  Alert,
   Animated,
   Platform,
   Pressable,
@@ -447,15 +448,23 @@ export default function RandomCallScreen() {
   };
 
   const endCall = async () => {
+    // Deduct spent coins FIRST — block call teardown if server rejects
+    if (coinsSpent > 0) {
+      const deducted = await deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
+      if (!deducted) {
+        Alert.alert(
+          "Call Charge Failed",
+          `We could not deduct ${coinsSpent} coins for this call. Please recharge your wallet and try again.`
+        );
+        return; // Hard failure: do not end the call until payment succeeds
+      }
+    }
+
     if (callId && wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "disconnect",
         payload: { callId, userId: user?.id },
       }));
-    }
-    // Deduct spent coins
-    if (coinsSpent > 0) {
-      await deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
     }
     setMode("idle");
     setMatched(null);
