@@ -44,7 +44,7 @@ function isTestMode(): boolean {
 
 // ── Server-side order stores ─────────────────────────────────────────────────
 // createdOrders: orderId → { userId, provider } (binds each order to the authenticated user)
-const createdOrders  = new Map<string, { userId: string; provider: string; sku: string; bonusCoins: number; planId: string | null; amount: number }>();
+const createdOrders  = new Map<string, { userId: string; provider: string; sku: string; bonusCoins: number; planId: string | null; amount: number; checkoutUrl?: string }>();
 const verifiedOrders = new Map<string, string>();
 const consumedOrders = new Set<string>();
 
@@ -412,6 +412,7 @@ router.post("/payments/create-order", requireUser, paymentRateLimit, async (req:
       bonusCoins: canonical.bonusCoins,
       planId: canonical.planId,
       amount,
+      checkoutUrl: (order as any).checkoutUrl,
     });
     req.log.info({ orderId: order.id, amount, provider, userId, sku }, `${provider} order created`);
     res.json({ ...order, provider });
@@ -630,12 +631,24 @@ router.get("/payments/provider", (_req, res) => {
 
 // ── GET /api/payments/checkout ────────────────────────────────────────────────
 // Serves an HTML page that opens the active provider's checkout
-router.get("/payments/checkout", (req, res) => {
+router.get("/payments/checkout", requireUser, async (req: AuthenticatedRequest, res) => {
   const { orderId, keyId, amount, desc, name, email, contact, provider } =
     req.query as Record<string, string>;
 
   const cfg = getPaymentConfig();
   const activeProvider = provider || cfg.activeProvider;
+
+  // Look up the order server-side to bind checkout to the authenticated user
+  const orderMeta = createdOrders.get(orderId);
+  if (!orderMeta) {
+    res.status(404).send("Order not found");
+    return;
+  }
+  const requestingUser = req.user?.sub || "";
+  if (orderMeta.userId !== requestingUser) {
+    res.status(403).send("Forbidden");
+    return;
+  }
 
   if (activeProvider === "razorpay") {
     const html = renderRazorpayCheckout({ orderId, keyId, amount, desc, name, email, contact });
@@ -644,12 +657,11 @@ router.get("/payments/checkout", (req, res) => {
     return;
   }
 
-  // For redirect-based providers, redirect directly to their checkout URL
-  // The checkout URL should have been returned in the create-order response
+  // For redirect-based providers, redirect to the server-stored checkout URL
+  // NEVER trust req.query.checkoutUrl (open redirect protection)
   if (activeProvider === "phonepe" || activeProvider === "instamojo" || activeProvider === "cashfree") {
-    const redirectUrl = req.query.checkoutUrl as string;
-    // Validate redirect URL to prevent open redirect
-    if (redirectUrl && (redirectUrl.startsWith("https://") || redirectUrl.startsWith("http://"))) {
+    const redirectUrl = orderMeta.checkoutUrl;
+    if (redirectUrl) {
       res.redirect(redirectUrl);
       return;
     }
