@@ -26,7 +26,7 @@ catalog:
   tailwind-merge: ^3.3.1
   tailwindcss: ^4.1.14
   tsx: ^4.21.0
-  vite: ^7.3.2
+  vite: ^7.3.5
   wouter: ^3.3.5
   zod: ^3.25.76
 
@@ -64,7 +64,7 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-linux-x64-musl': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
-  esbuild: 0.27.3
+  esbuild: 0.28.1
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
   esbuild>@esbuild/android-arm64: '-'
@@ -128,6 +128,30 @@ overrides:
   rollup>@rollup/rollup-win32-x64-msvc: '-'
   uuid: ^11.1.1
   qs: ^6.15.2
+  # Security vulnerability fixes — bounded with ^ to avoid unintended major-version jumps
+  '@babel/core': '^7.29.6'
+  '@opentelemetry/core': '^2.8.0'
+  '@xmldom/xmldom': '^0.8.13'
+  ajv: '^8.18.0'
+  diff: '^8.0.3'
+  dompurify: '^3.4.11'
+  'form-data@2': '^2.5.6'
+  'form-data@4': '^4.0.6'
+  '@types/request>form-data': '^4.0.6'
+  joi: '^17.13.4'
+  js-yaml: '^4.2.0'
+  markdown-it: '^14.2.0'
+  'minimatch@5': '^5.1.8'
+  node-forge: '^1.4.0'
+  protobufjs: '^7.6.3'
+  shell-quote: '^1.8.4'
+  tar: '^7.5.16'
+  ts-deepmerge: '^8.0.0'
+  undici: '^6.27.0'
+  'ws@6': '^6.2.4'
+  'ws@7': '^7.5.11'
+  'ws@8': '^8.21.0'
+  yaml: '^2.8.3'
 
 patchedDependencies:
   jsc-safe-url@0.2.3: patches/jsc-safe-url@0.2.3.patch
