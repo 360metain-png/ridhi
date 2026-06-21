@@ -430,7 +430,6 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
     razorpay_signature,
     order_id,
     payment_id,
-    provider,
     signature,
   } = req.body as {
     razorpay_order_id?: string;
@@ -438,7 +437,6 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
     razorpay_signature?: string;
     order_id?: string;
     payment_id?: string;
-    provider?: PaymentProvider;
     signature?: string;
   };
 
@@ -466,8 +464,11 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
     return;
   }
 
-  const cfg = getPaymentConfig();
-  const activeProvider = provider || cfg.activeProvider;
+  // Always use the provider recorded at order-creation time.  Never let the
+  // client choose which verification branch runs — doing so would allow an
+  // attacker to steer a Razorpay HMAC check toward a provider that performs
+  // weaker or no cryptographic verification.
+  const activeProvider = orderMeta.provider as PaymentProvider;
 
   // Test mode
   if (isTestMode()) {
@@ -632,11 +633,8 @@ router.get("/payments/provider", (_req, res) => {
 // ── GET /api/payments/checkout ────────────────────────────────────────────────
 // Serves an HTML page that opens the active provider's checkout
 router.get("/payments/checkout", requireUser, async (req: AuthenticatedRequest, res) => {
-  const { orderId, keyId, amount, desc, name, email, contact, provider } =
+  const { orderId, keyId, amount, desc, name, email, contact } =
     req.query as Record<string, string>;
-
-  const cfg = getPaymentConfig();
-  const activeProvider = provider || cfg.activeProvider;
 
   // Look up the order server-side to bind checkout to the authenticated user
   const orderMeta = createdOrders.get(orderId);
@@ -650,6 +648,12 @@ router.get("/payments/checkout", requireUser, async (req: AuthenticatedRequest, 
     return;
   }
 
+  // Always use the provider that was recorded at order creation time — never
+  // trust a client-supplied `provider` query parameter. This prevents an
+  // attacker from steering the checkout into a different branch (e.g. forcing
+  // a redirect path for an order that was created with a different provider).
+  const activeProvider = orderMeta.provider as PaymentProvider;
+
   if (activeProvider === "razorpay") {
     const html = renderRazorpayCheckout({ orderId, keyId, amount, desc, name, email, contact });
     res.setHeader("Content-Type", "text/html");
@@ -657,8 +661,9 @@ router.get("/payments/checkout", requireUser, async (req: AuthenticatedRequest, 
     return;
   }
 
-  // For redirect-based providers, redirect to the server-stored checkout URL
-  // NEVER trust req.query.checkoutUrl (open redirect protection)
+  // For redirect-based providers, redirect to the server-stored checkout URL.
+  // NEVER redirect to any client-supplied URL — the target is always taken from
+  // the server-side order record that was populated during order creation.
   if (activeProvider === "phonepe" || activeProvider === "instamojo" || activeProvider === "cashfree") {
     const redirectUrl = orderMeta.checkoutUrl;
     if (redirectUrl) {
