@@ -123,7 +123,7 @@ export default function WalletScreen() {
   useTrackScreen("wallet");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, addCoins, claimDailyReward, syncWallet } = useAuth();
+  const { user, claimDailyReward, syncWallet } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 

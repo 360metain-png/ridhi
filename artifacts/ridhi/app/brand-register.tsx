@@ -144,7 +144,7 @@ export default function BrandRegisterScreen() {
     markBrandRegistered();
   };
 
-  const handleCoinPay = () => {
+  const handleCoinPay = async () => {
     if (coinBalance < BRAND_REGISTRATION_COINS) {
       Alert.alert("Insufficient Coins", `You need ${BRAND_REGISTRATION_COINS} coins. Go to Wallet to recharge.`, [
         { text: "Cancel", style: "cancel" },
@@ -153,7 +153,11 @@ export default function BrandRegisterScreen() {
       return;
     }
     setShowCoinConfirm(false);
-    deductCoins(BRAND_REGISTRATION_COINS);
+    const ok = await deductCoins(BRAND_REGISTRATION_COINS);
+    if (!ok) {
+      Alert.alert("Payment Failed", "Could not deduct coins. Please try again.");
+      return;
+    }
     setPaymentDone(true);
     markBrandRegistered();
   };

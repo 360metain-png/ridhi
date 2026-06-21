@@ -205,9 +205,10 @@ export default function LiveStreamScreen() {
     return () => { if (autoGiftRef.current) clearInterval(autoGiftRef.current); };
   }, [view]);
 
-  const sendGift = (gift: typeof LIVE_GIFTS[0]) => {
+  const sendGift = async (gift: typeof LIVE_GIFTS[0]) => {
     if ((user?.coins ?? 0) < gift.cost) return;
-    deductCoins(gift.cost);
+    const ok = await deductCoins(gift.cost);
+    if (!ok) return;
     const newMsg = {
       id: `m${Date.now()}`,
       user: user?.name?.split(" ")[0] ?? "You",

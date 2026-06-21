@@ -457,6 +457,14 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
     return;
   }
 
+  // Reject cross-user order ownership
+  const requestingUser = req.user?.sub || "";
+  if (orderMeta.userId && orderMeta.userId !== requestingUser) {
+    req.log.warn({ orderId: resolvedOrderId, userId: requestingUser }, "Verification rejected: order belongs to another user");
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+
   const cfg = getPaymentConfig();
   const activeProvider = provider || cfg.activeProvider;
 
@@ -571,6 +579,16 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
 // ── GET /api/payments/status/:orderId ────────────────────────────────────────
 router.get("/payments/status/:orderId", requireUser, (req: AuthenticatedRequest, res) => {
   const orderId = req.params.orderId as string;
+  const orderMeta = createdOrders.get(orderId);
+  if (!orderMeta) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+  const requestingUser = req.user?.sub || "";
+  if (orderMeta.userId && orderMeta.userId !== requestingUser) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
   const paymentId = verifiedOrders.get(orderId);
   if (paymentId) {
     res.json({ verified: true, paymentId });

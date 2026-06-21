@@ -446,7 +446,7 @@ export default function RandomCallScreen() {
     connectWebSocket();
   };
 
-  const endCall = () => {
+  const endCall = async () => {
     if (callId && wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "disconnect",
@@ -455,7 +455,7 @@ export default function RandomCallScreen() {
     }
     // Deduct spent coins
     if (coinsSpent > 0) {
-      deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
+      await deductCoins(Math.min(coinsSpent, user?.coins ?? 0));
     }
     setMode("idle");
     setMatched(null);
@@ -490,7 +490,7 @@ export default function RandomCallScreen() {
           colors={[colors.secondary + "30", colors.primary + "15", "transparent"]}
           style={[styles.header, { paddingTop: topPad + 10 }]}
         >
-          <Pressable onPress={() => { endCall(); router.back(); }} style={styles.headerBtn}>
+          <Pressable onPress={async () => { await endCall(); router.back(); }} style={styles.headerBtn}>
             <Feather name="arrow-left" size={24} color={colors.foreground} />
           </Pressable>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>Random Calls</Text>
@@ -942,7 +942,7 @@ export default function RandomCallScreen() {
                 </Pressable>
               ))}
               <Pressable
-                onPress={() => { endCall(); setReportVisible(false); }}
+                onPress={async () => { await endCall(); setReportVisible(false); }}
                 style={[styles.blockBtn, { backgroundColor: colors.destructive + "18", borderColor: colors.destructive + "30" }]}
               >
                 <Feather name="slash" size={16} color={colors.destructive} />

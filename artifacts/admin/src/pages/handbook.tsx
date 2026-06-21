@@ -784,9 +784,11 @@ const ADMIN_SECTIONS: Section[] = [
       "Plan Cancel API: POST /api/plan/cancel — reverts user to free tier",
       "Download validation: POST /api/downloads validates coin balance server-side using canonical prices; 402 if insufficient. Client no longer sends price or ownerId.",
       "Payment callback hardening: GET /api/payments/callback verifies provider status before marking orders verified; auto-fulfills coins/plan from order metadata; rejects unknown orders",
+      "Order ownership binding: POST /payments/verify and GET /payments/status/:orderId reject cross-user order access (403) — prevents probing other users' orders",
+      "Gift/spend flow hardening: all coin spend paths (gift store, live stream gifts, random calls, brand registration, boosts) await deductCoins confirmation before updating UI. If server rejects, the action is cancelled",
       "All wallet mutations are logged with userId, amount, reason, and new balance for audit",
     ],
-    note: "Client-side coin balance is purely for UI display. The server is the single source of truth. Coin minting and plan unlocking are no longer public API endpoints — they are only triggered internally after verified payment. Any client attempt to bypass server validation will fail.",
+    note: "Client-side coin balance is purely for UI display. The server is the single source of truth. Coin minting and plan unlocking are no longer public API endpoints — they are only triggered internally after verified payment. Any client attempt to bypass server validation will fail. Gift send actions are gated on server deduction confirmation.",
   },
   {
     id: "a-ai-hub",

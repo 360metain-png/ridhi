@@ -43,7 +43,7 @@ function CoinBal({ coins }: { coins: number }) {
   );
 }
 
-function GiftCard({ gift, onSend }: { gift: Gift; onSend: (g: Gift) => void }) {
+function GiftCard({ gift, onSend }: { gift: Gift; onSend: (g: Gift) => void | Promise<void> }) {
   const colors = useColors();
   const catColor =
     gift.category === "luxury"  ? "#E91E8C" :
@@ -93,7 +93,7 @@ export default function CoinStoreScreen() {
         activeTab === "special" ? g.category === "special" : g.category === activeTab
       );
 
-  const handleSend = (gift: Gift) => {
+  const handleSend = async (gift: Gift) => {
     if ((user?.coins ?? 0) < gift.coins) {
       Alert.alert(
         "Not enough coins",
@@ -105,7 +105,11 @@ export default function CoinStoreScreen() {
       );
       return;
     }
-    deductCoins(gift.coins);
+    const ok = await deductCoins(gift.coins);
+    if (!ok) {
+      Alert.alert("Payment Failed", "Could not deduct coins. Please try again.");
+      return;
+    }
     setSentGift(gift);
     setTimeout(() => setSentGift(null), 2200);
   };
