@@ -89,8 +89,11 @@ const INITIAL_HOSTS: Host[] = [
 ];
 
 const PENDING_HOSTS = [
-  { id: "ph1", name: "Anjali Rao",   city: "Bangalore", phone: "+91 99887 76655", agentId: "a1", appliedAt: "1 hour ago",  language: "Kannada", followers: 3200 },
-  { id: "ph2", name: "Rohit Sharma", city: "Delhi",     phone: "+91 88776 65544", agentId: "a2", appliedAt: "3 hours ago", language: "Hindi",   followers: 1800 },
+  { id: "ph1", name: "Anjali Rao",     city: "Bangalore", phone: "+91 99887 76655", appliedAt: "1 hour ago",   language: "Kannada",   followers: 3200, experience: "Dance & music creator, 2 yrs YouTube"    },
+  { id: "ph2", name: "Rohit Sharma",   city: "Delhi",     phone: "+91 88776 65544", appliedAt: "3 hours ago",  language: "Hindi",     followers: 1800, experience: "Comedy & entertainment, new to live"       },
+  { id: "ph3", name: "Nandita Pillai", city: "Chennai",   phone: "+91 77665 54433", appliedAt: "5 hours ago",  language: "Tamil",     followers: 5400, experience: "Singer, 3 yrs YouTube, 420K subs"         },
+  { id: "ph4", name: "Gaurav Tiwari",  city: "Varanasi",  phone: "+91 66554 43322", appliedAt: "1 day ago",    language: "Hindi",     followers: 920,  experience: "Gaming streamer, first platform attempt"   },
+  { id: "ph5", name: "Shweta Menon",   city: "Kochi",     phone: "+91 55443 32211", appliedAt: "2 days ago",   language: "Malayalam", followers: 7200, experience: "Fitness & wellness content, 4 yrs"         },
 ];
 
 const hostEarningsData = [
@@ -245,6 +248,103 @@ function AssignHostDialog({
             disabled={!pick || pick === host.agentId}
             onClick={() => { onAssign(host.id, pick); onClose(); }}>
             Confirm Assignment
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Approve Host & Assign Dialog (Super Admin only) ──────────────────────────
+
+type PendingHost = typeof PENDING_HOSTS[0];
+
+function ApproveHostDialog({
+  app, open, onClose, onApprove,
+}: {
+  app: PendingHost | null;
+  open: boolean;
+  onClose: () => void;
+  onApprove: (appId: string, agentId: string) => void;
+}) {
+  const [selectedAgentId, setSelectedAgentId] = useState("");
+  if (!app) return null;
+  const selectedAgent = AGENTS_META.find(a => a.id === selectedAgentId);
+  const derivedAdmin  = getLiveAdmins().find(a => a.id === selectedAgent?.adminId);
+  return (
+    <Dialog open={open} onOpenChange={() => { setSelectedAgentId(""); onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            Approve & Assign Host
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          {/* SA note */}
+          <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+            <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
+            <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this host application and assign them to a dedicated agent.</p>
+          </div>
+          {/* Applicant info */}
+          <div className="flex items-center gap-3 bg-muted rounded-xl p-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {app.name.split(" ").map(n => n[0]).join("")}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{app.name}</p>
+              <div className="flex items-center gap-3 flex-wrap mt-0.5">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.followers.toLocaleString()} followers</span>
+                <span className="text-xs text-muted-foreground">{app.language}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 italic">{app.experience}</p>
+            </div>
+          </div>
+          {/* Agent picker */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase">Assign to Dedicated Agent</Label>
+            <Select value={selectedAgentId} onValueChange={setSelectedAgentId}>
+              <SelectTrigger><SelectValue placeholder="Choose an agent to manage this host…" /></SelectTrigger>
+              <SelectContent>
+                {AGENTS_META.map(a => {
+                  const adm = getLiveAdmins().find(x => x.id === a.adminId);
+                  return (
+                    <SelectItem key={a.id} value={a.id}>
+                      <span className="flex items-center gap-2">
+                        <Briefcase className="w-3.5 h-3.5 text-pink-500" />
+                        {a.name}
+                        <span className="text-xs text-muted-foreground">({a.level})</span>
+                        {adm && <span className="text-xs text-muted-foreground">· under {adm.name}</span>}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+          {/* Chain preview */}
+          {selectedAgent && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5 space-y-1.5">
+              <p className="text-xs font-semibold text-emerald-800">Assignment chain after approval:</p>
+              <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                <span className="flex items-center gap-1 bg-violet-100 border border-violet-300 rounded-full px-2 py-0.5 font-medium text-violet-700"><Crown className="w-3 h-3" /> Super Admin</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5 font-medium text-blue-700">{derivedAdmin?.name ?? "—"}</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="flex items-center gap-1 bg-pink-50 border border-pink-200 rounded-full px-2 py-0.5 font-medium text-pink-700"><Briefcase className="w-3 h-3" /> {selectedAgent.name}</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="flex items-center gap-1 bg-emerald-100 border border-emerald-300 rounded-full px-2 py-0.5 font-medium text-emerald-700"><Star className="w-3 h-3" /> {app.name}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => { setSelectedAgentId(""); onClose(); }}>Cancel</Button>
+          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1"
+            disabled={!selectedAgentId}
+            onClick={() => { onApprove(app.id, selectedAgentId); setSelectedAgentId(""); onClose(); }}>
+            <CheckCircle className="w-3.5 h-3.5" /> Approve & Assign
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -411,6 +511,7 @@ export default function HostsPage() {
   const [detailHost, setDetailHost]  = useState<Host | null>(null);
   const [removeTarget, setRemoveTarget] = useState<Host | null>(null);
   const [assignTarget, setAssignTarget] = useState<Host | null>(null);
+  const [approveTarget, setApproveTarget] = useState<PendingHost | null>(null);
 
   // ── Role-based data scoping ──────────────────────────────────────────────
   const scopedHosts = (() => {
@@ -434,13 +535,8 @@ export default function HostsPage() {
     return matchSearch && matchLevel && matchAgent && matchAdmin && matchStatus;
   });
 
-  // Pending hosts scoped to current viewer
-  const scopedPending = (() => {
-    if (isSA)    return pending;
-    if (isAdmin) { const ids = AGENTS_META.filter(a => a.adminId === myAdminId).map(a => a.id); return pending.filter(p => ids.includes(p.agentId)); }
-    if (isAgent) return pending.filter(p => p.agentId === myAgentId);
-    return [];
-  })();
+  // Pending hosts — Super Admin reviews ALL applications; other roles see none
+  const scopedPending = isSA ? pending : [];
 
   const handleSuspend = (id: string) => {
     setHosts(prev => prev.map(h => h.id === id
@@ -462,6 +558,36 @@ export default function HostsPage() {
     setHosts(prev => prev.map(h => h.id === hostId ? { ...h, agentId, adminId: agent?.adminId ?? h.adminId } : h));
     const host = hosts.find(x => x.id === hostId)!;
     toast({ title: "Host reassigned", description: `${host.name} assigned to ${agent?.name ?? agentId}` });
+  };
+
+  const handleApproveHost = (appId: string, agentId: string) => {
+    const app = pending.find(p => p.id === appId);
+    if (!app) return;
+    const agent = AGENTS_META.find(a => a.id === agentId);
+    const newHost: Host = {
+      id: `h-${Date.now()}`,
+      name: app.name,
+      city: app.city,
+      language: app.language,
+      level: "L1",
+      coinsReceived: 0,
+      followers: app.followers,
+      isLive: false,
+      agentId,
+      adminId: agent?.adminId ?? liveAdmins[0]?.id ?? "adm1",
+      earnings: 0,
+      pkWins: 0,
+      streamHours: 0,
+      verified: false,
+      status: "active",
+      joinDate: new Date().toLocaleString("default", { month: "short", year: "numeric" }),
+      phone: app.phone,
+      hostMonthlyHours: 0,
+      hostActiveUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    };
+    setHosts(prev => [newHost, ...prev]);
+    setPending(prev => prev.filter(p => p.id !== appId));
+    toast({ title: "Host approved & assigned", description: `${app.name} → ${agent?.name ?? agentId}`, className: "border-green-200 bg-green-50 text-green-900" });
   };
 
   const liveCount     = scopedHosts.filter(h => h.isLive).length;
@@ -576,23 +702,23 @@ export default function HostsPage() {
         </div>
       )}
 
-      {/* ── Pending Host Approvals ── */}
-      {scopedPending.length > 0 && (
-        <Card className="border-blue-200 bg-blue-50/40">
+      {/* ── Pending Host Approvals (Super Admin only) ── */}
+      {isSA && scopedPending.length > 0 && (
+        <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-pink-50/40">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
-              <ShieldAlert className="w-4 h-4 text-blue-600" />
+            <CardTitle className="text-sm flex items-center gap-2 text-violet-900">
+              <Crown className="w-4 h-4 text-violet-600" />
               Pending Host Applications
-              <Badge className="bg-blue-500 text-white text-xs">{scopedPending.length} awaiting</Badge>
-              <span className="ml-auto text-xs font-normal text-blue-600">
-                {isAgent ? "Agent approval required" : "Admin / Agent review"}
-              </span>
+              <Badge className="bg-violet-600 text-white text-xs">{scopedPending.length} awaiting</Badge>
+              <Badge variant="outline" className="ml-1 text-xs border-violet-300 text-violet-600 gap-1">
+                <Crown className="w-3 h-3" /> Super Admin Review Required
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             {scopedPending.map(app => (
-              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-blue-100 p-3 shadow-sm">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-violet-100 p-3 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {app.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -600,20 +726,22 @@ export default function HostsPage() {
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground"><Briefcase className="w-3 h-3" />{agentName(app.agentId)}</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.followers.toLocaleString()} followers</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="w-3 h-3" />{app.appliedAt}</span>
                   </div>
-                  <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1.5">{app.language}</Badge>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <Badge variant="outline" className="text-[10px] h-4 px-1.5">{app.language}</Badge>
+                    <span className="text-xs text-muted-foreground italic">{app.experience}</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-red-200 text-red-600 hover:bg-red-50"
                     onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
                     <XCircle className="w-3 h-3" /> Reject
                   </Button>
-                  <Button size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
-                    <CheckCircle className="w-3 h-3" /> Approve
+                  <Button size="sm" className="h-7 text-xs gap-1 bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 text-white border-0"
+                    onClick={() => setApproveTarget(app)}>
+                    <CheckCircle className="w-3 h-3" /> Approve & Assign
                   </Button>
                 </div>
               </div>
@@ -621,10 +749,10 @@ export default function HostsPage() {
           </CardContent>
         </Card>
       )}
-      {scopedPending.length === 0 && (
+      {isSA && scopedPending.length === 0 && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
           <CheckCircle className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-green-700 font-medium">No pending host applications.</p>
+          <p className="text-sm text-green-700 font-medium">No pending host applications — queue is clear.</p>
         </div>
       )}
 
@@ -998,6 +1126,10 @@ export default function HostsPage() {
       <AssignHostDialog
         host={assignTarget} agents={AGENTS_META} open={!!assignTarget}
         onClose={() => setAssignTarget(null)} onAssign={handleAssign}
+      />
+      <ApproveHostDialog
+        app={approveTarget} open={!!approveTarget}
+        onClose={() => setApproveTarget(null)} onApprove={handleApproveHost}
       />
     </div>
   );

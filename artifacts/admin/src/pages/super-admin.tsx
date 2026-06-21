@@ -317,6 +317,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "push-notif",     name: "Push Notifications (FCM)",   desc: "Firebase Cloud Messaging background push alerts",                      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "regional-feed",  name: "Regional Language Feed",     desc: "Feed content filtered by selected app language & region",             phase: "3", audience: "All Users",      status: "testing", enabled: false },
       { id: "share-sheet",    name: "Native Share Sheet",         desc: "Share posts to WhatsApp, Instagram, Telegram & more (planned)",       phase: "3", audience: "All Users",      status: "testing", enabled: false },
+      { id: "sa-host-review", name: "SA-Centric Host Application Review", desc: "All host applications are reviewed exclusively by Super Admin. SA picks the assigned Agent (and Admin is derived from the agent's chain) before approving. Admins and Agents no longer see or approve pending host applications.", phase: "2", audience: "Super Admin", status: "live", enabled: true },
+      { id: "sa-agent-review", name: "SA-Centric Agent Application Review", desc: "All agent applications are reviewed exclusively by Super Admin. SA selects starting level (A1–A5) and the dedicated Admin the agent reports to before approving. Admins no longer see or approve pending agent applications.", phase: "2", audience: "Super Admin", status: "live", enabled: true },
     ],
   },
 ];

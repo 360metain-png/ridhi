@@ -75,9 +75,11 @@ const INITIAL_AGENTS: Agent[] = [
 ];
 
 const PENDING_AGENTS = [
-  { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years in talent mgmt" },
-  { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 years"     },
-  { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform"        },
+  { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years talent & influencer mgmt"   },
+  { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 yrs live experience"   },
+  { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform, event manager"     },
+  { id: "pa4", name: "Tanvir Ahmed",    city: "Lucknow",   phone: "+91 91234 56789", appliedAt: "1 day ago",    hosts: 5,  experience: "Social media manager, 3 yrs"        },
+  { id: "pa5", name: "Reena Kapoor",    city: "Jaipur",    phone: "+91 80123 45678", appliedAt: "2 days ago",   hosts: 18, experience: "Ran independent streaming studio"   },
 ];
 
 // ── Agent Complaints (from hosts) ──────────────────────────────────────────
@@ -320,6 +322,114 @@ function RecruitDialog({
   );
 }
 
+// ── Approve Agent & Assign Dialog (Super Admin only) ─────────────────────────
+
+type PendingAgent = typeof PENDING_AGENTS[0];
+
+function ApproveAgentDialog({
+  app, admins, open, onClose, onApprove,
+}: {
+  app: PendingAgent | null;
+  admins: Admin[];
+  open: boolean;
+  onClose: () => void;
+  onApprove: (appId: string, adminId: string, level: string) => void;
+}) {
+  const [selectedAdminId, setSelectedAdminId] = useState("");
+  const [selectedLevel,   setSelectedLevel]   = useState("A1");
+  if (!app) return null;
+  const selectedAdmin = admins.find(a => a.id === selectedAdminId);
+  return (
+    <Dialog open={open} onOpenChange={() => { setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            Approve & Assign Agent
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-1">
+          {/* SA note */}
+          <div className="flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+            <Crown className="w-4 h-4 text-violet-600 flex-shrink-0" />
+            <p className="text-xs text-violet-800 font-medium">Super Admin action — approve this agent application and assign them to a dedicated admin.</p>
+          </div>
+          {/* Applicant info */}
+          <div className="flex items-center gap-3 bg-muted rounded-xl p-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {app.name.split(" ").map(n => n[0]).join("")}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm">{app.name}</p>
+              <div className="flex items-center gap-3 flex-wrap mt-0.5">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="w-3 h-3" />{app.city}</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><Phone className="w-3 h-3" />{app.phone}</span>
+                <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="w-3 h-3" />{app.hosts} referred hosts</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 italic">{app.experience}</p>
+            </div>
+          </div>
+          {/* Level + Admin pickers */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">Starting Level</Label>
+              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {AGENT_LEVELS.map(l => (
+                    <SelectItem key={l.level} value={l.level}>
+                      {l.level} — {l.title} ({l.commissionRate}%)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase">Assign to Admin</Label>
+              <Select value={selectedAdminId} onValueChange={setSelectedAdminId}>
+                <SelectTrigger><SelectValue placeholder="Select admin…" /></SelectTrigger>
+                <SelectContent>
+                  {admins.map(a => (
+                    <SelectItem key={a.id} value={a.id}>
+                      <span className="flex items-center gap-2">
+                        <Crown className="w-3.5 h-3.5 text-violet-500" /> {a.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {/* Chain preview */}
+          {selectedAdmin && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2.5 space-y-1.5">
+              <p className="text-xs font-semibold text-emerald-800">Assignment chain after approval:</p>
+              <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                <span className="flex items-center gap-1 bg-violet-100 border border-violet-300 rounded-full px-2 py-0.5 font-medium text-violet-700"><Crown className="w-3 h-3" /> Super Admin</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="flex items-center gap-1 bg-blue-50 border border-blue-200 rounded-full px-2 py-0.5 font-medium text-blue-700">{selectedAdmin.name}</span>
+                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                <span className="flex items-center gap-1 bg-pink-50 border border-pink-200 rounded-full px-2 py-0.5 font-medium text-pink-700">
+                  <Briefcase className="w-3 h-3" /> {app.name}
+                  <span className="ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full border font-bold" style={{ borderColor: levelColor(selectedLevel), color: levelColor(selectedLevel) }}>{selectedLevel}</span>
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => { setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>Cancel</Button>
+          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white gap-1"
+            disabled={!selectedAdminId}
+            onClick={() => { onApprove(app.id, selectedAdminId, selectedLevel); setSelectedAdminId(""); setSelectedLevel("A1"); onClose(); }}>
+            <CheckCircle className="w-3.5 h-3.5" /> Approve & Assign
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
@@ -348,6 +458,7 @@ export default function AgentsPage() {
   const [removeTarget, setRemoveTarget] = useState<Agent | null>(null);
   const [showRecruit, setShowRecruit] = useState(false);
   const [showHierarchy, setShowHierarchy] = useState(false);
+  const [approveTarget, setApproveTarget] = useState<PendingAgent | null>(null);
 
   // Role-based data scope
   const scopedAgents = isSA
@@ -374,6 +485,33 @@ export default function AgentsPage() {
     setAgents(prev => prev.map(a => a.id === removeTarget.id ? { ...a, status: "removed" } : a));
     toast({ title: "Agent removed", description: `${removeTarget.name} has been removed from the platform.`, variant: "destructive" });
     setRemoveTarget(null);
+  };
+
+  const handleApproveAgent = (appId: string, adminId: string, level: string) => {
+    const app = pending.find(p => p.id === appId);
+    if (!app) return;
+    const commissionRate = AGENT_LEVELS.find(l => l.level === level)?.commissionRate ?? 2;
+    const newAgent: Agent = {
+      id: `ag-${Date.now()}`,
+      name: app.name,
+      city: app.city,
+      phone: app.phone,
+      level,
+      hosts: app.hosts,
+      activeHosts: 0,
+      commission: commissionRate,
+      totalHostEarnings: 0,
+      earned: 0,
+      pendingPayout: 0,
+      status: "active",
+      joinDate: new Date().toLocaleString("default", { month: "short", year: "numeric" }),
+      topHost: "—",
+      adminId,
+    };
+    setAgents(prev => [newAgent, ...prev]);
+    setPending(prev => prev.filter(p => p.id !== appId));
+    const admin = liveAdmins.find(a => a.id === adminId);
+    toast({ title: "Agent approved & assigned", description: `${app.name} → ${admin?.name ?? adminId} as ${level}`, className: "border-green-200 bg-green-50 text-green-900" });
   };
 
   const handleAssign = (agentId: string, adminId: string) => {
@@ -565,20 +703,23 @@ export default function AgentsPage() {
         </Card>
       )}
 
-      {/* ── Pending Applications ── */}
-      {(isSA || isAdmin) && pending.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50/50">
+      {/* ── Pending Applications (Super Admin only) ── */}
+      {isSA && pending.length > 0 && (
+        <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-indigo-50/40">
           <CardHeader className="py-3 px-4">
-            <CardTitle className="text-sm flex items-center gap-2 text-orange-800">
-              <ShieldAlert className="w-4 h-4 text-orange-600" />
+            <CardTitle className="text-sm flex items-center gap-2 text-violet-900">
+              <Crown className="w-4 h-4 text-violet-600" />
               Pending Agent Applications
-              <Badge className="bg-orange-500 text-white text-xs">{pending.length} awaiting</Badge>
+              <Badge className="bg-violet-600 text-white text-xs">{pending.length} awaiting</Badge>
+              <Badge variant="outline" className="ml-1 text-xs border-violet-300 text-violet-600 gap-1">
+                <Crown className="w-3 h-3" /> Super Admin Review Required
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
             {pending.map(app => (
-              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-orange-100 p-3 shadow-sm">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div key={app.id} className="flex items-center gap-3 bg-white rounded-xl border border-violet-100 p-3 shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                   {app.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -596,9 +737,9 @@ export default function AgentsPage() {
                     onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
                     <XCircle className="w-3 h-3" /> Reject
                   </Button>
-                  <Button size="sm" className="h-7 text-xs gap-1 bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => setPending(p => p.filter(x => x.id !== app.id))}>
-                    <CheckCircle className="w-3 h-3" /> Approve
+                  <Button size="sm" className="h-7 text-xs gap-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0"
+                    onClick={() => setApproveTarget(app)}>
+                    <CheckCircle className="w-3 h-3" /> Approve & Assign
                   </Button>
                 </div>
               </div>
@@ -606,10 +747,10 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       )}
-      {(isSA || isAdmin) && pending.length === 0 && (
+      {isSA && pending.length === 0 && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-50 border border-green-200">
           <CheckCircle className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-green-700 font-medium">No pending agent applications.</p>
+          <p className="text-sm text-green-700 font-medium">No pending agent applications — queue is clear.</p>
         </div>
       )}
 
@@ -939,6 +1080,10 @@ export default function AgentsPage() {
       <RecruitDialog
         open={showRecruit} admins={liveAdmins}
         onClose={() => setShowRecruit(false)} onRecruit={handleRecruit}
+      />
+      <ApproveAgentDialog
+        app={approveTarget} admins={liveAdmins} open={!!approveTarget}
+        onClose={() => setApproveTarget(null)} onApprove={handleApproveAgent}
       />
     </div>
   );
