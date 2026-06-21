@@ -17,45 +17,40 @@ import {
 import { Feather } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { useColors } from "@/hooks/useColors";
+import { apiFetch } from "@/utils/api";
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 
-// ── API helpers ────────────────────────────────────────────────────────────────
+// ── API helpers (authenticated via apiFetch) ─────────────────────────────────
 const API_BASE = process.env["EXPO_PUBLIC_DOMAIN"]
   ? `https://${process.env["EXPO_PUBLIC_DOMAIN"]}/api`
   : "/api";
 
 async function createOrder(amountInPaise: number, label: string) {
   try {
-    const res = await fetch(`${API_BASE}/payments/create-order`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ amount: amountInPaise, notes: { label } }),
-    });
-    if (!res.ok) return null;
-    return await res.json() as {
+    const data = await apiFetch<{
       id: string; amount: number; testMode: boolean; keyId?: string;
       provider: string; checkoutUrl?: string;
-    };
+    }>("/payments/create-order", {
+      method: "POST",
+      body: JSON.stringify({ amount: amountInPaise, notes: { label } }),
+    });
+    return data;
   } catch {
     return null;
   }
 }
 
-// ── API helpers (continued) ────────────────────────────────────────────────────
 async function verifyOrder(orderId: string, paymentId: string, provider?: string) {
   try {
-    const res = await fetch(`${API_BASE}/payments/verify`, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({
+    const data = await apiFetch<{ success: boolean }>("/payments/verify", {
+      method: "POST",
+      body: JSON.stringify({
         razorpay_order_id:   orderId,
         razorpay_payment_id: paymentId,
         razorpay_signature:  "",
         provider,
       }),
     });
-    if (!res.ok) return false;
-    const data = await res.json() as { success: boolean };
     return data.success === true;
   } catch {
     return false;
@@ -64,9 +59,10 @@ async function verifyOrder(orderId: string, paymentId: string, provider?: string
 
 async function checkOrderStatus(orderId: string): Promise<{ verified: boolean; paymentId?: string }> {
   try {
-    const res = await fetch(`${API_BASE}/payments/status/${encodeURIComponent(orderId)}`);
-    if (!res.ok) return { verified: false };
-    return await res.json() as { verified: boolean; paymentId?: string };
+    const data = await apiFetch<{ verified: boolean; paymentId?: string }>(
+      `/payments/status/${encodeURIComponent(orderId)}`
+    );
+    return data;
   } catch {
     return { verified: false };
   }

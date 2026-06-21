@@ -437,7 +437,7 @@ router.post("/payments/verify", requireUser, paymentRateLimit, async (req: Authe
 });
 
 // ── GET /api/payments/status/:orderId ────────────────────────────────────────
-router.get("/payments/status/:orderId", (req, res) => {
+router.get("/payments/status/:orderId", requireUser, (req: AuthenticatedRequest, res) => {
   const { orderId } = req.params;
   const paymentId = verifiedOrders.get(orderId);
   if (paymentId) {
