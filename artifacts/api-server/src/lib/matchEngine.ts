@@ -44,8 +44,10 @@ export interface ActiveCall {
   userB: MatchUser;
   startedAt: number;
   coinRate: number; // coins per minute (server-authoritative)
-  userACoinsSpent: number;
-  userBCoinsSpent: number;
+  userACoinsSpent: number; // display-only: shown to client for UI ticker
+  userBCoinsSpent: number; // display-only: shown to client for UI ticker
+  userADeducted: number;   // authoritative: actual coins deducted from wallet
+  userBDeducted: number;   // authoritative: actual coins deducted from wallet
   type: "audio" | "video";
   category: CallCategory;
 }
@@ -180,7 +182,23 @@ export async function deductCoinsFromUser(
   userId: string,
   amount: number,
 ): Promise<{ success: true; newBalance: number } | { success: false; error: string }> {
-  if (amount <= 0) return { success: true, newBalance: 0 }; // no-op
+  if (amount === 0) return { success: true, newBalance: 0 }; // no-op
+  if (amount < 0) {
+    // Refund: add coins back unconditionally
+    try {
+      const { db } = await import("@workspace/db");
+      const { users } = await import("@workspace/db");
+      const { eq, sql } = await import("drizzle-orm");
+      const result = await db.update(users)
+        .set({ coins: sql`${users.coins} - ${amount}` })
+        .where(eq(users.phone, userId))
+        .returning({ coins: users.coins });
+      if (result.length === 0) return { success: false, error: "User not found" };
+      return { success: true, newBalance: result[0].coins };
+    } catch {
+      return { success: false, error: "Database error" };
+    }
+  }
   try {
     const { db } = await import("@workspace/db");
     const { users } = await import("@workspace/db");
@@ -218,6 +236,8 @@ export function startCall(
     coinRate,
     userACoinsSpent: 0,
     userBCoinsSpent: 0,
+    userADeducted: 0,
+    userBDeducted: 0,
     type,
     category: userA.category !== "any" ? userA.category : userB.category,
   };
@@ -225,7 +245,7 @@ export function startCall(
   return call;
 }
 
-/** Pre-deduct coins at call start (deterrent for free riders) */
+/** Pre-deduct coins at call start. Sequential with rollback on pair failure. */
 export async function startCallWithDeduct(
   callId: string,
   userA: MatchUser,
@@ -234,19 +254,24 @@ export async function startCallWithDeduct(
 ): Promise<{ call: ActiveCall; ok: true } | { ok: false; error: string }> {
   const rate = resolveCoinRate(type);
   const upfront = Math.max(rate, 5); // deduct 1 minute worth upfront
-  const [aDeduction, bDeduction] = await Promise.all([
-    deductCoinsFromUser(userA.id, upfront),
-    deductCoinsFromUser(userB.id, upfront),
-  ]);
+
+  // Deduct sequentially: if A fails, call cannot start. If B fails, refund A.
+  const aDeduction = await deductCoinsFromUser(userA.id, upfront);
   if (!aDeduction.success) {
     return { ok: false, error: `User A failed: ${aDeduction.error}` };
   }
+  const bDeduction = await deductCoinsFromUser(userB.id, upfront);
   if (!bDeduction.success) {
+    // Refund A so they are not charged for a cancelled call
+    await deductCoinsFromUser(userA.id, -upfront).catch(() => {});
     return { ok: false, error: `User B failed: ${bDeduction.error}` };
   }
+
   const call = startCall(callId, userA, userB, type);
   call.userACoinsSpent = upfront;
   call.userBCoinsSpent = upfront;
+  call.userADeducted = upfront;
+  call.userBDeducted = upfront;
   return { call, ok: true };
 }
 
@@ -256,15 +281,15 @@ export async function settleCall(callId: string): Promise<{ settledA: number; se
   if (!call) return null;
   const durationMin = Math.ceil((Date.now() - call.startedAt) / 60000);
   const totalDue = durationMin * call.coinRate;
-  const settleA = Math.max(0, totalDue - call.userACoinsSpent);
-  const settleB = Math.max(0, totalDue - call.userBCoinsSpent);
+  const settleA = Math.max(0, totalDue - call.userADeducted);
+  const settleB = Math.max(0, totalDue - call.userBDeducted);
   const [aResult, bResult] = await Promise.all([
     settleA > 0 ? deductCoinsFromUser(call.userA.id, settleA) : { success: true, newBalance: 0 } as any,
     settleB > 0 ? deductCoinsFromUser(call.userB.id, settleB) : { success: true, newBalance: 0 } as any,
   ]);
-  if (aResult.success) call.userACoinsSpent += settleA;
-  if (bResult.success) call.userBCoinsSpent += settleB;
-  return { settledA: call.userACoinsSpent, settledB: call.userBCoinsSpent };
+  if (aResult.success) call.userADeducted += settleA;
+  if (bResult.success) call.userBDeducted += settleB;
+  return { settledA: call.userADeducted, settledB: call.userBDeducted };
 }
 
 /** End a call and record history */
@@ -273,7 +298,7 @@ export function endCall(callId: string, endedByUserId: string): ActiveCall | nul
   if (!call) return null;
 
   const durationSec = Math.floor((Date.now() - call.startedAt) / 1000);
-  const coinsTransferred = call.userACoinsSpent + call.userBCoinsSpent;
+  const coinsTransferred = call.userADeducted + call.userBDeducted;
 
   callHistory.push({
     callId,
