@@ -551,7 +551,6 @@ export default function ProfileScreen() {
         {/* Action buttons */}
         <View style={styles.actionRow}>
           <GradientButton label="Edit Profile" onPress={openEditModal} small style={{ flex: 1 }} />
-          <GradientButton label="Boost" onPress={() => router.push("/subscription")} small outline style={{ flex: 1 }} />
           <Pressable onPress={() => router.push("/wallet")} style={[styles.walletBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}>
             <CoinBadge amount={user.coins} size="sm" />
           </Pressable>
