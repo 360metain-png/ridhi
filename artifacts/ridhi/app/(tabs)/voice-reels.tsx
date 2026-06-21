@@ -4,6 +4,7 @@ import {
   Animated,
   Easing,
   FlatList,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -17,9 +18,12 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { Audio } from "expo-av";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+
+const MAX_REPLY_SECONDS = 10;
 
 const VOICE_REELS = [
   {
@@ -252,6 +256,267 @@ const VOICE_REELS = [
 
 const ICON_HITSLOP = { top: 12, bottom: 12, left: 12, right: 12 };
 
+// ── Voice Reply Sheet ────────────────────────────────────────────────────────
+type ReplyPhase = "idle" | "recording" | "preview" | "sending";
+
+function VoiceReplySheet({
+  visible,
+  reelUserName,
+  onClose,
+}: {
+  visible: boolean;
+  reelUserName: string;
+  onClose: () => void;
+}) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  const [phase, setPhase] = useState<ReplyPhase>("idle");
+  const [secondsLeft, setSecondsLeft] = useState(MAX_REPLY_SECONDS);
+  const [recordingUri, setRecordingUri] = useState<string | null>(null);
+
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const meterAnim = useRef(
+    Array.from({ length: 12 }, () => new Animated.Value(0.2))
+  ).current;
+
+  // Slide in/out
+  useEffect(() => {
+    if (visible) {
+      setPhase("idle");
+      setSecondsLeft(MAX_REPLY_SECONDS);
+      setRecordingUri(null);
+      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+    } else {
+      Animated.timing(slideAnim, { toValue: 300, duration: 220, useNativeDriver: true }).start();
+    }
+  }, [visible, slideAnim]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      timerRef.current && clearInterval(timerRef.current);
+      recordingRef.current?.stopAndUnloadAsync().catch(() => {});
+      soundRef.current?.unloadAsync().catch(() => {});
+    };
+  }, []);
+
+  // Meter animation loop while recording
+  useEffect(() => {
+    if (phase === "recording") {
+      const anims = meterAnim.map((v, i) =>
+        Animated.loop(
+          Animated.sequence([
+            Animated.delay(i * 55),
+            Animated.timing(v, { toValue: 0.5 + Math.random() * 0.5, duration: 250, useNativeDriver: true }),
+            Animated.timing(v, { toValue: 0.15, duration: 250, useNativeDriver: true }),
+          ])
+        )
+      );
+      anims.forEach((a) => a.start());
+      return () => {
+        anims.forEach((a) => a.stop());
+        meterAnim.forEach((v) => v.setValue(0.2));
+      };
+    } else {
+      meterAnim.forEach((v) => v.setValue(0.2));
+    }
+  }, [phase, meterAnim]);
+
+  const startRecording = useCallback(async () => {
+    try {
+      const { granted } = await Audio.requestPermissionsAsync();
+      if (!granted) {
+        Alert.alert("Microphone access needed", "Please allow microphone access in Settings to send a voice reply.");
+        return;
+      }
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const rec = new Audio.Recording();
+      await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      await rec.startAsync();
+      recordingRef.current = rec;
+      setPhase("recording");
+      setSecondsLeft(MAX_REPLY_SECONDS);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      let remaining = MAX_REPLY_SECONDS;
+      timerRef.current = setInterval(() => {
+        remaining -= 1;
+        setSecondsLeft(remaining);
+        if (remaining <= 0) {
+          timerRef.current && clearInterval(timerRef.current);
+          stopRecording();
+        }
+      }, 1000);
+    } catch {
+      Alert.alert("Could not start recording", "Please try again.");
+    }
+  }, []);
+
+  const stopRecording = useCallback(async () => {
+    timerRef.current && clearInterval(timerRef.current);
+    timerRef.current = null;
+    const rec = recordingRef.current;
+    if (!rec) return;
+    try {
+      await rec.stopAndUnloadAsync();
+      const uri = rec.getURI();
+      recordingRef.current = null;
+      setRecordingUri(uri ?? null);
+      setPhase("preview");
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      setPhase("idle");
+    }
+  }, []);
+
+  const handleMicPress = useCallback(() => {
+    if (phase === "idle") {
+      startRecording();
+    } else if (phase === "recording") {
+      stopRecording();
+    }
+  }, [phase, startRecording, stopRecording]);
+
+  const handlePreviewPlay = useCallback(async () => {
+    if (!recordingUri) return;
+    try {
+      soundRef.current && (await soundRef.current.unloadAsync());
+      const { sound } = await Audio.Sound.createAsync({ uri: recordingUri });
+      soundRef.current = sound;
+      await sound.playAsync();
+    } catch {
+      Alert.alert("Playback failed", "Could not play your recording.");
+    }
+  }, [recordingUri]);
+
+  const handleSend = useCallback(() => {
+    setPhase("sending");
+    // In production: upload recordingUri to API and post voice reply
+    setTimeout(() => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onClose();
+      Alert.alert("Voice reply sent!", `Your reply to ${reelUserName} was sent.`);
+    }, 600);
+  }, [recordingUri, reelUserName, onClose]);
+
+  const handleDiscard = useCallback(() => {
+    timerRef.current && clearInterval(timerRef.current);
+    recordingRef.current?.stopAndUnloadAsync().catch(() => {});
+    recordingRef.current = null;
+    soundRef.current?.unloadAsync().catch(() => {});
+    soundRef.current = null;
+    setRecordingUri(null);
+    setPhase("idle");
+    setSecondsLeft(MAX_REPLY_SECONDS);
+  }, []);
+
+  const progressPct = (MAX_REPLY_SECONDS - secondsLeft) / MAX_REPLY_SECONDS;
+
+  return (
+    <Modal transparent animationType="none" visible={visible} onRequestClose={onClose}>
+      <Pressable style={replyStyles.backdrop} onPress={phase === "idle" ? onClose : undefined}>
+        <Animated.View
+          style={[
+            replyStyles.sheet,
+            { paddingBottom: insets.bottom + 16, transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <Pressable>
+            {/* Handle */}
+            <View style={replyStyles.handle} />
+
+            {/* Header */}
+            <View style={replyStyles.sheetHeader}>
+              <Text style={replyStyles.sheetTitle}>Voice Reply</Text>
+              <Text style={replyStyles.sheetSub}>to {reelUserName}</Text>
+              <Pressable onPress={phase === "recording" ? undefined : onClose} hitSlop={ICON_HITSLOP} style={{ marginLeft: "auto" }}>
+                <Feather name="x" size={20} color="#aaa" />
+              </Pressable>
+            </View>
+
+            {/* Meter / waveform */}
+            <View style={replyStyles.meterRow}>
+              {meterAnim.map((v, i) => (
+                <Animated.View
+                  key={i}
+                  style={[
+                    replyStyles.meterBar,
+                    {
+                      backgroundColor: phase === "recording" ? "#E91E8C" : "#7B2FBE40",
+                      transform: [{ scaleY: v }],
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+
+            {/* Timer / progress */}
+            {phase === "recording" && (
+              <View style={replyStyles.timerWrap}>
+                <View style={replyStyles.progressTrack}>
+                  <View style={[replyStyles.progressFill, { width: `${progressPct * 100}%` as any }]} />
+                </View>
+                <Text style={replyStyles.timerText}>{secondsLeft}s left</Text>
+              </View>
+            )}
+
+            {phase === "preview" && (
+              <View style={replyStyles.previewRow}>
+                <Pressable style={replyStyles.previewPlayBtn} onPress={handlePreviewPlay}>
+                  <Feather name="play" size={18} color="#fff" />
+                  <Text style={replyStyles.previewPlayText}>Preview</Text>
+                </Pressable>
+                <Pressable style={replyStyles.redoBtn} onPress={handleDiscard}>
+                  <Feather name="refresh-ccw" size={16} color="#aaa" />
+                  <Text style={replyStyles.redoBtnText}>Redo</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {/* Main action buttons */}
+            <View style={replyStyles.actions}>
+              {phase !== "preview" && (
+                <Pressable
+                  style={[
+                    replyStyles.micBtn,
+                    phase === "recording" && replyStyles.micBtnRecording,
+                  ]}
+                  onPress={handleMicPress}
+                  disabled={phase === "sending"}
+                >
+                  <Feather name={phase === "recording" ? "square" : "mic"} size={28} color="#fff" />
+                </Pressable>
+              )}
+
+              {phase === "idle" && (
+                <Text style={replyStyles.hint}>Tap mic to start • max {MAX_REPLY_SECONDS}s</Text>
+              )}
+
+              {(phase === "preview" || phase === "sending") && (
+                <Pressable
+                  style={[replyStyles.sendBtn, phase === "sending" && { opacity: 0.6 }]}
+                  onPress={handleSend}
+                  disabled={phase === "sending"}
+                >
+                  <Feather name="send" size={18} color="#fff" />
+                  <Text style={replyStyles.sendBtnText}>
+                    {phase === "sending" ? "Sending…" : "Send Reply"}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </Pressable>
+        </Animated.View>
+      </Pressable>
+    </Modal>
+  );
+}
+
 function Waveform({
   bars,
   active,
@@ -445,13 +710,12 @@ function VoiceReelItem({
     }
   }, [reel.id, trackComment]);
 
+  const [replySheetVisible, setReplySheetVisible] = useState(false);
+
   const handleReply = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push({
-      pathname: "/create-post",
-      params: { type: "audio", replyTo: reel.id, replyToUser: reel.userName, replyToCaption: reel.caption },
-    });
-  }, [reel.id, reel.userName, reel.caption]);
+    setReplySheetVisible(true);
+  }, []);
 
   const fmt = useCallback(
     (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
@@ -535,11 +799,17 @@ function VoiceReelItem({
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
           </Pressable>
           <Pressable style={styles.reelAction} onPress={handleReply} hitSlop={ICON_HITSLOP}>
-            <Feather name="mic" size={28} color="#fff" />
+            <Feather name="mic" size={28} color={replySheetVisible ? "#E91E8C" : "#fff"} />
             <Text style={styles.reelActionCount}>Reply</Text>
           </Pressable>
         </View>
       </LinearGradient>
+
+      <VoiceReplySheet
+        visible={replySheetVisible}
+        reelUserName={reel.userName}
+        onClose={() => setReplySheetVisible(false)}
+      />
     </View>
   );
 }
@@ -764,5 +1034,163 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0,0,0,0.4)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+});
+
+const replyStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: "#1A0533",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 24,
+  },
+  sheetTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    color: "#fff",
+  },
+  sheetSub: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.5)",
+    flex: 1,
+  },
+  meterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    height: 56,
+    marginBottom: 16,
+  },
+  meterBar: {
+    width: 5,
+    height: 40,
+    borderRadius: 3,
+  },
+  timerWrap: {
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 20,
+  },
+  progressTrack: {
+    width: "100%",
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E91E8C",
+  },
+  timerText: {
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    color: "#E91E8C",
+  },
+  previewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+    justifyContent: "center",
+  },
+  previewPlayBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#7B2FBE",
+  },
+  previewPlayText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
+  },
+  redoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  redoBtnText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: "#aaa",
+  },
+  actions: {
+    alignItems: "center",
+    gap: 10,
+    paddingBottom: 8,
+  },
+  micBtn: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#7B2FBE",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#7B2FBE",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  micBtnRecording: {
+    backgroundColor: "#E91E8C",
+    shadowColor: "#E91E8C",
+  },
+  hint: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 4,
+  },
+  sendBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 36,
+    paddingVertical: 14,
+    borderRadius: 28,
+    backgroundColor: "#E91E8C",
+    shadowColor: "#E91E8C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  sendBtnText: {
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+    color: "#fff",
   },
 });
