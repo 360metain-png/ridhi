@@ -1417,8 +1417,10 @@ export default function SubscriptionScreen() {
                           setPendingBilling(billing);
                           setPendingBonus(plan.bonusCoins);
                           handlePlanSuccess("iap_" + Date.now());
+                          return;
                         }
-                        return;
+                        // IAP unavailable or plan not on App Store — fall through to Razorpay
+                        setIapError("");
                       }
                       setPendingPlanId(plan.id);
                       setPendingBilling(billing);
