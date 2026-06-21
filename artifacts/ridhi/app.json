@@ -14,9 +14,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash_new.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1A0533"
+      "image": "./assets/images/splash_user.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#0A001A"
     },
     "ios": {
       "supportsTablet": false,
