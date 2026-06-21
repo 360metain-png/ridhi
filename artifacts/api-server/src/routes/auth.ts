@@ -78,15 +78,15 @@ async function msg91Resend(mobile: string): Promise<{ success: boolean; message:
   return { success: data.type === "success", message: data.message };
 }
 
-/** Store a local demo OTP and return the response payload */
-function fallbackOtp(
+/** Store a local OTP server-side (demo/dev mode only). Never returns the code in the response. */
+function storeLocalOtp(
   contact: string,
   log: (msg: string, obj?: object) => void,
-): { success: true; demo: true; otp: string; message: string } {
+): void {
   const otp = generateOtp();
   otpStore.set(contact, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
-  log(`[DEMO OTP] contact=${contact} otp=${otp} — use this code on the OTP screen`);
-  return { success: true, demo: true, otp, message: "OTP generated (demo mode)" };
+  // OTP is logged server-side only — never sent to the client
+  log(`[DEMO OTP] contact=${contact} otp=${otp} — check server logs to retrieve this code`);
 }
 
 // ── GET /api/auth/otp-provider ────────────────────────────────────────────────
@@ -107,17 +107,23 @@ router.post("/auth/send-otp", otpRateLimit, async (req, res) => {
 
   const provider = resolveProvider();
 
-  // Email OTP always falls back to local demo (no SMS provider needed)
+  // Email OTP: no real email provider is configured — fail closed in production.
+  // In pure demo mode (no SMS credentials either), store a local OTP server-side
+  // and log it; the code is never sent back in the HTTP response.
   if (type === "email") {
-    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
-    res.json(payload);
+    if (!PURE_DEMO_MODE) {
+      res.status(503).json({ success: false, error: "Email login is not available. Please use your phone number." });
+      return;
+    }
+    storeLocalOtp(contact, (msg) => req.log.info(msg));
+    res.json({ success: true, message: "OTP generated — check server logs (demo mode)" });
     return;
   }
 
-  // Pure demo mode (no credentials at all)
+  // Pure demo mode (no credentials at all) — store OTP server-side, never in response
   if (PURE_DEMO_MODE && provider === "msg91") {
-    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
-    res.json(payload);
+    storeLocalOtp(contact, (msg) => req.log.info(msg));
+    res.json({ success: true, message: "OTP generated — check server logs (demo mode)" });
     return;
   }
 
@@ -131,7 +137,7 @@ router.post("/auth/send-otp", otpRateLimit, async (req, res) => {
     return;
   }
 
-  // MSG91 provider (or auto-fallback): send via MSG91
+  // MSG91 provider (or auto-fallback): send via MSG91 — fail closed on error
   try {
     const mobile = normalisePhone(contact);
     const result = await msg91Send(mobile);
@@ -142,14 +148,11 @@ router.post("/auth/send-otp", otpRateLimit, async (req, res) => {
       return;
     }
 
-    // MSG91 rejected → fall back to demo OTP (graceful degradation)
-    req.log.warn({ contact, msg91: result.message }, "MSG91 send failed — falling back to demo OTP");
-    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json({ ...payload, provider: "demo" });
+    req.log.error({ contact, msg91: result.message }, "MSG91 send failed");
+    res.status(503).json({ success: false, error: "Failed to send OTP. Please try again." });
   } catch (err) {
-    req.log.error({ err }, "send-otp network error — falling back to demo OTP");
-    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json({ ...payload, provider: "demo" });
+    req.log.error({ err }, "send-otp network error");
+    res.status(503).json({ success: false, error: "Failed to send OTP. Please try again." });
   }
 });
 
@@ -258,8 +261,8 @@ router.post("/auth/resend-otp", async (req, res) => {
   }
 
   if (PURE_DEMO_MODE || type === "email") {
-    const payload = fallbackOtp(contact, (msg) => req.log.info(msg));
-    res.json(payload);
+    storeLocalOtp(contact, (msg) => req.log.info(msg));
+    res.json({ success: true, message: "OTP generated — check server logs (demo mode)" });
     return;
   }
 
@@ -273,14 +276,11 @@ router.post("/auth/resend-otp", async (req, res) => {
       return;
     }
 
-    // MSG91 resend failed — fall back
-    req.log.warn({ contact, msg91: result.message }, "MSG91 resend failed — falling back to demo OTP");
-    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json(payload);
+    req.log.error({ contact, msg91: result.message }, "MSG91 resend failed");
+    res.status(503).json({ success: false, error: "Failed to resend OTP. Please try again." });
   } catch (err) {
     req.log.error({ err }, "resend-otp error");
-    const payload = fallbackOtp(contact, (msg) => req.log.warn(msg));
-    res.json(payload);
+    res.status(503).json({ success: false, error: "Failed to resend OTP. Please try again." });
   }
 });
 
