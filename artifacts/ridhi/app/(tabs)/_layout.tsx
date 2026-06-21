@@ -2,8 +2,7 @@ import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
-import { Animated, Platform, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Animated, Platform, StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useColors } from "@/hooks/useColors";
 import { TooltipTour } from "@/components/TooltipTour";
 
@@ -134,17 +133,10 @@ export default function TabLayout() {
         <Tabs.Screen
           name="match"
           options={{
-            tabBarIcon: () => (
-              <LinearGradient
-                colors={["#E91E8C", "#7B2FBE"]}
-                style={styles.createBtn}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Feather name="heart" size={24} color="#fff" />
-              </LinearGradient>
+            tabBarIcon: ({ color, focused }) => (
+              <AnimatedTabIcon name="heart" focused={focused} color={color} />
             ),
-            tabBarLabel: () => null,
+            tabBarLabel: ({ focused }) => <TabLabel label="Dating" focused={focused} />,
           }}
         />
         <Tabs.Screen
@@ -200,16 +192,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: "Inter_500Medium",
     marginTop: -2,
-  },
-  createBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-    ...(Platform.OS === "web"
-      ? { boxShadow: "0 4px 14px rgba(233,30,140,0.55)" }
-      : { shadowColor: "#E91E8C", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 14, elevation: 10 }),
   },
 });
