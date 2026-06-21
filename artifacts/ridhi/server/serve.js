@@ -71,11 +71,19 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
   const host = req.headers["x-forwarded-host"] || req.headers["host"];
   const baseUrl = `${protocol}://${host}`;
   const expsUrl = `${host}`;
+  const description = "Join Ridhi to live stream, chat in audio rooms, connect with people, send virtual gifts, and find your match\u2014all in one powerful app. India\u2019s Social Universe.";
+  const ogTitle = appName;
+  const ogDescription = description;
+  const siteName = appName;
 
   const html = landingPageTemplate
     .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
     .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
-    .replace(/APP_NAME_PLACEHOLDER/g, appName);
+    .replace(/APP_NAME_PLACEHOLDER/g, appName)
+    .replace(/DESCRIPTION_PLACEHOLDER/g, description)
+    .replace(/OG_TITLE_PLACEHOLDER/g, ogTitle)
+    .replace(/OG_DESCRIPTION_PLACEHOLDER/g, ogDescription)
+    .replace(/SITE_NAME_PLACEHOLDER/g, siteName);
 
   res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
   res.end(html);
@@ -83,25 +91,30 @@ function serveLandingPage(req, res, landingPageTemplate, appName) {
 
 function serveStaticFile(urlPath, res) {
   const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
-  const filePath = path.join(STATIC_ROOT, safePath);
+  const candidates = [
+    path.join(STATIC_ROOT, safePath),
+    path.join(STATIC_ROOT, `${safePath}.html`),
+    path.join(STATIC_ROOT, safePath, "index.html"),
+  ];
 
-  if (!filePath.startsWith(STATIC_ROOT)) {
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
+  for (const filePath of candidates) {
+    if (!filePath.startsWith(STATIC_ROOT)) {
+      res.writeHead(403);
+      res.end("Forbidden");
+      return;
+    }
+    if (fs.existsSync(filePath) && !fs.statSync(filePath).isDirectory()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || "application/octet-stream";
+      const content = fs.readFileSync(filePath);
+      res.writeHead(200, { "content-type": contentType });
+      res.end(content);
+      return;
+    }
   }
 
-  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-    res.writeHead(404);
-    res.end("Not Found");
-    return;
-  }
-
-  const ext = path.extname(filePath).toLowerCase();
-  const contentType = MIME_TYPES[ext] || "application/octet-stream";
-  const content = fs.readFileSync(filePath);
-  res.writeHead(200, { "content-type": contentType });
-  res.end(content);
+  res.writeHead(404);
+  res.end("Not Found");
 }
 
 const landingPageTemplate = fs.readFileSync(TEMPLATE_PATH, "utf-8");

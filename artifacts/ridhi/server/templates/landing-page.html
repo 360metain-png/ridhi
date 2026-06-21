@@ -1,10 +1,55 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <title>APP_NAME_PLACEHOLDER</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='180' height='180' rx='36' fill='%23FF3C00'/%3E%3C/svg%3E" />
+    <title>APP_NAME_PLACEHOLDER</title>
+    <meta name="description" content="DESCRIPTION_PLACEHOLDER" />
+    <link rel="canonical" href="BASE_URL_PLACEHOLDER/" />
+    <link rel="icon" type="image/png" href="BASE_URL_PLACEHOLDER/assets/images/ridhi_logo.png" />
+    <link rel="apple-touch-icon" href="BASE_URL_PLACEHOLDER/assets/images/ridhi_logo.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="OG_TITLE_PLACEHOLDER" />
+    <meta property="og:description" content="OG_DESCRIPTION_PLACEHOLDER" />
+    <meta property="og:url" content="BASE_URL_PLACEHOLDER/" />
+    <meta property="og:image" content="BASE_URL_PLACEHOLDER/assets/images/ridhi_logo.png" />
+    <meta property="og:site_name" content="SITE_NAME_PLACEHOLDER" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OG_TITLE_PLACEHOLDER" />
+    <meta name="twitter:description" content="OG_DESCRIPTION_PLACEHOLDER" />
+    <meta name="twitter:image" content="BASE_URL_PLACEHOLDER/assets/images/ridhi_logo.png" />
+
+    <!-- Structured data: Organization + WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "SITE_NAME_PLACEHOLDER",
+          "url": "BASE_URL_PLACEHOLDER/",
+          "logo": "BASE_URL_PLACEHOLDER/assets/images/ridhi_logo.png",
+          "sameAs": ["https://ridhi.app"],
+          "description": "DESCRIPTION_PLACEHOLDER"
+        },
+        {
+          "@type": "WebSite",
+          "url": "BASE_URL_PLACEHOLDER/",
+          "name": "SITE_NAME_PLACEHOLDER",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "BASE_URL_PLACEHOLDER/explore?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
     <style>
       * {
         box-sizing: border-box;
