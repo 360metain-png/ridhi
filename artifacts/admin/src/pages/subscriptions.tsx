@@ -107,12 +107,18 @@ function OverviewTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creato
   }));
 
   const conversionFeatures = [
-    { feature: "Priority Matching",   strength: "Extremely High", pct: 95 },
-    { feature: "Ad-Free Experience",  strength: "Very High",      pct: 85 },
-    { feature: "Profile Boost",       strength: "Very High",      pct: 80 },
-    { feature: "HD Video Calls",      strength: "Very High",      pct: 78 },
-    { feature: "VIP Badge",           strength: "High",           pct: 65 },
-    { feature: "Ghost Mode",          strength: "High",           pct: 60 },
+    { feature: "Priority Matching",      strength: "Extremely High", pct: 95 },
+    { feature: "Ad-Free Experience",     strength: "Very High",      pct: 85 },
+    { feature: "Profile Boost",          strength: "Very High",      pct: 80 },
+    { feature: "HD Video Calls",         strength: "Very High",      pct: 78 },
+    { feature: "VIP Badge",            strength: "High",           pct: 65 },
+    { feature: "Ghost Mode",           strength: "High",           pct: 60 },
+    { feature: "Saved Posts",          strength: "Medium",         pct: 45 },
+    { feature: "Story Highlights",     strength: "Medium",         pct: 40 },
+    { feature: "Super Likes",          strength: "Very High",      pct: 82 },
+    { feature: "Ridhi Shop Discount",   strength: "High",           pct: 55 },
+    { feature: "Events & Meetups",     strength: "Medium",         pct: 35 },
+    { feature: "Broadcast Channels",   strength: "High",           pct: 58 },
   ];
 
   return (
@@ -209,6 +215,9 @@ function OverviewTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creato
                 { label: "VIP Subscriptions",    rank: 3, color: "bg-amber-500"  },
                 { label: "Live Streaming",        rank: 4, color: "bg-blue-500"   },
                 { label: "PK Battles",            rank: 5, color: "bg-green-500"  },
+                { label: "Super Likes",           rank: 6, color: "bg-yellow-500" },
+                { label: "Ridhi Shop",            rank: 7, color: "bg-teal-500"   },
+                { label: "Broadcast Channels",    rank: 8, color: "bg-indigo-500" },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3 py-1.5 border-b last:border-0">
                   <span className={`w-5 h-5 rounded-full ${s.color} text-white text-xs flex items-center justify-center font-bold flex-shrink-0`}>{s.rank}</span>
@@ -219,7 +228,9 @@ function OverviewTab({ vip, creators }: { vip: VIPSubscriber[]; creators: Creato
             <div>
               <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Secondary</p>
               {[
-                { label: "Creator Deals",   rank: 2, color: "bg-orange-500"  },
+                { label: "Creator Deals",       rank: 1, color: "bg-orange-500" },
+                { label: "Events & Meetups",     rank: 2, color: "bg-red-500"    },
+                { label: "Saved Posts",          rank: 3, color: "bg-sky-500"    },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-3 py-1.5 border-b last:border-0">
                   <span className={`w-5 h-5 rounded-full ${s.color} text-white text-xs flex items-center justify-center font-bold flex-shrink-0`}>{s.rank}</span>
@@ -390,10 +401,10 @@ function PlanConfigTab() {
               </thead>
               <tbody>
                 {[
-                  { tier: "silver",   weekly: "₹99",  monthly: "₹199",   yearly: "₹1,999",  bonus: 100,  color: "text-gray-500"   },
-                  { tier: "gold",     weekly: "₹199", monthly: "₹499",   yearly: "₹4,999",  bonus: 350,  color: "text-amber-600"  },
-                  { tier: "platinum", weekly: "₹399", monthly: "₹999",   yearly: "₹9,999",  bonus: 1000, color: "text-purple-600" },
-                  { tier: "diamond",  weekly: "—",    monthly: "₹2,499", yearly: "₹24,999", bonus: 3000, color: "text-pink-600"   },
+                  { tier: "silver",   weekly: "₹49",  monthly: "₹149",   yearly: "₹999",   bonus: 15,   color: "text-gray-500"   },
+                  { tier: "gold",     weekly: "₹99",  monthly: "₹299",   yearly: "₹1,999", bonus: 40,   color: "text-amber-600"  },
+                  { tier: "platinum", weekly: "₹199", monthly: "₹599",   yearly: "₹3,999", bonus: 100,  color: "text-purple-600" },
+                  { tier: "diamond",  weekly: "₹349", monthly: "₹999",   yearly: "₹6,999", bonus: 300,  color: "text-pink-600"   },
                 ].map((row, i) => (
                   <tr key={row.tier} className={i % 2 === 0 ? "" : "bg-muted/20"}>
                     <td className="px-4 py-2.5 font-semibold capitalize">
@@ -459,7 +470,7 @@ function PlanConfigTab() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {["Basic Profile", "Random Matches", "Standard Chat", "Limited Filters", "Watch Live Streams", "Join Communities", "Join Audio Rooms", "Send Virtual Gifts"].map((f) => (
+            {["Basic Profile", "Random Matches", "Standard Chat", "Limited Filters", "Watch Live Streams", "Join Communities", "Join Audio Rooms", "Send Virtual Gifts", "Browse Shop", "Join Events", "Join Broadcast Channels"].map((f) => (
               <span key={f} className="text-xs bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">{f}</span>
             ))}
           </div>

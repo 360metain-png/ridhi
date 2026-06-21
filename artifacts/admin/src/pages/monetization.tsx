@@ -41,12 +41,15 @@ const mrrData = Array.from({ length: 12 }, (_, i) => ({
 
 // ─── Coin usage breakdown ───
 const coinUsageData = [
-  { name: "Gifts", value: 35, color: MAGENTA },
-  { name: "Boosts", value: 22, color: PURPLE },
-  { name: "Premium", value: 18, color: TEAL },
-  { name: "Games", value: 12, color: AMBER },
-  { name: "Calls", value: 8, color: EMERALD },
-  { name: "Other", value: 5, color: "#94A3B8" },
+  { name: "Gifts", value: 28, color: MAGENTA },
+  { name: "Boosts", value: 18, color: PURPLE },
+  { name: "Super Likes", value: 12, color: AMBER },
+  { name: "Shop", value: 10, color: TEAL },
+  { name: "Premium", value: 10, color: "#6366F1" },
+  { name: "Events", value: 8, color: ROSE },
+  { name: "Broadcasts", value: 5, color: "#8B5CF6" },
+  { name: "Calls", value: 5, color: EMERALD },
+  { name: "Other", value: 4, color: "#94A3B8" },
 ];
 
 // ─── Subscription tier breakdown ───
@@ -55,6 +58,17 @@ const subscriptionTiers = [
   { name: "Gold", users: 5200, revenue: 520000, color: AMBER },
   { name: "Platinum", users: 3100, revenue: 465000, color: TEAL },
   { name: "Diamond Elite", users: 1200, revenue: 360000, color: PURPLE },
+];
+
+// ─── New Feature Revenue Breakdown (monthly) ───
+const featureRevenue = [
+  { name: "Super Likes", revenue: 850000, color: AMBER },
+  { name: "Ridhi Shop", revenue: 120000, color: TEAL },
+  { name: "Events", revenue: 75000, color: ROSE },
+  { name: "Broadcast Channels", revenue: 590000, color: PURPLE },
+  { name: "Saved Posts", revenue: 0, color: "#94A3B8" },
+  { name: "Story Highlights", revenue: 0, color: "#6366F1" },
+  { name: "Profile Prompts", revenue: 0, color: "#8B5CF6" },
 ];
 
 // ─── Creator earnings data ───
