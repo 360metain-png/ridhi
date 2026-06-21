@@ -91,6 +91,18 @@ Ridhi is an India-first social networking and dating mobile app — think ShareC
 - `pnpm run dev` at workspace root is disabled by design; use the workflow or `pnpm --filter`
 - Dark mode uses `Appearance.setColorScheme()` which works on web; on native, restart may be needed for full effect
 
+## Feature Update Protocol
+
+Whenever new features or options are added to the Ridhi app, they MUST be automatically synced to:
+1. **Handbook** (`artifacts/admin/src/pages/handbook.tsx`) — update the Host Creator Dashboard section with feature descriptions, tier limits, and monetization details
+2. **Super Admin** (`artifacts/admin/src/pages/super-admin.tsx`) — update:
+   - `FEATURE_FLAGS` array (id, name, desc, phase, audience, status, enabled)
+   - Coin Spend Rates if coins are involved
+   - VIP Plans Editor if tier limits change
+   - Feature Analytics tab if the feature generates revenue or has adoption metrics
+
+This rule is mandatory for all feature additions. No exceptions.
+
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
