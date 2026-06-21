@@ -337,27 +337,53 @@ function VoiceReelItem({
   const [playing, setPlaying] = useState(isActive);
   const [progress, setProgress] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
+  const animRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  const startPlayback = useCallback(() => {
+    setPlaying(true);
+    progressAnim.setValue(0);
+    animRef.current = Animated.timing(progressAnim, {
+      toValue: 1,
+      duration: reel.duration * 1000,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    });
+    animRef.current.start(({ finished }) => {
+      if (finished) {
+        setPlaying(false);
+        animRef.current = null;
+      }
+    });
+  }, [reel.duration, progressAnim]);
+
+  const stopPlayback = useCallback(() => {
+    setPlaying(false);
+    animRef.current?.stop();
+    animRef.current = null;
+  }, []);
 
   useEffect(() => {
     if (isActive) {
-      setPlaying(true);
-      progressAnim.setValue(0);
-      Animated.timing(progressAnim, {
-        toValue: 1,
-        duration: reel.duration * 1000,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }).start();
+      startPlayback();
     } else {
-      setPlaying(false);
+      stopPlayback();
       progressAnim.setValue(0);
     }
-  }, [isActive, reel.duration]);
+  }, [isActive, startPlayback, stopPlayback, progressAnim]);
 
   useEffect(() => {
     const listener = progressAnim.addListener(({ value }) => setProgress(value));
     return () => progressAnim.removeListener(listener);
   }, [progressAnim]);
+
+  const handleTogglePlay = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (playing) {
+      stopPlayback();
+    } else {
+      startPlayback();
+    }
+  }, [playing, startPlayback, stopPlayback]);
 
   const { trackLike, trackUnlike, trackShare, trackFollow, trackUnfollow, trackComment } = useAnalytics();
 
@@ -443,8 +469,8 @@ function VoiceReelItem({
         end={{ x: 1, y: 1 }}
       />
 
-      {/* Audio visualizer center */}
-      <View style={styles.reelCenter}>
+      {/* Audio visualizer center — tappable to play/pause */}
+      <Pressable style={styles.reelCenter} onPress={handleTogglePlay}>
         <View style={styles.audioIconWrap}>
           <Feather name={playing ? "pause" : "play"} size={32} color="#fff" />
         </View>
@@ -460,7 +486,7 @@ function VoiceReelItem({
         <View style={styles.categoryBadge}>
           <Text style={styles.categoryText}>{reel.category}</Text>
         </View>
-      </View>
+      </Pressable>
 
       {/* Bottom overlay */}
       <LinearGradient
