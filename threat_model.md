@@ -29,12 +29,12 @@ The current backend now enforces wallet deductions, payment verification, and do
 ## Scan Anchors
 
 - **Production entry points**: `artifacts/ridhi/app`, `artifacts/ridhi/components`, `artifacts/api-server/src/index.ts`, `artifacts/api-server/src/routes/*.ts`, `artifacts/admin/src/App.tsx`, `artifacts/admin/src/lib/*.ts`
-- **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/api-server/src/routes/users.ts`, `artifacts/api-server/src/routes/kyc.ts`, `artifacts/api-server/src/routes/calls.ts`
+- **Highest-risk code areas**: `artifacts/api-server/src/routes/auth.ts`, `artifacts/api-server/src/lib/auth.ts`, `artifacts/api-server/src/routes/payments.ts`, `artifacts/api-server/src/routes/analytics-config.ts`, `artifacts/ridhi/components/PaymentSheet.tsx`, `artifacts/ridhi/contexts/AuthContext.tsx`, `artifacts/api-server/src/routes/users.ts`, `artifacts/api-server/src/routes/kyc.ts`, `artifacts/api-server/src/routes/calls.ts`
 - **Public vs authenticated surfaces**:
-  - `/api/auth/*`, `/api/feed`, `/api/users`, `/api/users/:id`, `/api/posts/:id/comments`, `/api/calls/*`, and `/api/payments/config` have public reachability.
+  - `/api/auth/*`, `/api/feed`, `/api/users`, `/api/users/:id`, `/api/posts/:id/comments`, `/api/calls/*`, `/api/payments/config`, `/api/payments/checkout`, and the current `/api/admin/*-config` read endpoints have public reachability.
   - User-protected routes rely on bearer JWTs issued from OTP verification. The live MSG91 success path currently does not mint that JWT, which reduces practical reachability but should not be relied on as a security boundary.
   - Admin-protected routes now rely on backend JWT verification via `/api/admin/me`; the earlier client-side-only admin auth issue is fixed.
-  - `/ws/calls` is publicly reachable and should be treated like an unauthenticated remote-control boundary unless token checks are added.
+  - `/ws/calls` is publicly reachable. The backend now requires a JWT query token, but the shipped client currently omits that token; treat the client bug as non-mitigating when analyzing backend authorization or billing enforcement.
 - **Usually ignore unless reachability changes**: `artifacts/mockup-sandbox`, build scripts, static mock data with no server-trusted effect, and configuration endpoints that expose only blank placeholder fields or non-sensitive provider availability.
 
 ## Threat Categories
