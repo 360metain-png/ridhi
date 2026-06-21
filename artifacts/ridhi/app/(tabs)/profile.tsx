@@ -71,14 +71,6 @@ const POST_COLORS = [
   ["#006064","#00838F"], ["#880E4F","#C2185B"], ["#1A237E","#3949AB"],
 ];
 
-const PROMPT_GRADIENTS = [
-  ["#FF3B30", "#FF9500"],
-  ["#7B2FBE", "#E91E8C"],
-  ["#007AFF", "#5AC8FA"],
-  ["#34C759", "#00C7BE"],
-  ["#FF9500", "#FFCC00"],
-];
-
 // ── Menu sections (grouped like iOS Settings) ──────────────────────────────
 const MENU_SECTIONS = [
   {
@@ -489,44 +481,6 @@ export default function ProfileScreen() {
             <Text style={[styles.bio, { color: colors.mutedForeground }]}>{user.bio}</Text>
           ) : null}
 
-          {/* Profile Prompts */}
-          {user.profilePrompts && user.profilePrompts.length > 0 ? (
-            <View style={styles.promptsSection}>
-              {user.profilePrompts.map((p, i) => (
-                <LinearGradient
-                  key={i}
-                  colors={PROMPT_GRADIENTS[i % PROMPT_GRADIENTS.length] as [string, string]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.promptCard}
-                >
-                  <Text style={styles.promptQuestion}>{p.question}</Text>
-                  <Text style={styles.promptAnswer}>{p.answer}</Text>
-                </LinearGradient>
-              ))}
-              <Pressable 
-                onPress={() => router.push("/profile-prompts")}
-                style={[styles.editPromptsBtn, { borderColor: colors.border }]}
-              >
-                <Feather name="edit-3" size={14} color={colors.primary} />
-                <Text style={[styles.editPromptsText, { color: colors.primary }]}>Edit Prompts</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable 
-              onPress={() => router.push("/profile-prompts")}
-              style={[styles.addPromptsCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-            >
-              <View style={[styles.addPromptsIcon, { backgroundColor: colors.primary + "18" }]}>
-                <Feather name="plus" size={20} color={colors.primary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.addPromptsTitle, { color: colors.foreground }]}>Add Profile Prompts</Text>
-                <Text style={[styles.addPromptsSub, { color: colors.mutedForeground }]}>Help others get to know you better</Text>
-              </View>
-              <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
-            </Pressable>
-          )}
         </View>
 
         {/* Stats */}
@@ -551,6 +505,7 @@ export default function ProfileScreen() {
         {/* Action buttons */}
         <View style={styles.actionRow}>
           <GradientButton label="Edit Profile" onPress={openEditModal} small style={{ flex: 1 }} />
+          <GradientButton label="Boost" onPress={() => router.push("/subscription")} small outline style={{ flex: 1 }} />
           <Pressable onPress={() => router.push("/wallet")} style={[styles.walletBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}>
             <CoinBadge amount={user.coins} size="sm" />
           </Pressable>
@@ -984,15 +939,4 @@ const styles = StyleSheet.create({
   followBtn: { paddingHorizontal: 16, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
   followBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   
-  // ── Profile Prompts ────────────────────────────────────────────────────────
-  promptsSection: { marginTop: 16, gap: 12 },
-  promptCard: { borderRadius: 16, padding: 16 },
-  promptQuestion: { color: "rgba(255,255,255,0.8)", fontSize: 12, fontFamily: "Inter_500Medium", marginBottom: 4 },
-  promptAnswer: { color: "#fff", fontSize: 15, fontFamily: "Inter_700Bold" },
-  editPromptsBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 10, borderRadius: 12, borderWidth: 1, marginTop: 4 },
-  editPromptsText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
-  addPromptsCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 18, borderWidth: 1, marginTop: 16 },
-  addPromptsIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
-  addPromptsTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
-  addPromptsSub: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 });
