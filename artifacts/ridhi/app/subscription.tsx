@@ -1086,7 +1086,7 @@ function CompareTable({ colors }: { colors: ReturnType<typeof useColors> }) {
 }
 
 // ── Main screen ────────────────────────────────────────────────────────────────
-type Section = "plans" | "creator" | "boost" | "fan";
+type Section = "plans" | "creator" | "boost" | "fan" | "shop";
 
 function getPlanPrice(plan: typeof PLANS[0], billing: BillingPeriod): number | null {
   return plan.prices[billing] ?? null;
@@ -1224,6 +1224,7 @@ export default function SubscriptionScreen() {
             { key: "creator" as Section, label: "Creator",  icon: "video"       },
             { key: "boost"   as Section, label: "Boost",    icon: "trending-up" },
             { key: "fan"     as Section, label: "Fan Club", icon: "heart"       },
+            { key: "shop"    as Section, label: "Shop",     icon: "shopping-bag" },
           ]).map(({ key, label, icon }) => (
             <Pressable key={key} onPress={() => setSection(key)}
               style={[styles.tabBtn, section === key && styles.tabBtnActive]}>
