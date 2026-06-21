@@ -97,20 +97,36 @@ export default function DuetRecordScreen() {
 
       {/* Split screen preview */}
       <View style={styles.splitScreen}>
-        {/* Left: Original video placeholder */}
-        <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
-          <LinearGradient colors={["#FF6B35", "#E91E8C"]} style={[styles.halfScreen, { opacity: 0.3 }]}>
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Feather name="film" size={40} color="#fff" />
-              <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                Original
-              </Text>
-              <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                {params.reelUser || "Creator"}
-              </Text>
-            </View>
-          </LinearGradient>
-        </View>
+        {/* Left side */}
+        {side === "left" ? (
+          <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
+            <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Feather name="camera" size={40} color={colors.primary} />
+                <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
+                  You
+                </Text>
+                <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  Side-by-side duet
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+        ) : (
+          <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
+            <LinearGradient colors={["#FF6B35", "#E91E8C"]} style={[styles.halfScreen, { opacity: 0.3 }]}>
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Feather name="film" size={40} color="#fff" />
+                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
+                  Original
+                </Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  {params.reelUser || "Creator"}
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+        )}
 
         {/* Divider */}
         <View style={[styles.divider, { backgroundColor: "#fff" }]}>
@@ -119,20 +135,36 @@ export default function DuetRecordScreen() {
           </View>
         </View>
 
-        {/* Right: User camera placeholder */}
-        <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
-          <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Feather name="camera" size={40} color={colors.primary} />
-              <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                You
-              </Text>
-              <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                Side-by-side duet
-              </Text>
-            </View>
-          </LinearGradient>
-        </View>
+        {/* Right side */}
+        {side === "right" ? (
+          <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
+            <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Feather name="camera" size={40} color={colors.primary} />
+                <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
+                  You
+                </Text>
+                <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  Side-by-side duet
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+        ) : (
+          <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
+            <LinearGradient colors={["#FF6B35", "#E91E8C"]} style={[styles.halfScreen, { opacity: 0.3 }]}>
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Feather name="film" size={40} color="#fff" />
+                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
+                  Original
+                </Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  {params.reelUser || "Creator"}
+                </Text>
+              </View>
+            </LinearGradient>
+          </View>
+        )}
       </View>
 
       {/* Layout options */}
