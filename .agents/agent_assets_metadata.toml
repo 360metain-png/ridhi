@@ -30,8 +30,104 @@ uri = "file://artifacts/ridhi/assets/images/feed_post2.png"
 type = "image"
 title = "feed_post_wedding"
 
+[[generated]]
+id = "PeAwjrR3RVfuedXSTGFGj"
+uri = "file://artifacts/ridhi/assets/images/splash_new.png"
+type = "image"
+title = "Ridhi splash screen"
+
+[[generated]]
+id = "ebVfia9dyHCMKBR7kEz1t"
+uri = "file://artifacts/ridhi/assets/images/feature_graphic.png"
+type = "image"
+title = "Ridhi feature graphic"
+
+[[generated]]
+id = "DFY6FFUJ3qAKGCfKLLa5e"
+uri = "file://artifacts/ridhi/assets/images/screenshot_home.png"
+type = "image"
+title = "Ridhi home feed screenshot"
+
+[[generated]]
+id = "wgVwPIHKmnoVTB3juzDJs"
+uri = "file://artifacts/ridhi/assets/images/screenshot_reels.png"
+type = "image"
+title = "Ridhi reels screenshot"
+
+[[generated]]
+id = "O1UhuLDeroU9erg_YNakz"
+uri = "file://artifacts/ridhi/assets/images/screenshot_dating.png"
+type = "image"
+title = "Ridhi dating match screenshot"
+
+[[generated]]
+id = "qAr1Z1jZc5PdNfRAuGQcA"
+uri = "file://artifacts/ridhi/assets/images/screenshot_chat.png"
+type = "image"
+title = "Ridhi chat screenshot"
+
+[[generated]]
+id = "KEsNQAewBRCu8p_FKQtdA"
+uri = "file://artifacts/ridhi/assets/images/screenshot_profile.png"
+type = "image"
+title = "Ridhi profile screenshot"
+
+[[generated]]
+id = "dT0pA2sUvN3obtKVL_r8a"
+uri = "file://artifacts/ridhi/assets/images/screenshot_vip.png"
+type = "image"
+title = "Ridhi VIP subscription screenshot"
+
 [[outputs]]
 id = "oK7a5jCJi0ada67hRTH7h"
 uri = "file://artifacts/api-server/SECURITY_AUDIT_REPORT.md"
 type = "text"
 title = "Ridhi Security Audit Report"
+
+[[outputs]]
+id = "UWJREtrwRYQVeTT4WVpX1"
+uri = "file://artifacts/ridhi/assets/images/splash_new.png"
+type = "image"
+title = "Splash Screen (Portrait)"
+
+[[outputs]]
+id = "4JbZG4BGKF8PVlYEFkU9l"
+uri = "file://artifacts/ridhi/assets/images/feature_graphic.png"
+type = "image"
+title = "Google Play Feature Graphic (16:9)"
+
+[[outputs]]
+id = "94M9d599FremuAm8hMJ_V"
+uri = "file://artifacts/ridhi/assets/images/screenshot_home.png"
+type = "image"
+title = "Screenshot: Home Feed"
+
+[[outputs]]
+id = "NdL64KstLGhxGEeRYklHv"
+uri = "file://artifacts/ridhi/assets/images/screenshot_reels.png"
+type = "image"
+title = "Screenshot: Video Reels"
+
+[[outputs]]
+id = "Ij-LINvPxOJlTYSrxxu9o"
+uri = "file://artifacts/ridhi/assets/images/screenshot_dating.png"
+type = "image"
+title = "Screenshot: Dating Match"
+
+[[outputs]]
+id = "jLLGvCl_1HF0SDsF4pDb1"
+uri = "file://artifacts/ridhi/assets/images/screenshot_chat.png"
+type = "image"
+title = "Screenshot: Chat"
+
+[[outputs]]
+id = "ureBSVn-B2b4iDlmUy3lS"
+uri = "file://artifacts/ridhi/assets/images/screenshot_profile.png"
+type = "image"
+title = "Screenshot: Profile"
+
+[[outputs]]
+id = "WH68k2KfTCqN2BAscRmf2"
+uri = "file://artifacts/ridhi/assets/images/screenshot_vip.png"
+type = "image"
+title = "Screenshot: VIP Plans"
