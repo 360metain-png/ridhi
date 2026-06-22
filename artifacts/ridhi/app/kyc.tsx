@@ -189,7 +189,11 @@ export default function KYCScreen() {
   const toggleRole = (role: "host" | "creator" | "agent") => {
     setRoles((prev) => {
       if (prev.includes(role)) return prev.filter((r) => r !== role);
-      return [...prev, role];
+      // Host and Agent are mutually exclusive — pick one, not both
+      let next = [...prev, role];
+      if (role === "host" && next.includes("agent")) next = next.filter((r) => r !== "agent");
+      if (role === "agent" && next.includes("host")) next = next.filter((r) => r !== "host");
+      return next;
     });
     setError("");
   };
