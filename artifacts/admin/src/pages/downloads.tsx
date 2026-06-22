@@ -215,7 +215,7 @@ function genCoins(n = 200): Record<string, string | number>[] {
   return Array.from({ length: n }, (_, i) => ({
     txn_id:       `COIN${String(i + 1).padStart(7, "0")}`,
     user_id:      `USR${randInt(100000, 999999)}`,
-    txn_type:     randOf(["Recharge","Gift","Gift Received","Daily Reward","Referral","Subscription Bonus","Spent-Live"]),
+    txn_type:     randOf(["Recharge","Gift","Gift Received","Referral","Subscription Bonus","Spent-Live"]),
     coins:        randInt(10, 50000),
     amount_inr:   randInt(0, 5000),
     pack:         randOf(["₹49 / 100c","₹99 / 250c","₹499 / 1500c","₹999 / 3500c","₹4999 / 20000c","N/A"]),

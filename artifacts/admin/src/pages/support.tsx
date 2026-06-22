@@ -160,7 +160,7 @@ const FAQS: { section: string; icon: React.ComponentType<{ className?: string }>
     items: [
       {
         q: "What are the VIP subscription tiers?",
-        a: "Ridhi offers four VIP tiers — Silver, Gold, Platinum, and Diamond Elite — with increasing perks like profile badge, priority in discovery, daily coin bonuses, and exclusive stickers.",
+        a: "Ridhi offers four VIP tiers — Silver, Gold, Platinum, and Diamond Elite — with increasing perks like profile badge, priority in discovery, ad-free experience, and exclusive stickers.",
         quickAnswer: "Ridhi has four VIP tiers: Silver, Gold, Platinum, and Diamond Elite, each with increasing perks.",
         expertReviewed: true,
       },

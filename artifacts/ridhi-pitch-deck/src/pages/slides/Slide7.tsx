@@ -38,7 +38,7 @@ export default function Slide7() {
             </div>
             <h3 className="text-[1.3vw] font-bold text-white mb-2">Coin Economy</h3>
             <p className="text-[1vw] text-[#A0A0A0] flex-1">
-              In-app currency for gifts, boosts, premium features. Recharge packs from ₹49 to ₹4,999. Daily rewards.
+              In-app currency for gifts, boosts, premium features. Recharge packs from ₹49 to ₹4,999. Missions, ads, and referrals.
             </p>
             <div className="mt-3 pt-3 border-t border-white/10">
               <div className="text-[1.5vw] font-bold text-[#E91E8C]">₹8L</div>

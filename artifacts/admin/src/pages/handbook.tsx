@@ -795,8 +795,12 @@ const ADMIN_SECTIONS: Section[] = [
       "Gift/spend flow hardening: all coin spend paths (gift store, live stream gifts, random calls, brand registration, boosts) await deductCoins confirmation before updating UI. If server rejects, the action is cancelled",
       "Checkout redirect hardening: GET /payments/checkout requires authentication and binds to the server-created order. Redirect URL for PhonePe/Instamojo/Cashfree is taken from the server-stored order, never from client query params. Prevents phishing via open redirect.",
       "All wallet mutations are logged with userId, amount, reason, and new balance for audit",
+      "Dual-coin tracking: free coins (from missions, ads, referrals) vs paid coins (from recharges). Free coins expire after 30 days. Paid coins never expire.",
+      "Free-coin budget safeguard: platform-wide daily limit of 50,000 free coins. Auto-pause free coin earning when budget is exceeded to prevent coin economy collapse.",
+      "Spend order: free coins deducted first on every spend, then paid coins. Prevents paid coin subsidy leakage.",
+      "Coin Economy tab (Super Admin only): real-time health dashboard showing free vs paid coin flow, daily budget usage, free-to-paid ratio alerts, and circulation breakdown",
     ],
-    note: "Client-side coin balance is purely for UI display. The server is the single source of truth. Coin minting and plan unlocking are no longer public API endpoints — they are only triggered internally after verified payment. Any client attempt to bypass server validation will fail. Gift send actions are gated on server deduction confirmation.",
+    note: "Client-side coin balance is purely for UI display. The server is the single source of truth. Coin minting and plan unlocking are no longer public API endpoints — they are only triggered internally after verified payment. Any client attempt to bypass server validation will fail. Gift send actions are gated on server deduction confirmation. The dual-coin system ensures paid revenue coins are protected and free coin issuance is budget-controlled.",
   },
   {
     id: "a-ai-hub",

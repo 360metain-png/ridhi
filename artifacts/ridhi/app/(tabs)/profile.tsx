@@ -462,14 +462,6 @@ export default function ProfileScreen() {
             <SubscriptionBadge tier={user.plan as VipTier} size="sm" style={{ marginTop: 4 }} />
           )}
 
-          {/* Streak badge */}
-          {(user.streakCount ?? 0) > 0 && (
-            <View style={[styles.streakBadge, { backgroundColor: "#FF6B35" + "18" }]}>
-              <Text style={styles.streakEmoji}>🔥</Text>
-              <Text style={[styles.streakText, { color: "#FF6B35" }]}>{user.streakCount} day streak</Text>
-            </View>
-          )}
-
           <View style={styles.locationRow}>
             <Feather name="map-pin" size={12} color={colors.mutedForeground} />
             <Text style={[styles.location, { color: colors.mutedForeground }]}>{user.city}</Text>
@@ -927,11 +919,6 @@ const styles = StyleSheet.create({
   ghostSub: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
   ghostBtn: { paddingHorizontal: 32, paddingVertical: 14, borderRadius: 16 },
   ghostBtnText: { fontSize: 15, fontFamily: "Inter_700Bold", color: "#fff" },
-  // Streak
-  streakBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, marginTop: 6 },
-  streakEmoji: { fontSize: 14 },
-  streakText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
-
   // ── Bottom sheet ──────────────────────────────────────────────────────────
   sheetOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.55)" },
   sheetContainer: { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: "78%", minHeight: 320 },

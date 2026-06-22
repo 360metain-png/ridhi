@@ -81,8 +81,6 @@ export interface UserProfile {
   pkBattleRequestedAt?: string;
   pkBattleApprovedAt?: string;
   pkBattleRejectionReason?: string;
-  lastDailyRewardAt?: string;
-  streakCount?: number;
   lastPostDate?: string;
   downloadEarnings?: number;
   // Saved posts / Collections
@@ -106,7 +104,6 @@ interface AuthContextValue {
   deleteAccount: () => Promise<boolean>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
-  claimDailyReward: () => Promise<boolean>;
   deductCoins: (amount: number) => Promise<boolean>;
   cancelPlan: () => Promise<void>;
   syncKycStatus: (userId: string) => Promise<void>;
@@ -146,7 +143,6 @@ const DEFAULT_USER: UserProfile = {
   posts: 12,
   plan: "free" as const,
   isVerified: false,
-  streakCount: 3,
   lastPostDate: new Date().toISOString(),
   downloadEarnings: 0,
   savedPosts: [],
@@ -330,24 +326,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
-  }, []);
-
-  const claimDailyReward = useCallback(async (): Promise<boolean> => {
-    let claimed = false;
-    setUser((prev) => {
-      if (!prev) return prev;
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const last = prev.lastDailyRewardAt ? new Date(prev.lastDailyRewardAt) : null;
-      const lastDate = last ? new Date(last.getFullYear(), last.getMonth(), last.getDate()) : null;
-      if (lastDate && lastDate.getTime() >= today.getTime()) return prev; // already claimed today
-      claimed = true;
-      const updated = { ...prev, coins: prev.coins + 3, lastDailyRewardAt: now.toISOString() };
-      AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-      return updated;
-    });
-    await new Promise((r) => setTimeout(r, 50));
-    return claimed;
   }, []);
 
   const deductCoins = useCallback(async (amount: number): Promise<boolean> => {
@@ -580,7 +558,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user, isLoading, isAuthenticated: !!user, login, logout, deleteAccount, updateProfile,
-        addCoins, claimDailyReward, deductCoins, cancelPlan,
+        addCoins, deductCoins, cancelPlan,
         syncKycStatus, syncPkBattleStatus, recordDownloadEarning, syncWallet,
         savePost, unsavePost, addCollection,
         useSuperLike, useBacktrack,

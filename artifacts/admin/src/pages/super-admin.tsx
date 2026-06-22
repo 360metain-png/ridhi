@@ -254,7 +254,7 @@ const FEATURE_FLAGS: FeatureCategory[] = [
     id: "commerce", category: "Commerce & Coins",
     icon: ShoppingBag, color: "text-yellow-600", bg: "bg-yellow-50", borderColor: "border-yellow-200",
     features: [
-      { id: "coin-wallet",       name: "Coin Wallet & Recharge",   desc: "Ridhi Coins balance, daily reward, ₹49–₹499 recharge packs",           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "coin-wallet",       name: "Coin Wallet & Recharge",   desc: "Ridhi Coins balance, ₹49–₹499 recharge packs",           phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "server-wallet",     name: "Server-Authoritative Wallet", desc: "Coin add and plan subscribe are no longer public endpoints. Coins/plans are auto-credited after verified payment. Only deduct and balance query remain public. Atomic SQL updates prevent double-spend.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "payment-auto-fulfill", name: "Payment Auto-Fulfillment", desc: "Server resolves SKU → coins/plan/bonus from canonical mapping. Amount is validated against SKU. Client cannot override bonus or plan.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "order-ownership",      name: "Order Ownership Binding",  desc: "POST /payments/verify and GET /payments/status/:orderId now reject orders belonging to another user (403). Prevents cross-user order probing.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
@@ -272,7 +272,9 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "ridhi-shop",        name: "Ridhi Shop",               desc: "In-app product marketplace with exclusive merchandise, digital gifts, and creator merch", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "ridhi-shop-cart",   name: "Shop Cart & Checkout",   desc: "Add to cart, quantity adjust, bulk checkout with coins. Cart persistence via AsyncStorage", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "coin-store",        name: "Coin Store",             desc: "Dedicated coin purchase screen with ₹49–₹4999 recharge packs and bonus coins",        phase: "2", audience: "All Users",      status: "live",  enabled: true  },
-      { id: "missions",          name: "Daily Missions & Rewards", desc: "Task-based coin earning: daily check-in, streak rewards, referral missions, and achievement badges", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "dual-coin",         name: "Dual-Coin Economy",      desc: "Free coins (missions/ads/referrals) tracked separately from paid coins (recharges). Free coins expire in 30 days. Paid coins never expire. Spend order: free first, then paid.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "coin-economy-safeguard", name: "Coin Economy Safeguard", desc: "Platform-wide daily free-coin budget of 50,000 with auto-pause. Real-time health monitor with free-to-paid ratio alerts and circulation breakdown. Prevents economy collapse from excessive free coin issuance.", phase: "2", audience: "Super Admin",    status: "live",  enabled: true  },
+      { id: "missions",          name: "Missions & Rewards", desc: "Task-based coin earning: weekly missions, ad rewards, referral missions, and achievement badges", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "referral",          name: "Referral Program",       desc: "Invite friends with unique code and earn bonus coins when they join and verify",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "withdraw",          name: "Withdrawal & Payouts",   desc: "Request earnings withdrawal to bank or UPI with KYC verification and admin approval", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
       { id: "kyc",               name: "E-KYC Verification",     desc: "Aadhaar/PAN identity verification for hosts, creators & high earners",          phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
@@ -429,7 +431,6 @@ export default function SuperAdminPage() {
 
   const [coinConfig, setCoinConfig] = useState({
     coinValueInr:           "1.00",
-    autoGenDailyLogin:      "10",
     autoGenWatchReel:       "3",
     autoGenPostLike:        "1",
     autoGenReferral:        "100",
@@ -2683,7 +2684,6 @@ export default function SuperAdminPage() {
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <NumField label="Daily Login Reward" field="autoGenDailyLogin" suffix="coins" min={0} max={500} />
                         <NumField label="Watch 1 Reel" field="autoGenWatchReel" suffix="coins" min={0} max={50} />
                         <NumField label="Like a Post" field="autoGenPostLike" suffix="coins" min={0} max={10} />
                         <NumField label="Referral Bonus" field="autoGenReferral" suffix="coins" min={0} max={1000} />

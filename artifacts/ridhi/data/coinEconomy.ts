@@ -14,7 +14,7 @@ export interface Mission {
   desc: string;
   icon: string;
   reward: number;
-  type: "daily" | "weekly" | "one_time";
+  type: "weekly" | "one_time";
   progress: number;
   total: number;
   completed: boolean;
@@ -72,15 +72,6 @@ export const AD_REWARDS = [
 ];
 
 export const MISSIONS: Mission[] = [
-  { id: "m01", title: "Daily Login",        desc: "Log in to the app today",                    icon: "sun",        reward: 1,   type: "daily",    progress: 1, total: 1,  completed: true,  category: "engage" },
-  { id: "m02", title: "Watch 5 Reels",      desc: "Watch any 5 reels today",                    icon: "play",       reward: 1,   type: "daily",    progress: 3, total: 5,  completed: false, category: "engage" },
-  { id: "m03", title: "Like 10 Posts",      desc: "React to 10 posts in the feed",              icon: "heart",      reward: 1,   type: "daily",    progress: 7, total: 10, completed: false, category: "social" },
-  { id: "m04", title: "Send a Gift",        desc: "Send any gift to a creator or host",         icon: "gift",       reward: 1,   type: "daily",    progress: 0, total: 1,  completed: false, category: "social" },
-  { id: "m05", title: "Share a Post",       desc: "Share any post today",                       icon: "share-2",    reward: 1,   type: "daily",    progress: 0, total: 1,  completed: false, category: "content" },
-  { id: "m06", title: "Swipe 10 Profiles",  desc: "Swipe on 10 profiles in dating",             icon: "shuffle",    reward: 1,   type: "daily",    progress: 4, total: 10, completed: false, category: "engage" },
-  { id: "m07", title: "Visit 3 Livestreams",desc: "Join 3 different live streams",              icon: "video",      reward: 1,   type: "daily",    progress: 1, total: 3,  completed: false, category: "engage" },
-  { id: "m08", title: "Comment on 5 Posts", desc: "Leave a comment on 5 different posts",       icon: "message-circle", reward: 1, type: "daily", progress: 2, total: 5,  completed: false, category: "social" },
-
   { id: "m09", title: "Create a Post",      desc: "Post original content this week",            icon: "edit-2",     reward: 3,   type: "weekly",   progress: 0, total: 1,  completed: false, category: "content" },
   { id: "m10", title: "Host a Live",        desc: "Start a live stream this week",              icon: "radio",      reward: 5,   type: "weekly",   progress: 0, total: 1,  completed: false, category: "content" },
   { id: "m11", title: "Get 50 Likes",       desc: "Collect 50 likes on your posts this week",   icon: "thumbs-up",  reward: 5,   type: "weekly",   progress: 12, total: 50, completed: false, category: "social" },
@@ -133,15 +124,5 @@ export const REVENUE_SPLIT = {
   creator: 0.6,
   platform: 0.4,
 };
-
-export const DAILY_REWARD_STREAK = [
-  { day: 1, reward: 3,   claimed: true },
-  { day: 2, reward: 5,   claimed: true },
-  { day: 3, reward: 7,   claimed: true },
-  { day: 4, reward: 8,   claimed: false },
-  { day: 5, reward: 10,  claimed: false },
-  { day: 6, reward: 15,  claimed: false },
-  { day: 7, reward: 25,  claimed: false },
-];
 
 export const COIN_RATE_INR = 1.00;

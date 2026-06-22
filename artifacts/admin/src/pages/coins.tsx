@@ -201,7 +201,6 @@ function CoinValuesTab() {
   const configFields: { key: keyof CoinValueConfig; label: string; suffix: string; hint: string }[] = [
     { key: "inrPerCoin",          label: "INR per Coin",          suffix: "₹ / coin",     hint: "How much ₹1 coin is worth" },
     { key: "coinPerInr",          label: "Coins per ₹1",          suffix: "coins",         hint: "Coins issued per ₹1 paid" },
-    { key: "dailyLoginReward",    label: "Daily Login Reward",    suffix: "coins",         hint: "Free coins on daily login" },
     { key: "referralBonus",       label: "Referral Bonus",        suffix: "coins",         hint: "Coins per successful referral" },
     { key: "profileBoostCost",    label: "Profile Boost Cost",    suffix: "coins",         hint: "Coins to boost profile 24h" },
     { key: "unlockChatCost",      label: "Unlock Chat Cost",      suffix: "coins",         hint: "Coins to unlock a locked chat" },

@@ -123,7 +123,7 @@ export default function WalletScreen() {
   useTrackScreen("wallet");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, claimDailyReward, syncWallet } = useAuth();
+  const { user, syncWallet } = useAuth();
   const { toasts, fire, remove } = useCoinToasts();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -157,25 +157,6 @@ export default function WalletScreen() {
   const scrollToRecharge = useCallback(() => {
     scrollRef.current?.scrollTo({ y: rechargeSectionY.current, animated: true });
   }, []);
-
-  const [dailyClaimed, setDailyClaimed] = useState(false);
-
-  useEffect(() => {
-    if (!user?.lastDailyRewardAt) return;
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const last = new Date(user.lastDailyRewardAt);
-    const lastDate = new Date(last.getFullYear(), last.getMonth(), last.getDate());
-    setDailyClaimed(lastDate.getTime() >= today.getTime());
-  }, [user?.lastDailyRewardAt]);
-
-  const onClaimReward = async () => {
-    const claimed = await claimDailyReward();
-    if (claimed) {
-      setDailyClaimed(true);
-      fire({ type: "credit", amount: 10, label: "Daily Reward", sublabel: "User", bottom: 200 });
-    }
-  };
 
   const [pendingPack, setPendingPack] = useState<typeof COIN_PACKAGES[0] | null>(null);
   const [showPayment, setShowPayment] = useState(false);
@@ -341,32 +322,6 @@ export default function WalletScreen() {
               {liveTxs.map((tx) => <LiveTxRow key={tx.id} tx={tx} />)}
             </View>
           )}
-        </View>
-
-        {/* ── Daily Rewards ── */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Daily Rewards</Text>
-          <Pressable
-            onPress={dailyClaimed ? undefined : onClaimReward}
-            style={[
-              styles.rewardCard,
-              { backgroundColor: colors.gold + "18", borderColor: colors.gold + "40" },
-              dailyClaimed && { opacity: 0.6 },
-            ]}
-          >
-            <View style={[styles.rewardIcon, { backgroundColor: colors.gold + "30" }]}>
-              <Feather name="gift" size={24} color={colors.gold} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.rewardTitle, { color: colors.foreground }]}>Daily Login Reward</Text>
-              <Text style={[styles.rewardSub, { color: colors.mutedForeground }]}>
-                {dailyClaimed ? "Come back tomorrow for 3 more coins" : "Claim 3 coins every day"}
-              </Text>
-            </View>
-            <View style={[styles.claimBtn, { backgroundColor: dailyClaimed ? colors.muted : colors.gold }]}>
-              <Text style={styles.claimText}>{dailyClaimed ? "Claimed" : "Claim"}</Text>
-            </View>
-          </Pressable>
         </View>
 
         {/* ── Earn Coins ── */}

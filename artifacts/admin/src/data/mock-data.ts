@@ -503,7 +503,6 @@ export type CoinPackageConfig = {
 export type CoinValueConfig = {
   inrPerCoin: number;
   coinPerInr: number;
-  dailyLoginReward: number;
   referralBonus: number;
   profileBoostCost: number;
   unlockChatCost: number;
@@ -549,7 +548,6 @@ export type ManualCoinLog = {
 export const DEFAULT_COIN_VALUE_CONFIG: CoinValueConfig = {
   inrPerCoin: 1.00,
   coinPerInr: 1.00,
-  dailyLoginReward: 10,
   referralBonus: 50,
   profileBoostCost: 100,
   unlockChatCost: 50,

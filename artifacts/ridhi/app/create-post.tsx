@@ -427,15 +427,6 @@ export default function CreatePostScreen() {
         body: JSON.stringify(body),
       });
       if (res.success) {
-        // Update streak
-        const today = new Date().toISOString().split("T")[0];
-        const lastPost = user?.lastPostDate?.split("T")[0];
-        if (lastPost !== today) {
-          const newStreak = lastPost === new Date(Date.now() - 86400000).toISOString().split("T")[0]
-            ? (user?.streakCount ?? 0) + 1
-            : 1;
-          updateProfile?.({ streakCount: newStreak, lastPostDate: new Date().toISOString() });
-        }
         Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
         trackCreate(selectedType as "post" | "reel" | "story" | "live");
       } else {

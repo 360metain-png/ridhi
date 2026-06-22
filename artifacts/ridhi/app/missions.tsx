@@ -17,7 +17,7 @@ import { useColors } from "@/hooks/useColors"
 import { useTrackScreen } from "@/hooks/useAnalytics";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { MISSIONS, DAILY_REWARD_STREAK, AD_REWARDS, Mission } from "@/data/coinEconomy";
+import { MISSIONS, AD_REWARDS, Mission } from "@/data/coinEconomy";
 import { PrivateHead } from "@/components/PrivateHead";
 
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
@@ -25,7 +25,6 @@ const { width } = Dimensions.get("window");
 
 const TABS = [
   { id: "ads",      label: "Watch Ads" },
-  { id: "daily",    label: "Daily" },
   { id: "weekly",   label: "Weekly" },
   { id: "one_time", label: "One-Time" },
 ];
@@ -135,14 +134,14 @@ export default function MissionsScreen() {
   const { user, addCoins } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
-  const [activeTab, setActiveTab] = useState<"ads" | "daily" | "weekly" | "one_time">("ads");
+  const [activeTab, setActiveTab] = useState<"ads" | "weekly" | "one_time">("ads");
   const [missions, setMissions] = useState(MISSIONS);
   const [claimedCoins, setClaimedCoins] = useState(0);
 
   const filtered = missions.filter((m) => m.type === activeTab);
 
-  const totalToday = MISSIONS.filter((m) => m.type === "daily").reduce((s, m) => s + m.reward, 0);
-  const earnedToday = MISSIONS.filter((m) => m.type === "daily" && m.completed).reduce((s, m) => s + m.reward, 0);
+  const totalWeekly = MISSIONS.filter((m) => m.type === "weekly").reduce((s, m) => s + m.reward, 0);
+  const earnedWeekly = MISSIONS.filter((m) => m.type === "weekly" && m.completed).reduce((s, m) => s + m.reward, 0);
 
   const handleClaim = (mission: Mission) => {
     addCoins(mission.reward);
@@ -154,8 +153,6 @@ export default function MissionsScreen() {
     addCoins(ad.reward);
     setClaimedCoins((prev) => prev + ad.reward);
   };
-
-  const currentDay = DAILY_REWARD_STREAK.findIndex((d) => !d.claimed);
 
   return (
     <>
@@ -181,52 +178,16 @@ export default function MissionsScreen() {
         <View style={styles.progressCard}>
           <View style={styles.progressRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.progressTitle}>Today's Progress</Text>
-              <Text style={styles.progressSub}>{earnedToday} / {totalToday} coins earned</Text>
+              <Text style={styles.progressTitle}>Weekly Progress</Text>
+              <Text style={styles.progressSub}>{earnedWeekly} / {totalWeekly} coins earned</Text>
             </View>
             <View style={styles.progressCircle}>
-              <Text style={styles.progressPct}>{Math.round((earnedToday / totalToday) * 100)}%</Text>
+              <Text style={styles.progressPct}>{Math.round((earnedWeekly / totalWeekly) * 100)}%</Text>
             </View>
           </View>
           <View style={[pbarStyles.track, { marginTop: 10, backgroundColor: "rgba(255,255,255,0.3)" }]}>
-            <View style={[pbarStyles.fill, { width: `${(earnedToday / totalToday) * 100}%` as any, backgroundColor: "#fff" }]} />
+            <View style={[pbarStyles.fill, { width: `${(earnedWeekly / totalWeekly) * 100}%` as any, backgroundColor: "#fff" }]} />
           </View>
-        </View>
-
-        {/* Streak calendar */}
-        <View style={{ marginTop: 14 }}>
-          <Text style={styles.streakLabel}>Login Streak Rewards</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 8 }}>
-            <View style={{ flexDirection: "row", gap: 8, paddingRight: 16 }}>
-              {DAILY_REWARD_STREAK.map((d, i) => {
-                const isToday = i === currentDay;
-                const isPast = d.claimed;
-                return (
-                  <View
-                    key={d.day}
-                    style={[
-                      styles.streakDay,
-                      {
-                        backgroundColor: isPast ? "rgba(255,255,255,0.25)" : isToday ? "#fff" : "rgba(255,255,255,0.1)",
-                        borderWidth: isToday ? 2 : 0,
-                        borderColor: isToday ? colors.gold : "transparent",
-                      },
-                    ]}
-                  >
-                    {isPast ? (
-                      <Feather name="check" size={14} color="#fff" />
-                    ) : (
-                      <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
-                    )}
-                    <Text style={[styles.streakReward, { color: isToday ? colors.primary : "#fff" }]}>+{d.reward}</Text>
-                    <Text style={[styles.streakDayLabel, { color: isToday ? colors.mutedForeground : "rgba(255,255,255,0.7)" }]}>
-                      Day {d.day}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          </ScrollView>
         </View>
       </LinearGradient>
 

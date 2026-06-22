@@ -48,10 +48,9 @@ const PLANS = [
     bonusCoins: 0,
     yearlySaving: 0,
     color: "#888888", gradient: ["#555", "#333"] as [string, string],
-    highlights: ["3 free coins/day", "Basic feed & reels", "3 audio calls/day"],
+    highlights: ["Basic feed & reels", "3 audio calls/day"],
     features: [
       "Home Feed, Reels, Voice Reels & Explore",
-      "3 coins/day — free daily reward",
       "5 stories/day · up to 5 communities",
       "3 random audio calls/day (standard quality)",
       "No video calls",
