@@ -49,3 +49,9 @@ externalPort = 4200
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+ADMIN_SA_EMAIL = "admin@ridhi.app"
+ADMIN_SA_PASSWORD = "Ridhi@2026"
