@@ -251,7 +251,7 @@ export default function CreatePostScreen() {
       }
       if (type === "carousel") {
         const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: "images",
           allowsMultipleSelection: true,
           quality: 0.85,
         });
@@ -261,7 +261,7 @@ export default function CreatePostScreen() {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+        mediaTypes: type === "photo" ? "images" : "videos",
         allowsEditing: true,
         quality: 0.85,
       });
@@ -307,7 +307,7 @@ export default function CreatePostScreen() {
         return;
       }
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+        mediaTypes: type === "photo" ? "images" : "videos",
         allowsEditing: true,
         quality: 0.9,
       });
