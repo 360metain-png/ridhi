@@ -493,6 +493,32 @@ function ReelItem({
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showDownload, setShowDownload] = useState(false);
 
+  // ── Emoji reactions ────────────────────────────────────────────────────
+  const [reactions, setReactions] = useState<{ emoji: string; count: number; selected: boolean }[]>([
+    { emoji: "❤️", count: 0, selected: false },
+    { emoji: "🔥", count: 0, selected: false },
+    { emoji: "😂", count: 0, selected: false },
+    { emoji: "😢", count: 0, selected: false },
+  ]);
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const handleEmojiReact = (emoji: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setReactions((prev) => {
+      if (selectedEmoji === emoji) {
+        setSelectedEmoji(null);
+        return prev.map((r) => (r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1), selected: false } : r));
+      }
+      setSelectedEmoji(emoji);
+      return prev.map((r) => {
+        if (r.emoji === selectedEmoji) return { ...r, count: Math.max(0, r.count - 1), selected: false };
+        if (r.emoji === emoji) return { ...r, count: r.count + 1, selected: true };
+        return r;
+      });
+    });
+  };
+
   // ── Content entry animations ─────────────────────────────────────────────
   const infoY       = useRef(new Animated.Value(36)).current;
   const infoOpacity = useRef(new Animated.Value(0)).current;
@@ -634,6 +660,64 @@ function ReelItem({
             { opacity: actOpacity, transform: [{ translateX: actX }] },
           ]}
         >
+          {/* Emoji reactions */}
+          <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {reactions.map((r) => (
+              <Pressable
+                key={r.emoji}
+                onPress={() => handleEmojiReact(r.emoji)}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 3,
+                  backgroundColor: r.selected ? "rgba(233,30,140,0.35)" : "rgba(255,255,255,0.15)",
+                  borderRadius: 14,
+                  paddingHorizontal: 7,
+                  paddingVertical: 4,
+                  borderWidth: r.selected ? 1 : 0,
+                  borderColor: "rgba(233,30,140,0.5)",
+                }}
+              >
+                <Text style={{ fontSize: 14 }}>{r.emoji}</Text>
+                {r.count > 0 && (
+                  <Text style={{ color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" }}>
+                    {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
+                  </Text>
+                )}
+              </Pressable>
+            ))}
+            <Pressable
+              onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+              style={{
+                backgroundColor: "rgba(255,255,255,0.15)",
+                borderRadius: 14,
+                paddingHorizontal: 7,
+                paddingVertical: 4,
+              }}
+            >
+              <Feather name="plus" size={12} color="#fff" />
+            </Pressable>
+          </View>
+
+          {showEmojiPicker && (
+            <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude22", "\ud83e\udd2f", "\ud83d\ude4c", "\ud83d\udc4f", "\ud83d\ude0d", "\ud83d\ude21", "\ud83d\ude32", "\ud83d\udc80", "\ud83d\ude4f"].map((emoji) => (
+                <Pressable
+                  key={emoji}
+                  onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    borderRadius: 14,
+                    paddingHorizontal: 8,
+                    paddingVertical: 5,
+                  }}
+                >
+                  <Text style={{ fontSize: 16 }}>{emoji}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
           <Pressable
             style={styles.reelAction}
             onPress={handleLike}

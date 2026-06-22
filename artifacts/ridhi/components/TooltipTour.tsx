@@ -94,9 +94,6 @@ export function TooltipTour({ onDismiss }: TooltipTourProps) {
       ]}
       pointerEvents="box-none"
     >
-      {/* Dimmed background */}
-      <View style={styles.dim} />
-
       {/* Tooltip card */}
       <View style={[styles.card, { top: Platform.OS === "ios" ? 80 : 60 }]}>
         {/* Arrow pointing to tab */}
@@ -150,12 +147,12 @@ export function TooltipTour({ onDismiss }: TooltipTourProps) {
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 999,
-  },
-  dim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.65)",
+    pointerEvents: "box-none",
   },
   card: {
     position: "absolute",

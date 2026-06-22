@@ -563,20 +563,22 @@ function Waveform({
   const litCount = Math.floor(progress * totalBars);
 
   return (
-    <View style={styles.waveformRow}>
-      {animValues.map((val, i) => (
-        <Animated.View
-          key={i}
-          style={[
-            styles.waveformBar,
-            {
-              backgroundColor: i < litCount ? color : `${color}40`,
-              opacity: active ? val : 0.4,
-              transform: [{ scaleY: active ? val.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) : 0.3 }],
-            },
-          ]}
-        />
-      ))}
+    <View style={[styles.waveformContainer, { shadowColor: color, shadowOpacity: 0.35, shadowRadius: 10, elevation: 6 }]}>
+      <View style={styles.waveformRow}>
+        {animValues.map((val, i) => (
+          <Animated.View
+            key={i}
+            style={[
+              styles.waveformBar,
+              {
+                backgroundColor: i < litCount ? "#fff" : "rgba(255,255,255,0.25)",
+                opacity: active ? val : 0.4,
+                transform: [{ scaleY: active ? val.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) : 0.3 }],
+              },
+            ]}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -604,6 +606,32 @@ function VoiceReelItem({
   const [progress, setProgress] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
   const animRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  // ── Emoji reactions ────────────────────────────────────────────────────
+  const [reactions, setReactions] = useState<{ emoji: string; count: number; selected: boolean }[]>([
+    { emoji: "❤️", count: 0, selected: false },
+    { emoji: "🔥", count: 0, selected: false },
+    { emoji: "😂", count: 0, selected: false },
+    { emoji: "🤯", count: 0, selected: false },
+  ]);
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const handleEmojiReact = (emoji: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setReactions((prev) => {
+      if (selectedEmoji === emoji) {
+        setSelectedEmoji(null);
+        return prev.map((r) => (r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1), selected: false } : r));
+      }
+      setSelectedEmoji(emoji);
+      return prev.map((r) => {
+        if (r.emoji === selectedEmoji) return { ...r, count: Math.max(0, r.count - 1), selected: false };
+        if (r.emoji === emoji) return { ...r, count: r.count + 1, selected: true };
+        return r;
+      });
+    });
+  };
 
   const startPlayback = useCallback(() => {
     setPlaying(true);
@@ -803,6 +831,64 @@ function VoiceReelItem({
           </View>
         </View>
 
+        {/* Emoji reactions */}
+        <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {reactions.map((r) => (
+            <Pressable
+              key={r.emoji}
+              onPress={() => handleEmojiReact(r.emoji)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 3,
+                backgroundColor: r.selected ? "rgba(233,30,140,0.35)" : "rgba(255,255,255,0.15)",
+                borderRadius: 14,
+                paddingHorizontal: 7,
+                paddingVertical: 4,
+                borderWidth: r.selected ? 1 : 0,
+                borderColor: "rgba(233,30,140,0.5)",
+              }}
+            >
+              <Text style={{ fontSize: 14 }}>{r.emoji}</Text>
+              {r.count > 0 && (
+                <Text style={{ color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" }}>
+                  {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
+                </Text>
+              )}
+            </Pressable>
+          ))}
+          <Pressable
+            onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+            style={{
+              backgroundColor: "rgba(255,255,255,0.15)",
+              borderRadius: 14,
+              paddingHorizontal: 7,
+              paddingVertical: 4,
+            }}
+          >
+            <Feather name="plus" size={12} color="#fff" />
+          </Pressable>
+        </View>
+
+        {showEmojiPicker && (
+          <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude22", "\ud83e\udd2f", "\ud83d\ude4c", "\ud83d\udc4f", "\ud83d\ude0d", "\ud83d\ude21", "\ud83d\ude32", "\ud83d\udc80", "\ud83d\ude4f"].map((emoji) => (
+              <Pressable
+                key={emoji}
+                onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  borderRadius: 14,
+                  paddingHorizontal: 8,
+                  paddingVertical: 5,
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>{emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
+
         <View style={styles.reelActions}>
           <Pressable style={styles.reelAction} onPress={handleLike} hitSlop={ICON_HITSLOP}>
             <Feather name="heart" size={28} color={liked ? colors.primary : "#fff"} />
@@ -943,6 +1029,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.3)",
+  },
+  waveformContainer: {
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   waveformRow: {
     flexDirection: "row",

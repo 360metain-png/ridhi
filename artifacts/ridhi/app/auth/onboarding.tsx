@@ -153,22 +153,22 @@ function SlideContent({
   isActive: boolean;
   screenWidth: number;
 }) {
-  const titleAnim    = useRef(new Animated.Value(0)).current;
-  const subtitleAnim = useRef(new Animated.Value(0)).current;
-  const iconAnim     = useRef(new Animated.Value(0)).current;
+  const titleAnim    = useRef(new Animated.Value(1)).current;
+  const subtitleAnim = useRef(new Animated.Value(1)).current;
+  const iconAnim     = useRef(new Animated.Value(1)).current;
   const iconPulse    = useRef(new Animated.Value(1)).current;
   const iconGlow     = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
     if (isActive) {
-      titleAnim.setValue(0);
-      subtitleAnim.setValue(0);
-      iconAnim.setValue(0);
+      titleAnim.setValue(1);
+      subtitleAnim.setValue(1);
+      iconAnim.setValue(1);
 
       Animated.stagger(100, [
         Animated.spring(iconAnim,     { toValue: 1, useNativeDriver: true, speed: 12, bounciness: 10 }),
-        Animated.timing(titleAnim,    { toValue: 1, duration: 480, useNativeDriver: true }),
-        Animated.timing(subtitleAnim, { toValue: 1, duration: 480, useNativeDriver: true }),
+        Animated.timing(titleAnim,    { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.timing(subtitleAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
       ]).start();
 
       const breathe = Animated.loop(
