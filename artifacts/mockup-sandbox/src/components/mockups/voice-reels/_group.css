@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --ridhi-purple: #7B2FBE;
+  --ridhi-pink: #E91E8C;
+  --ridhi-bg: #0A0A0A;
+  --ridhi-card: #1A1A2E;
+  --ridhi-text: #ffffff;
+  --ridhi-text-muted: rgba(255,255,255,0.6);
+  --ridhi-border: rgba(255,255,255,0.1);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #111;
+  color: var(--ridhi-text);
+}
