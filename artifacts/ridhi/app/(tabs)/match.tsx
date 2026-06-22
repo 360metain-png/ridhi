@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Alert,
   Animated,
@@ -23,6 +23,7 @@ import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { MATCH_PROFILES } from "@/data/mockData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 import { AISuggestionPanel } from "@/components/AISuggestionPanel";
 import { AIMatchBadge } from "@/components/AIMatchBadge";
@@ -194,10 +195,30 @@ export default function MatchScreen() {
   const [filters, setFilters] = useState<DiscoverFilters>(initialFilters);
   const [draft, setDraft] = useState<DiscoverFilters>(initialFilters);
   const [showAI, setShowAI] = useState(true);
+  const [showGestureCoach, setShowGestureCoach] = useState(false);
 
   const starAnim = useRef(new Animated.Value(0)).current;
+  const coachAnim = useRef(new Animated.Value(0)).current;
+  const lastTap = useRef(0);
 
   const aiSuggestions = useAIMatchSuggestions(5);
+
+  useEffect(() => {
+    let mounted = true;
+    AsyncStorage.getItem("ridhi_gesture_coach_seen").then((seen) => {
+      if (!seen && mounted) {
+        setShowGestureCoach(true);
+        Animated.timing(coachAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+        setTimeout(() => {
+          Animated.timing(coachAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start(() => {
+            setShowGestureCoach(false);
+            AsyncStorage.setItem("ridhi_gesture_coach_seen", "true").catch(() => {});
+          });
+        }, 4000);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
 
   const position = useRef(new Animated.ValueXY()).current;
   const rotateAnim = position.x.interpolate({
@@ -228,6 +249,13 @@ export default function MatchScreen() {
         swipe("right");
       } else if (gs.dx < -SWIPE_THRESHOLD) {
         swipe("left");
+      } else if (Math.abs(gs.dx) < 10 && Math.abs(gs.dy) < 10) {
+        const now = Date.now();
+        if (now - lastTap.current < 300) {
+          superLike();
+        } else {
+          lastTap.current = now;
+        }
       } else {
         Animated.spring(position, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
       }
@@ -548,42 +576,30 @@ export default function MatchScreen() {
         )}
       </View>
 
-      {/* ── SWIPE BUTTONS ──────────────────────────────────────────────────── */}
-      {profiles.length > 0 && (
-        <View style={[styles.buttonsContainer, { paddingBottom: bottomPad + 12 }]}>
-          <View style={styles.buttons}>
-            <Pressable
-              onPress={backtrack}
-              disabled={history.length === 0}
-              style={[styles.actionBtn, { opacity: history.length === 0 ? 0.4 : 1 }]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Feather name="corner-up-left" size={20} color={colors.foreground} />
-              <Text style={[styles.actionBtnLabel, { color: colors.foreground }]}>Back</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => swipe("left")}
-              style={[styles.actionBtn, styles.rejectBtn]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Feather name="x" size={24} color="#FF3B30" />
-            </Pressable>
-            <Pressable
-              onPress={superLike}
-              style={[styles.actionBtn, styles.superLikeBtn]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Feather name="star" size={22} color={colors.gold} />
-            </Pressable>
-            <Pressable
-              onPress={() => swipe("right")}
-              style={[styles.actionBtn, styles.likeBtn]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Feather name="heart" size={24} color={colors.primary} />
-            </Pressable>
+      {/* ── GESTURE COACH OVERLAY (first-time only) ──────────────────────────── */}
+      {showGestureCoach && profiles.length > 0 && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.gestureCoach,
+            { opacity: coachAnim, transform: [{ scale: coachAnim.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1] }) }] },
+          ]}
+        >
+          <View style={styles.gestureCoachRow}>
+            <View style={styles.gestureCoachPill}>
+              <Feather name="arrow-left" size={14} color="#fff" />
+              <Text style={styles.gestureCoachText}>Swipe left to pass</Text>
+            </View>
+            <View style={styles.gestureCoachPill}>
+              <Feather name="arrow-right" size={14} color="#fff" />
+              <Text style={styles.gestureCoachText}>Swipe right to like</Text>
+            </View>
           </View>
-        </View>
+          <View style={styles.gestureCoachPill}>
+            <Feather name="arrow-up" size={14} color={colors.gold} />
+            <Text style={[styles.gestureCoachText, { color: colors.gold }]}>Double-tap to Super Like</Text>
+          </View>
+        </Animated.View>
       )}
 
       {/* ── ANIMATIONS ────────────────────────────────────────────────────── */}
@@ -1118,4 +1134,33 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   applyBtnText: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+
+  // ── Gesture Coach ──
+  gestureCoach: {
+    position: "absolute",
+    top: 100,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    gap: 8,
+    zIndex: 50,
+  },
+  gestureCoachRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  gestureCoachPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  gestureCoachText: {
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "Inter_500Medium",
+  },
 });
