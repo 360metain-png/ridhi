@@ -41,11 +41,11 @@ const LIVE_GIFTS = [
 ];
 
 const LIVE_ROOMS = [
-  { id: "l1", host: "Priya Sharma", viewers: 2847, city: "Mumbai", title: "Bollywood Night", coins: 12400, language: "Hindi" },
-  { id: "l2", host: "Rahul Verma", viewers: 1203, city: "Delhi", title: "Gaming Live", coins: 4800, language: "Hindi" },
-  { id: "l3", host: "Kavya R", viewers: 892, city: "Hyderabad", title: "Telugu Songs", coins: 3200, language: "Telugu" },
-  { id: "l4", host: "Meera K", viewers: 541, city: "Kochi", title: "Cooking Malayalam", coins: 1900, language: "Malayalam" },
-  { id: "l5", host: "Dev Patel", viewers: 2100, city: "Bangalore", title: "Tech Talk", coins: 8700, language: "English" },
+  { id: "l1", host: "Priya Sharma", viewers: 2847, city: "Mumbai", title: "Bollywood Night", coins: 12400, language: "Hindi", reactions: [{ emoji: "❤️", count: 342 }, { emoji: "🔥", count: 189 }, { emoji: "😍", count: 56 }] },
+  { id: "l2", host: "Rahul Verma", viewers: 1203, city: "Delhi", title: "Gaming Live", coins: 4800, language: "Hindi", reactions: [{ emoji: "❤️", count: 120 }, { emoji: "😂", count: 89 }] },
+  { id: "l3", host: "Kavya R", viewers: 892, city: "Hyderabad", title: "Telugu Songs", coins: 3200, language: "Telugu", reactions: [{ emoji: "❤️", count: 210 }, { emoji: "🙌", count: 45 }] },
+  { id: "l4", host: "Meera K", viewers: 541, city: "Kochi", title: "Cooking Malayalam", coins: 1900, language: "Malayalam", reactions: [{ emoji: "❤️", count: 98 }, { emoji: "🔥", count: 67 }, { emoji: "🙏", count: 23 }] },
+  { id: "l5", host: "Dev Patel", viewers: 2100, city: "Bangalore", title: "Tech Talk", coins: 8700, language: "English", reactions: [{ emoji: "🔥", count: 156 }, { emoji: "🤯", count: 89 }, { emoji: "🙌", count: 34 }] },
 ];
 
 const CHAT_MESSAGES = [
@@ -296,6 +296,17 @@ export default function LiveStreamScreen() {
                   <Image source={COIN_IMAGE} style={{ width: 12, height: 12, marginLeft: 8 }} resizeMode="contain" />
                   <Text style={[styles.roomMetaText, { color: colors.gold }]}>{room.coins.toLocaleString()}</Text>
                 </View>
+                {/* Room emoji reactions */}
+                {room.reactions && room.reactions.length > 0 && (
+                  <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
+                    {room.reactions.map((r) => (
+                      <View key={r.emoji} style={{ flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: "rgba(255,255,255,0.08)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 10 }}>
+                        <Text style={{ fontSize: 12 }}>{r.emoji}</Text>
+                        <Text style={{ fontSize: 10, color: colors.mutedForeground, fontFamily: "Inter_500Medium" }}>{r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
               <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
             </Pressable>
@@ -484,6 +495,17 @@ export default function LiveStreamScreen() {
                 </View>
               </View>
               <Text style={styles.hostVideoText}>Your camera</Text>
+              {/* Host view emoji reactions */}
+              <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
+                {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude0d", "\ud83d\ude4c", "\ud83d\udc4f"].map((emoji) => (
+                  <View key={emoji} style={{ flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                    <Text style={{ fontSize: 14 }}>{emoji}</Text>
+                    <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_500Medium" }}>
+                      {Math.floor(Math.random() * 200)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </LinearGradient>
             <View style={[styles.hostControls, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
               <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>

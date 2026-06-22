@@ -15,6 +15,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { Alert } from "react-native";
 
+export interface PostReaction {
+  emoji: string;
+  count: number;
+  selected?: boolean;
+}
+
 export interface Post {
   id: string;
   userId?: string;
@@ -51,6 +57,8 @@ export interface Post {
   soundTitle?: string;
   soundArtist?: string;
   taggedProduct?: { id: string; name: string; price: number; image: string };
+  // Emoji reactions
+  reactions?: PostReaction[];
 }
 
 interface FeedPostProps {
@@ -127,6 +135,64 @@ function HeartBurst({ visible }: { visible: boolean }) {
           />
         );
       })}
+    </View>
+  );
+}
+
+// ─── Emoji Reaction Bar ──────────────────────────────────────────────────────
+const DEFAULT_EMOJIS = ["❤️", "🔥", "😂", "😢", "🤯", "🙌"];
+
+function EmojiReactionBar({ post, colors }: { post: Post; colors: any }) {
+  const [reactions, setReactions] = useState<PostReaction[]>(
+    post.reactions?.length ? post.reactions : DEFAULT_EMOJIS.map((e) => ({ emoji: e, count: 0, selected: false }))
+  );
+  const [showPicker, setShowPicker] = useState(false);
+
+  const handleReact = (emoji: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setReactions((prev) =>
+      prev.map((r) =>
+        r.emoji === emoji
+          ? { ...r, count: r.selected ? Math.max(0, r.count - 1) : r.count + 1, selected: !r.selected }
+          : r
+      )
+    );
+  };
+
+  return (
+    <View>
+      <View style={styles.reactionBar}>
+        {reactions.map((r) => (
+          <Pressable
+            key={r.emoji}
+            onPress={() => handleReact(r.emoji)}
+            style={[
+              styles.reactionChip,
+              { backgroundColor: r.selected ? colors.primary + "25" : colors.muted },
+              r.selected && { borderColor: colors.primary + "50", borderWidth: 1 },
+            ]}
+          >
+            <Text style={styles.reactionEmoji}>{r.emoji}</Text>
+            {r.count > 0 && (
+              <Text style={[styles.reactionCount, { color: r.selected ? colors.primary : colors.mutedForeground }]}>
+                {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
+              </Text>
+            )}
+          </Pressable>
+        ))}
+        <Pressable onPress={() => setShowPicker(!showPicker)} style={[styles.reactionChip, { backgroundColor: colors.muted }]}>
+          <Feather name="plus" size={14} color={colors.mutedForeground} />
+        </Pressable>
+      </View>
+      {showPicker && (
+        <View style={[styles.emojiPicker, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
+            <Pressable key={emoji} onPress={() => { handleReact(emoji); setShowPicker(false); }} style={styles.emojiPickerItem}>
+              <Text style={styles.emojiPickerEmoji}>{emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -302,6 +368,9 @@ export const FeedPost = React.memo(function FeedPost({
         )}
 
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+        {/* ── Emoji Reactions ── */}
+        <EmojiReactionBar post={post} colors={colors} />
 
         {/* ── Actions ── */}
         <View style={styles.actions}>
@@ -501,4 +570,12 @@ const styles = StyleSheet.create({
   productPrice: { fontSize: 12, fontFamily: "Inter_700Bold" },
   shopNowBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   shopNowText: { color: "#fff", fontSize: 11, fontFamily: "Inter_700Bold" },
+  // Emoji Reactions
+  reactionBar: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 14, paddingTop: 10, paddingBottom: 4, gap: 8 },
+  reactionChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 16 },
+  reactionEmoji: { fontSize: 16 },
+  reactionCount: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  emojiPicker: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderBottomWidth: 1 },
+  emojiPickerItem: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.06)" },
+  emojiPickerEmoji: { fontSize: 20 },
 });

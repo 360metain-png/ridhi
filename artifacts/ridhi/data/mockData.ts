@@ -134,6 +134,11 @@ export const INITIAL_POSTS: Post[] = [
     timeAgo: "30m ago",
     type: "carousel",
     hashtags: ["#Navratri", "#Garba", "#Ahmedabad", "#IndianFashion"],
+    reactions: [
+      { emoji: "❤️", count: 340, selected: true },
+      { emoji: "🔥", count: 189, selected: false },
+      { emoji: "😍", count: 56, selected: false },
+    ],
   },
   {
     id: "p1",
@@ -150,6 +155,11 @@ export const INITIAL_POSTS: Post[] = [
     shares: 18,
     isLiked: false,
     timeAgo: "2h ago",
+    reactions: [
+      { emoji: "❤️", count: 120, selected: false },
+      { emoji: "🔥", count: 89, selected: false },
+      { emoji: "😂", count: 45, selected: false },
+    ],
   },
   {
     id: "p2",

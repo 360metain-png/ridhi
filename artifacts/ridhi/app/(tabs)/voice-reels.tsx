@@ -597,6 +597,15 @@ function VoiceReelItem({
   const insets = useSafeAreaInsets();
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likes);
+  const [reactions, setReactions] = useState([
+    { emoji: "❤️", count: 0, selected: false },
+    { emoji: "🔥", count: 0, selected: false },
+    { emoji: "😂", count: 0, selected: false },
+    { emoji: "😢", count: 0, selected: false },
+    { emoji: "🤯", count: 0, selected: false },
+    { emoji: "🙌", count: 0, selected: false },
+  ]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
   const [playing, setPlaying] = useState(isActive);
@@ -782,6 +791,60 @@ function VoiceReelItem({
             <Text style={styles.playsText}>{fmt(reel.plays)} plays</Text>
           </View>
         </View>
+
+        {/* Emoji Reactions */}
+        <View style={styles.reactionRow}>
+          {reactions.map((r) => (
+            <Pressable
+              key={r.emoji}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setReactions((prev) => prev.map((x) => x.emoji === r.emoji ? { ...x, count: x.selected ? Math.max(0, x.count - 1) : x.count + 1, selected: !x.selected } : x));
+              }}
+              style={[
+                styles.reactionChip,
+                { backgroundColor: r.selected ? "rgba(233,30,140,0.25)" : "rgba(255,255,255,0.08)" },
+                r.selected && { borderColor: "rgba(233,30,140,0.5)", borderWidth: 1 },
+              ]}
+            >
+              <Text style={{ fontSize: 16 }}>{r.emoji}</Text>
+              {r.count > 0 && (
+                <Text style={[styles.reelActionCount, { color: r.selected ? "#E91E8C" : "#fff", fontSize: 10 }]}>
+                  {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
+                </Text>
+              )}
+            </Pressable>
+          ))}
+          <Pressable
+            onPress={() => setShowEmojiPicker(!showEmojiPicker)}
+            style={[styles.reactionChip, { backgroundColor: "rgba(255,255,255,0.08)" }]}
+          >
+            <Feather name="plus" size={14} color="#fff" />
+          </Pressable>
+        </View>
+        {showEmojiPicker && (
+          <View style={styles.emojiPicker}>
+            {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
+              <Pressable
+                key={emoji}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setReactions((prev) => {
+                    const existing = prev.find((x) => x.emoji === emoji);
+                    if (existing) {
+                      return prev.map((x) => x.emoji === emoji ? { ...x, count: x.selected ? Math.max(0, x.count - 1) : x.count + 1, selected: !x.selected } : x);
+                    }
+                    return [...prev, { emoji, count: 1, selected: true }];
+                  });
+                  setShowEmojiPicker(false);
+                }}
+                style={styles.emojiPickerItem}
+              >
+                <Text style={{ fontSize: 20 }}>{emoji}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
 
         <View style={styles.reelActions}>
           <Pressable style={styles.reelAction} onPress={handleLike} hitSlop={ICON_HITSLOP}>
@@ -1018,6 +1081,11 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "rgba(255,255,255,0.7)",
   },
+  // Emoji reactions
+  reactionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8, justifyContent: "center" },
+  reactionChip: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 16 },
+  emojiPicker: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8, justifyContent: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 16, padding: 8 },
+  emojiPickerItem: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.08)" },
   reelActions: {
     alignItems: "center",
     gap: 16,

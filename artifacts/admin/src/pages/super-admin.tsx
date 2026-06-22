@@ -222,6 +222,7 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "promo-banner", name: "Promo Banner (Home Feed)","desc": "Auto-sliding gradient promo cards between feed posts (5 cards, 3s rotation)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "banner-ads",   name: "Inline Banner Ads",       desc: "Sponsored banner ads injected every 5th post in the feed — API-backed targeting with impression/click tracking", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "ad-serving",   name: "Ad Serving System",       desc: "Real-time ad targeting by city, age, gender, interests. Active campaigns served via /api/ads/feed with server-side targeting", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "emoji-reactions", name: "Emoji Reactions",      desc: "React to posts, video reels, voice reels, and live streams with emoji (❤️ 🔥 😂 😢 🤯 🙌 + 6 more). Selected emojis highlight in pink. Count displayed with K-formatting.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
     ],
   },
   {
