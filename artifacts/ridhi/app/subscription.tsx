@@ -14,6 +14,7 @@ import { RidhiCoin } from "@/components/RidhiCoin";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { isIapAvailable, purchasePackage, getOfferings } from "@/lib/iap";
+import { PRODUCTS } from "@/data/mockData";
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import type { VipTier } from "@/components/SubscriptionBadge";
 
@@ -1771,6 +1772,80 @@ export default function SubscriptionScreen() {
                 <Text style={styles.creatorBtnTxt}>Creator Pass</Text>
               </Pressable>
             </LinearGradient>
+          </View>
+        )}
+
+        {/* ══════════════ SHOP ══════════════ */}
+        {section === "shop" && (
+          <View style={styles.sectionWrap}>
+            {/* Shop header */}
+            <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={{ borderRadius: 16, padding: 16, gap: 8, alignItems: "center" }}>
+              <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: colors.primary + "20", alignItems: "center", justifyContent: "center" }}>
+                <Feather name="shopping-bag" size={24} color={colors.primary} />
+              </View>
+              <Text style={{ fontSize: 20, fontFamily: "Inter_700Bold", color: colors.foreground }}>Ridhi Shop</Text>
+              <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.mutedForeground, textAlign: "center" }}>
+                Browse curated products from Fashion, Beauty, Electronics & Home. Buy with coins and earn rewards!
+              </Text>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+                {[
+                  { icon: "award", label: "VIP discounts", color: "#7B2FBE" },
+                  { icon: "truck", label: "Free shipping", color: "#34C759" },
+                  { icon: "repeat", label: "Easy returns", color: "#FF6B35" },
+                ].map(({ icon, label, color }) => (
+                  <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: color + "15", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 }}>
+                    <Feather name={icon as any} size={10} color={color} />
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color }}>{label}</Text>
+                  </View>
+                ))}
+              </View>
+            </LinearGradient>
+
+            {/* Product grid */}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {PRODUCTS.map((product) => (
+                <Pressable
+                  key={product.id}
+                  style={{ width: (width - 52) / 2, backgroundColor: colors.card, borderRadius: 14, borderWidth: 1, borderColor: colors.border + "50", overflow: "hidden" }}
+                  onPress={() => router.push({ pathname: "/product-detail", params: { id: product.id } })}
+                >
+                  <Image source={{ uri: product.image }} style={{ width: "100%", aspectRatio: 1, backgroundColor: colors.muted }} resizeMode="cover" />
+                  <View style={{ padding: 10, gap: 4 }}>
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_700Bold", color: colors.primary, textTransform: "uppercase" }}>{product.category}</Text>
+                    <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.foreground }} numberOfLines={2}>{product.name}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 2 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                        <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: colors.foreground }}>{product.price}</Text>
+                        <RidhiCoin size={12} />
+                      </View>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                        <Feather name="star" size={10} color="#FFD700" />
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.mutedForeground }}>{product.rating}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <Pressable
+                    style={{ backgroundColor: colors.primary, marginHorizontal: 10, marginBottom: 10, borderRadius: 10, paddingVertical: 8, alignItems: "center" }}
+                    onPress={() => router.push({ pathname: "/product-detail", params: { id: product.id } })}
+                  >
+                    <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_700Bold" }}>View Details</Text>
+                  </Pressable>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Open full shop CTA */}
+            <Pressable onPress={() => router.push("/shop" as any)}
+              style={{ flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: colors.primary + "12", borderRadius: 16, borderWidth: 1, borderColor: colors.primary + "30", padding: 14 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "20", alignItems: "center", justifyContent: "center" }}>
+                <Feather name="shopping-cart" size={18} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: colors.foreground }}>Open Full Shop</Text>
+                <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.mutedForeground }}>Search, cart, wishlist & more</Text>
+              </View>
+              <Feather name="arrow-right" size={16} color={colors.primary} />
+            </Pressable>
           </View>
         )}
       </ScrollView>
