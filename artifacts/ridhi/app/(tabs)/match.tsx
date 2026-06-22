@@ -869,7 +869,7 @@ const styles = StyleSheet.create({
   filterBadgeText: { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold" },
   cardArea: { flex: 1, alignItems: "center", justifyContent: "center" },
   card: {
-    height: SCREEN_HEIGHT * 0.55,
+    height: SCREEN_HEIGHT * 0.50,
     borderRadius: 24,
     overflow: "hidden",
     position: "absolute",

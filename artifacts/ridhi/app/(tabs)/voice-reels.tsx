@@ -810,12 +810,12 @@ function VoiceReelItem({
             <Pressable onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
               <Avatar name={reel.userName} size={36} />
             </Pressable>
-            <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: reel.userId || reel.id } })} accessibilityRole="button" accessibilityLabel={`View ${reel.userName}'s profile`}>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={styles.reelUserName} numberOfLines={1}>
                 {reel.userName}
               </Text>
-              <Text style={styles.reelCity}>{reel.userCity}</Text>
-            </Pressable>
+              <Text style={styles.reelCity} numberOfLines={1}>{reel.userCity}</Text>
+            </View>
             <Pressable style={styles.followBtn} onPress={handleFollow} hitSlop={ICON_HITSLOP}>
               <Text style={[styles.followText, isFollowing && { color: "#22C55E" }]}>
                 {isFollowing ? "Following" : "Follow"}

@@ -606,13 +606,18 @@ function ReelItem({
           end={{ x: 1, y: 1 }}
         />
 
-      {/* Centre emoji — pops in when reel becomes active */}
+      {/* Centre content — large play area */}
       <View style={styles.reelOverlay}>
         <View style={styles.reelCenter}>
-          <Animated.Text style={[styles.reelEmoji, { opacity: emojiOpacity, transform: [{ scale: emojiScale }] }]}>
-            {reel.emoji}
-          </Animated.Text>
+          <View style={styles.reelRing}>
+            <Animated.Text style={[styles.reelEmoji, { opacity: emojiOpacity, transform: [{ scale: emojiScale }] }]}>
+              {reel.emoji}
+            </Animated.Text>
+          </View>
           <Text style={styles.reelPlayHint}>Reel Preview</Text>
+          <View style={styles.reelPlayBtn}>
+            <Feather name="play-circle" size={40} color="rgba(255,255,255,0.5)" />
+          </View>
         </View>
       </View>
 
@@ -1110,12 +1115,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  reelCenter: { alignItems: "center", gap: 12 },
-  reelEmoji: { fontSize: 80 },
+  reelCenter: { alignItems: "center", gap: 14 },
+  reelRing: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reelEmoji: { fontSize: 72 },
   reelPlayHint: {
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.45)",
     fontSize: 14,
     fontFamily: "Inter_500Medium",
+  },
+  reelPlayBtn: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   reelBottom: {
