@@ -25,6 +25,12 @@ export default function Slide1() {
         >
           India's First Social Networking & Dating Super-App
         </p>
+        <p
+          className="text-[1.2vw] font-medium text-[#E91E8C] mt-2 text-center tracking-wide"
+          style={{ fontFamily: 'var(--font-body-family)' }}
+        >
+          A Product of Krilo Digitech Pvt Ltd
+        </p>
 
         {/* Divider */}
         <div className="w-32 h-[2px] bg-gradient-to-r from-[#7B2FBE] to-[#E91E8C] mt-10 mb-8" />
@@ -34,7 +40,7 @@ export default function Slide1() {
           className="text-[1.4vw] text-[#A0A0A0] text-center max-w-[50vw]"
           style={{ fontFamily: 'var(--font-body-family)' }}
         >
-          Think <span className="text-white font-semibold">ShareChat</span> × <span className="text-white font-semibold">Instagram</span> × <span className="text-white font-semibold">TikTok</span>
+          Think <span className="text-white font-semibold">ShareChat</span> × <span className="text-white font-semibold">Instagram</span> × <span className="text-white font-semibold">TikTok</span> × <span className="text-white font-semibold">Spotify</span>
           <br />Built for 1.4 billion Indians, in 13 regional languages
         </p>
 

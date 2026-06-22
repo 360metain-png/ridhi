@@ -1,6 +1,6 @@
 # Ridhi
 
-Ridhi is an India-first social networking and dating mobile app — think ShareChat × Instagram × TikTok. Built for Android & iOS with Expo/React Native.
+**Ridhi** is an Indian-based, globally first social universal app — made by **Krilo Digitech Pvt Ltd**. It combines social networking, dating, short-form video, audio rooms, podcasts, live streaming, and creator monetization into one platform. Think ShareChat × Instagram × TikTok × Spotify, built for India and the world. Available on Android & iOS via Expo/React Native.
 
 ## Run & Operate
 

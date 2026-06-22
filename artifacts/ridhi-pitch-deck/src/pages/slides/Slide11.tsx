@@ -13,6 +13,9 @@ export default function Slide11() {
           >
             Experienced Founders, Deep India Expertise
           </h2>
+          <p className="text-[1.1vw] text-[#A0A0A0] mt-2">
+            Krilo Digitech Pvt Ltd — Building India's First Social Universal App
+          </p>
         </div>
 
         <div className="flex-1 grid grid-cols-3 gap-[3vw]">
