@@ -87,12 +87,32 @@ function resolveEntitlement(sku: string) {
 // ── Internal: credit coins to user after verified payment (atomic) ─────
 async function creditCoins(userId: string, amount: number, reason: string) {
   try {
+    // Dual-coin: payment credits go to paidCoins (real money, never expire)
+    const [user] = await db.select({ id: users.id, coins: users.coins, freeCoins: users.freeCoins, paidCoins: users.paidCoins })
+      .from(users).where(userBySub(userId));
+    if (!user) return;
+    const newCoins = user.coins + amount;
+    const newPaidCoins = user.paidCoins + amount;
     const result = await db.update(users)
-      .set({ coins: sql`${users.coins} + ${amount}` })
+      .set({ coins: newCoins, paidCoins: newPaidCoins })
       .where(userBySub(userId))
-      .returning({ coins: users.coins });
+      .returning({ coins: users.coins, freeCoins: users.freeCoins, paidCoins: users.paidCoins });
     if (result.length === 0) return;
-    logger.info({ userId, amount, reason, newBalance: result[0].coins }, "coins credited from payment");
+    // Record transaction
+    const { coinTransactions } = await import("@workspace/db");
+    await db.insert(coinTransactions).values({
+      userId: user.id,
+      type: "paid_recharge",
+      direction: "credit",
+      amount: amount,
+      freeAmount: 0,
+      paidAmount: amount,
+      balanceFree: user.freeCoins,
+      balancePaid: newPaidCoins,
+      source: "payment",
+      description: reason,
+    });
+    logger.info({ userId, amount, reason, newBalance: result[0].coins }, "coins credited from payment (paid coins)");
   } catch (err: any) {
     logger.error({ err: err.message }, "creditCoins error");
   }

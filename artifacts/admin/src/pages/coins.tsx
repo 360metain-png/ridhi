@@ -14,6 +14,7 @@ import {
   Search, ChevronLeft, ChevronRight, ShieldCheck, Lock, CheckCircle2,
   XCircle, Plus, Minus, Edit2, Save, X, RefreshCw, AlertTriangle,
   IndianRupee, Star, Clock, Settings2, Wallet, BarChart3, Download,
+  Gift,
 } from "lucide-react";
 import {
   mockTransactions, mockUsers,
@@ -49,6 +50,7 @@ const PAGE_SIZE = 10;
 
 const TABS = [
   { id: "overview",  label: "Overview",         icon: BarChart3,   superOnly: false },
+  { id: "economy",   label: "Coin Economy",      icon: TrendingUp,  superOnly: false },
   { id: "values",    label: "Coin Values",       icon: Settings2,   superOnly: true  },
   { id: "adjust",    label: "Add / Remove",      icon: Wallet,      superOnly: true  },
   { id: "requests",  label: "Pending Requests",  icon: Clock,       superOnly: true  },
@@ -849,6 +851,299 @@ function PendingRequestsTab({ dateRange }: { dateRange: DateRange }) {
   );
 }
 
+// ─── Coin Economy Tab ─────────────────────────────────────────────────────────
+// Coin Economy Health Monitor - tracks free vs paid coin flow and alerts
+function CoinEconomyTab() {
+  const [economy, setEconomy] = useState<{
+    freeCoinsIssuedToday: number;
+    paidCoinsReceivedToday: number;
+    coinsSpentToday: number;
+    freeToPaidRatio: number;
+    totalCirculating: number;
+    totalFreeCirculating: number;
+    totalPaidCirculating: number;
+    dailyFreeCoinBudget: number;
+    dailyBudgetUsedPercent: number;
+    freeCoinEarningEnabled: boolean;
+    autoPauseOnBudgetExhaust: boolean;
+    alertThreshold: number;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchEconomy() {
+      try {
+        const resp = await fetch("/api/wallet/economy");
+        if (!resp.ok) {
+          if (resp.status === 401) {
+            setError("Unauthorized. Please log in as admin.");
+          } else {
+            setError("Failed to load economy data.");
+          }
+          return;
+        }
+        const data = await resp.json();
+        setEconomy(data);
+      } catch {
+        setError("Network error. Please check your connection.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEconomy();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin" />
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-24 gap-3">
+        <AlertTriangle className="w-8 h-8 text-destructive" />
+        <p className="text-muted-foreground">{error}</p>
+      </div>
+    );
+  }
+  if (!economy) {
+    return (
+      <div className="flex items-center justify-center py-24 gap-3">
+        <AlertTriangle className="w-8 h-8 text-muted-foreground" />
+        <p className="text-muted-foreground">No economy data available.</p>
+      </div>
+    );
+  }
+
+  const freeOut = economy.freeCoinsIssuedToday;
+  const paidIn = economy.paidCoinsReceivedToday;
+  const spent = economy.coinsSpentToday;
+  const ratio = economy.freeToPaidRatio;
+  const alertThreshold = economy.alertThreshold;
+  const isOverThreshold = ratio > alertThreshold;
+  const isBudgetCritical = economy.dailyBudgetUsedPercent > 90;
+  const isBudgetWarning = economy.dailyBudgetUsedPercent > 75;
+
+  const stats = [
+    {
+      label: "Free Coins Issued Today",
+      value: freeOut.toLocaleString(),
+      icon: Gift,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      sub: `${economy.dailyBudgetUsedPercent}% of daily budget (${economy.dailyFreeCoinBudget.toLocaleString()})`,
+      warn: isBudgetWarning,
+      critical: isBudgetCritical,
+    },
+    {
+      label: "Paid Coins Received Today",
+      value: paidIn.toLocaleString(),
+      icon: IndianRupee,
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
+      sub: "Real money recharges",
+    },
+    {
+      label: "Free-to-Paid Ratio",
+      value: `${ratio.toFixed(1)}%`,
+      icon: TrendingUp,
+      color: isOverThreshold ? "text-rose-400" : "text-amber-400",
+      bg: isOverThreshold ? "bg-rose-500/10" : "bg-amber-500/10",
+      sub: `Alert at ${alertThreshold}%`,
+      warn: isOverThreshold,
+      critical: isOverThreshold,
+    },
+    {
+      label: "Coins Spent Today",
+      value: spent.toLocaleString(),
+      icon: ArrowDownRight,
+      color: "text-violet-400",
+      bg: "bg-violet-500/10",
+      sub: "User consumption",
+    },
+  ];
+
+  const circulation = [
+    {
+      label: "Total Circulating",
+      value: economy.totalCirculating.toLocaleString(),
+      color: "text-violet-400",
+      bg: "bg-violet-500/10",
+    },
+    {
+      label: "Free Coins in Circulation",
+      value: economy.totalFreeCirculating.toLocaleString(),
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+      sub: "Budgeted, expirable",
+    },
+    {
+      label: "Paid Coins in Circulation",
+      value: economy.totalPaidCirculating.toLocaleString(),
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
+      sub: "Real money, never expires",
+    },
+  ];
+
+  return (
+    <div className="space-y-5">
+      {/* Alert Banner */}
+      {isOverThreshold && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20">
+          <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-rose-400">
+              Free coin outflow exceeds safe threshold!
+            </p>
+            <p className="text-xs text-rose-300/80 mt-0.5">
+              Free-to-paid ratio is {ratio.toFixed(1)}% (alert at {alertThreshold}%). Free coins are being issued faster than paid coins are being received. This is an unfunded liability.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+            onClick={() => {
+              toast({
+                title: "Action: Pause Free Coin Earning",
+                description: "You can disable free coin earning in the Coin Values tab under Free Coin Budget settings.",
+              });
+            }}
+          >
+            <Lock className="w-3.5 h-3.5 mr-1" />
+            Pause
+          </Button>
+        </div>
+      )}
+      {isBudgetCritical && !isOverThreshold && (
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-400">
+              Daily free coin budget nearly exhausted!
+            </p>
+            <p className="text-xs text-amber-300/80 mt-0.5">
+              {economy.dailyBudgetUsedPercent}% of {economy.dailyFreeCoinBudget.toLocaleString()} daily free coin budget has been used today.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Key Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((s) => (
+          <Card key={s.label} className={`bg-card border-border ${s.critical ? "border-rose-500/30" : ""}`}>
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{s.label}</span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.bg}`}>
+                  <s.icon className={`w-4 h-4 ${s.color}`} />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-foreground">{s.value}</div>
+              <p className="text-xs text-muted-foreground mt-1">{s.sub}</p>
+              {s.warn && (
+                <Badge className="mt-2 bg-rose-500/10 text-rose-400 border-rose-500/20 text-xs">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Alert
+                </Badge>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Circulation */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {circulation.map((s) => (
+          <Card key={s.label} className="bg-card border-border">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{s.label}</span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.bg}`}>
+                  <Coins className={`w-4 h-4 ${s.color}`} />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-foreground">{s.value}</div>
+              {s.sub && <p className="text-xs text-muted-foreground mt-1">{s.sub}</p>}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Economy Config */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Settings2 className="w-4 h-4 text-primary" />
+            Economy Safeguards
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Active controls preventing coin economy collapse</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Free coin budget cap</p>
+                <p className="text-xs text-muted-foreground">{economy.dailyFreeCoinBudget.toLocaleString()} free coins per day platform-wide</p>
+              </div>
+            </div>
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">Active</Badge>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Free-to-paid ratio alert</p>
+                <p className="text-xs text-muted-foreground">Alert when free outflow exceeds {alertThreshold}% of paid inflow</p>
+              </div>
+            </div>
+            <Badge className={isOverThreshold ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}>
+              {isOverThreshold ? "Triggered" : "Active"}
+            </Badge>
+          </div>
+          <div className="flex items-center justify-between py-2 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Free coin expiry</p>
+                <p className="text-xs text-muted-foreground">Free coins expire after 30 days (natural liability reduction)</p>
+              </div>
+            </div>
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">Active</Badge>
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-violet-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Auto-pause on budget exhaust</p>
+                <p className="text-xs text-muted-foreground">Automatically pause free coin earning when daily budget is exceeded</p>
+              </div>
+            </div>
+            <Badge className={economy.autoPauseOnBudgetExhaust ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-muted text-muted-foreground border-muted"}>
+              {economy.autoPauseOnBudgetExhaust ? "Enabled" : "Disabled"}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 // ─── Ledger Tab ───────────────────────────────────────────────────────────────
 function LedgerTab({ dateRange }: { dateRange: DateRange }) {
   const [search, setSearch] = useState("");
@@ -1001,6 +1296,7 @@ export default function CoinsPage() {
 
       {/* Tab Content */}
       {activeTab === "overview"  && <OverviewTab />}
+      {activeTab === "economy"  && <CoinEconomyTab />}
       {activeTab === "values"    && (isSuperAdmin ? <CoinValuesTab />   : <SuperAdminGate />)}
       {activeTab === "adjust"    && (isSuperAdmin ? <AdjustCoinsTab />  : <SuperAdminGate />)}
       {activeTab === "requests"  && (isSuperAdmin ? <PendingRequestsTab dateRange={dateRange} /> : <SuperAdminGate />)}

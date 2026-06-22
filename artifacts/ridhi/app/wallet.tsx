@@ -261,6 +261,22 @@ export default function WalletScreen() {
               style={styles.balance}
             />
             <Text style={styles.balanceSub}>coins</Text>
+
+            {/* Dual-coin split badges */}
+            <View style={styles.coinSplitRow}>
+              <View style={[styles.coinSplitBadge, { backgroundColor: "rgba(34,197,94,0.25)" }]}>
+                <Text style={styles.coinSplitText}>
+                  <Feather name="gift" size={12} color="#4ADE80" /> {user?.freeCoins ?? 0} Free
+                </Text>
+                <Text style={styles.coinSplitSub}>Expires in 30 days</Text>
+              </View>
+              <View style={[styles.coinSplitBadge, { backgroundColor: "rgba(59,130,246,0.25)" }]}>
+                <Text style={styles.coinSplitText}>
+                  <Feather name="shield" size={12} color="#60A5FA" /> {user?.paidCoins ?? 0} Paid
+                </Text>
+                <Text style={styles.coinSplitSub}>Never expires</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.quickStats}>
@@ -598,6 +614,10 @@ const styles = StyleSheet.create({
   balanceLabel: { color: "rgba(255,255,255,0.8)", fontSize: 14, fontFamily: "Inter_400Regular" },
   balance: { color: "#fff", fontSize: 56, fontFamily: "Inter_700Bold", letterSpacing: -2 },
   balanceSub: { color: "rgba(255,255,255,0.7)", fontSize: 16, fontFamily: "Inter_400Regular" },
+  coinSplitRow: { flexDirection: "row", gap: 12, marginTop: 8, justifyContent: "center" },
+  coinSplitBadge: { alignItems: "center", paddingVertical: 6, paddingHorizontal: 12, borderRadius: 12, gap: 2 },
+  coinSplitText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  coinSplitSub: { color: "rgba(255,255,255,0.6)", fontSize: 9, fontFamily: "Inter_400Regular" },
   quickStats: { flexDirection: "row", justifyContent: "space-around" },
   quickStat: { alignItems: "center", gap: 4 },
   quickStatValue: { color: "#fff", fontSize: 18, fontFamily: "Inter_700Bold" },

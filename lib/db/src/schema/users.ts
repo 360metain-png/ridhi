@@ -11,7 +11,13 @@ export const users = pgTable("users", {
   city: text("city"),
   gender: varchar("gender", { length: 10 }).notNull().default("other"),
   language: varchar("language", { length: 20 }).notNull().default("english"),
+  // Legacy single coins column — kept for backward compatibility
+  // coins = freeCoins + paidCoins
   coins: integer("coins").notNull().default(100),
+  // Dual-coin tracking: free coins (budgeted, earnable, expirable)
+  freeCoins: integer("free_coins").notNull().default(100),
+  // Paid coins (real money recharges, never expire)
+  paidCoins: integer("paid_coins").notNull().default(0),
   plan: varchar("plan", { length: 20 }).notNull().default("free"),
   interests: jsonb("interests").$type<string[]>().notNull().default([]),
 

@@ -31,6 +31,8 @@ export interface UserProfile {
   interests: string[];
   avatar?: string;
   coins: number;
+  freeCoins?: number;
+  paidCoins?: number;
   followers: number;
   following: number;
   posts: number;
@@ -417,11 +419,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const syncWallet = useCallback(async () => {
     try {
-      const resp = await apiFetch<{ coins?: number; plan?: string }>("/api/wallet");
+      const resp = await apiFetch<{
+        coins?: number;
+        freeCoins?: number;
+        paidCoins?: number;
+        plan?: string;
+      }>("/api/wallet");
       setUser((prev) => {
         if (!prev) return prev;
         const updated = { ...prev };
         if (resp.coins !== undefined) updated.coins = resp.coins;
+        if (resp.freeCoins !== undefined) updated.freeCoins = resp.freeCoins;
+        if (resp.paidCoins !== undefined) updated.paidCoins = resp.paidCoins;
         if (resp.plan !== undefined) updated.plan = resp.plan as UserProfile["plan"];
         AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
         return updated;

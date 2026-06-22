@@ -103,8 +103,7 @@
           "isAccessMediaLocationEnabled": true
         }
       ],
-      "expo-av",
-      "expo-screen-capture"
+      "expo-av"
     ],
     "experiments": {
       "typedRoutes": true,
