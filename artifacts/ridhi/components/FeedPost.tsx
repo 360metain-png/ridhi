@@ -146,17 +146,31 @@ function EmojiReactionBar({ post, colors }: { post: Post; colors: any }) {
   const [reactions, setReactions] = useState<PostReaction[]>(
     post.reactions?.length ? post.reactions : DEFAULT_EMOJIS.map((e) => ({ emoji: e, count: 0, selected: false }))
   );
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
 
   const handleReact = (emoji: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setReactions((prev) =>
-      prev.map((r) =>
-        r.emoji === emoji
-          ? { ...r, count: r.count + 1, selected: true }
-          : r
-      )
-    );
+    setReactions((prev) => {
+      if (selectedEmoji === emoji) {
+        // Deselect: remove user's reaction
+        setSelectedEmoji(null);
+        return prev.map((r) =>
+          r.emoji === emoji ? { ...r, count: Math.max(0, r.count - 1), selected: false } : r
+        );
+      }
+      // Switch to new emoji: remove old, add new
+      setSelectedEmoji(emoji);
+      return prev.map((r) => {
+        if (r.emoji === selectedEmoji) {
+          return { ...r, count: Math.max(0, r.count - 1), selected: false };
+        }
+        if (r.emoji === emoji) {
+          return { ...r, count: r.count + 1, selected: true };
+        }
+        return r;
+      });
+    });
   };
 
   return (
