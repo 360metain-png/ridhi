@@ -5,11 +5,11 @@ import {
   Modal,
   Platform,
   Pressable,
+  Share,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import * as Sharing from "expo-sharing";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -44,9 +44,10 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
   const [copied, setCopied] = useState(false);
 
   const handleShare = async (optionId: string) => {
-    const shareText = `${data.title}\n\n${data.message}\n\n${data.url ?? ""}`;
-    const shareUrl = data.url ?? "https://ridhi.app";
+    const shareText = `${data.title}\n\n${data.message}\n\n${data.url ?? "https://ridhi.app"}`;
+    const shareUrl  = data.url ?? "https://ridhi.app";
 
+    // Copy link
     if (optionId === "copy") {
       await Clipboard.setStringAsync(shareUrl);
       setCopied(true);
@@ -54,72 +55,62 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
       return;
     }
 
-    if (optionId === "more" && Platform.OS !== "web") {
-      try {
-        await Sharing.shareAsync(shareUrl, {
-          dialogTitle: "Share via...",
-          mimeType: "text/plain",
-        });
-      } catch {
-        // User cancelled
-      }
-      onClose();
-      return;
-    }
-
-    // Platform-specific deep links
-    const deepLinks: Record<string, string> = {
-      whatsapp: `https://wa.me/?text=${encodeURIComponent(shareText)}`,
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
-      twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
-      telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
-      snapchat: `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(shareUrl)}`,
-      instagram: `https://www.instagram.com/`, // Instagram web share not supported via URL scheme; will open app
-    };
-
-    const url = deepLinks[optionId];
-    if (url) {
-      const canOpen = await Linking.canOpenURL(url);
-      if (canOpen) {
-        await Linking.openURL(url);
-      } else if (Platform.OS === "web") {
-        window.open(url, "_blank", "noopener,noreferrer");
+    // "More" → native share sheet (Android / iOS) or Web Share API
+    if (optionId === "more") {
+      if (Platform.OS === "web") {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: data.title, text: shareText, url: shareUrl });
+          } catch {
+            // User cancelled
+          }
+        } else {
+          await Clipboard.setStringAsync(shareText);
+          Alert.alert("Copied", "Share text copied to clipboard!");
+        }
       } else {
-        Alert.alert(
-          "App Not Found",
-          `${optionId} is not installed on your device.`,
-          [{ text: "OK" }]
-        );
-      }
-      onClose();
-      return;
-    }
-
-    // Fallback for "more" on web
-    if (optionId === "more" && Platform.OS === "web") {
-      if (navigator.share) {
         try {
-          await navigator.share({
-            title: data.title,
-            text: shareText,
+          await Share.share({
+            message: shareText,
             url: shareUrl,
           });
         } catch {
           // User cancelled
         }
-      } else {
-        await Clipboard.setStringAsync(shareText);
-        Alert.alert("Copied", "Share text copied to clipboard!");
       }
       onClose();
       return;
     }
 
-    Alert.alert(
-      "Share",
-      `This ${type} will be shared.`,
-      [{ text: "OK", onPress: () => onClose() }]
-    );
+    // Deep links for specific platforms
+    const deepLinks: Record<string, string> = {
+      whatsapp:  `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+      facebook:  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+      twitter:   `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      telegram:  `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+      snapchat:  `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(shareUrl)}`,
+      instagram: `https://www.instagram.com/`,
+    };
+
+    const url = deepLinks[optionId];
+    if (url) {
+      if (Platform.OS === "web") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      } else {
+        // On native, try to open the app directly; if that fails, open the browser fallback
+        try {
+          await Linking.openURL(url);
+        } catch {
+          Alert.alert(
+            "Cannot open",
+            `${optionId} app not found. Try "More" to share through another app.`,
+            [{ text: "OK" }]
+          );
+        }
+      }
+      onClose();
+      return;
+    }
   };
 
   return (
