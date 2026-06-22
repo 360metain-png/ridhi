@@ -344,7 +344,7 @@ export default function WalletScreen() {
             <View style={{ flex: 1 }}>
               <Text style={[styles.rewardTitle, { color: colors.foreground }]}>Daily Login Reward</Text>
               <Text style={[styles.rewardSub, { color: colors.mutedForeground }]}>
-                {dailyClaimed ? "Come back tomorrow for 10 more coins" : "Claim 10 coins every day"}
+                {dailyClaimed ? "Come back tomorrow for 3 more coins" : "Claim 3 coins every day"}
               </Text>
             </View>
             <View style={[styles.claimBtn, { backgroundColor: dailyClaimed ? colors.muted : colors.gold }]}>

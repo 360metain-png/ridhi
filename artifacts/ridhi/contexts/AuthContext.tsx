@@ -507,62 +507,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const useSuperLike = useCallback(async (): Promise<boolean> => {
-    let success = false;
+    // Check free tier first (local-only state)
+    let hasFree = false;
     setUser((prev) => {
       if (!prev) return prev;
-      
       const plan = prev.plan || "free";
-      const freeLimit = plan === "diamond" ? 10 : plan === "platinum" ? 5 : plan === "gold" ? 2 : 0;
       const remainingFree = prev.superLikesRemaining ?? 0;
-      
       if (remainingFree > 0) {
-        success = true;
+        hasFree = true;
         const updated: UserProfile = { ...prev, superLikesRemaining: remainingFree - 1 };
         AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
         return updated;
       }
-      
-      if (prev.coins >= 5) {
-        success = true;
-        const updated: UserProfile = { ...prev, coins: prev.coins - 5 };
-        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-        return updated;
-      }
-      
       return prev;
     });
-    await new Promise((r) => setTimeout(r, 50));
-    return success;
-  }, []);
+    if (hasFree) return true;
+    // No free limit — deduct 5 coins via server (prevents local tampering)
+    return await deductCoins(5);
+  }, [deductCoins]);
 
   const useBacktrack = useCallback(async (): Promise<boolean> => {
-    let success = false;
+    // Check free tier first (local-only state)
+    let hasFree = false;
     setUser((prev) => {
       if (!prev) return prev;
-      
       const plan = prev.plan || "free";
-      const freeLimit = plan === "diamond" ? Infinity : plan === "platinum" ? 3 : plan === "gold" ? 1 : 0;
       const remainingFree = prev.backtracksRemaining ?? 0;
-      
       if (plan === "diamond" || remainingFree > 0) {
-        success = true;
+        hasFree = true;
         const updated: UserProfile = { ...prev, backtracksRemaining: plan === "diamond" ? remainingFree : Math.max(0, remainingFree - 1) };
         AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
         return updated;
       }
-      
-      if (prev.coins >= 1) {
-        success = true;
-        const updated: UserProfile = { ...prev, coins: prev.coins - 1 };
-        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-        return updated;
-      }
-      
       return prev;
     });
-    await new Promise((r) => setTimeout(r, 50));
-    return success;
-  }, []);
+    if (hasFree) return true;
+    // No free limit — deduct 1 coin via server (prevents local tampering)
+    return await deductCoins(1);
+  }, [deductCoins]);
 
   const addProfilePrompt = useCallback(async (question: string, answer: string) => {
     setUser((prev) => {
