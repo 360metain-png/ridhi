@@ -54,27 +54,27 @@ interface ReferralEvent {
 
 // ── Mock data ──────────────────────────────────────────────────────────────
 const TOP_REFERRERS: TopReferrer[] = [
-  { rank: 1, id: "u1", name: "Priya Sharma",   city: "Mumbai",    referrals: 284, verified: 241, active: 198, coinsEarned: 72300, conversionRate: 84.9, joinDate: "Jan 2025", tier: "platinum", streak: 42 },
-  { rank: 2, id: "u2", name: "Rahul Verma",    city: "Delhi",     referrals: 196, verified: 159, active: 131, coinsEarned: 47700, conversionRate: 81.1, joinDate: "Feb 2025", tier: "platinum", streak: 28 },
-  { rank: 3, id: "u3", name: "Ananya K.",       city: "Bangalore", referrals: 173, verified: 138, active: 112, coinsEarned: 41400, conversionRate: 79.8, joinDate: "Jan 2025", tier: "gold",     streak: 19 },
-  { rank: 4, id: "u4", name: "Karan Malhotra", city: "Hyderabad", referrals: 142, verified: 110, active: 89,  coinsEarned: 33000, conversionRate: 77.5, joinDate: "Mar 2025", tier: "gold",     streak: 14 },
-  { rank: 5, id: "u5", name: "Neha Gupta",     city: "Chennai",   referrals: 118, verified: 89,  active: 74,  coinsEarned: 26700, conversionRate: 75.4, joinDate: "Feb 2025", tier: "gold",     streak: 11 },
-  { rank: 6, id: "u6", name: "Arjun Nair",     city: "Pune",      referrals: 94,  verified: 68,  active: 56,  coinsEarned: 20400, conversionRate: 72.3, joinDate: "Mar 2025", tier: "silver",   streak: 8  },
-  { rank: 7, id: "u7", name: "Divya Pillai",   city: "Kolkata",   referrals: 76,  verified: 54,  active: 43,  coinsEarned: 16200, conversionRate: 71.1, joinDate: "Apr 2025", tier: "silver",   streak: 6  },
-  { rank: 8, id: "u8", name: "Suresh Kumar",   city: "Jaipur",    referrals: 62,  verified: 41,  active: 33,  coinsEarned: 12300, conversionRate: 66.1, joinDate: "Apr 2025", tier: "silver",   streak: 5  },
-  { rank: 9, id: "u9", name: "Meera Iyer",     city: "Cochin",    referrals: 51,  verified: 33,  active: 27,  coinsEarned: 9900,  conversionRate: 64.7, joinDate: "May 2025", tier: "bronze",   streak: 3  },
-  { rank: 10,id:"u10", name: "Vikash Singh",   city: "Lucknow",   referrals: 44,  verified: 28,  active: 22,  coinsEarned: 8400,  conversionRate: 63.6, joinDate: "May 2025", tier: "bronze",   streak: 2  },
+  { rank: 1, id: "u1", name: "Priya Sharma",   city: "Mumbai",    referrals: 284, verified: 241, active: 198, coinsEarned: 12050, conversionRate: 84.9, joinDate: "Jan 2025", tier: "platinum", streak: 42 },
+  { rank: 2, id: "u2", name: "Rahul Verma",    city: "Delhi",     referrals: 196, verified: 159, active: 131, coinsEarned: 7950, conversionRate: 81.1, joinDate: "Feb 2025", tier: "platinum", streak: 28 },
+  { rank: 3, id: "u3", name: "Ananya K.",       city: "Bangalore", referrals: 173, verified: 138, active: 112, coinsEarned: 6900, conversionRate: 79.8, joinDate: "Jan 2025", tier: "gold",     streak: 19 },
+  { rank: 4, id: "u4", name: "Karan Malhotra", city: "Hyderabad", referrals: 142, verified: 110, active: 89,  coinsEarned: 5500, conversionRate: 77.5, joinDate: "Mar 2025", tier: "gold",     streak: 14 },
+  { rank: 5, id: "u5", name: "Neha Gupta",     city: "Chennai",   referrals: 118, verified: 89,  active: 74,  coinsEarned: 4450, conversionRate: 75.4, joinDate: "Feb 2025", tier: "gold",     streak: 11 },
+  { rank: 6, id: "u6", name: "Arjun Nair",     city: "Pune",      referrals: 94,  verified: 68,  active: 56,  coinsEarned: 3400, conversionRate: 72.3, joinDate: "Mar 2025", tier: "silver",   streak: 8  },
+  { rank: 7, id: "u7", name: "Divya Pillai",   city: "Kolkata",   referrals: 76,  verified: 54,  active: 43,  coinsEarned: 2700, conversionRate: 71.1, joinDate: "Apr 2025", tier: "silver",   streak: 6  },
+  { rank: 8, id: "u8", name: "Suresh Kumar",   city: "Jaipur",    referrals: 62,  verified: 41,  active: 33,  coinsEarned: 2050, conversionRate: 66.1, joinDate: "Apr 2025", tier: "silver",   streak: 5  },
+  { rank: 9, id: "u9", name: "Meera Iyer",     city: "Cochin",    referrals: 51,  verified: 33,  active: 27,  coinsEarned: 1650, conversionRate: 64.7, joinDate: "May 2025", tier: "bronze",   streak: 3  },
+  { rank: 10,id:"u10", name: "Vikash Singh",   city: "Lucknow",   referrals: 44,  verified: 28,  active: 22,  coinsEarned: 1400, conversionRate: 63.6, joinDate: "May 2025", tier: "bronze",   streak: 2  },
 ];
 
 const RECENT_ACTIVITY: ReferralEvent[] = [
-  { id: "e1",  referrerId: "u1", referrerName: "Priya Sharma",   refereePhone: "+91 98***1234", refereeName: "Sonal R.",     status: "rewarded", coinsAwarded: 300, timestamp: "2 min ago",  city: "Mumbai",    source: "whatsapp"  },
-  { id: "e2",  referrerId: "u2", referrerName: "Rahul Verma",    refereePhone: "+91 97***5678", refereeName: "Manish P.",    status: "verified", coinsAwarded: 300, timestamp: "8 min ago",  city: "Delhi",     source: "link"      },
-  { id: "e3",  referrerId: "u3", referrerName: "Ananya K.",      refereePhone: "+91 96***9012", refereeName: "Lakshmi V.",   status: "rewarded", coinsAwarded: 300, timestamp: "15 min ago", city: "Bangalore", source: "instagram" },
+  { id: "e1",  referrerId: "u1", referrerName: "Priya Sharma",   refereePhone: "+91 98***1234", refereeName: "Sonal R.",     status: "rewarded", coinsAwarded: 50, timestamp: "2 min ago",  city: "Mumbai",    source: "whatsapp"  },
+  { id: "e2",  referrerId: "u2", referrerName: "Rahul Verma",    refereePhone: "+91 97***5678", refereeName: "Manish P.",    status: "verified", coinsAwarded: 50, timestamp: "8 min ago",  city: "Delhi",     source: "link"      },
+  { id: "e3",  referrerId: "u3", referrerName: "Ananya K.",      refereePhone: "+91 96***9012", refereeName: "Lakshmi V.",   status: "rewarded", coinsAwarded: 50, timestamp: "15 min ago", city: "Bangalore", source: "instagram" },
   { id: "e4",  referrerId: "u5", referrerName: "Neha Gupta",     refereePhone: "+91 99***3456", refereeName: "Ravi S.",      status: "pending",  coinsAwarded: 0,   timestamp: "31 min ago", city: "Chennai",   source: "code"      },
   { id: "e5",  referrerId: "u1", referrerName: "Priya Sharma",   refereePhone: "+91 91***7890", refereeName: "Tanya M.",     status: "flagged",  coinsAwarded: 0,   timestamp: "45 min ago", city: "Mumbai",    source: "link"      },
-  { id: "e6",  referrerId: "u4", referrerName: "Karan Malhotra", refereePhone: "+91 92***2345", refereeName: "Ankit J.",     status: "rewarded", coinsAwarded: 300, timestamp: "1h ago",     city: "Hyderabad", source: "whatsapp"  },
-  { id: "e7",  referrerId: "u6", referrerName: "Arjun Nair",     refereePhone: "+91 93***6789", refereeName: "Pooja D.",     status: "verified", coinsAwarded: 300, timestamp: "1h ago",     city: "Pune",      source: "link"      },
-  { id: "e8",  referrerId: "u7", referrerName: "Divya Pillai",   refereePhone: "+91 94***1234", refereeName: "Sanjay K.",    status: "rewarded", coinsAwarded: 300, timestamp: "2h ago",     city: "Kolkata",   source: "instagram" },
+  { id: "e6",  referrerId: "u4", referrerName: "Karan Malhotra", refereePhone: "+91 92***2345", refereeName: "Ankit J.",     status: "rewarded", coinsAwarded: 50, timestamp: "1h ago",     city: "Hyderabad", source: "whatsapp"  },
+  { id: "e7",  referrerId: "u6", referrerName: "Arjun Nair",     refereePhone: "+91 93***6789", refereeName: "Pooja D.",     status: "verified", coinsAwarded: 50, timestamp: "1h ago",     city: "Pune",      source: "link"      },
+  { id: "e8",  referrerId: "u7", referrerName: "Divya Pillai",   refereePhone: "+91 94***1234", refereeName: "Sanjay K.",    status: "rewarded", coinsAwarded: 50, timestamp: "2h ago",     city: "Kolkata",   source: "instagram" },
 ];
 
 const trendData = [
@@ -156,8 +156,8 @@ export default function ReferralProgramPage() {
   const [search, setSearch]       = useState("");
   const [copied, setCopied]       = useState(false);
   const [programOn, setProgramOn] = useState(true);
-  const [referrerBonus, setReferrerBonus] = useState(300);
-  const [refereeBonus, setRefereeBonus]   = useState(100);
+  const [referrerBonus, setReferrerBonus] = useState(50);
+  const [refereeBonus, setRefereeBonus]   = useState(50);
   const [tierBonus, setTierBonus]         = useState(true);
   const [fraudGuard, setFraudGuard]       = useState(true);
   const [minActivity, setMinActivity]     = useState(7);

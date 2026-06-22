@@ -378,7 +378,7 @@ export default function WalletScreen() {
                 <Feather name="user-plus" size={22} color={colors.gold} />
               </View>
               <Text style={[styles.earnTitle, { color: colors.foreground }]}>Refer Friends</Text>
-              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>100 coins per referral</Text>
+              <Text style={[styles.earnSub, { color: colors.mutedForeground }]}>50 coins per referral</Text>
               <View style={[styles.earnBtn, { backgroundColor: colors.gold }]}>
                 <Text style={styles.earnBtnText}>Invite →</Text>
               </View>

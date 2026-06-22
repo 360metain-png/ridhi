@@ -94,7 +94,17 @@
           "photosPermission": "Ridhi needs photo access to let you upload your profile picture, share posts, and create content.",
           "cameraPermission": "Ridhi needs camera access to let you take photos, record videos, and go live."
         }
-      ]
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Ridhi needs photo library access to save your downloaded reels, stories, and posts.",
+          "savePhotosPermission": "Allow Ridhi to save photos and videos to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-av",
+      "expo-screen-capture"
     ],
     "experiments": {
       "typedRoutes": true,
