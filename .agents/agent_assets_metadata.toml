@@ -131,3 +131,9 @@ id = "WH68k2KfTCqN2BAscRmf2"
 uri = "file://artifacts/ridhi/assets/images/screenshot_vip.png"
 type = "image"
 title = "Screenshot: VIP Plans"
+
+[[outputs]]
+id = "ROf6bKDUdAZEFEqY14fXA"
+uri = "file://Ridhi_Information.md"
+type = "text"
+title = "Ridhi Information — India's First Social Universal App"
