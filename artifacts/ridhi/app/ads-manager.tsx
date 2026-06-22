@@ -462,25 +462,29 @@ export default function AdsManagerScreen() {
   };
 
   const pickCreative = async (type: "image" | "video") => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow media access to upload creative.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: type === "video" ? ImagePicker.MediaTypeOptions.Videos : ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.85,
-      videoMaxDuration: 10,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCreativeUri(result.assets[0].uri);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission needed", "Allow media access to upload creative.");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: type === "video" ? ImagePicker.MediaTypeOptions.Videos : ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.85,
+        videoMaxDuration: 10,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+      const asset = result.assets[0];
+      setCreativeUri(asset.uri);
       setIsVideo(type === "video");
-      if (type === "video" && result.assets[0].duration && result.assets[0].duration > 10) {
+      if (type === "video" && asset.duration && asset.duration > 10) {
         Alert.alert("Video too long", "Videos must be 10 seconds or less. Please trim and retry.");
         setCreativeUri(null);
         setIsVideo(false);
       }
+    } catch {
+      Alert.alert("Gallery Error", "Could not select media. Please try again.");
     }
   };
 

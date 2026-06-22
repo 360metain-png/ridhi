@@ -167,15 +167,20 @@ export default function PodcastCreateScreen() {
   const remainingSeconds = Math.max(0, DURATION_LIMITS[episodeType] - recordSeconds);
 
   const pickCoverArt = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Permission needed", "Allow photo access to add cover art."); return; }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets[0]) setCoverArt(result.assets[0].uri);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission needed", "Allow photo access to add cover art."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+      setCoverArt(result.assets[0].uri);
+    } catch {
+      Alert.alert("Gallery Error", "Could not select cover art. Please try again.");
+    }
   };
 
   const STEPS = ["mode", "details", "ai", "publish"];

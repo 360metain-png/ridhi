@@ -235,32 +235,34 @@ export default function CreatePostScreen() {
   };
 
   const pickMedia = async (type: "photo" | "video" | "carousel") => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow access to your gallery to upload photos and videos.", [{ text: "OK" }]);
-      return;
-    }
-    if (type === "carousel") {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        quality: 0.85,
-      });
-      if (!result.canceled && result.assets.length > 0) {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission needed", "Allow access to your gallery to upload photos and videos.", [{ text: "OK" }]);
+        return;
+      }
+      if (type === "carousel") {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: true,
+          quality: 0.85,
+        });
+        if (result.canceled || !result.assets || result.assets.length === 0) return;
         setCarouselImages(result.assets.map((a) => a.uri));
         setMediaUri(null);
+        return;
       }
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      quality: 0.85,
-    });
-    if (!result.canceled && result.assets[0]) {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        quality: 0.85,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
       setMediaUri(result.assets[0].uri);
       if (type === "photo" && selectedType === "text") setSelectedType("photo");
       if (type === "video" && selectedType === "text") setSelectedType("video");
+    } catch {
+      Alert.alert("Gallery Error", "Could not open gallery. Please try again.");
     }
   };
 
@@ -273,20 +275,23 @@ export default function CreatePostScreen() {
       );
       return;
     }
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Camera needed", "Allow camera access to take photos and videos.", [{ text: "OK" }]);
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      quality: 0.9,
-    });
-    if (!result.canceled && result.assets[0]) {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Camera needed", "Allow camera access to take photos and videos.", [{ text: "OK" }]);
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        quality: 0.9,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
       setMediaUri(result.assets[0].uri);
       if (type === "photo" && selectedType === "text") setSelectedType("photo");
       if (type === "video" && selectedType === "text") setSelectedType("video");
+    } catch {
+      Alert.alert("Camera Error", "Could not open camera. Please try again.");
     }
   };
 

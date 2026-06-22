@@ -87,6 +87,13 @@
         {
           "locationWhenInUsePermission": "Ridhi uses your location to show people and content near you."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ridhi needs photo access to let you upload your profile picture, share posts, and create content.",
+          "cameraPermission": "Ridhi needs camera access to let you take photos, record videos, and go live."
+        }
       ]
     ],
     "experiments": {

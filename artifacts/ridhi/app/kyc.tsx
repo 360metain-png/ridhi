@@ -195,46 +195,52 @@ export default function KYCScreen() {
   };
 
   const pickCamera = async (docKey: string) => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow camera access to take live photos of your documents.");
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.7,
-      base64: true,
-    });
-    if (!result.canceled && result.assets[0]) {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission needed", "Allow camera access to take live photos of your documents.");
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
       const asset = result.assets[0];
       setDocs((prev) => ({
         ...prev,
         [docKey]: { uri: asset.uri, base64: asset.base64 ?? "" },
       }));
       setError("");
+    } catch {
+      Alert.alert("Camera Error", "Could not take a photo. Please try again.");
     }
   };
 
   const pickGallery = async (docKey: string) => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission needed", "Allow access to your gallery to upload the bank document.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.7,
-      base64: true,
-    });
-    if (!result.canceled && result.assets[0]) {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission needed", "Allow access to your gallery to upload the bank document.");
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
       const asset = result.assets[0];
       setDocs((prev) => ({
         ...prev,
         [docKey]: { uri: asset.uri, base64: asset.base64 ?? "" },
       }));
       setError("");
+    } catch {
+      Alert.alert("Gallery Error", "Could not select photo. Please try again.");
     }
   };
 

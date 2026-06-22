@@ -206,10 +206,23 @@ export default function ProfileScreen() {
   };
 
   const pickPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") { Alert.alert("Permission needed", "Allow photo access to change your profile picture."); return; }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [1, 1], quality: 0.85 });
-    if (!result.canceled && result.assets[0]) { setEditAvatar(result.assets[0].uri); setAvatarSheet(false); }
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") { Alert.alert("Permission needed", "Allow photo access to change your profile picture."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+      const uri = result.assets[0].uri;
+      if (!uri) return;
+      setEditAvatar(uri);
+      setAvatarSheet(false);
+    } catch (err) {
+      Alert.alert("Photo Error", "Could not select a photo. Please try again.");
+    }
   };
 
   const useAutoAvatar = () => { setEditAvatar(undefined); setAvatarSheet(false); setShowAvatarGrid(false); };
