@@ -153,7 +153,7 @@ function EmojiReactionBar({ post, colors }: { post: Post; colors: any }) {
     setReactions((prev) =>
       prev.map((r) =>
         r.emoji === emoji
-          ? { ...r, count: r.selected ? Math.max(0, r.count - 1) : r.count + 1, selected: !r.selected }
+          ? { ...r, count: r.count + 1, selected: true }
           : r
       )
     );

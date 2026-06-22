@@ -22,6 +22,7 @@ import { Audio } from "expo-av";
 import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { VOICE_REEL_THEMES } from "@/data/voiceReelThemes";
 
 const MAX_REPLY_SECONDS = 10;
 
@@ -597,15 +598,6 @@ function VoiceReelItem({
   const insets = useSafeAreaInsets();
   const [liked, setLiked] = useState(reel.isLiked);
   const [likeCount, setLikeCount] = useState(reel.likes);
-  const [reactions, setReactions] = useState([
-    { emoji: "❤️", count: 0, selected: false },
-    { emoji: "🔥", count: 0, selected: false },
-    { emoji: "😂", count: 0, selected: false },
-    { emoji: "😢", count: 0, selected: false },
-    { emoji: "🤯", count: 0, selected: false },
-    { emoji: "🙌", count: 0, selected: false },
-  ]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
   const [playing, setPlaying] = useState(isActive);
@@ -731,33 +723,52 @@ function VoiceReelItem({
     []
   );
 
+  const theme = VOICE_REEL_THEMES[reel.category] || VOICE_REEL_THEMES.Motivation;
+
   const bottomPad = Platform.OS === "web" ? 84 : Math.max(insets.bottom, 16) + 44;
 
   return (
     <View style={{ width: screenWidth, height: screenHeight, overflow: "hidden" }}>
+      {/* Themed gradient background */}
       <LinearGradient
-        colors={reel.gradient}
+        colors={theme.gradient}
         style={StyleSheet.absoluteFill}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
 
+      {/* Floating mood emojis */}
+      <View style={[styles.moodEmojiFloat, { top: screenHeight * 0.12, left: screenWidth * 0.08 }]}>
+        <Text style={styles.moodEmojiText}>{theme.moodEmoji}</Text>
+      </View>
+      <View style={[styles.moodEmojiFloat, { top: screenHeight * 0.22, right: screenWidth * 0.12 }]}>
+        <Text style={[styles.moodEmojiText, { fontSize: 18, opacity: 0.25 }]}>{theme.icon}</Text>
+      </View>
+      <View style={[styles.moodEmojiFloat, { bottom: screenHeight * 0.35, left: screenWidth * 0.15 }]}>
+        <Text style={[styles.moodEmojiText, { fontSize: 14, opacity: 0.2 }]}>{theme.moodEmoji}</Text>
+      </View>
+
       {/* Audio visualizer center — tappable to play/pause */}
       <Pressable style={styles.reelCenter} onPress={handleTogglePlay}>
-        <View style={styles.audioIconWrap}>
-          <Feather name={playing ? "pause" : "play"} size={32} color="#fff" />
+        <View style={[styles.audioIconWrap, { borderColor: theme.accent + "60", shadowColor: theme.accent, shadowOpacity: 0.4, shadowRadius: 12, elevation: 8 }]}>
+          <Feather name={playing ? "pause" : "play"} size={32} color={theme.accent} />
         </View>
         <Waveform
           bars={reel.waveform}
           active={playing}
-          color="#fff"
+          color={theme.waveformColor}
           progress={progress}
         />
-        <Text style={styles.durationText}>
+        <Text style={[styles.durationText, { color: theme.accent }]}>
           {Math.floor(progress * reel.duration)}s / {reel.duration}s
         </Text>
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{reel.category}</Text>
+        <View style={[
+          styles.categoryBadge,
+          theme.badgeStyle === "glow" && { backgroundColor: theme.accent + "35", borderColor: theme.accent + "80", borderWidth: 1, shadowColor: theme.accent, shadowOpacity: 0.5, shadowRadius: 8 },
+          theme.badgeStyle === "solid" && { backgroundColor: theme.accent + "45", borderColor: theme.accent + "90", borderWidth: 1 },
+          theme.badgeStyle === "outline" && { backgroundColor: "transparent", borderColor: theme.accent + "70", borderWidth: 1.5 },
+        ]}>
+          <Text style={[styles.categoryText, { color: theme.accent }]}>{theme.icon} {reel.category}</Text>
         </View>
       </Pressable>
 
@@ -791,60 +802,6 @@ function VoiceReelItem({
             <Text style={styles.playsText}>{fmt(reel.plays)} plays</Text>
           </View>
         </View>
-
-        {/* Emoji Reactions */}
-        <View style={styles.reactionRow}>
-          {reactions.map((r) => (
-            <Pressable
-              key={r.emoji}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setReactions((prev) => prev.map((x) => x.emoji === r.emoji ? { ...x, count: x.selected ? Math.max(0, x.count - 1) : x.count + 1, selected: !x.selected } : x));
-              }}
-              style={[
-                styles.reactionChip,
-                { backgroundColor: r.selected ? "rgba(233,30,140,0.25)" : "rgba(255,255,255,0.08)" },
-                r.selected && { borderColor: "rgba(233,30,140,0.5)", borderWidth: 1 },
-              ]}
-            >
-              <Text style={{ fontSize: 16 }}>{r.emoji}</Text>
-              {r.count > 0 && (
-                <Text style={[styles.reelActionCount, { color: r.selected ? "#E91E8C" : "#fff", fontSize: 10 }]}>
-                  {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
-                </Text>
-              )}
-            </Pressable>
-          ))}
-          <Pressable
-            onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-            style={[styles.reactionChip, { backgroundColor: "rgba(255,255,255,0.08)" }]}
-          >
-            <Feather name="plus" size={14} color="#fff" />
-          </Pressable>
-        </View>
-        {showEmojiPicker && (
-          <View style={styles.emojiPicker}>
-            {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
-              <Pressable
-                key={emoji}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setReactions((prev) => {
-                    const existing = prev.find((x) => x.emoji === emoji);
-                    if (existing) {
-                      return prev.map((x) => x.emoji === emoji ? { ...x, count: x.selected ? Math.max(0, x.count - 1) : x.count + 1, selected: !x.selected } : x);
-                    }
-                    return [...prev, { emoji, count: 1, selected: true }];
-                  });
-                  setShowEmojiPicker(false);
-                }}
-                style={styles.emojiPickerItem}
-              >
-                <Text style={{ fontSize: 20 }}>{emoji}</Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
 
         <View style={styles.reelActions}>
           <Pressable style={styles.reelAction} onPress={handleLike} hitSlop={ICON_HITSLOP}>
@@ -1003,6 +960,14 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     color: "rgba(255,255,255,0.7)",
   },
+  moodEmojiFloat: {
+    position: "absolute",
+    zIndex: 1,
+    opacity: 0.35,
+  },
+  moodEmojiText: {
+    fontSize: 28,
+  },
   categoryBadge: {
     paddingHorizontal: 14,
     paddingVertical: 5,
@@ -1081,11 +1046,6 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "rgba(255,255,255,0.7)",
   },
-  // Emoji reactions
-  reactionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8, justifyContent: "center" },
-  reactionChip: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 16 },
-  emojiPicker: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 8, justifyContent: "center", backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 16, padding: 8 },
-  emojiPickerItem: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.08)" },
   reelActions: {
     alignItems: "center",
     gap: 16,

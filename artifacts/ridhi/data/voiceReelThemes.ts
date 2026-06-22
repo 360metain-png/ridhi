@@ -1,0 +1,148 @@
+export type VoiceReelTheme = {
+  name: string;
+  gradient: [string, string, string];
+  accent: string;
+  glow: string;
+  icon: string;
+  waveformColor: string;
+  waveformGlow: string;
+  badgeStyle: "solid" | "outline" | "glow";
+  moodEmoji: string;
+};
+
+export const VOICE_REEL_THEMES: Record<string, VoiceReelTheme> = {
+  Comedy: {
+    name: "Comedy",
+    gradient: ["#FF6B35", "#FFB800", "#FF3D00"],
+    accent: "#FFB800",
+    glow: "rgba(255,184,0,0.3)",
+    icon: "🎭",
+    waveformColor: "#FFB800",
+    waveformGlow: "rgba(255,184,0,0.5)",
+    badgeStyle: "glow",
+    moodEmoji: "😂",
+  },
+  Business: {
+    name: "Business",
+    gradient: ["#1A237E", "#3949AB", "#5C6BC0"],
+    accent: "#00BCD4",
+    glow: "rgba(0,188,212,0.3)",
+    icon: "🚀",
+    waveformColor: "#00BCD4",
+    waveformGlow: "rgba(0,188,212,0.5)",
+    badgeStyle: "solid",
+    moodEmoji: "📈",
+  },
+  Cricket: {
+    name: "Cricket",
+    gradient: ["#1B5E20", "#2E7D32", "#4CAF50"],
+    accent: "#76FF03",
+    glow: "rgba(118,255,3,0.3)",
+    icon: "🏏",
+    waveformColor: "#76FF03",
+    waveformGlow: "rgba(118,255,3,0.5)",
+    badgeStyle: "glow",
+    moodEmoji: "🏆",
+  },
+  Poetry: {
+    name: "Poetry",
+    gradient: ["#880E4F", "#C2185B", "#E91E63"],
+    accent: "#FF80AB",
+    glow: "rgba(255,128,171,0.3)",
+    icon: "📝",
+    waveformColor: "#FF80AB",
+    waveformGlow: "rgba(255,128,171,0.5)",
+    badgeStyle: "outline",
+    moodEmoji: "✨",
+  },
+  Motivation: {
+    name: "Motivation",
+    gradient: ["#FF6F00", "#FF8F00", "#FFB300"],
+    accent: "#FFD54F",
+    glow: "rgba(255,213,79,0.3)",
+    icon: "🌅",
+    waveformColor: "#FFD54F",
+    waveformGlow: "rgba(255,213,79,0.5)",
+    badgeStyle: "glow",
+    moodEmoji: "💪",
+  },
+  Stories: {
+    name: "Stories",
+    gradient: ["#4A148C", "#6A1B9A", "#8E24AA"],
+    accent: "#E040FB",
+    glow: "rgba(224,64,251,0.3)",
+    icon: "📖",
+    waveformColor: "#E040FB",
+    waveformGlow: "rgba(224,64,251,0.5)",
+    badgeStyle: "outline",
+    moodEmoji: "🌙",
+  },
+  Travel: {
+    name: "Travel",
+    gradient: ["#006064", "#00838F", "#0097A7"],
+    accent: "#00E5FF",
+    glow: "rgba(0,229,255,0.3)",
+    icon: "✈️",
+    waveformColor: "#00E5FF",
+    waveformGlow: "rgba(0,229,255,0.5)",
+    badgeStyle: "solid",
+    moodEmoji: "🗺️",
+  },
+  Culture: {
+    name: "Culture",
+    gradient: ["#BF360C", "#D84315", "#E64A19"],
+    accent: "#FF6E40",
+    glow: "rgba(255,110,64,0.3)",
+    icon: "🎨",
+    waveformColor: "#FF6E40",
+    waveformGlow: "rgba(255,110,64,0.5)",
+    badgeStyle: "outline",
+    moodEmoji: "🪔",
+  },
+  Cinema: {
+    name: "Cinema",
+    gradient: ["#212121", "#424242", "#616161"],
+    accent: "#FFEB3B",
+    glow: "rgba(255,235,59,0.3)",
+    icon: "🎬",
+    waveformColor: "#FFEB3B",
+    waveformGlow: "rgba(255,235,59,0.5)",
+    badgeStyle: "glow",
+    moodEmoji: "🎥",
+  },
+  Food: {
+    name: "Food",
+    gradient: ["#E65100", "#F57C00", "#FF9800"],
+    accent: "#FFE082",
+    glow: "rgba(255,224,130,0.3)",
+    icon: "🍜",
+    waveformColor: "#FFE082",
+    waveformGlow: "rgba(255,224,130,0.5)",
+    badgeStyle: "glow",
+    moodEmoji: "😋",
+  },
+  Tech: {
+    name: "Tech",
+    gradient: ["#0D47A1", "#1565C0", "#1976D2"],
+    accent: "#00E676",
+    glow: "rgba(0,230,118,0.3)",
+    icon: "💻",
+    waveformColor: "#00E676",
+    waveformGlow: "rgba(0,230,118,0.5)",
+    badgeStyle: "solid",
+    moodEmoji: "⚡",
+  },
+  Art: {
+    name: "Art",
+    gradient: ["#7B2FBE", "#E91E8C", "#FF6B35"],
+    accent: "#FF80AB",
+    glow: "rgba(255,128,171,0.3)",
+    icon: "🎨",
+    waveformColor: "#FF80AB",
+    waveformGlow: "rgba(255,128,171,0.5)",
+    badgeStyle: "outline",
+    moodEmoji: "🖌️",
+  },
+};
+
+export const DEFAULT_VOICE_REEL_THEME: VoiceReelTheme = VOICE_REEL_THEMES.Motivation;
