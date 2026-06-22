@@ -29,7 +29,7 @@ import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { Avatar } from "@/components/Avatar";
-import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, BANNER_ADS, POPUP_ADS, type BannerAdConfig } from "@/data/mockData";
+import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, POPUP_ADS, type BannerAdConfig } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -153,6 +153,27 @@ type FeedItem =
   | { kind: "post"; post: Post }
   | { kind: "ad"; ad: BannerAdConfig; adKey: string };
 
+function mapApiAdToBannerConfig(apiAd: any): BannerAdConfig {
+  return {
+    id: apiAd.id,
+    title: apiAd.headline,
+    headline: apiAd.headline,
+    body: apiAd.body || "",
+    ctaText: apiAd.cta || "Learn More",
+    ctaRoute: "/wallet",
+    gradient: ["#7B2FBE", "#E91E8C"],
+    textColor: "white",
+    clientName: "Ridhi Brand",
+    clientTier: "Premium",
+    position: "feed",
+    startDate: apiAd.startsAt || new Date().toISOString(),
+    endDate: apiAd.endsAt || new Date().toISOString(),
+    active: true,
+    impressions: apiAd.impressions || 0,
+    clicks: apiAd.clicks || 0,
+  };
+}
+
 export default function FeedScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -169,9 +190,38 @@ export default function FeedScreen() {
   const [hiddenCommentIds, setHiddenCommentIds] = useState<Record<string, Set<string>>>({});
   const [storyViewId, setStoryViewId] = useState<string | null>(null);
 
+  // ── Feed Ads (API) ────────────────────────────────────────────────────────
+  const [feedAds, setFeedAds] = useState<BannerAdConfig[]>([]);
+  const [feedAdsLoading, setFeedAdsLoading] = useState(false);
+  const loadFeedAds = useCallback(async () => {
+    if (!user?.id) return;
+    setFeedAdsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("format", "feed");
+      params.set("limit", "5");
+      params.set("city", user?.city || "All India");
+      if (user?.age) params.set("age", String(user.age));
+      if (user?.gender) params.set("gender", user.gender);
+      const data = await apiFetch<{ ads: any[] }>(`/api/ads/feed?${params.toString()}`);
+      if (data?.ads) {
+        const mapped = data.ads.map(mapApiAdToBannerConfig);
+        setFeedAds(mapped);
+      }
+    } catch {
+      // silently fail — keep empty or previous ads
+    } finally {
+      setFeedAdsLoading(false);
+    }
+  }, [user?.id, user?.city, user?.age, user?.gender]);
+
+  useEffect(() => {
+    loadFeedAds();
+  }, [loadFeedAds]);
+
   // ── Special Client Ads ────────────────────────────────────────────────────
   const activePopup = POPUP_ADS.find((a) => a.active) ?? null;
-  const activeBanners = BANNER_ADS.filter((a) => a.active);
+  const activeBanners = feedAds.length > 0 ? feedAds : [];
   const [popupDismissed, setPopupDismissed] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   useEffect(() => {
@@ -522,6 +572,7 @@ export default function FeedScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
+    await loadFeedAds();
     try {
       const trending = activeTab === "Trending";
       const data = await apiFetch<{ posts: any[] }>(`/api/feed?trending=${trending}&limit=20`);
@@ -550,7 +601,7 @@ export default function FeedScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [activeTab, user?.id]);
+  }, [activeTab, user?.id, loadFeedAds]);
 
   const getActivePosts = (): Post[] => {
     switch (activeTab) {
@@ -1016,7 +1067,27 @@ export default function FeedScreen() {
         data={feedData}
         keyExtractor={(item) => item.kind === "post" ? item.post.id : item.adKey}
         renderItem={({ item }) => {
-          if (item.kind === "ad") return <BannerAd ad={item.ad} />;
+          if (item.kind === "ad") {
+            return (
+              <BannerAd
+                ad={item.ad}
+                onImpression={async () => {
+                  try {
+                    await apiFetch(`/api/ads/${item.ad.id}/impression`, { method: "POST" });
+                  } catch {
+                    // impression tracking non-critical
+                  }
+                }}
+                onClick={async () => {
+                  try {
+                    await apiFetch(`/api/ads/${item.ad.id}/click`, { method: "POST" });
+                  } catch {
+                    // click tracking non-critical
+                  }
+                }}
+              />
+            );
+          }
           return (
             <FeedPost
               post={item.post}

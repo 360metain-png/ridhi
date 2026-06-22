@@ -18,6 +18,7 @@ import moderateRouter from "./moderate";
 import friendRequestsRouter from "./friend_requests";
 import walletRouter from "./wallet";
 import plansRouter from "./plans";
+import adsRouter from "./ads";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(moderateRouter);
 router.use(friendRequestsRouter);
 router.use(walletRouter);
 router.use(plansRouter);
+router.use(adsRouter);
 
 export default router;

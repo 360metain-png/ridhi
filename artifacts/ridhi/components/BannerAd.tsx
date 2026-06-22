@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -7,6 +7,8 @@ import { type BannerAdConfig } from "@/data/mockData";
 
 interface BannerAdProps {
   ad: BannerAdConfig;
+  onImpression?: () => void;
+  onClick?: () => void;
 }
 
 const TIER_COLOR: Record<string, string> = {
@@ -15,8 +17,19 @@ const TIER_COLOR: Record<string, string> = {
   Premium: "#E91E8C",
 };
 
-export function BannerAd({ ad }: BannerAdProps) {
+export function BannerAd({ ad, onImpression, onClick }: BannerAdProps) {
   const [dismissed, setDismissed] = useState(false);
+  const [impressed, setImpressed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!impressed && onImpression) {
+        setImpressed(true);
+        onImpression();
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (dismissed) return null;
 

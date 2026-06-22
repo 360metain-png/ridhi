@@ -220,7 +220,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "saved-posts",  name: "Saved Posts & Collections", desc: "Bookmark posts with collection folders (20—unlimited by tier)",              phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "story-highlights", name: "Story Highlights",    desc: "Save stories permanently to profile highlights (2—unlimited by tier)",      phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "promo-banner", name: "Promo Banner (Home Feed)","desc": "Auto-sliding gradient promo cards between feed posts (5 cards, 3s rotation)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
-      { id: "banner-ads",   name: "Inline Banner Ads",       desc: "Sponsored banner ads injected every 5th post in the feed",                    phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "banner-ads",   name: "Inline Banner Ads",       desc: "Sponsored banner ads injected every 5th post in the feed — API-backed targeting with impression/click tracking", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "ad-serving",   name: "Ad Serving System",       desc: "Real-time ad targeting by city, age, gender, interests. Active campaigns served via /api/ads/feed with server-side targeting", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
     ],
   },
   {

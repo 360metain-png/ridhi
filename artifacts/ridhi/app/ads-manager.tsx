@@ -25,13 +25,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { useColors } from "@/hooks/useColors"
 import { useTrackScreen } from "@/hooks/useAnalytics";
-;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientButton } from "@/components/GradientButton";
 import { USER_CAMPAIGNS, type AdCampaign, type AdCampaignStatus, type AdCampaignFormat, type AdPayMethod, type AdCampaignType } from "@/data/mockData";
 import { PaymentSheet } from "@/components/PaymentSheet";
 import type { InvoiceData } from "@/components/GstInvoice";
+import { apiFetch } from "@/utils/api";
 
 const { width } = Dimensions.get("window");
 
@@ -439,6 +439,7 @@ export default function AdsManagerScreen() {
   const [showCoinConfirm, setShowCoinConfirm] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
 
   const coinBalance = user?.coins ?? 2450;
 
@@ -488,46 +489,76 @@ export default function AdsManagerScreen() {
     }
   };
 
-  const submitCampaign = () => {
+  const submitCampaign = async () => {
     if (!format || !targetCity || !targetAge || !targetGender || !payMethod) return;
-    const newCampaign: AdCampaign = {
-      id: "uc" + (campaigns.length + 1),
-      headline: headline || "Untitled Campaign",
-      body: body || "",
-      cta: cta || "Learn More",
-      format,
-      imageUri: isVideo ? undefined : creativeUri || undefined,
-      videoUri: isVideo ? creativeUri || undefined : undefined,
-      videoDurationSec: isVideo ? 10 : undefined,
-      targetCity,
-      targetAge,
-      targetGender,
-      targetInterests: targetInterests.join(", ") || "General",
-      dailyBudget: parseInt(dailyBudget) || 0,
-      days: parseInt(days) || 0,
-      totalCost,
-      payMethod,
-      campaignType,
-      status: "pending",
-      submittedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
-      impressions: 0, clicks: 0, ctr: 0, spent: 0,
-      gstAmount: payMethod === "direct" ? Math.round(totalCost * GST_RATE) : 0,
-    };
-    setCampaigns((prev) => [newCampaign, ...prev]);
-    resetCreate();
-    setTab("campaigns");
-    // Update brand activity tracking
-    const now = new Date().toISOString();
-    const activeUntil = new Date();
-    activeUntil.setDate(activeUntil.getDate() + 30);
-    updateProfile({
-      lastAdCampaignAt: now,
-      brandActiveUntil: activeUntil.toISOString(),
-    });
-    Alert.alert("Campaign Submitted", "Your campaign is under review. You will be notified once it goes live or if any changes are needed.");
+    setCampaignsLoading(true);
+    try {
+      const payload = {
+        headline: headline || "Untitled Campaign",
+        body: body || "",
+        cta: cta || "Learn More",
+        format,
+        creativeUri: creativeUri || undefined,
+        isVideo,
+        targetCities: targetCity === "All India" ? ["All India"] : [targetCity],
+        targetAges: [targetAge],
+        targetGenders: [targetGender],
+        targetInterests: targetInterests.length > 0 ? targetInterests : ["General"],
+        dailyBudget: parseInt(dailyBudget) || 0,
+        totalBudget: totalCost,
+        durationDays: parseInt(days) || 7,
+        payMethod,
+      };
+      const data = await apiFetch<{ success: boolean; campaign: any }>("/api/ads/campaigns", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      if (data?.success && data.campaign) {
+        const mapped: AdCampaign = {
+          id: data.campaign.id,
+          headline: data.campaign.headline,
+          body: data.campaign.body || "",
+          cta: data.campaign.cta || "Learn More",
+          format: data.campaign.format as AdCampaignFormat,
+          imageUri: data.campaign.creativeUri && !isVideo ? data.campaign.creativeUri : undefined,
+          videoUri: data.campaign.creativeUri && isVideo ? data.campaign.creativeUri : undefined,
+          videoDurationSec: isVideo ? 10 : undefined,
+          targetCity: data.campaign.targetCities?.[0] || targetCity,
+          targetAge: data.campaign.targetAges?.[0] || targetAge,
+          targetGender: data.campaign.targetGenders?.[0] || targetGender,
+          targetInterests: data.campaign.targetInterests?.join(", ") || "General",
+          dailyBudget: data.campaign.dailyBudget || 0,
+          days: data.campaign.durationDays || 0,
+          totalCost: data.campaign.totalBudget || totalCost,
+          payMethod: data.campaign.payMethod as AdPayMethod,
+          campaignType,
+          status: "pending",
+          submittedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
+          impressions: 0, clicks: 0, ctr: 0, spent: 0,
+          gstAmount: payMethod === "direct" ? Math.round(totalCost * GST_RATE) : 0,
+        };
+        setCampaigns((prev) => [mapped, ...prev]);
+      } else {
+        throw new Error("Failed to create campaign");
+      }
+      resetCreate();
+      setTab("campaigns");
+      const now = new Date().toISOString();
+      const activeUntil = new Date();
+      activeUntil.setDate(activeUntil.getDate() + 30);
+      updateProfile({
+        lastAdCampaignAt: now,
+        brandActiveUntil: activeUntil.toISOString(),
+      });
+      Alert.alert("Campaign Submitted", "Your campaign is under review. You will be notified once it goes live or if any changes are needed.");
+    } catch (err: any) {
+      Alert.alert("Submission Failed", err?.message || "Could not create campaign. Please try again.");
+    } finally {
+      setCampaignsLoading(false);
+    }
   };
 
-  const handlePaySuccess = () => {
+  const handlePaySuccess = async () => {
     setShowPayment(false);
     const gstAmount = Math.round(totalCost * GST_RATE);
     const invoice: InvoiceData = {
@@ -551,10 +582,10 @@ export default function AdsManagerScreen() {
     if (user && !user.isAdUser) {
       updateProfile({ isAdUser: true });
     }
-    submitCampaign();
+    await submitCampaign();
   };
 
-  const handleCoinPay = () => {
+  const handleCoinPay = async () => {
     if (coinBalance < coinCost) {
       Alert.alert("Insufficient Coins", `You need ${coinCost} coins. Go to Wallet to recharge.`, [
         { text: "Cancel", style: "cancel" },
@@ -563,7 +594,7 @@ export default function AdsManagerScreen() {
       return;
     }
     setShowCoinConfirm(false);
-    submitCampaign();
+    await submitCampaign();
   };
 
   // Step validation
