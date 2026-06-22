@@ -550,40 +550,37 @@ export default function MatchScreen() {
 
       {/* ── SWIPE BUTTONS ──────────────────────────────────────────────────── */}
       {profiles.length > 0 && (
-        <View style={[styles.buttonsContainer, { paddingBottom: bottomPad + 20 }]}>
-          <View style={styles.countsRow}>
-            <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
-              Backtracks: {user?.backtracksRemaining ?? 0}
-            </Text>
-            <Text style={[styles.countLabel, { color: colors.mutedForeground }]}>
-              Super Likes: {user?.superLikesRemaining ?? 0}
-            </Text>
-          </View>
+        <View style={[styles.buttonsContainer, { paddingBottom: bottomPad + 12 }]}>
           <View style={styles.buttons}>
             <Pressable
               onPress={backtrack}
               disabled={history.length === 0}
-              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border, opacity: history.length === 0 ? 0.5 : 1 }]}
+              style={[styles.actionBtn, { opacity: history.length === 0 ? 0.4 : 1 }]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Feather name="corner-up-left" size={24} color={colors.foreground} />
+              <Feather name="corner-up-left" size={20} color={colors.foreground} />
+              <Text style={[styles.actionBtnLabel, { color: colors.foreground }]}>Back</Text>
             </Pressable>
             <Pressable
               onPress={() => swipe("left")}
-              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              style={[styles.actionBtn, styles.rejectBtn]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Feather name="x" size={28} color="#FF3B30" />
+              <Feather name="x" size={24} color="#FF3B30" />
             </Pressable>
             <Pressable
               onPress={superLike}
-              style={[styles.swipeBtn, styles.superBtn, { backgroundColor: colors.gold + "20", borderColor: colors.gold }]}
+              style={[styles.actionBtn, styles.superLikeBtn]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Feather name="star" size={28} color={colors.gold} />
+              <Feather name="star" size={22} color={colors.gold} />
             </Pressable>
             <Pressable
               onPress={() => swipe("right")}
-              style={[styles.swipeBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              style={[styles.actionBtn, styles.likeBtn]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Feather name="heart" size={28} color={colors.primary} />
+              <Feather name="heart" size={24} color={colors.primary} />
             </Pressable>
           </View>
         </View>
@@ -984,22 +981,43 @@ const styles = StyleSheet.create({
   cardTags: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
   cardTag: { backgroundColor: "rgba(255,255,255,0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   cardTagText: { color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" },
-  buttons: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 20, paddingHorizontal: 24 },
-  swipeBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  buttons: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 12, paddingHorizontal: 24 },
+  actionBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
   },
-  superBtn: { width: 52, height: 52, borderRadius: 26, flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1 },
-  superCost: { fontSize: 9, fontFamily: "Inter_700Bold" },
+  actionBtnLabel: {
+    fontSize: 9,
+    fontFamily: "Inter_500Medium",
+    marginTop: 2,
+  },
+  rejectBtn: {
+    backgroundColor: "rgba(255,59,48,0.1)",
+    borderColor: "rgba(255,59,48,0.25)",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+  },
+  likeBtn: {
+    backgroundColor: "rgba(123,47,190,0.12)",
+    borderColor: "rgba(123,47,190,0.25)",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+  },
+  superLikeBtn: {
+    backgroundColor: "rgba(255,184,0,0.12)",
+    borderColor: "rgba(255,184,0,0.25)",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
   emptyState: { alignItems: "center", gap: 12, paddingHorizontal: 40 },
   emptyTitle: { fontSize: 22, fontFamily: "Inter_700Bold" },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular", textAlign: "center" },
