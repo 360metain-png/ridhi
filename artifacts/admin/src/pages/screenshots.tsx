@@ -25,7 +25,7 @@ const SLIDES = [
 type SlideId = typeof SLIDES[number];
 
 const SLIDE_META: Record<SlideId, { title: string; subtitle: string; bg: string }> = {
-  "onboarding":   { title: "India's #1 Social App",      subtitle: "Connect · Stream · Date · Earn",      bg: "linear-gradient(160deg,#0d001a 0%,#2d0a5e 60%,#1a001a 100%)" },
+  "onboarding":   { title: "India's First Social Universal App", subtitle: "Connect · Stream · Date · Earn",      bg: "linear-gradient(160deg,#0d001a 0%,#2d0a5e 60%,#1a001a 100%)" },
   "home-feed":    { title: "Your Personalised Feed",      subtitle: "Stories · Posts · Reels · Reactions",  bg: "linear-gradient(160deg,#0a0a12 0%,#1a0533 100%)" },
   "live-stream":  { title: "Go Live Instantly",           subtitle: "Earn coins · Gifts · Top Creators",    bg: "linear-gradient(160deg,#0a0a12 0%,#1a0020 100%)" },
   "dating":       { title: "Find Your Match",             subtitle: "Swipe · Connect · Chat",               bg: "linear-gradient(160deg,#0a0a12 0%,#2d0a5e 100%)" },

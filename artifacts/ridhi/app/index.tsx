@@ -72,7 +72,7 @@ export default function Index() {
       <>
         {Platform.OS === "web" && (
           <SeoHead
-            title="Ridhi App – India's #1 Social, Live Streaming & Dating Platform"
+            title="Ridhi App – India's First Social Universal App by Krilo Digitech"
             description="Join millions of Indians on Ridhi. Live stream, join audio chat rooms, share reels & stories, find your match, and earn virtual gifts. Free on Android & iOS."
             canonical="/"
             jsonLd={[HOME_WEBPAGE_SCHEMA, HOME_FAQ_SCHEMA]}

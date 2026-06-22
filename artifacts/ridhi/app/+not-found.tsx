@@ -14,7 +14,7 @@ export default function NotFoundScreen() {
       {Platform.OS === "web" && (
         <SeoHead
           title="Page Not Found — Ridhi App"
-          description="The page you are looking for doesn't exist. Explore Ridhi — India's #1 social networking and live streaming app."
+          description="The page you are looking for doesn't exist. Explore Ridhi — India's first social universal app by Krilo Digitech Pvt Ltd."
           robots="noindex, follow"
         />
       )}

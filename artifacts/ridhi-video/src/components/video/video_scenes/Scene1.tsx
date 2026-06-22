@@ -28,7 +28,7 @@ export function Scene1() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        The India-first social networking & dating app.
+        The India-based, globally first social universal app.
       </motion.p>
     </motion.div>
   );

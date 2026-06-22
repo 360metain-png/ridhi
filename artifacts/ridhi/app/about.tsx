@@ -88,16 +88,16 @@ export default function AboutScreen() {
   return (
     <>
       <SeoHead
-        title="About Ridhi — India's #1 Live Streaming, Voice Chat & Social App"
-        description="Learn about Ridhi — India's all-in-one app for live streaming, voice chat rooms, social networking, and creator earnings. Built for the next billion users."
+        title="About Ridhi — India's First Social Universal App by Krilo Digitech"
+        description="Ridhi is an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd. Live streaming, voice chat, social networking, dating, podcasts, and creator earnings in one platform."
         canonical="/about"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "About Ridhi — India's #1 Live Streaming, Voice Chat & Social App",
+          name: "About Ridhi — India's First Social Universal App by Krilo Digitech",
           url: "https://ridhi.app/about",
           inLanguage: "en-IN",
-          description: "Learn about Ridhi — India's all-in-one app for live streaming, voice chat rooms, social networking, and creator earnings.",
+          description: "Ridhi is an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd.",
           about: { "@type": "SoftwareApplication", name: "Ridhi" },
         }}
       />
@@ -126,7 +126,7 @@ export default function AboutScreen() {
             <Image source={LOGO} style={s.logo} resizeMode="contain" />
           </View>
           <Text style={s.heroName}>Ridhi</Text>
-          <Text style={s.heroTagline}>India's #1 Social & Creator Platform</Text>
+          <Text style={s.heroTagline}>India's First Social Universal App</Text>
           <View style={s.heroBadgeRow}>
             <View style={s.heroBadge}><Text style={s.heroBadgeText}>v1.0.0</Text></View>
             <View style={s.heroBadge}><Text style={s.heroBadgeText}>Krilo Digitech Pvt. Ltd.</Text></View>

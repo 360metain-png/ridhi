@@ -1,6 +1,6 @@
 # Ridhi
 
-> Ridhi is an India-first social networking and dating app — discover content, connect with creators, join communities, and find meaningful relationships. Available on Android and iOS.
+> Ridhi is an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd — discover content, connect with creators, join communities, stream live, and find meaningful relationships. Available on Android and iOS.
 
 Ridhi combines short-video entertainment, social networking, and dating in a single platform built for Indian users. It supports 13 regional languages and a creator economy with live streaming, podcasts, and coin-based gifting.
 

@@ -73,7 +73,7 @@ const ORG_SCHEMA = {
   },
   areaServed: "IN",
   description:
-    "Ridhi Technologies builds India-first live streaming, social networking, and dating experiences for the next billion users.",
+    "Ridhi — an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd. Live streaming, social networking, dating, podcasts, and creator earnings.",
 };
 
 // ─── Inlined critical CSS — prevents FOUC, applied before JS executes ────────
@@ -191,7 +191,7 @@ export default function Root({ children }: PropsWithChildren) {
         {children}
         <noscript>
           <div style={{ padding: "24px", textAlign: "center", fontFamily: "sans-serif", background: "#0A0A0F", color: "#fff" }}>
-            <h1>Ridhi – India's #1 Social App</h1>
+            <h1>Ridhi – India's First Social Universal App</h1>
             <p>Download the Ridhi app to live stream, join voice chat rooms, and connect with people. Available free on Android &amp; iOS.</p>
             <p><a href="https://play.google.com/store/apps/details?id=com.pt.ridhi" style={{ color: "#E91E8C" }}>Download on Google Play</a></p>
           </div>

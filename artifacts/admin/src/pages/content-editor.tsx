@@ -48,7 +48,7 @@ Contact: hello@ridhi.app`,
 
   about: `Ridhi — India's Social Universe
 
-Ridhi is an India-first social networking and dating platform designed for authentic connections, creative expression, and community engagement. Built for Android & iOS with support for 13 Indian languages.
+Ridhi is an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd. Designed for authentic connections, creative expression, live streaming, and community engagement. Built for Android & iOS with support for 13 Indian languages.
 
 Our mission is to create a safe, inclusive, and vibrant space where people can connect, share, and grow together. From messaging and video calls to creator monetization and virtual gifting, Ridhi empowers every user to be a creator.
 

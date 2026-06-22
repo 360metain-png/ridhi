@@ -315,7 +315,7 @@ export default function OnboardingScreen() {
     <>
       <SeoHead
         title="Ridhi App — Live Streaming, Voice Chat & Social | India"
-        description="India's #1 app for live streaming, voice chat rooms, and social networking. Go live, earn gifts, chat in 13 Indian languages. Free download on Android & iOS."
+        description="Ridhi — an India-based, globally first social universal app by Krilo Digitech Pvt Ltd. Live streaming, voice chat, social networking, dating, podcasts, and creator earnings in 13 Indian languages."
       />
       <View style={styles.container}>
       {/* Dark gradient base */}
@@ -355,7 +355,7 @@ export default function OnboardingScreen() {
           <Text style={styles.logoName}>Ridhi</Text>
         </View>
         <View style={[styles.tagBadge, { borderColor: currentSlide.primary + "40", backgroundColor: currentSlide.primary + "12" }]}>
-          <Text style={[styles.tagText, { color: currentSlide.primary }]}>India's #1 Social App</Text>
+          <Text style={[styles.tagText, { color: currentSlide.primary }]}>India's First Social Universal App</Text>
         </View>
       </Animated.View>
 

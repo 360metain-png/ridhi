@@ -314,7 +314,7 @@ const orgSchema = {
     height: 512,
   },
   description:
-    "Ridhi is India's #1 social networking and dating app — live streams, voice rooms, dating & match, coin economy, reels, and creator brand deals.",
+    "Ridhi is an India-based, globally first social universal app made by Krilo Digitech Pvt Ltd — live streams, voice rooms, dating, podcasts, coin economy, reels, and creator brand deals.",
   sameAs: ["https://instagram.com/ridhiapp"],
   contactPoint: {
     "@type": "ContactPoint",
@@ -419,13 +419,13 @@ export default function SupportPage() {
         {/* ── Core Meta ── */}
         <title>Ridhi Help &amp; Support — 27 FAQs, Contact &amp; Troubleshooting</title>
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-        <meta name="description" content="Get help with Ridhi — India's #1 social networking and dating app. Find expert-verified answers to 27 FAQs on accounts, coins, live streams, dating, privacy, and more. Contact us at hello@ridhi.app." />
+        <meta name="description" content="Get help with Ridhi — India's first social universal app by Krilo Digitech Pvt Ltd. Find expert-verified answers to 27 FAQs on accounts, coins, live streams, dating, privacy, and more. Contact us at hello@ridhi.app." />
         <meta name="keywords" content="Ridhi support, Ridhi help, Ridhi FAQ, Ridhi app help, dating app support, live stream support, coin recharge help, India dating app, social app India, Ridhi customer service, how to use Ridhi, Ridhi account help" />
         <meta name="author" content="Ridhi Support Team" />
 
         {/* ── Open Graph ── */}
         <meta property="og:title"       content="Ridhi Help &amp; Support — 27 Expert-Verified FAQs" />
-        <meta property="og:description" content="Get help with Ridhi — India's social networking and dating app. Expert-verified answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
+        <meta property="og:description" content="Get help with Ridhi — India's first social universal app. Expert-verified answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
         <meta property="og:type"        content="website" />
         <meta property="og:url"         content="https://ridhi.app/admins/support" />
         <meta property="og:site_name"   content="Ridhi" />
@@ -435,7 +435,7 @@ export default function SupportPage() {
         {/* ── Twitter Card ── */}
         <meta name="twitter:card"        content="summary_large_image" />
         <meta name="twitter:title"       content="Ridhi Help &amp; Support — 27 Expert-Verified FAQs" />
-        <meta name="twitter:description" content="Get help with Ridhi — India's social networking and dating app. Expert-verified answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
+        <meta name="twitter:description" content="Get help with Ridhi — India's first social universal app. Expert-verified answers to FAQs on accounts, coins, live streams, dating, privacy, and more." />
         <meta name="twitter:image"       content="https://ridhi.app/opengraph.jpg" />
         <meta name="twitter:site"        content="@ridhiapp" />
         <meta name="twitter:creator"     content="@ridhiapp" />

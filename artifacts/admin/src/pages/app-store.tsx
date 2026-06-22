@@ -119,7 +119,7 @@ export default function AppStorePage() {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="gap-1.5">
-            <Globe className="w-3 h-3" /> India-first
+            <Globe className="w-3 h-3" /> India-based, Global-first
           </Badge>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Download className="w-3.5 h-3.5" /> Export

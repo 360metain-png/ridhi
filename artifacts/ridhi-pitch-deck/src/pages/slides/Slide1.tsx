@@ -23,7 +23,7 @@ export default function Slide1() {
           className="text-[2vw] font-medium text-[#A0A0A0] mt-4 text-center tracking-wide"
           style={{ fontFamily: 'var(--font-body-family)' }}
         >
-          India's First Social Networking & Dating Super-App
+          India's First Social Universal App
         </p>
         <p
           className="text-[1.2vw] font-medium text-[#E91E8C] mt-2 text-center tracking-wide"
