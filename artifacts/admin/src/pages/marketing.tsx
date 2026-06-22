@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Bell, Megaphone, Send, Clock, Users, Eye, CheckCircle2, Plus,
   MessageSquare, Mail, Smartphone, BarChart2,
-  Target, TrendingUp, AlertCircle, Tag, X, Pencil, Trash2, Play, Pause, Download} from "lucide-react";
+  Target, TrendingUp, AlertCircle, Tag, X, Pencil, Trash2, Play, Pause, Download, MapPin} from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { mockCampaigns, type Campaign } from "@/data/mock-data";
 import { useToast } from "@/hooks/use-toast";
 import { downloadCSV } from "@/lib/utils";
@@ -512,7 +513,16 @@ function NewCampaignModal({ open, onClose, onSave }: {
   const [endDate,    setEndDate]    = useState("");
   const [loading,    setLoading]    = useState(false);
 
-  const reset = () => { setName(""); setType("Push"); setCategory("Festival Offer"); setAudience("all"); setMessage(""); setPromoCode(""); setStartDate(""); setEndDate(""); };
+  // Geo-targeting
+  const [locationMode, setLocationMode] = useState<"all" | "city" | "radius">("all");
+  const [targetCity,     setTargetCity]   = useState("");
+  const [targetRadius,   setTargetRadius] = useState(25);   // km
+
+  const reset = () => {
+    setName(""); setType("Push"); setCategory("Festival Offer"); setAudience("all");
+    setMessage(""); setPromoCode(""); setStartDate(""); setEndDate("");
+    setLocationMode("all"); setTargetCity(""); setTargetRadius(25);
+  };
 
   const handleSave = async () => {
     if (!name.trim() || !message.trim() || !startDate || !endDate) {
@@ -532,6 +542,9 @@ function NewCampaignModal({ open, onClose, onSave }: {
       status: "Draft",
       startDate,
       endDate,
+      locationMode,
+      targetCity: locationMode === "all" ? undefined : targetCity || undefined,
+      targetRadius: locationMode === "radius" ? targetRadius : undefined,
     };
     onSave(newC);
     toast({ title: "✅ Campaign Created", description: `"${name}" saved as Draft. Activate it to start sending.` });
@@ -588,6 +601,82 @@ function NewCampaignModal({ open, onClose, onSave }: {
               <AudienceSelect value={audience} onChange={setAudience} />
             </div>
 
+            {/* Geo-Targeting */}
+            <div className="col-span-2 space-y-3">
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-muted-foreground" /> Location Targeting
+              </Label>
+              <div className="flex items-center gap-2 bg-muted/40 rounded-lg p-1 w-fit">
+                {[
+                  { id: "all" as const,    label: "All Locations" },
+                  { id: "city" as const,   label: "By City" },
+                  { id: "radius" as const, label: "Radius" },
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setLocationMode(m.id)}
+                    className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${locationMode === m.id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+
+              {locationMode === "city" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Target City</Label>
+                  <Input
+                    placeholder="e.g. Mumbai, Delhi, Bangalore, Chennai, Hyderabad…"
+                    className="bg-background border-border"
+                    value={targetCity}
+                    onChange={(e) => setTargetCity(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {locationMode === "radius" && (
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">Target City / Pinpoint</Label>
+                    <Input
+                      placeholder="e.g. Mumbai, Delhi, Bangalore, Hyderabad…"
+                      className="bg-background border-border"
+                      value={targetCity}
+                      onChange={(e) => setTargetCity(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs text-muted-foreground">Radius</Label>
+                      <span className="text-xs font-bold text-primary">{targetRadius} km</span>
+                    </div>
+                    <Slider
+                      value={[targetRadius]}
+                      onValueChange={(v) => setTargetRadius(v[0])}
+                      min={5}
+                      max={100}
+                      step={5}
+                    />
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span>5 km</span>
+                      <span>100 km</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {locationMode !== "all" && targetCity && (
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <p className="text-xs text-emerald-800">
+                    {locationMode === "city"
+                      ? `Targeting users in ${targetCity}`
+                      : `Targeting users within ${targetRadius} km of ${targetCity}`}
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="col-span-2 space-y-1.5">
               <Label className="text-sm font-medium">Message / Creative</Label>
               <Textarea
@@ -633,7 +722,14 @@ function NewCampaignModal({ open, onClose, onSave }: {
                         {promoCode && <Badge variant="outline" className="text-xs font-mono border-primary/30 text-primary">{promoCode}</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">{message}</p>
-                      <p className="text-xs text-muted-foreground/60 mt-1">now · Ridhi · {category}</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">
+                        now · Ridhi · {category}
+                        {locationMode !== "all" && targetCity && (
+                          <span className="text-primary ml-1">
+                            · {locationMode === "city" ? targetCity : `${targetCity} (${targetRadius} km)`}
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -718,6 +814,7 @@ function CampaignsTab({ campaigns, setCampaigns }: { campaigns: Campaign[]; setC
                 <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground text-xs font-semibold">Campaign</TableHead>
                   <TableHead className="text-muted-foreground text-xs font-semibold">Channel</TableHead>
+                  <TableHead className="text-muted-foreground text-xs font-semibold">Target</TableHead>
                   <TableHead className="text-muted-foreground text-xs font-semibold text-right">Reach</TableHead>
                   <TableHead className="text-muted-foreground text-xs font-semibold text-right">Clicks</TableHead>
                   <TableHead className="text-muted-foreground text-xs font-semibold text-right">Conv.</TableHead>
@@ -729,7 +826,7 @@ function CampaignsTab({ campaigns, setCampaigns }: { campaigns: Campaign[]; setC
               <TableBody>
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground text-sm py-8">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground text-sm py-8">
                       No campaigns found. Create one to get started.
                     </TableCell>
                   </TableRow>
@@ -739,6 +836,17 @@ function CampaignsTab({ campaigns, setCampaigns }: { campaigns: Campaign[]; setC
                     <TableCell className="font-medium text-foreground text-sm max-w-[180px] truncate">{c.name}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs border-border text-muted-foreground">{c.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">
+                        {c.locationMode === "city" && c.targetCity ? (
+                          <span className="flex items-center gap-1 text-primary"><MapPin className="w-3 h-3" />{c.targetCity}</span>
+                        ) : c.locationMode === "radius" && c.targetCity ? (
+                          <span className="flex items-center gap-1 text-primary"><MapPin className="w-3 h-3" />{c.targetCity} · {c.targetRadius} km</span>
+                        ) : (
+                          <span>All</span>
+                        )}
+                      </span>
                     </TableCell>
                     <TableCell className="text-right text-sm text-muted-foreground">{(c.reach / 1000).toFixed(0)}K</TableCell>
                     <TableCell className="text-right text-sm text-foreground font-medium">{c.clicks.toLocaleString()}</TableCell>

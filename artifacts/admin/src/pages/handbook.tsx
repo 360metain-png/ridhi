@@ -848,6 +848,7 @@ const ADMIN_SECTIONS: Section[] = [
       "Referral Program: view referral stats, top referrers, and configure the referral coin bonus amount",
       "Promotional Banners: upload and schedule in-app banner images for the Home Feed",
       "Campaign analytics: impressions, click-through rates, conversions, and reach per campaign",
+      "Geo-targeting: when creating a campaign, Admins can target All Locations, a specific City (e.g. Mumbai, Delhi), or a Radius around a city (5 km – 100 km slider). The campaign table shows the target location in a dedicated column.",
       "Ad pages (Business Ads, Special Ads, Commercial Banners) are Super Admin only — Admin cannot access these",
       "Promo & Offer Codes are Super Admin only — Admin cannot create discount codes",
     ],

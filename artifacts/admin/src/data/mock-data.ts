@@ -43,7 +43,13 @@ export type Post = { id: string, userId: string, type: "post"|"reel"|"story"|"po
 export type Community = { id: string, name: string, category: string, members: number, posts: number, language: string, visibility: "public"|"private", status: "active"|"suspended"|"pending", createdAt: string };
 export type Transaction = { id: string, userId: string, userName: string, type: "Earned"|"Spent"|"Recharged"|"Gift Sent"|"Gift Received", amount: number, balanceAfter: number, description: string, createdAt: string };
 export type WithdrawalRequest = { id: string, creatorId: string, creatorName: string, amount: number, method: "UPI"|"Bank", upiId?: string, bankAccount?: string, requestedAt: string, status: "Pending"|"Approved"|"Rejected"|"Paid" };
-export type Campaign = { id: string, name: string, type: string, reach: number, clicks: number, conversions: number, status: "Draft"|"Active"|"Completed", startDate: string, endDate: string };
+export type Campaign = {
+  id: string, name: string, type: string, reach: number, clicks: number, conversions: number,
+  status: "Draft"|"Active"|"Completed", startDate: string, endDate: string,
+  locationMode?: "all" | "city" | "radius",
+  targetCity?: string,
+  targetRadius?: number,
+};
 
 // ── Fake Profile Detection Engine ──
 export function calculateTrustScore(user: Partial<User>): number {
@@ -246,17 +252,27 @@ export const mockWithdrawals: WithdrawalRequest[] = Array.from({ length: 30 }, (
   status: ["Pending", "Approved", "Rejected", "Paid"][Math.floor(Math.random() * 4)] as any
 }));
 
-export const mockCampaigns: Campaign[] = Array.from({ length: 15 }, (_, i) => ({
-  id: `camp${i + 1}`,
-  name: `Diwali Offer ${i + 1}`,
-  type: "Push Notification",
-  reach: Math.floor(Math.random() * 100000),
-  clicks: Math.floor(Math.random() * 10000),
-  conversions: Math.floor(Math.random() * 1000),
-  status: ["Draft", "Active", "Completed"][Math.floor(Math.random() * 3)] as any,
-  startDate: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0],
-  endDate: new Date(Date.now() + Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0]
-}));
+export const mockCampaigns: Campaign[] = Array.from({ length: 15 }, (_, i) => {
+  const locModes: ("all" | "city" | "radius")[] = ["all", "all", "city", "radius", "all"];
+  const locMode = locModes[i % locModes.length];
+  const cities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Kolkata"];
+  const targetCity = locMode === "all" ? undefined : cities[i % cities.length];
+  const targetRadius = locMode === "radius" ? [5, 10, 15, 25, 50, 100][i % 6] : undefined;
+  return {
+    id: `camp${i + 1}`,
+    name: `Diwali Offer ${i + 1}`,
+    type: "Push Notification",
+    reach: Math.floor(Math.random() * 100000),
+    clicks: Math.floor(Math.random() * 10000),
+    conversions: Math.floor(Math.random() * 1000),
+    status: ["Draft", "Active", "Completed"][Math.floor(Math.random() * 3)] as any,
+    startDate: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0],
+    endDate: new Date(Date.now() + Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0],
+    locationMode: locMode,
+    targetCity,
+    targetRadius,
+  };
+});
 
 // ── 30-Day Time-Series Analytics ───────────────────────────────────
 export interface DailyStat {
