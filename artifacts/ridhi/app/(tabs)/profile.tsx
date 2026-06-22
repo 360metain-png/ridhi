@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -205,7 +205,13 @@ export default function ProfileScreen() {
     setEditOpen(false);
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const pickPhoto = async () => {
+    if (Platform.OS === "web") {
+      fileInputRef.current?.click();
+      return;
+    }
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") { Alert.alert("Permission needed", "Allow photo access to change your profile picture."); return; }
@@ -223,6 +229,14 @@ export default function ProfileScreen() {
     } catch (err) {
       Alert.alert("Photo Error", "Could not select a photo. Please try again.");
     }
+  };
+
+  const handleWebFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const uri = URL.createObjectURL(file);
+    setEditAvatar(uri);
+    setAvatarSheet(false);
   };
 
   const useAutoAvatar = () => { setEditAvatar(undefined); setAvatarSheet(false); setShowAvatarGrid(false); };
@@ -290,6 +304,13 @@ export default function ProfileScreen() {
 
   return (
     <>
+    {Platform.OS === "web" && React.createElement("input", {
+      type: "file",
+      accept: "image/*",
+      ref: fileInputRef as any,
+      style: { display: "none" },
+      onChange: handleWebFileChange as any,
+    })}
     <PrivateHead />
     {/* ── Edit Profile Modal ─────────────────────────────────────────────── */}
     <Modal visible={editOpen} transparent animationType="slide" onRequestClose={() => setEditOpen(false)}>

@@ -234,7 +234,15 @@ export default function CreatePostScreen() {
     Alert.alert("Text-to-Speech", `Preview: "${text.slice(0, 50)}..." in ${ttsVoice} ${ttsLanguage} voice`, [{ text: "OK" }]);
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingMediaType = useRef<"photo" | "video" | "carousel" | null>(null);
+
   const pickMedia = async (type: "photo" | "video" | "carousel") => {
+    if (Platform.OS === "web") {
+      pendingMediaType.current = type;
+      fileInputRef.current?.click();
+      return;
+    }
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== "granted") {
@@ -264,6 +272,23 @@ export default function CreatePostScreen() {
     } catch {
       Alert.alert("Gallery Error", "Could not open gallery. Please try again.");
     }
+  };
+
+  const handleWebFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const type = pendingMediaType.current;
+    pendingMediaType.current = null;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (type === "carousel") {
+      const uris = Array.from(files).map((f) => URL.createObjectURL(f));
+      setCarouselImages(uris);
+      setMediaUri(null);
+      return;
+    }
+    const uri = URL.createObjectURL(files[0]);
+    setMediaUri(uri);
+    if (type === "photo" && selectedType === "text") setSelectedType("photo");
+    if (type === "video" && selectedType === "text") setSelectedType("video");
   };
 
   const openCamera = async (type: "photo" | "video") => {
@@ -496,6 +521,14 @@ export default function CreatePostScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {Platform.OS === "web" && React.createElement("input", {
+        type: "file",
+        accept: "image/*,video/*",
+        multiple: true,
+        ref: fileInputRef as any,
+        style: { display: "none" },
+        onChange: handleWebFileChange as any,
+      })}
       <View style={[styles.header, { paddingTop: topPad + 10, backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <Pressable onPress={() => router.back()} style={styles.closeBtn}>
           <Feather name="x" size={24} color={colors.foreground} />
