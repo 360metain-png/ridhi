@@ -18,12 +18,6 @@ export function AIReplySuggestions({ lastMessage, otherUser, onSelectReply }: Pr
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Feather name="cpu" size={12} color={colors.primary} />
-        <Text style={[styles.headerText, { color: colors.primary }]}>
-          AI Suggestions
-        </Text>
-      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -33,13 +27,20 @@ export function AIReplySuggestions({ lastMessage, otherUser, onSelectReply }: Pr
           <Pressable
             key={i}
             onPress={() => onSelectReply(reply)}
-            style={[styles.suggestionChip, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}
+            style={[
+              styles.suggestionChip,
+              { backgroundColor: colors.muted + "60", borderColor: colors.border },
+            ]}
           >
-            <Text style={[styles.suggestionText, { color: colors.primary }]} numberOfLines={1}>
+            <Text style={[styles.suggestionText, { color: colors.mutedForeground }]} numberOfLines={1}>
               {reply}
             </Text>
           </Pressable>
         ))}
+        <View style={styles.ghostLabel}>
+          <Feather name="zap" size={10} color={colors.mutedForeground} />
+          <Text style={[styles.ghostLabelText, { color: colors.mutedForeground }]}>AI</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -47,34 +48,35 @@ export function AIReplySuggestions({ lastMessage, otherUser, onSelectReply }: Pr
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(0,0,0,0.05)",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 16,
-    marginBottom: 6,
-  },
-  headerText: {
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
   },
   scrollContent: {
     paddingHorizontal: 12,
     gap: 8,
+    alignItems: "center",
   },
   suggestionChip: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
+    paddingVertical: 7,
+    borderRadius: 16,
     borderWidth: 1,
     maxWidth: 280,
   },
   suggestionText: {
     fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  ghostLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    paddingLeft: 4,
+    opacity: 0.6,
+  },
+  ghostLabelText: {
+    fontSize: 10,
     fontFamily: "Inter_500Medium",
   },
 });

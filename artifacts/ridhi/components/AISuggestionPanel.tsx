@@ -9,12 +9,11 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useColors } from "@/hooks/useColors";
 import { type AISuggestedMatch } from "@/data/aiMatchEngine";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.72;
+const AVATAR_SIZE = 64;
 
 interface Props {
   suggestions: AISuggestedMatch[];
@@ -30,14 +29,16 @@ export function AISuggestionPanel({ suggestions, onPressMatch }: Props) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Feather name="cpu" size={16} color={colors.primary} />
+          <View style={[styles.aiIcon, { backgroundColor: colors.primary + "20" }]}>
+            <Feather name="zap" size={14} color={colors.primary} />
+          </View>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>
-            AI Suggested Matches
+            AI Picks for you
           </Text>
         </View>
-        <View style={[styles.aiBadge, { backgroundColor: colors.primary + "18" }]}>
+        <View style={[styles.aiBadge, { backgroundColor: colors.primary + "15" }]}>
           <Text style={[styles.aiBadgeText, { color: colors.primary }]}>
-            {suggestions.length} picks
+            {suggestions.length}
           </Text>
         </View>
       </View>
@@ -46,71 +47,30 @@ export function AISuggestionPanel({ suggestions, onPressMatch }: Props) {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        decelerationRate="fast"
-        snapToInterval={CARD_WIDTH + 12}
       >
         {suggestions.map((s) => (
           <Pressable
             key={s.profile.id}
             onPress={() => onPressMatch(s.profile)}
-            style={styles.card}
+            style={styles.avatarRowItem}
           >
-            <Image
-              source={{ uri: s.profile.imageUri }}
-              style={styles.cardImage}
-              contentFit="cover"
-            />
-            <LinearGradient
-              colors={["transparent", "rgba(0,0,0,0.85)"]}
-              style={styles.cardGradient}
-            />
-
-            {/* AI Score Badge */}
-            <View style={styles.scoreContainer}>
-              <LinearGradient
-                colors={
-                  s.compatibility.score >= 85
-                    ? ["#FF6B35", "#E91E8C"]
-                    : ["#7B2FBE", "#E91E8C"]
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.scoreBadge}
-              >
-                <Feather name="zap" size={10} color="#fff" />
-                <Text style={styles.scoreText}>{s.compatibility.score}%</Text>
-              </LinearGradient>
-            </View>
-
-            {/* Card Info */}
-            <View style={styles.cardInfo}>
-              <Text style={styles.cardName}>
-                {s.profile.name}, {s.profile.age}
-              </Text>
-              <View style={styles.cardMeta}>
-                <Feather name="map-pin" size={11} color="rgba(255,255,255,0.7)" />
-                <Text style={styles.cardMetaText}>
-                  {s.profile.city} · {s.profile.language}
-                </Text>
-              </View>
-
-              {/* AI Reasons */}
-              <View style={styles.reasons}>
-                {s.compatibility.matchReasons.slice(0, 2).map((r, i) => (
-                  <Text key={i} style={styles.reasonText}>
-                    ✨ {r}
-                  </Text>
-                ))}
-              </View>
-
-              {/* AI Icebreaker preview */}
-              <View style={styles.icebreakerPreview}>
-                <Text style={styles.icebreakerLabel}>AI Icebreaker:</Text>
-                <Text style={styles.icebreakerText} numberOfLines={2}>
-                  {s.aiIcebreaker}
-                </Text>
+            <View style={styles.avatarWrap}>
+              <Image
+                source={{ uri: s.profile.imageUri }}
+                style={styles.avatar}
+                contentFit="cover"
+              />
+              {/* Score ring */}
+              <View style={[styles.scoreRing, { borderColor: s.compatibility.score >= 85 ? "#E91E8C" : colors.primary }]}>
+                <View style={[styles.scoreDot, { backgroundColor: s.compatibility.score >= 85 ? "#E91E8C" : colors.primary }]} />
               </View>
             </View>
+            <Text style={styles.avatarName} numberOfLines={1}>
+              {s.profile.name}
+            </Text>
+            <Text style={[styles.avatarScore, { color: s.compatibility.score >= 85 ? "#E91E8C" : colors.primary }]}>
+              {s.compatibility.score}% match
+            </Text>
           </Pressable>
         ))}
       </ScrollView>
@@ -120,126 +80,91 @@ export function AISuggestionPanel({ suggestions, onPressMatch }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: 6,
+    marginBottom: 12,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
+  aiIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: {
-    fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
   },
   aiBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   aiBadgeText: {
     fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_700Bold",
   },
   scrollContent: {
     paddingHorizontal: 16,
-    gap: 12,
+    gap: 16,
   },
-  card: {
-    width: CARD_WIDTH,
-    height: 340,
-    borderRadius: 24,
-    overflow: "hidden",
+  avatarRowItem: {
+    alignItems: "center",
+    width: AVATAR_SIZE + 8,
+    gap: 4,
+  },
+  avatarWrap: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
     position: "relative",
-    backgroundColor: "#1a1a2e",
   },
-  cardImage: {
-    width: "100%",
-    height: "100%",
-    position: "absolute",
+  avatar: {
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.1)",
   },
-  cardGradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "70%",
-  },
-  scoreContainer: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-  },
-  scoreBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-  },
-  scoreText: {
-    color: "#fff",
-    fontSize: 12,
-    fontFamily: "Inter_700Bold",
-  },
-  cardInfo: {
+  scoreRing: {
     position: "absolute",
     bottom: 0,
-    left: 0,
     right: 0,
-    padding: 16,
-    gap: 6,
-  },
-  cardName: {
-    color: "#fff",
-    fontSize: 20,
-    fontFamily: "Inter_700Bold",
-  },
-  cardMeta: {
-    flexDirection: "row",
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    backgroundColor: "#000",
     alignItems: "center",
-    gap: 4,
+    justifyContent: "center",
   },
-  cardMetaText: {
-    color: "rgba(255,255,255,0.7)",
+  scoreDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  avatarName: {
+    color: "#fff",
     fontSize: 12,
     fontFamily: "Inter_500Medium",
-  },
-  reasons: {
-    gap: 2,
-    marginTop: 2,
-  },
-  reasonText: {
-    color: "rgba(255,255,255,0.85)",
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 16,
-  },
-  icebreakerPreview: {
-    backgroundColor: "rgba(255,255,255,0.12)",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
+    textAlign: "center",
     marginTop: 4,
   },
-  icebreakerLabel: {
-    color: "#E91E8C",
+  avatarScore: {
     fontSize: 10,
     fontFamily: "Inter_600SemiBold",
-    marginBottom: 2,
-  },
-  icebreakerText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 16,
+    textAlign: "center",
   },
 });
