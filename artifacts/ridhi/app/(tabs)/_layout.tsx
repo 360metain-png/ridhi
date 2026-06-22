@@ -136,7 +136,7 @@ export default function TabLayout() {
             tabBarIcon: ({ color, focused }) => (
               <AnimatedTabIcon name="heart" focused={focused} color={color} />
             ),
-            tabBarLabel: ({ focused }) => <TabLabel label="Dating" focused={focused} />,
+            tabBarLabel: ({ focused }) => <TabLabel label="Vibe" focused={focused} />,
           }}
         />
         <Tabs.Screen
