@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/utils/api";
 import { MONTHS, getZodiacSignId, getZodiacFromBirthday, getAgeFromBirthday, ZODIAC_LIST } from "@/utils/zodiac";
 import { GradientButton } from "@/components/GradientButton";
 import { Avatar, AvatarPicker, getAvatarUrl, getAvatarOptions } from "@/components/Avatar";
@@ -275,7 +276,18 @@ export default function ProfileSetupScreen() {
     if (step < TOTAL_STEPS - 1) { setStep(step + 1); return; }
     setLoading(true);
     const resolvedAvatar = photoUri || avatarUri || getAvatarUrl(name, gender);
+    const userId = "user_" + Date.now();
+    const resp = await apiFetch<{ success: boolean; token?: string; userId?: string }>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        id: userId,
+        name,
+        phone: "",
+        email: "",
+      }),
+    });
     await login({
+      id: userId,
       name,
       nickname: nickname.trim() || name,
       age: computedAge,
@@ -291,7 +303,7 @@ export default function ProfileSetupScreen() {
       coins: 100,
       locationCoords: coords ?? undefined,
       registeredAt: new Date().toISOString(),
-    });
+    }, resp.token);
     setLoading(false);
     router.replace("/(tabs)");
   };

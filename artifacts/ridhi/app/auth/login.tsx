@@ -21,6 +21,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { GradientButton } from "@/components/GradientButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { sendFirebaseOtp, storeFirebaseConfirmation, isFirebaseReady } from "@/lib/firebaseAuth";
+import { apiFetch, ApiError } from "@/utils/api";
 import * as AppleAuthentication from "expo-apple-authentication";
 
 const LOGO = require("../../assets/images/ridhi_logo.png");
@@ -199,11 +200,17 @@ export default function LoginScreen() {
         const name = credential.fullName?.givenName
           ? `${credential.fullName.givenName} ${credential.fullName.familyName || ""}`.trim()
           : "Ridhi User";
+        const id = credential.user;
+        const email = credential.email || `${credential.user}@ridhi.app`;
+        const resp = await apiFetch<{ success: boolean; token?: string; userId?: string }>("/api/auth/register", {
+          method: "POST",
+          body: JSON.stringify({ id, name, email }),
+        });
         login({
-          id: credential.user,
+          id,
           name,
           phone: "",
-          email: credential.email || `${credential.user}@ridhi.app`,
+          email,
           avatar: "",
           city: "Mumbai",
           age: 25,
@@ -213,19 +220,26 @@ export default function LoginScreen() {
           followers: 0,
           following: 0,
           posts: 0,
-        });
+        }, resp.token);
         router.replace("/(tabs)");
         return;
       }
       // Google / Facebook / other — mock fallback for now
       await new Promise((r) => setTimeout(r, 1000));
+      const id = "social_" + Date.now();
+      const name = provider === "google" ? "Rahul Sharma" : "Arjun Kumar";
+      const email = provider + "@ridhi.app";
+      const resp = await apiFetch<{ success: boolean; token?: string; userId?: string }>("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify({ id, name, email }),
+      });
       login({
-        id: "social_" + Date.now(),
-        name: provider === "google" ? "Rahul Sharma" : "Arjun Kumar",
-        phone: "", email: provider + "@ridhi.app", avatar: "",
+        id,
+        name,
+        phone: "", email, avatar: "",
         city: "Mumbai", age: 25, gender: "other", interests: [],
         coins: 100, followers: 0, following: 0, posts: 0,
-      });
+      }, resp.token);
       router.replace("/(tabs)");
     } catch (err: any) {
       if (err.code === "ERR_REQUEST_CANCELED") {
@@ -242,12 +256,17 @@ export default function LoginScreen() {
     setSocialLoading("guest");
     await new Promise((r) => setTimeout(r, 600));
     setSocialLoading(null);
+    const id = "guest_" + Date.now();
+    const resp = await apiFetch<{ success: boolean; token?: string; userId?: string }>("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ id, name: "Guest User", email: "guest@ridhi.app" }),
+    });
     login({
-      id: "guest_" + Date.now(),
+      id,
       name: "Guest User", phone: "", email: "guest@ridhi.app", avatar: "",
       city: "India", age: 18, gender: "other", interests: [],
       coins: 20, followers: 0, following: 0, posts: 0,
-    });
+    }, resp.token);
     router.replace("/(tabs)");
   }, [login]);
 

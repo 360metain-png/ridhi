@@ -299,4 +299,35 @@ router.post("/auth/resend-otp", async (req, res) => {
   }
 });
 
+// ── POST /api/auth/register ─────────────────────────────────────────────────
+// Register a new user profile (social, guest, or any login path that doesn't
+// go through OTP). Returns a JWT token so the client can make authenticated
+// requests immediately.
+router.post("/auth/register", async (req, res) => {
+  const { id, name, phone, email } = req.body as {
+    id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
+
+  if (!id || !name) {
+    res.status(400).json({ success: false, error: "id and name are required" });
+    return;
+  }
+
+  const identifier = phone || email || id;
+  try {
+    await db.insert(users)
+      .values({ phone: identifier, name, coins: 100 })
+      .onConflictDoNothing();
+  } catch (err) {
+    req.log.warn({ err, id }, "user upsert warning (non-fatal)");
+  }
+
+  const token = await signUserToken(id);
+  req.log.info({ id, name }, "user registered via /auth/register");
+  res.json({ success: true, token, userId: id });
+});
+
 export default router;

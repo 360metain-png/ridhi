@@ -99,7 +99,7 @@ interface AuthContextValue {
   user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (profile: Partial<UserProfile>) => Promise<void>;
+  login: (profile: Partial<UserProfile>, token?: string) => Promise<void>;
   logout: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
@@ -258,9 +258,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const login = useCallback(async (profile: Partial<UserProfile>) => {
+  const login = useCallback(async (profile: Partial<UserProfile>, token?: string) => {
     const newUser: UserProfile = { ...DEFAULT_USER, ...profile };
     await AsyncStorage.setItem("ridhi_user", JSON.stringify(newUser));
+    if (token) {
+      await AsyncStorage.setItem("ridhi_token", token);
+    }
     // Ensure all settings are ON for every login session
     await AsyncStorage.setItem("ridhi_app_settings", JSON.stringify({
       theme: "dark",
