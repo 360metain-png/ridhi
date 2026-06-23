@@ -656,17 +656,9 @@ function ReelItem({
           <Text style={styles.reelCaption} numberOfLines={2}>
             {reel.caption}
           </Text>
-        </Animated.View>
 
-        {/* Actions slide in from the right */}
-        <Animated.View
-          style={[
-            styles.reelActions,
-            { opacity: actOpacity, transform: [{ translateX: actX }] },
-          ]}
-        >
-          {/* Emoji reactions */}
-          <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {/* Emoji reactions — inside info column so they don't squash the layout */}
+          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
             {reactions.map((r) => (
               <Pressable
                 key={r.emoji}
@@ -705,8 +697,8 @@ function ReelItem({
           </View>
 
           {showEmojiPicker && (
-            <View style={{ flexDirection: "row", gap: 6, marginBottom: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude22", "\ud83e\udd2f", "\ud83d\ude4c", "\ud83d\udc4f", "\ud83d\ude0d", "\ud83d\ude21", "\ud83d\ude32", "\ud83d\udc80", "\ud83d\ude4f"].map((emoji) => (
+            <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+              {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
                 <Pressable
                   key={emoji}
                   onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
@@ -722,7 +714,15 @@ function ReelItem({
               ))}
             </View>
           )}
+        </Animated.View>
 
+        {/* Actions slide in from the right */}
+        <Animated.View
+          style={[
+            styles.reelActions,
+            { opacity: actOpacity, transform: [{ translateX: actX }] },
+          ]}
+        >
           <Pressable
             style={styles.reelAction}
             onPress={handleLike}
