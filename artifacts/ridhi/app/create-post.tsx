@@ -538,7 +538,7 @@ export default function CreatePostScreen() {
           label={isScheduled ? "Schedule" : "Post"}
           onPress={isScheduled ? executeSchedule : handlePost}
           loading={loading}
-          disabled={!text.trim() && hashtags.length === 0}
+          disabled={!text.trim() && hashtags.length === 0 && !mediaUri && carouselImages.length === 0}
           small
         />
       </View>
