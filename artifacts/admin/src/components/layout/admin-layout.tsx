@@ -10,7 +10,7 @@ import {
   Landmark,
   Gamepad2, Headphones, Music, PenTool, MessageSquare,
   Eye, Clapperboard, Menu, X, Smartphone,
-  MessagesSquare,
+  MessagesSquare, ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge }  from "@/components/ui/badge";
@@ -77,6 +77,7 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: "Commerce",
     items: [
+      { name: "Shop Products",       href: "/shop-products",       icon: ShoppingBag,    badge: "NEW", allowedRoles: SA },
       { name: "Business Ads",        href: "/business-ads",        icon: Zap,            badge: "3", allowedRoles: SA },
       { name: "Special Client Ads",  href: "/special-ads",         icon: Crown,                        allowedRoles: SA },
       { name: "Commercial Banners",  href: "/commercial-banners",  icon: LayoutTemplate,               allowedRoles: SA },

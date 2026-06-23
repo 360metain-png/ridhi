@@ -54,6 +54,7 @@ import CRM                 from "@/pages/crm";
 import PaymentGateway      from "@/pages/payment-gateway";
 import AdminManagement     from "@/pages/admin-management";
 import PkBattleApprovals   from "@/pages/pk-battle-approvals";
+import ShopProducts        from "@/pages/shop-products";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth-context";
@@ -109,6 +110,7 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/handbook":     ["super_admin", "admin"],
   "/payment-gateway": ["super_admin"],
   "/pk-battle-approvals": ["super_admin"],
+  "/shop-products":       ["super_admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -227,6 +229,7 @@ function Router() {
       <Route path="/crm"             component={() => <RoleRoute component={CRM}               path="/crm" />} />
       <Route path="/payment-gateway" component={() => <RoleRoute component={PaymentGateway}   path="/payment-gateway" />} />
       <Route path="/pk-battle-approvals" component={() => <RoleRoute component={PkBattleApprovals} path="/pk-battle-approvals" />} />
+      <Route path="/shop-products"      component={() => <RoleRoute component={ShopProducts}      path="/shop-products" />} />
       <Route component={NotFound} />
     </Switch>
   );
