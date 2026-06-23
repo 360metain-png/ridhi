@@ -28,6 +28,7 @@ import { apiFetch } from "@/utils/api";
 import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
+import { RidhiCoin } from "@/components/RidhiCoin";
 import { Avatar } from "@/components/Avatar";
 import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, POPUP_ADS, PRODUCTS, type BannerAdConfig } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
@@ -657,14 +658,21 @@ export default function FeedScreen() {
                   style={[styles.shopProductCard, { backgroundColor: colors.background, borderColor: colors.border }]}
                   onPress={() => router.push({ pathname: "/product-detail", params: { id: product.id } } as any)}
                 >
-                  <Image source={{ uri: product.image }} style={styles.shopProductImg} />
+                  <Image
+                    source={{ uri: product.image }}
+                    style={[styles.shopProductImg, { backgroundColor: colors.muted }]}
+                    resizeMode="cover"
+                  />
                   <Text style={[styles.shopProductName, { color: colors.foreground }]} numberOfLines={2}>
                     {product.name}
                   </Text>
                   <View style={styles.shopProductBottom}>
-                    <Text style={[styles.shopProductPrice, { color: colors.primary }]}>
-                      {product.price} 🪙
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                      <Text style={[styles.shopProductPrice, { color: colors.primary }]}>
+                        {product.price}
+                      </Text>
+                      <RidhiCoin size={14} />
+                    </View>
                     <View style={styles.shopProductRating}>
                       <Feather name="star" size={9} color="#FFD700" />
                       <Text style={[styles.shopProductRatingText, { color: colors.mutedForeground }]}>
