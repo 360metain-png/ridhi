@@ -4,11 +4,14 @@ import {
   Animated,
   Easing,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
   ViewToken,
   useWindowDimensions,
@@ -603,6 +606,10 @@ function VoiceReelItem({
   const [likeCount, setLikeCount] = useState(reel.likes);
   const [isFollowing, setIsFollowing] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
+  const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string }>>([]);
+  const [hiddenComments, setHiddenComments] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState(isActive);
   const [progress, setProgress] = useState(0);
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -714,31 +721,33 @@ function VoiceReelItem({
   const handleComment = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     trackComment(reel.id, "voice_reel");
-    // Simple inline comment — prompt for text and increment count
-    if (Platform.OS === "web") {
-      const text = window.prompt("Add a comment...");
-      if (text && text.trim()) {
-        setCommentCount((c) => c + 1);
-      }
-    } else {
-      Alert.prompt(
-        "Comment",
-        "Add a comment on this voice reel",
-        [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Post",
-            onPress: (text?: string) => {
-              if (text && text.trim()) {
-                setCommentCount((c) => c + 1);
-              }
-            },
-          },
-        ],
-        "plain-text"
-      );
-    }
+    setShowCommentSheet(true);
   }, [reel.id, trackComment]);
+
+  const handleLongPressComment = useCallback((commentId: string, commentName: string) => {
+    Alert.alert("Comment Options", `Comment by ${commentName}`, [
+      {
+        text: "Delete Comment",
+        style: "destructive",
+        onPress: () => setSentComments((prev) => prev.filter((c) => c.id !== commentId)),
+      },
+      {
+        text: "Hide Comment",
+        onPress: () => setHiddenComments((prev) => { const s = new Set(prev); s.add(commentId); return s; }),
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }, []);
+
+  const submitComment = useCallback(() => {
+    if (!commentText.trim()) return;
+    setSentComments((prev) => [
+      ...prev,
+      { id: Date.now().toString(), name: "You", text: commentText.trim(), timeAgo: "just now" },
+    ]);
+    setCommentCount((c) => c + 1);
+    setCommentText("");
+  }, [commentText]);
 
   const [replySheetVisible, setReplySheetVisible] = useState(false);
 
@@ -894,9 +903,136 @@ function VoiceReelItem({
         reelUserName={reel.userName}
         onClose={() => setReplySheetVisible(false)}
       />
+
+      {/* ── Comment Sheet ── */}
+      <Modal
+        visible={showCommentSheet}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCommentSheet(false)}
+      >
+        <Pressable style={vcStyles.backdrop} onPress={() => setShowCommentSheet(false)} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={vcStyles.sheet}>
+          <View style={vcStyles.sheetInner}>
+            <View style={vcStyles.header}>
+              <Text style={vcStyles.title}>Comments</Text>
+              <Pressable onPress={() => setShowCommentSheet(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Feather name="x" size={20} color="rgba(255,255,255,0.6)" />
+              </Pressable>
+            </View>
+            <ScrollView style={vcStyles.list} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
+              {[
+                { id: "c1", name: "Priya Sharma", text: "This voice reel is amazing! 🎙️", timeAgo: "1m" },
+                { id: "c2", name: "Arjun Kapoor", text: "So relaxing to listen to ❤️", timeAgo: "4m" },
+                { id: "c3", name: "Meera Nair", text: "Your voice is so soothing 🔥", timeAgo: "10m" },
+              ]
+                .concat(sentComments)
+                .filter((c) => !hiddenComments.has(c.id))
+                .map((c) => (
+                  <Pressable
+                    key={c.id}
+                    onLongPress={() => handleLongPressComment(c.id, c.name)}
+                    delayLongPress={400}
+                    style={vcStyles.item}
+                  >
+                    <Avatar name={c.name} size={32} />
+                    <View style={vcStyles.bubble}>
+                      <View style={vcStyles.bubbleInner}>
+                        <Text style={vcStyles.name}>{c.name}</Text>
+                        <Text style={vcStyles.commentText}>{c.text}</Text>
+                      </View>
+                      <Text style={vcStyles.time}>{c.timeAgo}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+            </ScrollView>
+            <View style={vcStyles.inputRow}>
+              <TextInput
+                style={vcStyles.input}
+                placeholder="Add a comment…"
+                placeholderTextColor="rgba(255,255,255,0.45)"
+                value={commentText}
+                onChangeText={setCommentText}
+                returnKeyType="send"
+                onSubmitEditing={submitComment}
+              />
+              <Pressable
+                onPress={submitComment}
+                disabled={!commentText.trim()}
+                style={[vcStyles.sendBtn, { backgroundColor: commentText.trim() ? "#E91E8C" : "rgba(255,255,255,0.2)" }]}
+              >
+                <Feather name="send" size={14} color="#fff" />
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
+
+const vcStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" },
+  sheet: { position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 50, justifyContent: "flex-end" },
+  sheetInner: {
+    backgroundColor: "#1A1A2E",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === "ios" ? 32 : 16,
+    borderTopWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  title: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+  list: { paddingHorizontal: 16, paddingTop: 12, maxHeight: 380 },
+  item: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  bubble: { flex: 1, gap: 4 },
+  bubbleInner: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 2,
+  },
+  name: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  commentText: { color: "rgba(255,255,255,0.85)", fontSize: 13, fontFamily: "Inter_400Regular" },
+  time: { color: "rgba(255,255,255,0.45)", fontSize: 11, fontFamily: "Inter_500Medium" },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    color: "#fff",
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 export default function VoiceReelsScreen() {
   const colors = useColors();
