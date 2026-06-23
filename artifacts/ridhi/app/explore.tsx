@@ -25,6 +25,21 @@ import { apiFetch } from "@/utils/api";
 const { width } = Dimensions.get("window");
 const CARD_W = (width - 48) / 2;
 
+const LIVE_HOSTS = [
+  { id: "l1", name: "Kavya Reddy", city: "Hyderabad", viewers: "1.2K", level: "L5", levelColor: "#FFD700", gradient: ["#E91E8C", "#FF6B35"] as [string, string] },
+  { id: "l2", name: "Priya Sharma", city: "Mumbai", viewers: "840", level: "L4", levelColor: "#C0C0C0", gradient: ["#FF6B35", "#FFB800"] as [string, string] },
+  { id: "l3", name: "Rahul D.", city: "Delhi", viewers: "612", level: "L3", levelColor: "#CD7F32", gradient: ["#4A90E2", "#7B2FBE"] as [string, string] },
+  { id: "l4", name: "Meera K.", city: "Ahmedabad", viewers: "490", level: "L2", levelColor: "#CD7F32", gradient: ["#34C759", "#4A90E2"] as [string, string] },
+  { id: "l5", name: "Arjun R.", city: "Bangalore", viewers: "1.5K", level: "L5", levelColor: "#FFD700", gradient: ["#7B2FBE", "#E91E8C"] as [string, string] },
+];
+
+const NEARBY_USERS = [
+  { id: "n1", name: "Rohit Verma", city: "Mumbai", content: "Mumbai ki barish mein chai aur pakode — life complete hai yaar!", likes: 421, timeAgo: "30m ago" },
+  { id: "n2", name: "Sneha Joshi", city: "Mumbai", content: "Vada Pav for ₹15 near Dadar station — best breakfast in the world.", likes: 892, timeAgo: "1h ago" },
+  { id: "n3", name: "Manish Gupta", city: "Mumbai", content: "Marine Drive pe evening walk — Mumbai magic at its peak.", likes: 1204, timeAgo: "2h ago" },
+  { id: "n4", name: "Neha Kulkarni", city: "Mumbai", content: "Ganpati bappa preparations in full swing!", likes: 2341, timeAgo: "3h ago" },
+];
+
 const TRENDING_HASHTAGS = [
   { tag: "#IndependenceDay", posts: "1.2M" },
   { tag: "#ChaiTime", posts: "840K" },
@@ -182,6 +197,44 @@ export default function ExploreScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: Platform.OS === "web" ? 84 : insets.bottom + 20 }}>
         {activeTab === "trending" && (
           <View>
+            {/* ── Discovery chips ──────────────────────────────────────────── */}
+            <View style={styles.discoveryStrip}>
+              {/* Live chips */}
+              <View style={styles.discoveryRow}>
+                <View style={styles.discoveryLabel}>
+                  <View style={styles.liveDot} />
+                  <Text style={[styles.discoveryTitle, { color: colors.foreground }]}>Live</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.discoveryChips}>
+                  {LIVE_HOSTS.map((host) => (
+                    <Pressable key={host.id} style={[styles.liveChip, { borderColor: colors.border }]}>
+                      <LinearGradient colors={host.gradient} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
+                      <View style={styles.liveChipDot} />
+                      <Text style={styles.liveChipName}>{host.name}</Text>
+                      <Text style={styles.liveChipCount}>{host.viewers}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Nearby chips */}
+              <View style={styles.discoveryRow}>
+                <View style={styles.discoveryLabel}>
+                  <Feather name="map-pin" size={12} color={colors.secondary} />
+                  <Text style={[styles.discoveryTitle, { color: colors.foreground }]}>Near You</Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.discoveryChips}>
+                  {NEARBY_USERS.map((u) => (
+                    <Pressable key={u.id} style={[styles.nearbyChip, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                      <Avatar name={u.name} size={22} />
+                      <Text style={[styles.nearbyChipName, { color: colors.foreground }]} numberOfLines={1}>{u.name}</Text>
+                      <Text style={[styles.nearbyChipMeta, { color: colors.mutedForeground }]}>{u.likes >= 1000 ? `${(u.likes / 1000).toFixed(1)}k` : u.likes} ♥</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Trending Now</Text>
             {filteredPosts.length === 0 ? (
               <View style={styles.emptyResult}>
@@ -333,6 +386,39 @@ const styles = StyleSheet.create({
   tab: { flex: 1, alignItems: "center", paddingVertical: 12, position: "relative" },
   tabText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   tabUnderline: { position: "absolute", bottom: 0, left: "20%", right: "20%", height: 2, borderRadius: 1 },
+
+  // Discovery chips
+  discoveryStrip: { paddingTop: 12, paddingBottom: 8, gap: 10 },
+  discoveryRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  discoveryLabel: { flexDirection: "row", alignItems: "center", gap: 6, paddingLeft: 16, minWidth: 70 },
+  discoveryTitle: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  discoveryChips: { paddingHorizontal: 4, gap: 8, paddingRight: 16 },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#FF3B30" },
+  liveChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  liveChipDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: "#FF3B30" },
+  liveChipName: { color: "#fff", fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  liveChipCount: { color: "rgba(255,255,255,0.8)", fontSize: 11, fontFamily: "Inter_400Regular" },
+  nearbyChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  nearbyChipName: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  nearbyChipMeta: { fontSize: 11, fontFamily: "Inter_400Regular" },
+
   sectionTitle: { fontSize: 17, fontFamily: "Inter_700Bold", paddingHorizontal: 16, paddingVertical: 16 },
   postGrid: { flexDirection: "row", flexWrap: "wrap", gap: 4, paddingHorizontal: 16 },
   gridCard: {
