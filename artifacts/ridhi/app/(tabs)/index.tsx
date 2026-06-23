@@ -619,7 +619,7 @@ export default function FeedScreen() {
         <>
           <StoryRow
             stories={STORIES}
-            onAddStory={() => {}}
+            onAddStory={() => router.push({ pathname: "/create-post", params: { type: "story" } } as any)}
             onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
           />
