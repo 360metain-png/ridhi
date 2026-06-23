@@ -268,10 +268,12 @@ function VoiceReplySheet({
   visible,
   reelUserName,
   onClose,
+  onVoiceReply,
 }: {
   visible: boolean;
   reelUserName: string;
   onClose: () => void;
+  onVoiceReply?: () => void;
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -404,10 +406,10 @@ function VoiceReplySheet({
     // In production: upload recordingUri to API and post voice reply
     setTimeout(() => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onVoiceReply?.();
       onClose();
-      Alert.alert("Voice reply sent!", `Your reply to ${reelUserName} was sent.`);
     }, 600);
-  }, [recordingUri, reelUserName, onClose]);
+  }, [recordingUri, reelUserName, onClose, onVoiceReply]);
 
   const handleDiscard = useCallback(() => {
     timerRef.current && clearInterval(timerRef.current);
@@ -608,7 +610,7 @@ function VoiceReelItem({
   const [commentCount, setCommentCount] = useState(reel.comments);
   const [showCommentSheet, setShowCommentSheet] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string }>>([]);
+  const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string; isVoice?: boolean }>>([]);
   const [hiddenComments, setHiddenComments] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState(isActive);
   const [progress, setProgress] = useState(0);
@@ -902,6 +904,19 @@ function VoiceReelItem({
         visible={replySheetVisible}
         reelUserName={reel.userName}
         onClose={() => setReplySheetVisible(false)}
+        onVoiceReply={() => {
+          setSentComments((prev) => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              name: "You",
+              text: "Voice reply",
+              timeAgo: "just now",
+              isVoice: true,
+            },
+          ]);
+          setCommentCount((c) => c + 1);
+        }}
       />
 
       {/* ── Comment Sheet ── */}
@@ -922,9 +937,9 @@ function VoiceReelItem({
             </View>
             <ScrollView style={vcStyles.list} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
               {[
-                { id: "c1", name: "Priya Sharma", text: "This voice reel is amazing! 🎙️", timeAgo: "1m" },
-                { id: "c2", name: "Arjun Kapoor", text: "So relaxing to listen to ❤️", timeAgo: "4m" },
-                { id: "c3", name: "Meera Nair", text: "Your voice is so soothing 🔥", timeAgo: "10m" },
+                { id: "c1", name: "Priya Sharma", text: "This voice reel is amazing! 🎙️", timeAgo: "1m", isVoice: false },
+                { id: "c2", name: "Arjun Kapoor", text: "Voice reply", timeAgo: "4m", isVoice: true },
+                { id: "c3", name: "Meera Nair", text: "Your voice is so soothing 🔥", timeAgo: "10m", isVoice: false },
               ]
                 .concat(sentComments)
                 .filter((c) => !hiddenComments.has(c.id))
@@ -937,10 +952,33 @@ function VoiceReelItem({
                   >
                     <Avatar name={c.name} size={32} />
                     <View style={vcStyles.bubble}>
-                      <View style={vcStyles.bubbleInner}>
-                        <Text style={vcStyles.name}>{c.name}</Text>
-                        <Text style={vcStyles.commentText}>{c.text}</Text>
-                      </View>
+                      {c.isVoice ? (
+                        <View style={vcStyles.voiceBubble}>
+                          <View style={vcStyles.voiceBubbleRow}>
+                            <View style={vcStyles.voiceIconWrap}>
+                              <Feather name="mic" size={14} color="#E91E8C" />
+                            </View>
+                            <View style={vcStyles.waveformMini}>
+                              {[5, 9, 14, 10, 16, 8, 13, 7, 11, 6, 15, 9].map((h, i) => (
+                                <View
+                                  key={i}
+                                  style={[
+                                    vcStyles.waveBar,
+                                    { height: h, opacity: 0.55 + (i % 3) * 0.15 },
+                                  ]}
+                                />
+                              ))}
+                            </View>
+                            <Text style={vcStyles.voiceDuration}>0:07</Text>
+                          </View>
+                          <Text style={vcStyles.voiceLabel}>Voice Reply</Text>
+                        </View>
+                      ) : (
+                        <View style={vcStyles.bubbleInner}>
+                          <Text style={vcStyles.name}>{c.name}</Text>
+                          <Text style={vcStyles.commentText}>{c.text}</Text>
+                        </View>
+                      )}
                       <Text style={vcStyles.time}>{c.timeAgo}</Text>
                     </View>
                   </Pressable>
@@ -1031,6 +1069,50 @@ const vcStyles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+  },
+  voiceBubble: {
+    backgroundColor: "rgba(233,30,140,0.12)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(233,30,140,0.25)",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    gap: 4,
+  },
+  voiceBubbleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  voiceIconWrap: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "rgba(233,30,140,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  waveformMini: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    flex: 1,
+  },
+  waveBar: {
+    width: 3,
+    borderRadius: 2,
+    backgroundColor: "#E91E8C",
+  },
+  voiceDuration: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+  },
+  voiceLabel: {
+    color: "#E91E8C",
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.3,
   },
 });
 
