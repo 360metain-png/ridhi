@@ -656,64 +656,6 @@ function ReelItem({
           <Text style={styles.reelCaption} numberOfLines={2}>
             {reel.caption}
           </Text>
-
-          {/* Emoji reactions — inside info column so they don't squash the layout */}
-          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
-            {reactions.map((r) => (
-              <Pressable
-                key={r.emoji}
-                onPress={() => handleEmojiReact(r.emoji)}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 3,
-                  backgroundColor: r.selected ? "rgba(233,30,140,0.35)" : "rgba(255,255,255,0.15)",
-                  borderRadius: 14,
-                  paddingHorizontal: 7,
-                  paddingVertical: 4,
-                  borderWidth: r.selected ? 1 : 0,
-                  borderColor: "rgba(233,30,140,0.5)",
-                }}
-              >
-                <Text style={{ fontSize: 14 }}>{r.emoji}</Text>
-                {r.count > 0 && (
-                  <Text style={{ color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" }}>
-                    {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
-                  </Text>
-                )}
-              </Pressable>
-            ))}
-            <Pressable
-              onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-              style={{
-                backgroundColor: "rgba(255,255,255,0.15)",
-                borderRadius: 14,
-                paddingHorizontal: 7,
-                paddingVertical: 4,
-              }}
-            >
-              <Feather name="plus" size={12} color="#fff" />
-            </Pressable>
-          </View>
-
-          {showEmojiPicker && (
-            <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
-              {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
-                <Pressable
-                  key={emoji}
-                  onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    borderRadius: 14,
-                    paddingHorizontal: 8,
-                    paddingVertical: 5,
-                  }}
-                >
-                  <Text style={{ fontSize: 16 }}>{emoji}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
         </Animated.View>
 
         {/* Actions slide in from the right */}
@@ -723,6 +665,41 @@ function ReelItem({
             { opacity: actOpacity, transform: [{ translateX: actX }] },
           ]}
         >
+          {/* Compact emoji chips above icons */}
+          <View style={styles.reelEmojiRow}>
+            {reactions.slice(0, 3).map((r) => (
+              <Pressable
+                key={r.emoji}
+                onPress={() => handleEmojiReact(r.emoji)}
+                style={[
+                  styles.reelEmojiChip,
+                  r.selected && { backgroundColor: "rgba(233,30,140,0.35)", borderColor: "rgba(233,30,140,0.5)" },
+                ]}
+              >
+                <Text style={{ fontSize: 13 }}>{r.emoji}</Text>
+                {r.count > 0 && (
+                  <Text style={styles.reelEmojiCount}>{r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}</Text>
+                )}
+              </Pressable>
+            ))}
+            <Pressable onPress={() => setShowEmojiPicker(!showEmojiPicker)} style={styles.reelEmojiChip}>
+              <Feather name="plus" size={11} color="#fff" />
+            </Pressable>
+          </View>
+          {showEmojiPicker && (
+            <View style={styles.reelEmojiPicker}>
+              {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
+                <Pressable
+                  key={emoji}
+                  onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
+                  style={styles.reelEmojiPickerChip}
+                >
+                  <Text style={{ fontSize: 15 }}>{emoji}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
           <Pressable
             style={styles.reelAction}
             onPress={handleLike}
@@ -1188,6 +1165,44 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontFamily: "Inter_600SemiBold",
+  },
+  reelEmojiRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    maxWidth: 56,
+  },
+  reelEmojiChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderWidth: 0,
+    borderColor: "transparent",
+  },
+  reelEmojiCount: {
+    color: "#fff",
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+  },
+  reelEmojiPicker: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    justifyContent: "center",
+    maxWidth: 56,
+    marginBottom: 4,
+  },
+  reelEmojiPickerChip: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
   },
 
   // Stacked swipe chevrons

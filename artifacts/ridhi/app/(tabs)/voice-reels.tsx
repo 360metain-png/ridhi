@@ -829,67 +829,44 @@ function VoiceReelItem({
             <Feather name="headphones" size={12} color="rgba(255,255,255,0.7)" />
             <Text style={styles.playsText}>{fmt(reel.plays)} plays</Text>
           </View>
+        </View>
 
-          {/* Emoji reactions — inside info column to avoid squashing flex layout */}
-          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 6 }}>
-            {reactions.map((r) => (
+        <View style={styles.reelActions}>
+          {/* Compact emoji chips above icons */}
+          <View style={styles.reelEmojiRow}>
+            {reactions.slice(0, 3).map((r) => (
               <Pressable
                 key={r.emoji}
                 onPress={() => handleEmojiReact(r.emoji)}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 3,
-                  backgroundColor: r.selected ? "rgba(233,30,140,0.35)" : "rgba(255,255,255,0.15)",
-                  borderRadius: 14,
-                  paddingHorizontal: 7,
-                  paddingVertical: 4,
-                  borderWidth: r.selected ? 1 : 0,
-                  borderColor: "rgba(233,30,140,0.5)",
-                }}
+                style={[
+                  styles.reelEmojiChip,
+                  r.selected && { backgroundColor: "rgba(233,30,140,0.35)", borderColor: "rgba(233,30,140,0.5)" },
+                ]}
               >
-                <Text style={{ fontSize: 14 }}>{r.emoji}</Text>
+                <Text style={{ fontSize: 13 }}>{r.emoji}</Text>
                 {r.count > 0 && (
-                  <Text style={{ color: "#fff", fontSize: 11, fontFamily: "Inter_600SemiBold" }}>
-                    {r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}
-                  </Text>
+                  <Text style={styles.reelEmojiCount}>{r.count >= 1000 ? `${(r.count / 1000).toFixed(1)}K` : r.count}</Text>
                 )}
               </Pressable>
             ))}
-            <Pressable
-              onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-              style={{
-                backgroundColor: "rgba(255,255,255,0.15)",
-                borderRadius: 14,
-                paddingHorizontal: 7,
-                paddingVertical: 4,
-              }}
-            >
-              <Feather name="plus" size={12} color="#fff" />
+            <Pressable onPress={() => setShowEmojiPicker(!showEmojiPicker)} style={styles.reelEmojiChip}>
+              <Feather name="plus" size={11} color="#fff" />
             </Pressable>
           </View>
-
           {showEmojiPicker && (
-            <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+            <View style={styles.reelEmojiPicker}>
               {["❤️", "🔥", "😂", "😢", "🤯", "🙌", "👏", "😍", "😡", "😲", "💀", "🙏"].map((emoji) => (
                 <Pressable
                   key={emoji}
                   onPress={() => { handleEmojiReact(emoji); setShowEmojiPicker(false); }}
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    borderRadius: 14,
-                    paddingHorizontal: 8,
-                    paddingVertical: 5,
-                  }}
+                  style={styles.reelEmojiPickerChip}
                 >
-                  <Text style={{ fontSize: 16 }}>{emoji}</Text>
+                  <Text style={{ fontSize: 15 }}>{emoji}</Text>
                 </Pressable>
               ))}
             </View>
           )}
-        </View>
 
-        <View style={styles.reelActions}>
           <Pressable style={styles.reelAction} onPress={handleLike} hitSlop={ICON_HITSLOP}>
             <Feather name="heart" size={28} color={liked ? colors.primary : "#fff"} />
             <Text style={[styles.reelActionCount, liked && { color: colors.primary }]}>
@@ -1158,6 +1135,44 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0,0,0,0.4)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  reelEmojiRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    flexWrap: "wrap",
+    justifyContent: "center",
+    maxWidth: 56,
+  },
+  reelEmojiChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderWidth: 0,
+    borderColor: "transparent",
+  },
+  reelEmojiCount: {
+    color: "#fff",
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+  },
+  reelEmojiPicker: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 4,
+    justifyContent: "center",
+    maxWidth: 56,
+    marginBottom: 4,
+  },
+  reelEmojiPickerChip: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
   },
 });
 
