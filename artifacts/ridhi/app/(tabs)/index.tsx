@@ -29,7 +29,7 @@ import { FeedPost, Post } from "@/components/FeedPost";
 import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { Avatar } from "@/components/Avatar";
-import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, POPUP_ADS, type BannerAdConfig } from "@/data/mockData";
+import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, POPUP_ADS, PRODUCTS, type BannerAdConfig } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -623,6 +623,72 @@ export default function FeedScreen() {
             onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
           />
+
+          {/* ── Ridhi Shop Strip ───────────────────────────────────────── */}
+          <View style={[styles.shopStrip, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.shopStripHeader}>
+              <View style={styles.shopStripLeft}>
+                <LinearGradient
+                  colors={["#FF6B35", "#E91E8C"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.shopStripIcon}
+                >
+                  <Feather name="shopping-bag" size={14} color="#fff" />
+                </LinearGradient>
+                <Text style={[styles.shopStripTitle, { color: colors.foreground }]}>Ridhi Shop</Text>
+                <View style={styles.shopStripBadge}>
+                  <Text style={styles.shopStripBadgeText}>NEW</Text>
+                </View>
+              </View>
+              <Pressable onPress={() => router.push("/shop" as any)} style={styles.shopSeeAll}>
+                <Text style={[styles.shopSeeAllText, { color: colors.primary }]}>See All</Text>
+                <Feather name="chevron-right" size={14} color={colors.primary} />
+              </Pressable>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.shopProductsRow}
+            >
+              {PRODUCTS.slice(0, 6).map((product) => (
+                <Pressable
+                  key={product.id}
+                  style={[styles.shopProductCard, { backgroundColor: colors.background, borderColor: colors.border }]}
+                  onPress={() => router.push({ pathname: "/product-detail", params: { id: product.id } } as any)}
+                >
+                  <Image source={{ uri: product.image }} style={styles.shopProductImg} />
+                  <Text style={[styles.shopProductName, { color: colors.foreground }]} numberOfLines={2}>
+                    {product.name}
+                  </Text>
+                  <View style={styles.shopProductBottom}>
+                    <Text style={[styles.shopProductPrice, { color: colors.primary }]}>
+                      {product.price} 🪙
+                    </Text>
+                    <View style={styles.shopProductRating}>
+                      <Feather name="star" size={9} color="#FFD700" />
+                      <Text style={[styles.shopProductRatingText, { color: colors.mutedForeground }]}>
+                        {product.rating}
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              ))}
+              {/* Browse all CTA card */}
+              <Pressable
+                style={[styles.shopBrowseCard, { borderColor: colors.primary + "40" }]}
+                onPress={() => router.push("/shop" as any)}
+              >
+                <LinearGradient
+                  colors={[colors.primary + "22", colors.secondary + "22"]}
+                  style={styles.shopBrowseInner}
+                >
+                  <Feather name="shopping-cart" size={22} color={colors.primary} />
+                  <Text style={[styles.shopBrowseText, { color: colors.primary }]}>Browse{"\n"}All</Text>
+                </LinearGradient>
+              </Pressable>
+            </ScrollView>
+          </View>
 
           <PromoBanner />
         </>
@@ -1577,6 +1643,28 @@ const styles = StyleSheet.create({
   },
   localTabSubText: { fontSize: 11, fontFamily: "Inter_500Medium" },
   localTabDot: { width: 3, height: 3, borderRadius: 2 },
+
+  // ── Shop Strip ────────────────────────────────────────────────────────────
+  shopStrip: { marginHorizontal: 12, marginTop: 10, marginBottom: 4, borderRadius: 16, borderWidth: 1, paddingTop: 12, paddingBottom: 10 },
+  shopStripHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 14, marginBottom: 10 },
+  shopStripLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
+  shopStripIcon: { width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  shopStripTitle: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  shopStripBadge: { backgroundColor: "#FF6B35", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  shopStripBadgeText: { color: "#fff", fontSize: 9, fontFamily: "Inter_700Bold", letterSpacing: 0.5 },
+  shopSeeAll: { flexDirection: "row", alignItems: "center", gap: 2 },
+  shopSeeAllText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  shopProductsRow: { paddingHorizontal: 12, gap: 10, paddingRight: 16 },
+  shopProductCard: { width: 120, borderRadius: 12, borderWidth: 1, overflow: "hidden", paddingBottom: 10 },
+  shopProductImg: { width: 120, height: 110, borderRadius: 10 },
+  shopProductName: { fontSize: 12, fontFamily: "Inter_500Medium", paddingHorizontal: 8, paddingTop: 6, lineHeight: 16 },
+  shopProductBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 8, paddingTop: 4 },
+  shopProductPrice: { fontSize: 12, fontFamily: "Inter_700Bold" },
+  shopProductRating: { flexDirection: "row", alignItems: "center", gap: 2 },
+  shopProductRatingText: { fontSize: 10, fontFamily: "Inter_400Regular" },
+  shopBrowseCard: { width: 80, borderRadius: 12, borderWidth: 1.5, overflow: "hidden" },
+  shopBrowseInner: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 14 },
+  shopBrowseText: { fontSize: 12, fontFamily: "Inter_700Bold", textAlign: "center", lineHeight: 16 },
 
   // Near You section
   // ── Live Hosts section ───────────────────────────────────────────────────
