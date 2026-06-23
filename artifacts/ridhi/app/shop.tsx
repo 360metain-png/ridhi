@@ -10,7 +10,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
@@ -43,6 +43,10 @@ export default function ShopScreen() {
     const interval = setInterval(loadCartCount, 2000);
     return () => clearInterval(interval);
   }, [loadCartCount]);
+
+  useFocusEffect(useCallback(() => {
+    loadCartCount();
+  }, [loadCartCount]));
 
   const filteredProducts = useMemo(() => {
     return PRODUCTS.filter((p) => {

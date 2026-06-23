@@ -91,7 +91,7 @@ export default function ProductDetailScreen() {
     if (user.coins < product.price) {
       Alert.alert("Insufficient Coins", "You don't have enough coins to buy this product.", [
         { text: "Earn Coins", onPress: () => router.push("/missions") },
-        { text: "Buy Coins", onPress: () => router.push("/coin-store") },
+        { text: "Buy Coins", onPress: () => router.push("/wallet") },
         { text: "Cancel", style: "cancel" }
       ]);
       return;

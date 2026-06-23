@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
@@ -42,6 +42,10 @@ export default function CartScreen() {
   useEffect(() => {
     loadCart();
   }, [loadCart]);
+
+  useFocusEffect(useCallback(() => {
+    loadCart();
+  }, [loadCart]));
 
   const saveCart = async (items: CartItem[]) => {
     setCartItems(items);
@@ -85,7 +89,7 @@ export default function CartScreen() {
         `You need ${totalCoins} coins but have ${user.coins}.`,
         [
           { text: "Earn Coins", onPress: () => router.push("/missions") },
-          { text: "Buy Coins", onPress: () => router.push("/coin-store") },
+          { text: "Buy Coins", onPress: () => router.push("/wallet") },
           { text: "Cancel", style: "cancel" },
         ]
       );
