@@ -78,7 +78,7 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.mutedForeground,
+          tabBarInactiveTintColor: isDark ? "#8888A4" : "#3D3A58",
           headerShown: false,
           tabBarStyle: {
             position: "absolute",
@@ -94,7 +94,7 @@ export default function TabLayout() {
             isIOS ? (
               <BlurView
                 intensity={80}
-                tint="dark"
+                tint={isDark ? "dark" : "light"}
                 style={StyleSheet.absoluteFill}
               />
             ) : (
