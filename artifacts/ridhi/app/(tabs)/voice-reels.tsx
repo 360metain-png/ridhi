@@ -23,6 +23,7 @@ import { useColors } from "@/hooks/useColors";
 import { Avatar } from "@/components/Avatar";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { VOICE_REEL_THEMES } from "@/data/voiceReelThemes";
+import { SwipeUpHint } from "@/components/SwipeUpHint";
 
 const MAX_REPLY_SECONDS = 10;
 
@@ -929,6 +930,8 @@ export default function VoiceReelsScreen() {
           <Text style={styles.headerBtnText}>Record</Text>
         </Pressable>
       </View>
+
+      <SwipeUpHint label="Swipe up for next voice reel" bottomOffset={100} delay={1000} />
 
       <FlatList
         data={VOICE_REELS}
