@@ -234,9 +234,17 @@ export default function ProfileScreen() {
   const handleWebFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const uri = URL.createObjectURL(file);
-    setEditAvatar(uri);
-    setAvatarSheet(false);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      if (dataUrl) {
+        setEditAvatar(dataUrl);
+        setAvatarSheet(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset so the same file can be picked again
+    (e.target as HTMLInputElement).value = "";
   };
 
   const useAutoAvatar = () => { setEditAvatar(undefined); setAvatarSheet(false); setShowAvatarGrid(false); };
