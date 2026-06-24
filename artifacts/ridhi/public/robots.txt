@@ -127,6 +127,10 @@ Allow: /privacy-policy
 Allow: /terms
 Allow: /help-support
 
+# Admin & Super Admin panels (on separate subdomain / path)
+Disallow: /admins
+Disallow: /admins/
+
 # ── Standard search engines — allow only public pages ─────────────────────────
 User-agent: *
 
@@ -189,6 +193,10 @@ Disallow: /story-viewer
 Disallow: /settings
 Disallow: /notifications
 Disallow: /ai-assistant
+
+# Admin & Super Admin panels
+Disallow: /admins
+Disallow: /admins/
 
 # Allow public pages
 Allow: /

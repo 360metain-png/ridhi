@@ -4,8 +4,22 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { apiRateLimit } from "./lib/rateLimit";
+import {
+  helmetMiddleware,
+  protectAdminRoutes,
+  staticAdminSecurity,
+} from "./lib/security";
 
 const app: Express = express();
+
+// ── Security Layer 1: Helmet security headers (HSTS, CSP, X-Frame-Options, etc.)
+app.use(helmetMiddleware);
+
+// ── Security Layer 2: Static admin panel hardening (before other middleware)
+app.use(staticAdminSecurity);
+
+// ── Security Layer 3: Admin route protection (bot blocking, IP allowlist, anti-recon)
+app.use(protectAdminRoutes);
 
 app.use(
   pinoHttp({

@@ -1,0 +1,15 @@
+# Security Policy for Ridhi Admin Panel
+# Contact: security@ridhi.app
+# https://ridhi.app/.well-known/security.txt
+
+# Admin Panel: RESTRICTED ACCESS
+# Unauthorized access attempts are logged and reported.
+
+# If you find a security vulnerability, please report it responsibly.
+# Do NOT use automated tools on this endpoint.
+
+Contact: security@ridhi.app
+Acknowledgments: https://ridhi.app/security-hall-of-fame
+Preferred-Languages: en, hi
+Canonical: https://ridhi.app/.well-known/security.txt
+Policy: https://ridhi.app/security-policy
