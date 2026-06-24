@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { useFocusEffect } from "expo-router";
 
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,10 +22,11 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors"
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { apiFetch } from "@/utils/api";
 
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
-import { COIN_PACKAGES, COIN_TRANSACTIONS } from "@/data/mockData";
+import { COIN_PACKAGES } from "@/data/mockData";
 import { SPEND_CATEGORIES } from "@/data/coinEconomy";
 import { CoinFountainOverlay, AnimatedCoinBalance, useCoinToasts } from "@/components/CoinFountain";
 import { PaymentSheet } from "@/components/PaymentSheet";
@@ -151,6 +153,46 @@ export default function WalletScreen() {
     return () => { clearTimeout(base); clearInterval(interval); };
   }, []);
 
+  // ── Real transaction history & stats ──
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [txLoading, setTxLoading] = useState(false);
+  const [quickStats, setQuickStats] = useState({ earned: 0, spent: 0, gifted: 0 });
+
+  const fetchTransactions = useCallback(async () => {
+    setTxLoading(true);
+    try {
+      const resp = await apiFetch<{ transactions: any[] }>("/api/wallet/transactions");
+      if (resp?.transactions) {
+        setTransactions(resp.transactions);
+        // Compute real stats from transaction history
+        let earned = 0, spent = 0, gifted = 0;
+        resp.transactions.forEach((tx: any) => {
+          if (tx.direction === "credit") {
+            earned += tx.amount;
+          } else {
+            spent += tx.amount;
+            if (tx.description?.includes("gift") || tx.source?.includes("gift")) {
+              gifted += tx.amount;
+            }
+          }
+        });
+        setQuickStats({ earned, spent, gifted });
+      }
+    } catch {
+      // offline: keep empty
+    } finally {
+      setTxLoading(false);
+    }
+  }, []);
+
+  // Sync wallet + transactions on every screen focus
+  useFocusEffect(
+    useCallback(() => {
+      syncWallet().catch(() => {});
+      fetchTransactions();
+    }, [syncWallet, fetchTransactions])
+  );
+
   const scrollRef = useRef<ScrollView>(null);
   const rechargeSectionY = useRef(0);
 
@@ -262,9 +304,9 @@ export default function WalletScreen() {
 
           <View style={styles.quickStats}>
             {[
-              { icon: "arrow-down-circle", label: "Earned", value: "890" },
-              { icon: "arrow-up-circle", label: "Spent", value: "640" },
-              { icon: "gift", label: "Gifted", value: "25" },
+              { icon: "arrow-down-circle", label: "Earned", value: quickStats.earned.toLocaleString() },
+              { icon: "arrow-up-circle", label: "Spent", value: quickStats.spent.toLocaleString() },
+              { icon: "gift", label: "Gifted", value: quickStats.gifted.toLocaleString() },
             ].map((s) => (
               <View key={s.label} style={styles.quickStat}>
                 <Feather name={s.icon as any} size={18} color="rgba(255,255,255,0.8)" />
@@ -520,24 +562,41 @@ export default function WalletScreen() {
         {/* ── Transaction History ── */}
         <View style={[styles.section, { marginBottom: 40 }]}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Transaction History</Text>
-          {COIN_TRANSACTIONS.map((tx) => (
-            <View key={tx.id} style={[styles.txItem, { borderBottomColor: colors.border }]}>
-              <View style={[styles.txIcon, { backgroundColor: tx.type === "credit" ? colors.success + "18" : colors.destructive + "18" }]}>
-                <Feather
-                  name={tx.type === "credit" ? "arrow-down-left" : "arrow-up-right"}
-                  size={16}
-                  color={tx.type === "credit" ? colors.success : colors.destructive}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.txDesc, { color: colors.foreground }]} numberOfLines={1}>{tx.desc}</Text>
-                <Text style={[styles.txTime, { color: colors.mutedForeground }]}>{tx.time}</Text>
-              </View>
-              <Text style={[styles.txAmount, { color: tx.type === "credit" ? colors.success : colors.destructive }]}>
-                {tx.type === "credit" ? "+" : "-"}{tx.amount}
-              </Text>
-            </View>
-          ))}
+          {txLoading ? (
+            <Text style={{ color: colors.mutedForeground, textAlign: "center", padding: 20, fontFamily: "Inter_400Regular" }}>
+              Loading transactions...
+            </Text>
+          ) : transactions.length === 0 ? (
+            <Text style={{ color: colors.mutedForeground, textAlign: "center", padding: 20, fontFamily: "Inter_400Regular" }}>
+              No transactions yet. Recharge or spend coins to see your history.
+            </Text>
+          ) : (
+            transactions.map((tx) => {
+              const isCredit = tx.direction === "credit";
+              const desc = tx.description || tx.source || "Transaction";
+              const time = tx.createdAt
+                ? new Date(tx.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                : "";
+              return (
+                <View key={tx.id} style={[styles.txItem, { borderBottomColor: colors.border }]}>
+                  <View style={[styles.txIcon, { backgroundColor: isCredit ? colors.success + "18" : colors.destructive + "18" }]}>
+                    <Feather
+                      name={isCredit ? "arrow-down-left" : "arrow-up-right"}
+                      size={16}
+                      color={isCredit ? colors.success : colors.destructive}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.txDesc, { color: colors.foreground }]} numberOfLines={1}>{desc}</Text>
+                    <Text style={[styles.txTime, { color: colors.mutedForeground }]}>{time}</Text>
+                  </View>
+                  <Text style={[styles.txAmount, { color: isCredit ? colors.success : colors.destructive }]}>
+                    {isCredit ? "+" : "-"}{tx.amount}
+                  </Text>
+                </View>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 

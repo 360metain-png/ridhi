@@ -142,7 +142,7 @@ export default function CoinStoreScreen() {
           <CoinBal coins={coins} />
           <Text style={styles.balanceEq}>= ₹{coins.toLocaleString()}</Text>
           <View style={{ flex: 1 }} />
-          <Text style={[styles.balanceNote, { color: "rgba(255,255,255,0.7)" }]}>Coins never expire</Text>
+          <Text style={[styles.balanceNote, { color: "rgba(255,255,255,0.7)" }]}>Paid coins never expire</Text>
         </View>
 
         {/* Recipients */}
