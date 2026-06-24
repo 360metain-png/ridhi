@@ -68,6 +68,16 @@ const RECENT_ACTIVITY = [
   { id: "a5", type: "bonus",   desc: "Weekly activity bonus credited",             amount: "+₹200",  date: "Dec 18",          positive: true  },
 ];
 
+const ASSIGNED_AGENT = {
+  name: "Arjun Kumar",
+  level: "A3",
+  levelLabel: "Super Agent",
+  levelColor: "#FFB800",
+  phone: "+91 98765 43210",
+  email: "arjun.kumar@ridhi.app",
+  hostCount: 14,
+};
+
 const QUICK_ACTIONS = [
   { icon: "radio",          label: "Go Live",         route: "/live-stream",        color: "#E91E8C" },
   { icon: "arrow-up-circle",label: "Request Payout",  route: "/withdraw",           color: "#34C759" },
@@ -392,6 +402,30 @@ export default function HostDashboard() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>PK Battle Host Status</Text>
           <PkBattleHostCard user={user} />
+        </View>
+
+        {/* ── My Agent ── */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>My Agent</Text>
+          <View style={[styles.agentCard, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
+            <View style={styles.agentAvatar}>
+              <Text style={styles.agentAvatarText}>{ASSIGNED_AGENT.name.charAt(0)}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.agentNameRow}>
+                <Text style={[styles.agentName, { color: colors.text }]}>{ASSIGNED_AGENT.name}</Text>
+                <View style={[styles.agentLevelBadge, { backgroundColor: ASSIGNED_AGENT.levelColor + "20" }]}>
+                  <Text style={[styles.agentLevelText, { color: ASSIGNED_AGENT.levelColor }]}>{ASSIGNED_AGENT.level}</Text>
+                </View>
+              </View>
+              <Text style={[styles.agentEmail, { color: colors.mutedForeground }]}>{ASSIGNED_AGENT.email}</Text>
+              <Text style={[styles.agentPhone, { color: colors.mutedForeground }]}>{ASSIGNED_AGENT.phone}</Text>
+            </View>
+            <View style={{ alignItems: "flex-end", gap: 4 }}>
+              <Text style={[styles.agentName, { color: ASSIGNED_AGENT.levelColor }]}>{ASSIGNED_AGENT.levelLabel}</Text>
+              <Text style={[styles.agentPhone, { color: colors.mutedForeground }]}>{ASSIGNED_AGENT.hostCount} hosts</Text>
+            </View>
+          </View>
         </View>
 
         {/* ── KYC Status ── */}

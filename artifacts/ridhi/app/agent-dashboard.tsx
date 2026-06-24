@@ -495,7 +495,11 @@ export default function AgentDashboardScreen() {
               }} small />
             </View>
             {MY_HOSTS.map((host) => (
-              <View key={host.id} style={[styles.hostRow, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Pressable
+                key={host.id}
+                onPress={() => router.push({ pathname: "/host-profile", params: { hostId: host.id } } as any)}
+                style={[styles.hostRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
                 <Avatar name={host.name} size={44} />
                 <View style={{ flex: 1 }}>
                   <View style={styles.hostNameRow}>
@@ -518,8 +522,9 @@ export default function AgentDashboardScreen() {
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={[styles.hostEarning, { color: colors.success }]}>{host.earnings}</Text>
                   <Text style={[styles.hostEarningLabel, { color: colors.mutedForeground }]}>this month</Text>
+                  <Feather name="chevron-right" size={14} color={colors.mutedForeground} style={{ marginTop: 4 }} />
                 </View>
-              </View>
+              </Pressable>
             ))}
           </>
         )}
