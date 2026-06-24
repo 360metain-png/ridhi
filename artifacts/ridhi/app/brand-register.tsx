@@ -43,7 +43,6 @@ const PLATFORMS = [
   "LinkedIn",
   "TikTok",
   "Moj",
-  "ShareChat",
   "Snapchat",
   "Pinterest",
   "WhatsApp Status",
