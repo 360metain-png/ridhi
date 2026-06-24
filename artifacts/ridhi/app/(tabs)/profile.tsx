@@ -90,7 +90,8 @@ const MENU_SECTIONS = [
     title: "Create & Live",
     items: [
       { icon: "video",       label: "Go Live",         route: "/live-stream",      color: "#FF3B30" },
-      { icon: "zap",         label: "Creator Studio",  route: "/creator-dashboard", color: "#E91E8C" },
+      { icon: "zap",         label: "Creator Tools",   route: "/creator-tools",     color: "#E91E8C" },
+      { icon: "bar-chart-2",  label: "Creator Dashboard", route: "/creator-dashboard", color: "#4A90E2" },
       { icon: "crosshair",   label: "PK Battles",      route: "/pk-battle",        color: "#7B2FBE" },
       { icon: "phone",       label: "Random Call",     route: "/random-call",      color: "#34C759" },
     ],
@@ -638,14 +639,14 @@ export default function ProfileScreen() {
 
           {/* Creator — always visible */}
           <Pressable
-            onPress={() => router.push("/creator-dashboard" as any)}
+            onPress={() => router.push("/creator-tools" as any)}
             style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
           >
             <View style={[styles.earnIcon, { backgroundColor: "#E91E8C20" }]}>
               <Feather name="zap" size={20} color="#E91E8C" />
             </View>
             <Text style={[styles.earnCardTitle, { color: colors.foreground }]}>Creator</Text>
-            <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Studio</Text>
+            <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Tools</Text>
           </Pressable>
         </View>
       </View>

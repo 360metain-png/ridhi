@@ -612,7 +612,7 @@ function VoiceReelItem({
   const [showCommentSheet, setShowCommentSheet] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string; isVoice?: boolean }>>([]);
+  const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string; isVoice: boolean }>>([]);
   const [hiddenComments, setHiddenComments] = useState<Set<string>>(new Set());
   const [playing, setPlaying] = useState(isActive);
   const [progress, setProgress] = useState(0);
@@ -748,7 +748,7 @@ function VoiceReelItem({
     if (!commentText.trim()) return;
     setSentComments((prev) => [
       ...prev,
-      { id: Date.now().toString(), name: "You", text: commentText.trim(), timeAgo: "just now" },
+      { id: Date.now().toString(), name: "You", text: commentText.trim(), timeAgo: "just now", isVoice: false },
     ]);
     setCommentCount((c) => c + 1);
     setCommentText("");

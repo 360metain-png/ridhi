@@ -266,7 +266,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "vip-subscriptions", name: "VIP Subscription Plans",    desc: "4-tier VIP (Silver/Gold/Platinum/Diamond) with weekly/monthly/yearly billing",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "creator-plans",     name: "Creator Plans",            desc: "3-tier Creator plans (Starter/Pro/Elite) with monthly billing and bonus coins", phase: "2", audience: "Creators",       status: "live",  enabled: true  },
       { id: "coin-fountain",     name: "Coin Fountain Animations", desc: "Burst & rain coin animations during gifts in live streams",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
-      { id: "creator-dashboard", name: "Creator Dashboard",        desc: "Analytics, views chart, top content, earnings breakdown & withdrawal", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
+      { id: "creator-tools",     name: "Creator Tools",            desc: "14-tiered tools: 6 free (upload/drafts/analytics/schedule/music) + 8 premium (live/podcast/HD/ads/fan-club/brand-deals/radio/manager)", phase: "2", audience: "Creators",       status: "live",  enabled: true  },
+      { id: "creator-dashboard", name: "Creator Dashboard",        desc: "Tiered analytics: basic (free), advanced+audience demographics (Pro), revenue projection (Elite)", phase: "2", audience: "Hosts/Creators", status: "live",  enabled: true  },
       { id: "marketplace",       name: "Marketplace",              desc: "Creator brand deals & sponsorships (not product marketplace)",       phase: "2", audience: "All Users",      status: "beta",  enabled: false  },
       { id: "business-ads",      name: "Business Ads Manager",     desc: "Self-serve ad creation for businesses targeting Ridhi's audience",     phase: "2", audience: "Advertisers",    status: "live",  enabled: true  },
       { id: "special-ads",       name: "Special Client Popup Ads", desc: "Full-screen premium popup ads — Super Admin managed only",            phase: "2", audience: "All Users",      status: "live",  enabled: true  },
@@ -3289,9 +3290,9 @@ export default function SuperAdminPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {([
-                  { name: "Creator Starter", price: 199, features: "Badge, Live, Basic Analytics", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-                  { name: "Creator Pro", price: 499, features: "HD, PK Battle, Revenue Insights", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-                  { name: "Creator Elite", price: 999, features: "Homepage, Verified, Manager", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                  { name: "Creator Starter", price: 199, features: "Go Live, Podcast Studio, Basic Analytics, Commission 20%", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                  { name: "Creator Pro", price: 499, features: "HD Upload, Boost & Ads, Fan Club, Audience Demographics, Advanced Analytics, Commission 13%", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                  { name: "Creator Elite", price: 999, features: "Brand Deals, Ridhi Radio, Account Manager, Revenue Projection, Commission 8%", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
                 ] as const).map((plan) => (
                   <div key={plan.name} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">

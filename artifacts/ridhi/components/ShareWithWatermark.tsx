@@ -36,7 +36,7 @@ interface ShareWithWatermarkProps {
   visible: boolean;
   onClose: () => void;
   data: ShareData;
-  type: "post" | "reel" | "story" | "live" | "video";
+  type: "post" | "reel" | "story" | "live" | "video" | "voice_reel";
 }
 
 export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWatermarkProps) {

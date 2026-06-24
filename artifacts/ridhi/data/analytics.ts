@@ -8,6 +8,7 @@ export type ScreenName =
   | "subscriptions" | "communities" | "report_history" | "scheduled_content"
   | "podcasts" | "vibe_stars" | "music_library" | "lead_form" | "gaming"
   | "pk_battle" | "duet" | "stitch" | "leaderboard" | "missions"
+  | "creator_tools"
   | "coin_store" | "ads_manager" | "chatrooms" | "group_chat"
   | "story_viewer" | "about" | "help_support" | "withdraw"
   | "creator_marketplace" | "agent_dashboard" | "host_dashboard"

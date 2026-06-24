@@ -103,7 +103,7 @@ export const SPEND_CATEGORIES: SpendCategory[] = [
   { id: "sc12", label: "Broadcast",        icon: "radio",        color: "#7B2FBE", desc: "Start broadcast channels",   cost: "20 coins",            route: "/broadcast" },
 ];
 
-export type ContentType = "reel" | "post" | "story" | "live" | "audio" | "post_download";
+export type ContentType = "reel" | "post" | "story" | "live" | "audio" | "post_download" | "voice_reel";
 
 export interface DownloadPrice {
   type: ContentType;
@@ -118,6 +118,7 @@ export const DOWNLOAD_PRICING: Record<ContentType, DownloadPrice> = {
   story:         { type: "story",         price: 3,  label: "Story" },
   live:          { type: "live",          price: 20, label: "Live Recording" },
   audio:         { type: "audio",         price: 8,  label: "Audio Room" },
+  voice_reel:    { type: "voice_reel",    price: 6,  label: "Voice Reel" },
 };
 
 export const REVENUE_SPLIT = {

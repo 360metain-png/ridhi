@@ -46,6 +46,7 @@ function RootLayoutNav() {
       <Stack.Screen name="communities" options={{ presentation: "card" }} />
       <Stack.Screen name="settings" options={{ presentation: "card" }} />
       <Stack.Screen name="creator-dashboard" options={{ presentation: "card" }} />
+      <Stack.Screen name="creator-tools" options={{ presentation: "card" }} />
       <Stack.Screen name="create-post" options={{ presentation: "modal" }} />
       <Stack.Screen name="random-call" options={{ presentation: "card" }} />
       <Stack.Screen name="live-stream" options={{ presentation: "card" }} />
