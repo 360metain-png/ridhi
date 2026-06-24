@@ -1,47 +1,47 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Ridhi Admin — STRICT PRIVACY
-# All admin pages are PRIVATE. Only /admin/support is public.
+# All admin pages are PRIVATE. Only /admins/support is public.
 # No crawlers, bots, or AI tools may access private admin content.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── ALL crawlers — blanket block private admin ──
 User-agent: *
-Disallow: /admin/
-Allow: /admin/support
+Disallow: /admins/
+Allow: /admins/support
 
 # Crawl-delay to reduce any accidental probing
 Crawl-delay: 10
 
 # ── Search engines — explicit block ──
 User-agent: Googlebot
-Disallow: /admin/
-Allow: /admin/support
+Disallow: /admins/
+Allow: /admins/support
 
 User-agent: Googlebot-Image
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: Googlebot-News
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: Bingbot
-Disallow: /admin/
-Allow: /admin/support
+Disallow: /admins/
+Allow: /admins/support
 
 User-agent: Slurp
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: DuckDuckBot
-Disallow: /admin/
-Allow: /admin/support
+Disallow: /admins/
+Allow: /admins/support
 
 User-agent: Baiduspider
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: YandexBot
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: Sogou
-Disallow: /admin/
+Disallow: /admins/
 
 # ── AI / LLM crawlers — completely blocked everywhere ──
 User-agent: GPTBot
@@ -78,16 +78,13 @@ User-agent: Amazonbot
 Disallow: /
 
 User-agent: FacebookBot
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: meta-externalagent
-Disallow: /admin/
+Disallow: /admins/
 
 User-agent: Applebot
-Disallow: /admin/
-
-User-agent: anthropic-ai
-Disallow: /
+Disallow: /admins/
 
 User-agent: Claude-Web
 Disallow: /
@@ -97,4 +94,4 @@ Disallow: /
 
 # ── Sitemap ──
 # Only the public support page is listed. No private admin URLs exposed.
-Sitemap: https://ridhi.app/admin/sitemap-index.xml
+Sitemap: https://ridhi.app/admins/sitemap-index.xml

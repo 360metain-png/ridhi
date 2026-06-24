@@ -7,8 +7,15 @@
 
     <!-- SEO — per-route control via react-helmet-async; default noindex set in App.tsx -->
     <meta name="description" content="Ridhi — India's social networking and dating app. Connect, stream, date, and earn on India's #1 social universe." />
-    <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
+    <meta name="robots" content="noindex, nofollow, noarchive, noimageindex, nosnippet" />
+    <meta name="googlebot" content="noindex, nofollow, noarchive, noimageindex" />
     <meta name="theme-color" content="#7B2FBE" />
+
+    <!-- Security Headers via meta-equiv (non-negotiable) -->
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
     <meta name="application-name" content="Ridhi" />
 
     <!-- Open Graph — generic brand only, no admin details leaked -->
