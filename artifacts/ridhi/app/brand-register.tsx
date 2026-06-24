@@ -116,7 +116,7 @@ export default function BrandRegisterScreen() {
     brandName.trim().length >= 2 && !!industry,
     contactName.trim().length >= 2 && phone.trim().length >= 10 && email.includes("@"),
     !!brandSize && !!budgetRange,
-    paymentDone,
+    paymentDone || !!payMethod,
   ][step];
 
   const handleNext = () => {
