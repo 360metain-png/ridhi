@@ -55,6 +55,16 @@ import PaymentGateway      from "@/pages/payment-gateway";
 import AdminManagement     from "@/pages/admin-management";
 import PkBattleApprovals   from "@/pages/pk-battle-approvals";
 import ShopProducts        from "@/pages/shop-products";
+import AdminActivity       from "@/pages/admin-activity";
+import AppStore            from "@/pages/app-store";
+import BackendAccess       from "@/pages/backend-access";
+import ChatModeration      from "@/pages/chat-moderation";
+import ContentEditor       from "@/pages/content-editor";
+import DomainHosting       from "@/pages/domain-hosting";
+import Downloads           from "@/pages/downloads";
+import Gaming              from "@/pages/gaming";
+import Marketplace         from "@/pages/marketplace";
+import Screenshots         from "@/pages/screenshots";
 import AdminLayout         from "@/components/layout/admin-layout";
 
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth-context";
@@ -111,6 +121,16 @@ export const ROUTE_ROLES: Record<string, AdminRole[]> = {
   "/payment-gateway": ["super_admin"],
   "/pk-battle-approvals": ["super_admin"],
   "/shop-products":       ["super_admin"],
+  "/admin-activity":      ["super_admin"],
+  "/app-store":           ["super_admin"],
+  "/backend-access":      ["super_admin"],
+  "/chat-moderation":     ["super_admin"],
+  "/content-editor":      ["super_admin"],
+  "/domain-hosting":      ["super_admin"],
+  "/downloads":           ["super_admin"],
+  "/gaming":              ["super_admin"],
+  "/marketplace":         ["super_admin"],
+  "/screenshots":         ["super_admin"],
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -230,6 +250,16 @@ function Router() {
       <Route path="/payment-gateway" component={() => <RoleRoute component={PaymentGateway}   path="/payment-gateway" />} />
       <Route path="/pk-battle-approvals" component={() => <RoleRoute component={PkBattleApprovals} path="/pk-battle-approvals" />} />
       <Route path="/shop-products"      component={() => <RoleRoute component={ShopProducts}      path="/shop-products" />} />
+      <Route path="/admin-activity"      component={() => <RoleRoute component={AdminActivity}      path="/admin-activity" />} />
+      <Route path="/app-store"            component={() => <RoleRoute component={AppStore}            path="/app-store" />} />
+      <Route path="/backend-access"      component={() => <RoleRoute component={BackendAccess}      path="/backend-access" />} />
+      <Route path="/chat-moderation"     component={() => <RoleRoute component={ChatModeration}     path="/chat-moderation" />} />
+      <Route path="/content-editor"      component={() => <RoleRoute component={ContentEditor}      path="/content-editor" />} />
+      <Route path="/domain-hosting"      component={() => <RoleRoute component={DomainHosting}      path="/domain-hosting" />} />
+      <Route path="/downloads"           component={() => <RoleRoute component={Downloads}          path="/downloads" />} />
+      <Route path="/gaming"              component={() => <RoleRoute component={Gaming}             path="/gaming" />} />
+      <Route path="/marketplace"         component={() => <RoleRoute component={Marketplace}        path="/marketplace" />} />
+      <Route path="/screenshots"         component={() => <RoleRoute component={Screenshots}        path="/screenshots" />} />
       <Route component={NotFound} />
     </Switch>
   );

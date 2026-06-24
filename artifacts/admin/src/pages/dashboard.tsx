@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
 import { getAdminRole } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -168,6 +169,7 @@ const roleLabel: Record<AdminRole, string> = {
 };
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const [role, setRole] = useState<AdminRole>("super_admin");
   const [dateRange, setDateRange] = useState<DateRange>({ from: new Date(2025, 3, 1), to: new Date() });
 
@@ -239,16 +241,16 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 flex-wrap">
               {isSA && (
                 <Button size="sm" className="h-8 text-xs gap-1.5 bg-gradient-to-r from-primary to-pink-500 text-white hover:opacity-90"
-                  onClick={() => window.location.href = "/admins/super-admin"}>
+                  onClick={() => setLocation("/super-admin")}>
                   <Settings className="w-3.5 h-3.5" /> Open Launch Control
                 </Button>
               )}
               <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
-                onClick={() => window.location.href = "/admins/kyc"}>
+                onClick={() => setLocation("/kyc")}>
                 <Shield className="w-3.5 h-3.5" /> Review KYC
               </Button>
               <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 border-border"
-                onClick={() => window.location.href = "/admins/hosts"}>
+                onClick={() => setLocation("/hosts")}>
                 <Users className="w-3.5 h-3.5" /> Hosts
               </Button>
             </div>

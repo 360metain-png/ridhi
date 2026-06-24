@@ -240,7 +240,11 @@ export default function FriendRequestsScreen() {
         renderItem={({ item }) => (
           <Pressable
             style={[styles.row, { borderBottomColor: colors.border }]}
-            onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.friend?.id ?? "unknown" } })}
+            onPress={() => {
+                const fid = item.friend?.id;
+                if (!fid) return Alert.alert("Cannot Chat", "This user is not available for chat.");
+                router.push({ pathname: "/chat/[id]", params: { id: fid } });
+              }}
           >
             <Avatar name={item.friend?.name ?? "User"} size={50} />
             <View style={{ flex: 1, marginLeft: 12 }}>
@@ -250,7 +254,11 @@ export default function FriendRequestsScreen() {
             <View style={styles.actionRow}>
               <Pressable
                 style={[styles.actionBtn, { backgroundColor: colors.primary + "15" }]}
-                onPress={() => router.push({ pathname: "/chat/[id]", params: { id: item.friend?.id ?? "unknown" } })}>
+                onPress={() => {
+                const fid = item.friend?.id;
+                if (!fid) return Alert.alert("Cannot Chat", "This user is not available for chat.");
+                router.push({ pathname: "/chat/[id]", params: { id: fid } });
+              }}>
                 <Feather name="message-circle" size={16} color={colors.primary} />
               </Pressable>
               <Pressable

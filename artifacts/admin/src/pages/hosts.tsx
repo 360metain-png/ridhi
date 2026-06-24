@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { getAdminRole, getAdminName } from "@/lib/admin-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -627,6 +628,7 @@ function HostDetail({ host, onClose }: { host: Host; onClose: () => void }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function HostsPage() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const role = getAdminRole() ?? "admin";
   const myEmail = getAdminName() ?? "";
@@ -808,7 +810,7 @@ export default function HostsPage() {
                 {scopedHosts.filter(h => h.status === "active").length} Live-Ready
               </Badge>
               <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700 hover:bg-amber-100"
-                onClick={() => window.location.href = "/admins/kyc"}>
+                onClick={() => setLocation("/kyc")}>
                 <ShieldCheck className="w-3 h-3" /> KYC Queue
               </Button>
             </div>

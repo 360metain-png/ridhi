@@ -202,6 +202,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     "/content-editor":    "Content Management",
     "/app-store":         "App Store Analytics",
     "/crm":               "CRM & Support",
+    "/reports":           "Reports",
+    "/backend-access":    "Backend Access",
+    "/chat-moderation":   "Chat Moderation",
+    "/domain-hosting":    "Domain & Hosting",
+    "/gaming":            "Gaming Management",
+    "/marketplace":       "Marketplace",
+    "/video-uploads":     "Video Uploads",
+    "/content-assets":    "Creative Assets",
+    "/special-ads":       "Special Client Ads",
+    "/commercial-banners": "Commercial Banners",
+    "/financial-statements": "Financial Statements",
+    "/pk-battle-approvals": "PK Battle Approvals",
+    "/shop-products":     "Shop Products",
+    "/payment-gateway":   "Payment Gateways",
+    "/lead-forms":        "Lead Forms",
+    "/user-behavior":     "User Behavior",
   };
 
   // Sidebar content shared between desktop and mobile drawer
