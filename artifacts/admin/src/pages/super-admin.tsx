@@ -289,6 +289,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "pk-battle",         name: "PK Battles",             desc: "Livestream competition between two hosts where viewers vote with gifts",        phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
       { id: "vibe-stars",        name: "Vibe Stars",             desc: "Curated influencer discovery and trending creator showcase with match integration", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "host-dashboard",    name: "Host Dashboard",         desc: "Full host management: analytics, earnings, stream history, KYC, and agent info", phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
+      { id: "agent-dashboard",   name: "Agent Dashboard",        desc: "Agent management: roster, commissions, levels, recruitment tools, and host performance", phase: "2", audience: "Agents",         status: "live",  enabled: true  },
+      { id: "admin-dashboard",   name: "Admin Dashboard",        desc: "Operations panel: host/agent monitoring, KYC queue, analytics, calls, and marketing", phase: "2", audience: "Admins",         status: "live",  enabled: true  },
       { id: "host-profile",      name: "Host Profile",           desc: "Public host profile page with live status, stats, bio, and follower interaction", phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
       { id: "music-library",     name: "Music Library",          desc: "In-app music browsing, trending tracks, and background music for reels/posts",  phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "scheduled-content", name: "Scheduled Posts",        desc: "Schedule posts, reels, and stories to publish at a future date and time",        phase: "2", audience: "Creators",       status: "live",  enabled: true  },
@@ -734,10 +736,10 @@ export default function SuperAdminPage() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { role: "Super Admin", color: "bg-purple-600", scope: "Full control — all pages, all actions", manages: "Manages Admins" },
-                { role: "Admin",       color: "bg-indigo-500", scope: "All pages except Super Admin panel",    manages: "Approves Agents" },
+                { role: "Super Admin", color: "bg-purple-600", scope: "Full control — all dashboards, all pages, all actions", manages: "Manages Admins" },
+                { role: "Admin",       color: "bg-indigo-500", scope: "Host Dashboard + Agent Dashboard + Admin pages", manages: "Approves Agents" },
                 { role: "Agent",       color: "bg-blue-500",   scope: "Hosts, Calls, KYC, Live Streams",       manages: "Approves Hosts" },
-                { role: "Host",        color: "bg-pink-500",   scope: "Dashboard, Calls, Live Streams only",   manages: "Managed by Agent" },
+                { role: "Host",        color: "bg-pink-500",   scope: "Host Dashboard, Calls, Live Streams only",   manages: "Managed by Agent" },
               ].map((r) => (
                 <div key={r.role} className="bg-white rounded-lg border p-3 space-y-1.5">
                   <div className={`w-fit px-2 py-0.5 rounded-full ${r.color} text-white text-xs font-bold`}>{r.role}</div>
@@ -956,7 +958,9 @@ export default function SuperAdminPage() {
                   </thead>
                   <tbody>
                     {[
-                      { name: "Dashboard & Analytics",    sa: true, host: true,  agent: true  },
+                      { name: "Admin Dashboard",          sa: true, host: false, agent: false },
+                      { name: "Host Dashboard",           sa: true, host: true,  agent: false },
+                      { name: "Agent Dashboard",          sa: true, host: false, agent: true  },
                       { name: "User Management",          sa: true, host: false, agent: false },
                       { name: "Content Moderation",       sa: true, host: false, agent: false },
                       { name: "Host Management",          sa: true, host: false, agent: true  },
