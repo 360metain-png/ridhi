@@ -736,8 +736,8 @@ export default function SuperAdminPage() {
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { role: "Super Admin", color: "bg-purple-600", scope: "Full control — all dashboards, all pages, all actions", manages: "Manages Admins" },
-                { role: "Admin",       color: "bg-indigo-500", scope: "Host Dashboard + Agent Dashboard + Admin pages", manages: "Approves Agents" },
+                { role: "Super Admin", color: "bg-purple-600", scope: "Full control — all Hosts, all Agents, all Admin dashboards, all pages, all actions", manages: "Manages Admins" },
+                { role: "Admin",       color: "bg-indigo-500", scope: "Your Hosts + Your Agents + Admin pages", manages: "Approves Agents" },
                 { role: "Agent",       color: "bg-blue-500",   scope: "Hosts, Calls, KYC, Live Streams",       manages: "Approves Hosts" },
                 { role: "Host",        color: "bg-pink-500",   scope: "Host Dashboard, Calls, Live Streams only",   manages: "Managed by Agent" },
               ].map((r) => (

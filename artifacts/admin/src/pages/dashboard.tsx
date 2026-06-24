@@ -179,15 +179,15 @@ export default function Dashboard() {
   const isSA    = role === "super_admin";
   const isAdmin = role === "admin";
 
-  const networkStats = isSA ? NETWORK_SA : NETWORK_ADMIN;
-  const activityFeed = isSA ? RECENT_ACTIVITY_SA : RECENT_ACTIVITY_ADMIN;
+  const networkStats = isSA ? NETWORK_SA : (isAdmin ? NETWORK_ADMIN : null);
+  const activityFeed = isSA ? RECENT_ACTIVITY_SA : (isAdmin ? RECENT_ACTIVITY_ADMIN : null);
 
   const filteredDau = useMemo(() => filterByDateRange(dauData, dateRange, "date"), [dateRange]);
   const filteredRevenue = useMemo(() => filterByDateRange(revenueData, dateRange, "month"), [dateRange]);
 
   const subtitles: Record<AdminRole, string> = {
-    super_admin: "Full platform overview — SA view",
-    admin:       "Your network: agents + hosts under your management",
+    super_admin: "Full platform overview — all dashboards, all hosts, all agents",
+    admin:       "Your dedicated network: agents and hosts under your management",
   };
 
   return (
@@ -271,8 +271,8 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* ── Platform KPIs (SA/Admin only) ──────────────────────────────── */}
-      {(isSA || isAdmin) && (
+      {/* ── Platform KPIs (SA only — full platform overview) ───────────── */}
+      {isSA && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {PLATFORM_STATS.map((s) => (
             <Card key={s.label}>
@@ -329,11 +329,11 @@ export default function Dashboard() {
       )}
 
 
-      {/* ── Creator Network Health (SA / Admin) ────────────────────────── */}
+      {/* ── Network Health (SA / Admin) ──────────────────────────────── */}
       {networkStats && (
         <div>
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-            Creator Network Health
+            {isSA ? "Platform Network Health" : "Your Network Health"}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {networkStats.map((s) => (
@@ -360,8 +360,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Charts row (SA / Admin) ─────────────────────────────────────── */}
-      {(isSA || isAdmin) && (
+      {/* ── Charts row (SA only) ─────────────────────────────────────── */}
+      {isSA && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader><CardTitle className="text-base">DAU / MAU Trend (30 Days)</CardTitle></CardHeader>
@@ -452,8 +452,8 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* ── Charts row 2 (SA / Admin) ───────────────────────────────────── */}
-      {(isSA || isAdmin) && (
+      {/* ── Charts row 2 (SA only) ───────────────────────────────────── */}
+      {isSA && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader><CardTitle className="text-base">New Registrations (This Week)</CardTitle></CardHeader>
@@ -525,8 +525,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Agent leaderboard (SA / Admin) ─────────────────────────────── */}
-      {(isSA || isAdmin) && (
+      {/* ── Agent leaderboard (SA only — full platform view) ──────── */}
+      {isSA && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -579,16 +579,17 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Activity feed + stats ───────────────────────────────────────── */}
+      {/* ── Activity feed + stats (SA / Admin) ─────────────────────────── */}
+      {(isSA || isAdmin) && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-base">
-              {"Live Activity Feed"}
+              {isSA ? "Live Activity Feed" : "Your Network Activity"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {activityFeed.map((a, i) => (
+            {activityFeed?.map((a, i) => (
               <div key={i} className="flex items-start gap-3 text-sm">
                 <span className="text-lg w-6 flex-shrink-0">{a.icon}</span>
                 <div className="flex-1 min-w-0">
@@ -607,7 +608,7 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {((isSA || isAdmin) ? [
+            {(isSA ? [
               { label: "Active Hosts (Live)",  value: "18 / 284 total",         icon: Radio,        color: "text-red-500"    },
               { label: "Top Agent (A5)",       value: "Vikram Rao · 312 hosts", icon: Award,        color: "text-purple-500" },
               { label: "Active PK Battles",    value: "48 rooms · 96 players",  icon: Zap,          color: "text-yellow-500" },
@@ -616,11 +617,11 @@ export default function Dashboard() {
               { label: "Tournament Players",   value: "192 competing now",      icon: Star,         color: "text-indigo-500" },
             ] : [
               { label: "My Active Hosts",      value: "43 of 54",               icon: CheckCircle,  color: "text-green-500"  },
-              { label: "Hosts Live Now",        value: "12 streaming",           icon: Radio,        color: "text-red-500"    },
-              { label: "This Month Coins",     value: "4.6L gifted",             icon: Coins,        color: "text-yellow-500" },
-              { label: "Commission Rate",      value: "5% (A2 tier)",            icon: Award,        color: "text-purple-500" },
-              { label: "Pending KYC",          value: "2 applications",          icon: Shield,       color: "text-orange-500" },
-              { label: "Next Payout",          value: "₹23K estimated",          icon: IndianRupee,  color: "text-emerald-500"},
+              { label: "Hosts Live Now",       value: "12 streaming",           icon: Radio,        color: "text-red-500"    },
+              { label: "This Month Coins",     value: "4.6L gifted",            icon: Coins,        color: "text-yellow-500" },
+              { label: "Commission Rate",      value: "5% (A2 tier)",           icon: Award,        color: "text-purple-500" },
+              { label: "Pending KYC",          value: "2 applications",         icon: Shield,       color: "text-orange-500" },
+              { label: "Next Payout",          value: "₹23K estimated",         icon: IndianRupee,  color: "text-emerald-500"},
             ]).map((s) => (
               <div key={s.label} className="flex items-center gap-3">
                 <s.icon className={`w-4 h-4 flex-shrink-0 ${s.color}`} />
@@ -633,6 +634,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      )}
     </div>
   );
 }
