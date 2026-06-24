@@ -195,6 +195,7 @@ export default function ProfileScreen() {
   const [editAvatar,   setEditAvatar]   = useState<string | undefined>(undefined);
   const [avatarSheet,  setAvatarSheet]  = useState(false);
   const [showAvatarGrid, setShowAvatarGrid] = useState(false);
+  const [activeTab,    setActiveTab]    = useState<ProfileTab>("posts");
 
   const { trackFollow, trackUnfollow } = useAnalytics();
 
@@ -266,6 +267,7 @@ export default function ProfileScreen() {
       if (!uri) return;
       setEditAvatar(uri);
       setAvatarSheet(false);
+      updateProfile({ avatar: uri });
     } catch (err) {
       Alert.alert("Photo Error", "Could not select a photo. Please try again.");
     }
@@ -280,6 +282,7 @@ export default function ProfileScreen() {
       if (dataUrl) {
         setEditAvatar(dataUrl);
         setAvatarSheet(false);
+        updateProfile({ avatar: dataUrl });
       }
     };
     reader.readAsDataURL(file);
@@ -287,8 +290,18 @@ export default function ProfileScreen() {
     (e.target as HTMLInputElement).value = "";
   };
 
-  const useAutoAvatar = () => { setEditAvatar(undefined); setAvatarSheet(false); setShowAvatarGrid(false); };
-  const selectAvatarFromGrid = (uri: string) => { setEditAvatar(uri); setShowAvatarGrid(false); setAvatarSheet(false); };
+  const useAutoAvatar = () => {
+    setEditAvatar(undefined);
+    setAvatarSheet(false);
+    setShowAvatarGrid(false);
+    updateProfile({ avatar: undefined });
+  };
+  const selectAvatarFromGrid = (uri: string) => {
+    setEditAvatar(uri);
+    setShowAvatarGrid(false);
+    setAvatarSheet(false);
+    updateProfile({ avatar: uri });
+  };
 
   const sheetTitle =
     sheet === "posts"     ? `Posts (${user.posts})`         :
@@ -518,7 +531,7 @@ export default function ProfileScreen() {
 
         {/* Avatar + name */}
         <View style={styles.avatarBlock}>
-          <Pressable onPress={openEditModal} style={styles.avatarWrap}>
+          <Pressable onPress={() => { setEditAvatar(user.avatar); setAvatarSheet(true); }} style={styles.avatarWrap}>
             <Avatar name={user.name} uri={user.avatar} size={90} hasStory />
             <View style={[styles.avatarEditBadge, { backgroundColor: colors.primary }]}>
               <Feather name="camera" size={12} color="#fff" />
@@ -805,25 +818,177 @@ export default function ProfileScreen() {
         </View>
       )}
 
-      {/* ── POSTS GRID ───────────────────────────────────────────────────── */}
+      {/* ── TABBED CONTENT ─────────────────────────────────────────────────── */}
       <View style={styles.section}>
-        <View style={styles.gridHeader}>
-          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>POSTS</Text>
-          <Pressable onPress={() => setSheet("posts")}>
-            <Text style={[{ fontSize: 12, fontFamily: "Inter_600SemiBold" }, { color: colors.primary }]}>See all</Text>
-          </Pressable>
+        {/* Tab bar */}
+        <View style={[styles.tabBar, { borderBottomColor: colors.border }]}>
+          {([
+            { key: "posts" as ProfileTab, icon: "grid" },
+            { key: "videos" as ProfileTab, icon: "play" },
+            { key: "reels" as ProfileTab, icon: "film" },
+            { key: "dashboard" as ProfileTab, icon: "bar-chart-2" },
+          ]).map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <Pressable
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                style={styles.tabBtn}
+              >
+                <Feather
+                  name={tab.icon as any}
+                  size={20}
+                  color={isActive ? colors.primary : colors.mutedForeground}
+                />
+                {isActive && (
+                  <View style={[styles.tabIndicator, { backgroundColor: colors.primary }]} />
+                )}
+              </Pressable>
+            );
+          })}
         </View>
-        <View style={styles.grid}>
-          {[0,1,2,3,4,5].map((i) => (
-            <Pressable key={i} style={[styles.gridItem, { width: imageSize, height: imageSize }]}>
-              <LinearGradient
-                colors={POST_COLORS[i % POST_COLORS.length] as [string, string]}
-                style={[StyleSheet.absoluteFill, { borderRadius: 2 }]}
-              />
-              <Feather name="image" size={22} color="rgba(255,255,255,0.4)" />
-            </Pressable>
-          ))}
-        </View>
+
+        {/* Tab content */}
+        {activeTab === "posts" && (
+          <View style={styles.tabContent}>
+            {USER_POSTS.length === 0 ? (
+              <View style={styles.emptyTab}>
+                <Feather name="camera" size={40} color={colors.mutedForeground} />
+                <Text style={[styles.emptyTabText, { color: colors.mutedForeground }]}>No posts yet</Text>
+              </View>
+            ) : (
+              <View style={styles.grid}>
+                {USER_POSTS.map((post, i) => (
+                  <Pressable
+                    key={post.id}
+                    style={[styles.gridItem, { width: imageSize, height: imageSize }]}
+                  >
+                    {post.imageUri ? (
+                      <Image source={{ uri: post.imageUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                    ) : post.carouselImages && post.carouselImages.length > 0 ? (
+                      <Image source={{ uri: post.carouselImages[0] }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                    ) : (
+                      <LinearGradient
+                        colors={POST_COLORS[i % POST_COLORS.length] as [string, string]}
+                        style={[StyleSheet.absoluteFill, { borderRadius: 2 }]}
+                      />
+                    )}
+                    <View style={styles.gridOverlay}>
+                      <Feather name="heart" size={14} color="rgba(255,255,255,0.9)" />
+                      <Text style={styles.gridOverlayText}>{post.likes}</Text>
+                    </View>
+                    {post.carouselImages && post.carouselImages.length > 1 && (
+                      <View style={[styles.multiIcon, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+                        <Feather name="layers" size={12} color="#fff" />
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {activeTab === "videos" && (
+          <View style={styles.tabContent}>
+            {USER_VIDEOS.length === 0 ? (
+              <View style={styles.emptyTab}>
+                <Feather name="video" size={40} color={colors.mutedForeground} />
+                <Text style={[styles.emptyTabText, { color: colors.mutedForeground }]}>No videos yet</Text>
+              </View>
+            ) : (
+              <View style={styles.grid}>
+                {USER_VIDEOS.map((video) => (
+                  <Pressable
+                    key={video.id}
+                    style={[styles.gridItem, { width: imageSize, height: imageSize }]}>
+                    <Image source={{ uri: video.thumbnail }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                    <View style={[styles.videoOverlay, { backgroundColor: "rgba(0,0,0,0.35)" }]}>
+                      <Feather name="play-circle" size={24} color="#fff" />
+                    </View>
+                    <View style={[styles.durationBadge, { backgroundColor: "rgba(0,0,0,0.65)" }]}>
+                      <Text style={styles.durationText}>{video.duration}</Text>
+                    </View>
+                    <View style={styles.gridOverlay}>
+                      <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                      <Text style={styles.gridOverlayText}>{video.views}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {activeTab === "reels" && (
+          <View style={styles.tabContent}>
+            {USER_REELS.length === 0 ? (
+              <View style={styles.emptyTab}>
+                <Feather name="film" size={40} color={colors.mutedForeground} />
+                <Text style={[styles.emptyTabText, { color: colors.mutedForeground }]}>No reels yet</Text>
+              </View>
+            ) : (
+              <View style={styles.grid}>
+                {USER_REELS.map((reel) => (
+                  <Pressable
+                    key={reel.id}
+                    style={[styles.gridItem, { width: imageSize, height: imageSize }]}>
+                    <Image source={{ uri: reel.thumbnail }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+                    <View style={[styles.videoOverlay, { backgroundColor: "rgba(0,0,0,0.35)" }]}>
+                      <Feather name="play-circle" size={24} color="#fff" />
+                    </View>
+                    <View style={styles.gridOverlay}>
+                      <Feather name="heart" size={14} color="rgba(255,255,255,0.9)" />
+                      <Text style={styles.gridOverlayText}>{reel.likes}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
+        {activeTab === "dashboard" && (
+          <View style={styles.tabContent}>
+            <View style={styles.dashboardStats}>
+              {USER_DASHBOARD.map((stat) => (
+                <View key={stat.label} style={[styles.dashboardCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <View style={[styles.dashboardIcon, { backgroundColor: stat.color + "18" }]}>
+                    <Feather name={stat.icon as any} size={18} color={stat.color} />
+                  </View>
+                  <Text style={[styles.dashboardValue, { color: colors.foreground }]}>{stat.value}</Text>
+                  <Text style={[styles.dashboardLabel, { color: colors.mutedForeground }]}>{stat.label}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground, marginTop: 16, marginBottom: 8 }]}>TOP CONTENT</Text>
+            {USER_DASHBOARD_CONTENT.map((item, i) => (
+              <Pressable
+                key={item.id}
+                style={[styles.contentRow, { backgroundColor: colors.card, borderColor: colors.border }]}
+              >
+                <View style={[styles.contentRank, { backgroundColor: colors.primary }]}>
+                  <Text style={styles.contentRankText}>{i + 1}</Text>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[styles.contentTitle, { color: colors.foreground }]} numberOfLines={1}>{item.title}</Text>
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <Text style={[styles.contentMeta, { color: colors.mutedForeground }]}>
+                      <Feather name="eye" size={10} /> {item.views}
+                    </Text>
+                    <Text style={[styles.contentMeta, { color: colors.mutedForeground }]}>
+                      <Feather name="heart" size={10} /> {item.likes}
+                    </Text>
+                    <Text style={[styles.contentMeta, { color: colors.primary }]}>
+                      {item.type === "video" ? "Video" : item.type === "reel" ? "Reel" : "Post"}
+                    </Text>
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* ── ACCOUNT / SCHEDULED / LOGOUT ─────────────────────────────────── */}
@@ -912,6 +1077,34 @@ const styles = StyleSheet.create({
   // ── Section wrapper ───────────────────────────────────────────────────────
   section: { paddingHorizontal: 16, paddingTop: 22 },
   sectionLabel: { fontSize: 11, fontFamily: "Inter_600SemiBold", letterSpacing: 0.8, marginBottom: 8 },
+
+  // ── Tab bar ─────────────────────────────────────────────────────────────
+  tabBar: { flexDirection: "row", justifyContent: "space-around", borderBottomWidth: StyleSheet.hairlineWidth, marginBottom: 12 },
+  tabBtn: { flex: 1, alignItems: "center", paddingVertical: 12, position: "relative" },
+  tabIndicator: { position: "absolute", bottom: 0, left: "15%", right: "15%", height: 2, borderRadius: 1 },
+  tabContent: { paddingTop: 4 },
+  emptyTab: { alignItems: "center", paddingVertical: 48, gap: 10 },
+  emptyTabText: { fontSize: 14, fontFamily: "Inter_500Medium" },
+
+  // ── Grid overlay ────────────────────────────────────────────────────────
+  gridOverlay: { position: "absolute", bottom: 4, left: 4, flexDirection: "row", alignItems: "center", gap: 4 },
+  gridOverlayText: { fontSize: 11, fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.9)" },
+  multiIcon: { position: "absolute", top: 4, right: 4, borderRadius: 4, padding: 2 },
+  videoOverlay: { position: "absolute", inset: 0, alignItems: "center", justifyContent: "center" },
+  durationBadge: { position: "absolute", bottom: 4, right: 4, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  durationText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#fff" },
+
+  // ── Dashboard tab ─────────────────────────────────────────────────────────
+  dashboardStats: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  dashboardCard: { flex: 1, minWidth: 140, borderRadius: 12, borderWidth: 1, padding: 14, alignItems: "center", gap: 6 },
+  dashboardIcon: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  dashboardValue: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  dashboardLabel: { fontSize: 11, fontFamily: "Inter_500Medium" },
+  contentRow: { flexDirection: "row", alignItems: "center", gap: 10, borderRadius: 12, borderWidth: 1, padding: 10, marginBottom: 6 },
+  contentRank: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  contentRankText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" },
+  contentTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  contentMeta: { fontSize: 11, fontFamily: "Inter_500Medium" },
 
   // ── Level / Creator Status card ───────────────────────────────────────────
   levelCard: { borderRadius: 18, borderWidth: 1.5, padding: 16, gap: 12 },
