@@ -22,7 +22,8 @@ interface ShareData {
 }
 
 const SHARE_OPTIONS = [
-  { id: "whatsapp", label: "WhatsApp", icon: "whatsapp", iconSet: "fa5" as const, color: "#25D366" },
+  { id: "whatsapp_status", label: "WhatsApp Status", icon: "whatsapp", iconSet: "fa5" as const, color: "#25D366" },
+  { id: "whatsapp", label: "WhatsApp", icon: "whatsapp", iconSet: "fa5" as const, color: "#128C7E" },
   { id: "instagram", label: "Instagram", icon: "instagram", iconSet: "fa5" as const, color: "#E1306C" },
   { id: "facebook", label: "Facebook", icon: "facebook", iconSet: "fa5" as const, color: "#1877F2" },
   { id: "twitter", label: "X / Twitter", icon: "twitter", iconSet: "fa5" as const, color: "#000000" },
@@ -73,6 +74,29 @@ export function ShareWithWatermark({ visible, onClose, data, type }: ShareWithWa
           await Share.share({
             message: shareText,
             url: shareUrl,
+          });
+        } catch {
+          // User cancelled
+        }
+      }
+      onClose();
+      return;
+    }
+
+    // WhatsApp Status — native share sheet so user picks "WhatsApp → My Status"
+    if (optionId === "whatsapp_status") {
+      if (Platform.OS === "web") {
+        // On web, open WhatsApp Web with a pre-filled message
+        const waUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, "_blank", "noopener,noreferrer");
+      } else {
+        // On native, open the share sheet — WhatsApp will appear as an option
+        // and the user can select "My Status" inside WhatsApp
+        try {
+          await Share.share({
+            message: shareText,
+            url: shareUrl,
+            title: "Share to WhatsApp Status",
           });
         } catch {
           // User cancelled
