@@ -27,6 +27,7 @@ import { Avatar } from "@/components/Avatar";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { VOICE_REEL_THEMES } from "@/data/voiceReelThemes";
 import { SwipeUpHint } from "@/components/SwipeUpHint";
+import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 
 const MAX_REPLY_SECONDS = 10;
 
@@ -609,6 +610,7 @@ function VoiceReelItem({
   const [isFollowing, setIsFollowing] = useState(false);
   const [commentCount, setCommentCount] = useState(reel.comments);
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string; isVoice?: boolean }>>([]);
   const [hiddenComments, setHiddenComments] = useState<Set<string>>(new Set());
@@ -705,6 +707,7 @@ function VoiceReelItem({
   const handleShare = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     trackShare(reel.id, "voice_reel");
+    setShowShare(true);
   }, [reel.id, trackShare]);
 
   const handleFollow = useCallback(() => {
@@ -917,6 +920,18 @@ function VoiceReelItem({
           ]);
           setCommentCount((c) => c + 1);
         }}
+      />
+
+      {/* Share modal */}
+      <ShareWithWatermark
+        visible={showShare}
+        onClose={() => setShowShare(false)}
+        data={{
+          title: reel.caption,
+          message: `Listen to this voice reel by ${reel.userName} from ${reel.userCity} on Ridhi!`,
+          url: `https://ridhi.app/voice-reel/${reel.id}`,
+        }}
+        type="voice_reel"
       />
 
       {/* ── Comment Sheet ── */}
