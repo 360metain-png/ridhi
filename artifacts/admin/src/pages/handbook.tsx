@@ -421,6 +421,7 @@ const HOST_SECTIONS: Section[] = [
       "Creator plans reduce Ridhi's platform fee: Starter 20%, Pro 13%, Elite 8% (default is 30%)",
       "Creator Elite: dedicated creator manager, unlimited monetisation, fan club features",
       "Fan Club: set a monthly subscription fee for your exclusive content — tiers: Supporter 49 coins (₹49/mo), Super Fan 149 coins (₹149/mo), VIP Fan 499 coins (₹499/mo)",
+      "Duet Permission Control: toggle whether other users can duet on your reels. Default: enabled (Duet On). In the reel's More Options menu, a 'Creator Controls' section shows a toggle for the reel owner. When disabled, the Duet button is greyed out with 'Duet Off' label and shows an alert if tapped.",
     ],
   },
   {

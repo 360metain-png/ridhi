@@ -131,6 +131,7 @@ export default function CreatePostScreen() {
   const [text, setText] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [audience, setAudience] = useState<"public" | "followers" | "private">("public");
+  const [allowDuet, setAllowDuet] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const [mediaUri, setMediaUri] = useState<string | null>(null);
@@ -410,6 +411,7 @@ export default function CreatePostScreen() {
         city: user?.city ?? null,
         language: user?.language ?? null,
         type: selectedType,
+        allowDuet: selectedType === "reel" ? allowDuet : undefined,
         moderation: {
           category: moderation.category,
           severity: moderation.severity,
@@ -564,16 +566,29 @@ export default function CreatePostScreen() {
           <Avatar name={user?.name ?? "Me"} size={40} />
           <View style={{ flex: 1 }}>
             <Text style={[styles.composerName, { color: colors.foreground }]}>{user?.name}</Text>
-            <Pressable
-              style={[styles.audienceBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}
-              onPress={() => setAudience((a) => a === "public" ? "followers" : a === "followers" ? "private" : "public")}
-            >
-              <Feather name={audience === "public" ? "globe" : audience === "followers" ? "users" : "lock"} size={12} color={colors.mutedForeground} />
-              <Text style={[styles.audienceText, { color: colors.mutedForeground }]}>
-                {audience === "public" ? "Public" : audience === "followers" ? "Followers" : "Only me"}
-              </Text>
-              <Feather name="chevron-down" size={12} color={colors.mutedForeground} />
-            </Pressable>
+            <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+              <Pressable
+                style={[styles.audienceBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}
+                onPress={() => setAudience((a) => a === "public" ? "followers" : a === "followers" ? "private" : "public")}
+              >
+                <Feather name={audience === "public" ? "globe" : audience === "followers" ? "users" : "lock"} size={12} color={colors.mutedForeground} />
+                <Text style={[styles.audienceText, { color: colors.mutedForeground }]}>
+                  {audience === "public" ? "Public" : audience === "followers" ? "Followers" : "Only me"}
+                </Text>
+                <Feather name="chevron-down" size={12} color={colors.mutedForeground} />
+              </Pressable>
+              {selectedType === "reel" && (
+                <Pressable
+                  style={[styles.audienceBtn, { backgroundColor: allowDuet ? colors.primary + "15" : colors.muted, borderColor: allowDuet ? colors.primary + "40" : colors.border }]}
+                  onPress={() => setAllowDuet((v) => !v)}
+                >
+                  <Feather name="users" size={12} color={allowDuet ? colors.primary : colors.mutedForeground} />
+                  <Text style={[styles.audienceText, { color: allowDuet ? colors.primary : colors.mutedForeground }]}>
+                    {allowDuet ? "Duet On" : "Duet Off"}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           </View>
         </View>
 

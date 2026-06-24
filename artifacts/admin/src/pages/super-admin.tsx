@@ -228,6 +228,7 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "emoji-reactions", name: "Emoji Reactions",      desc: "React to posts, video reels, voice reels, and live streams with emoji (❤️ 🔥 😂 😢 🤯 🙌 + 6 more). Selected emojis highlight in pink. Count displayed with K-formatting.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "whatsapp-status-share", name: "WhatsApp Status Share", desc: "One-tap share Ridhi content (posts, reels, stories, live, voice reels) to WhatsApp Status. Native share sheet on mobile; WhatsApp Web fallback on web.", phase: "2", audience: "All Users", status: "live", enabled: true },
       { id: "repost", name: "Repost (All Content Types)", desc: "Repost any content — posts, video reels, voice reels, stories, live streams, and explore trending posts — to your followers with a repost badge. Toggle repost state with haptic feedback. Count displayed on action buttons.", phase: "2", audience: "All Users", status: "live", enabled: true },
+      { id: "duet-permission", name: "Duet Permission Control", desc: "Creators can toggle whether other users can duet on their reels. Duet button shows disabled state (greyed out + 'Duet Off' label) when disallowed. 'Creator Controls' section in More Options menu shows toggle for reel owners. Default: enabled. Stored in allowDuet field on reel objects.", phase: "2", audience: "Creators", status: "live", enabled: true },
     ],
   },
   {

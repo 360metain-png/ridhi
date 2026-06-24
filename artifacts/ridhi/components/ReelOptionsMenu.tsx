@@ -26,9 +26,12 @@ export interface ReelOptionsMenuProps {
     userName: string;
     userCity: string;
     videoUrl?: string;
+    userId?: string;
+    allowDuet?: boolean;
   };
   onHide?: () => void;
   onNotInterested?: () => void;
+  onToggleDuet?: (enabled: boolean) => void;
 }
 
 interface MenuOption {
@@ -46,6 +49,7 @@ export function ReelOptionsMenu({
   reel,
   onHide,
   onNotInterested,
+  onToggleDuet,
 }: ReelOptionsMenuProps) {
   const colors = useColors();
   const { user } = useAuth();
@@ -57,6 +61,7 @@ export function ReelOptionsMenu({
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
   const [showSpeedPicker, setShowSpeedPicker] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const isOwner = user?.id === reel.userId;
 
   const url = `https://ridhi.app/reel/${reel.id}`;
 
@@ -131,6 +136,12 @@ export function ReelOptionsMenu({
     { id: "somethingWrong", icon: "alert-triangle", label: "Something went wrong", type: "action" },
   ];
 
+  const creatorOptions: MenuOption[] = isOwner
+    ? [
+        { id: "toggleDuet", icon: "users", label: reel.allowDuet !== false ? "Duet enabled" : "Duet disabled", subtitle: reel.allowDuet !== false ? "Others can duet on this reel" : "Others cannot duet on this reel", type: "toggle", value: reel.allowDuet !== false },
+      ]
+    : [];
+
   const handleOption = (id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     switch (id) {
@@ -173,6 +184,8 @@ export function ReelOptionsMenu({
       case "somethingWrong":
         handleSomethingWrong();
         break;
+      case "toggleDuet":
+        return;
     }
   };
 
@@ -201,6 +214,11 @@ export function ReelOptionsMenu({
             onValueChange={(v) => {
               if (opt.id === "clearMode") setClearMode(v);
               if (opt.id === "autoScroll") setAutoScroll(v);
+              if (opt.id === "toggleDuet") {
+                onToggleDuet?.(v);
+                Haptics.notificationAsync(v ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Warning);
+                return;
+              }
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
             trackColor={{ false: "#3A3A3C", true: "#E91E8C" }}
@@ -259,6 +277,14 @@ export function ReelOptionsMenu({
 
             {/* More — collapsible */}
             {renderSection("More", moreOptions, "more")}
+
+            {/* Creator Controls — only for reel owner */}
+            {isOwner && creatorOptions.length > 0 && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Creator Controls</Text>
+                {creatorOptions.map(renderOption)}
+              </View>
+            )}
           </ScrollView>
 
           {/* Speed picker overlay */}

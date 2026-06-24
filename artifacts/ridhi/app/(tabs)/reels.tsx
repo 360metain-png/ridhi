@@ -45,6 +45,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#E91E8C"] as [string, string],
     emoji: "🍛",
+    allowDuet: true,
   },
   {
     id: "r2",
@@ -58,9 +59,11 @@ const REELS = [
     isLiked: true,
     gradient: ["#4A90E2", "#7B2FBE"] as [string, string],
     emoji: "🌅",
+    allowDuet: true,
   },
   {
     id: "r3",
+    userId: "u3",
     userName: "Kavya Reddy",
     userCity: "Hyderabad",
     caption: "Garba night — best night of the year! Navratri vibes 💃",
@@ -70,6 +73,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FFB800", "#E91E8C"] as [string, string],
     emoji: "💃",
+    allowDuet: false,
   },
   {
     id: "r4",
@@ -82,6 +86,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#34C759", "#4A90E2"] as [string, string],
     emoji: "🏃",
+    allowDuet: true,
   },
   {
     id: "r5",
@@ -94,6 +99,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#FF6B35", "#FFB800"] as [string, string],
     emoji: "👵",
+    allowDuet: true,
   },
   {
     id: "r6",
@@ -106,6 +112,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#E91E8C", "#FF6B35"] as [string, string],
     emoji: "🎬",
+    allowDuet: true,
   },
   {
     id: "r7",
@@ -119,6 +126,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#7B2FBE", "#4A90E2"] as [string, string],
     emoji: "🎉",
+    allowDuet: true,
   },
   {
     id: "r8",
@@ -131,6 +139,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#FFB800"] as [string, string],
     emoji: "🌸",
+    allowDuet: true,
   },
   {
     id: "r9",
@@ -143,6 +152,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#34C759", "#00BCD4"] as [string, string],
     emoji: "🌴",
+    allowDuet: true,
   },
   {
     id: "r10",
@@ -155,6 +165,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#E91E8C", "#FF6B35"] as [string, string],
     emoji: "🌇",
+    allowDuet: true,
   },
   {
     id: "r11",
@@ -167,6 +178,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#FF6B35", "#FFB800"] as [string, string],
     emoji: "🧵",
+    allowDuet: true,
   },
   {
     id: "r12",
@@ -179,6 +191,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#4A90E2", "#34C759"] as [string, string],
     emoji: "🌧️",
+    allowDuet: true,
   },
   {
     id: "r13",
@@ -191,6 +204,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#00BCD4", "#4A90E2"] as [string, string],
     emoji: "🌅",
+    allowDuet: true,
   },
   {
     id: "r14",
@@ -203,6 +217,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#E91E8C"] as [string, string],
     emoji: "🎨",
+    allowDuet: true,
   },
   {
     id: "r15",
@@ -215,6 +230,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#34C759", "#FFB800"] as [string, string],
     emoji: "🏔️",
+    allowDuet: true,
   },
   {
     id: "r16",
@@ -227,6 +243,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#E91E8C"] as [string, string],
     emoji: "🍗",
+    allowDuet: true,
   },
   {
     id: "r17",
@@ -239,6 +256,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#FFB800", "#FF6B35"] as [string, string],
     emoji: "🥘",
+    allowDuet: true,
   },
   {
     id: "r18",
@@ -251,6 +269,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#7B2FBE", "#E91E8C"] as [string, string],
     emoji: "🎵",
+    allowDuet: true,
   },
   {
     id: "r19",
@@ -263,6 +282,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#4A90E2", "#00BCD4"] as [string, string],
     emoji: "📸",
+    allowDuet: true,
   },
   {
     id: "r20",
@@ -275,6 +295,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#34C759", "#00BCD4"] as [string, string],
     emoji: "🌴",
+    allowDuet: true,
   },
   {
     id: "r21",
@@ -287,6 +308,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#E91E8C", "#FF6B35"] as [string, string],
     emoji: "💍",
+    allowDuet: true,
   },
   {
     id: "r22",
@@ -299,6 +321,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#FFB800"] as [string, string],
     emoji: "🏋️",
+    allowDuet: true,
   },
   {
     id: "r23",
@@ -311,6 +334,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#7B2FBE", "#E91E8C"] as [string, string],
     emoji: "💃",
+    allowDuet: true,
   },
   {
     id: "r24",
@@ -323,6 +347,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FFB800", "#FF6B35"] as [string, string],
     emoji: "✨",
+    allowDuet: true,
   },
   {
     id: "r25",
@@ -335,6 +360,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#FF6B35", "#E91E8C"] as [string, string],
     emoji: "🥩",
+    allowDuet: true,
   },
   {
     id: "r26",
@@ -347,6 +373,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#34C759", "#4A90E2"] as [string, string],
     emoji: "🐅",
+    allowDuet: true,
   },
   {
     id: "r27",
@@ -359,6 +386,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#E91E8C", "#7B2FBE"] as [string, string],
     emoji: "🎤",
+    allowDuet: true,
   },
   {
     id: "r28",
@@ -371,6 +399,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#FF6B35", "#FFB800"] as [string, string],
     emoji: "🍓",
+    allowDuet: true,
   },
   {
     id: "r29",
@@ -383,6 +412,7 @@ const REELS = [
     isLiked: true,
     gradient: ["#00BCD4", "#4A90E2"] as [string, string],
     emoji: "🕌",
+    allowDuet: true,
   },
   {
     id: "r30",
@@ -395,6 +425,7 @@ const REELS = [
     isLiked: false,
     gradient: ["#7B2FBE", "#4A90E2"] as [string, string],
     emoji: "🗿",
+    allowDuet: true,
   },
 ];
 
@@ -770,13 +801,22 @@ function ReelItem({
           </Pressable>
           <Pressable
             style={styles.reelAction}
-            onPress={() => router.push({ pathname: "/duet-record", params: { reelId: reel.id, reelTitle: reel.caption, reelUser: reel.userName } })}
+            onPress={() => {
+              if (reel.allowDuet === false) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                Alert.alert("Duet Disabled", "The creator has disabled duets on this reel.");
+                return;
+              }
+              router.push({ pathname: "/duet-record", params: { reelId: reel.id, reelTitle: reel.caption, reelUser: reel.userName } });
+            }}
             hitSlop={ICON_HITSLOP}
             accessibilityRole="button"
-            accessibilityLabel="Duet with this reel"
+            accessibilityLabel={reel.allowDuet === false ? "Duet disabled by creator" : "Duet with this reel"}
           >
-            <Text style={{ fontSize: 22 }}>🎙️</Text>
-            <Text style={styles.reelActionCount}>Duet</Text>
+            <Text style={{ fontSize: 22, opacity: reel.allowDuet === false ? 0.4 : 1 }}>🎙️</Text>
+            <Text style={[styles.reelActionCount, reel.allowDuet === false && { opacity: 0.4 }]}>
+              {reel.allowDuet === false ? "Duet Off" : "Duet"}
+            </Text>
           </Pressable>
           <Pressable
             style={styles.reelAction}
@@ -862,6 +902,14 @@ function ReelItem({
         visible={showMoreOptions}
         onClose={() => setShowMoreOptions(false)}
         reel={reel}
+        onToggleDuet={(enabled) => {
+          // In real app, this would call an API to update the reel's duet permission
+          // For now, we show a confirmation toast
+          Alert.alert(
+            enabled ? "Duet Enabled" : "Duet Disabled",
+            enabled ? "Others can now duet on this reel." : "Others can no longer duet on this reel."
+          );
+        }}
       />
 
       {/* Paid download service */}
