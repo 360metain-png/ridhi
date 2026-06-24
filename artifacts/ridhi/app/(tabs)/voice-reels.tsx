@@ -611,6 +611,8 @@ function VoiceReelItem({
   const [commentCount, setCommentCount] = useState(reel.comments);
   const [showCommentSheet, setShowCommentSheet] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [repostCount, setRepostCount] = useState(reel.shares);
   const [commentText, setCommentText] = useState("");
   const [sentComments, setSentComments] = useState<Array<{ id: string; name: string; text: string; timeAgo: string; isVoice: boolean }>>([]);
   const [hiddenComments, setHiddenComments] = useState<Set<string>>(new Set());
@@ -728,6 +730,15 @@ function VoiceReelItem({
     trackComment(reel.id, "voice_reel");
     setShowCommentSheet(true);
   }, [reel.id, trackComment]);
+
+  const handleRepost = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setReposted((prev) => {
+      const next = !prev;
+      setRepostCount((c) => Math.max(0, c + (next ? 1 : -1)));
+      return next;
+    });
+  }, []);
 
   const handleLongPressComment = useCallback((commentId: string, commentName: string) => {
     Alert.alert("Comment Options", `Comment by ${commentName}`, [
@@ -895,6 +906,10 @@ function VoiceReelItem({
           <Pressable style={styles.reelAction} onPress={handleShare} hitSlop={ICON_HITSLOP}>
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
+          </Pressable>
+          <Pressable style={styles.reelAction} onPress={handleRepost} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel={reposted ? "Undo repost" : "Repost"}>
+            <Feather name="repeat" size={28} color={reposted ? colors.primary : "#fff"} />
+            <Text style={[styles.reelActionCount, reposted && { color: colors.primary }]}>{fmt(repostCount)}</Text>
           </Pressable>
           <Pressable style={styles.reelAction} onPress={handleReply} hitSlop={ICON_HITSLOP}>
             <Feather name="mic" size={28} color={replySheetVisible ? "#E91E8C" : "#fff"} />

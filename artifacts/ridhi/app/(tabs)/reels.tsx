@@ -489,6 +489,8 @@ function ReelItem({
   const [showFilterBar, setShowFilterBar] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [reposted, setReposted] = useState(false);
+  const [repostCount, setRepostCount] = useState(reel.shares);
   const [showAllFilters, setShowAllFilters] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showDownload, setShowDownload] = useState(false);
@@ -588,6 +590,15 @@ function ReelItem({
     trackSave(reel.id, "reel");
     setShowDownload(true);
   }, [reel.id, trackSave]);
+
+  const handleRepost = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setReposted((prev) => {
+      const next = !prev;
+      setRepostCount((c) => Math.max(0, c + (next ? 1 : -1)));
+      return next;
+    });
+  }, []);
 
   const fmt = useCallback(
     (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n)),
@@ -723,6 +734,22 @@ function ReelItem({
           <Pressable style={styles.reelAction} onPress={handleShare} hitSlop={ICON_HITSLOP} accessibilityRole="button" accessibilityLabel="Share">
             <Feather name="send" size={28} color="#fff" />
             <Text style={styles.reelActionCount}>{fmt(reel.shares)}</Text>
+          </Pressable>
+          <Pressable
+            style={styles.reelAction}
+            onPress={handleRepost}
+            hitSlop={ICON_HITSLOP}
+            accessibilityRole="button"
+            accessibilityLabel={reposted ? "Undo repost" : "Repost"}
+          >
+            <Feather
+              name="repeat"
+              size={28}
+              color={reposted ? colors.primary : "#fff"}
+            />
+            <Text style={[styles.reelActionCount, reposted && { color: colors.primary }]}>
+              {fmt(repostCount)}
+            </Text>
           </Pressable>
           <Pressable
             style={styles.reelAction}

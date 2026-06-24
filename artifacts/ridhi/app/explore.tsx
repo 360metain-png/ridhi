@@ -78,6 +78,7 @@ export default function ExploreScreen() {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"trending" | "people" | "hashtags">("trending");
   const [users, setUsers] = useState(INITIAL_USERS);
+  const [repostedPosts, setRepostedPosts] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { trackFollow, trackSearch, trackHashtag } = useAnalytics();
 
@@ -243,20 +244,30 @@ export default function ExploreScreen() {
               </View>
             ) : (
               <View style={styles.postGrid}>
-                {filteredPosts.map((post) => (
-                  <Pressable
-                    key={post.id}
-                    onPress={() => router.push("/(tabs)" as any)}
-                    style={[
-                      styles.gridCard,
-                      { width: CARD_W, height: post.tall ? CARD_W * 1.5 : CARD_W },
-                    ]}
-                    accessibilityLabel={`Trending post ${post.emoji}`}
-                  >
-                    <LinearGradient colors={post.gradient} style={StyleSheet.absoluteFill} />
-                    <Text style={styles.gridEmoji}>{post.emoji}</Text>
-                  </Pressable>
-                ))}
+                {filteredPosts.map((post) => {
+                  const isReposted = repostedPosts.has(post.id);
+                  return (
+                    <Pressable
+                      key={post.id}
+                      onPress={() => router.push("/(tabs)" as any)}
+                      style={[
+                        styles.gridCard,
+                        { width: CARD_W, height: post.tall ? CARD_W * 1.5 : CARD_W },
+                      ]}
+                      accessibilityLabel={`Trending post ${post.emoji}`}
+                    >
+                      <LinearGradient colors={post.gradient} style={StyleSheet.absoluteFill} />
+                      <Text style={styles.gridEmoji}>{post.emoji}</Text>
+                      <Pressable
+                        onPress={(e) => { e.stopPropagation(); setRepostedPosts((prev) => { const s = new Set(prev); if (s.has(post.id)) s.delete(post.id); else s.add(post.id); return s; }); }}
+                        style={styles.gridRepostBtn}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Feather name="repeat" size={14} color={isReposted ? colors.primary : "rgba(255,255,255,0.85)"} />
+                      </Pressable>
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           </View>
@@ -428,6 +439,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   gridEmoji: { fontSize: 36 },
+  gridRepostBtn: { position: "absolute", bottom: 8, right: 8, width: 28, height: 28, borderRadius: 14, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" },
   personRow: {
     flexDirection: "row",
     alignItems: "center",

@@ -64,6 +64,7 @@ export default function StoryViewerScreen() {
   const [reply, setReply] = useState("");
   const [showShare, setShowShare] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const [storyReactions, setStoryReactions] = useState<Record<string, string[]>>({});
   const [lastReaction, setLastReaction] = useState("");
   const reactionAnim = useRef(new Animated.Value(0)).current;
@@ -306,6 +307,9 @@ export default function StoryViewerScreen() {
               </Pressable>
               <Pressable style={styles.replyActionBtn} onPress={() => setShowShare(true)}>
                 <Feather name="share" size={22} color="rgba(255,255,255,0.9)" />
+              </Pressable>
+              <Pressable style={styles.replyActionBtn} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setReposted((prev) => !prev); }}>
+                <Feather name="repeat" size={22} color={reposted ? colors.primary : "rgba(255,255,255,0.9)"} />
               </Pressable>
               <Pressable style={styles.replyActionBtn} onPress={() => setShowDownload(true)}>
                 <Feather name="download" size={22} color="rgba(255,255,255,0.9)" />

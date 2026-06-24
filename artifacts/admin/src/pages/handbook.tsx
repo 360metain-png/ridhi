@@ -12,7 +12,8 @@ import {
   FileText, HelpCircle, Award, Sparkles, TrendingUp,
   Crown, Gift, Users, ToggleRight, Globe, Settings, ShoppingBag,
   Key, Webhook, AlertTriangle, Lock, CreditCard,
-  UsersRound, ClipboardList, Percent, DollarSign, Download, Wallet} from "lucide-react";
+  UsersRound, ClipboardList, Percent, DollarSign, Download, Wallet,
+  Repeat} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -528,6 +529,25 @@ const HOST_SECTIONS: Section[] = [
       "Share count increases when a user shares (tracked in analytics)",
     ],
     note: "WhatsApp Status Share drives viral growth in India. When users share a funny reel or trending post to their WhatsApp status, their entire contact list sees it — the most effective organic growth channel for Bharat users.",
+  },
+  {
+    id: "h-repost",
+    icon: Repeat,
+    color: "text-violet-600",
+    bg: "bg-violet-50",
+    title: "Repost (All Content Types)",
+    subtitle: "Repost any content to your followers with a repost badge — just like TikTok",
+    features: [
+      "Tap the repeat icon on any content to repost it to your followers",
+      "Works on all content types: Posts (home feed), Video Reels, Voice Reels, Stories, Live Streams, and Explore trending posts",
+      "Repost button toggles on/off — tap again to undo the repost",
+      "Reposted state is highlighted in the brand purple (#7B2FBE) color with haptic feedback",
+      "Repost count is shown on the action button (e.g., 1.2K reposts)",
+      "On the home feed, reposted content shows a repost badge with the reposter's name",
+      "Reposts appear in your followers' Following feed (in a real backend implementation)",
+      "No coins required — reposting is free for all users",
+    ],
+    note: "Repost is a core virality mechanic. It allows users to amplify content they love to their followers, creating a secondary distribution network. The 'Repost badge' on the home feed makes it clear when content is being reshared, which builds trust and encourages original creators.",
   },
   {
     id: "h-support",

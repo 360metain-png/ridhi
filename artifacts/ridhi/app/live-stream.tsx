@@ -153,6 +153,7 @@ export default function LiveStreamScreen() {
   const [showGifts, setShowGifts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
   const prevLiveCoins = useRef(0);
 
@@ -421,6 +422,12 @@ export default function LiveStreamScreen() {
           />
           <Pressable onPress={() => setShowGifts((v) => !v)} style={[styles.giftBtn, { backgroundColor: colors.gold + "20" }]}>
             <Feather name="gift" size={20} color={colors.gold} />
+          </Pressable>
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setReposted((prev) => !prev); }}
+            style={[styles.giftBtn, { backgroundColor: reposted ? colors.primary + "20" : colors.muted }]}
+          >
+            <Feather name="repeat" size={20} color={reposted ? colors.primary : colors.foreground} />
           </Pressable>
           <Pressable
             onPress={() => {
