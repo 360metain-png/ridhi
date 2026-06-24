@@ -62,25 +62,57 @@ export default function ShopScreen() {
       style={[styles.productCard, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={() => router.push({ pathname: "/product-detail", params: { id: item.id } })}
     >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <View style={{ position: "relative" }}>
+        <Image source={{ uri: item.image }} style={styles.productImage} />
+        {/* Discount badge */}
+        {(item.discount ?? 0) > 0 && (
+          <View style={[styles.discountBadge, { backgroundColor: colors.secondary }]}>
+            <Text style={styles.discountText}>-{item.discount}%</Text>
+          </View>
+        )}
+        {/* Stock indicator */}
+        {(item.stock ?? 0) <= 0 && (
+          <View style={[styles.stockIndicator, { backgroundColor: "#FF3B30" }]}>
+            <Text style={styles.stockIndicatorText}>Out of Stock</Text>
+          </View>
+        )}
+        {(item.stock ?? 0) > 0 && (item.stock ?? 0) < 10 && (
+          <View style={[styles.stockIndicator, { backgroundColor: "#FF9500" }]}>
+            <Text style={styles.stockIndicatorText}>Low Stock</Text>
+          </View>
+        )}
+        {/* Brand tag */}
+        {item.brand && (
+          <View style={[styles.brandTag, { backgroundColor: "rgba(0,0,0,0.65)" }]}>
+            <Text style={styles.brandText}>{item.brand}</Text>
+          </View>
+        )}
+      </View>
       <View style={styles.productInfo}>
         <Text style={[styles.categoryTag, { color: colors.primary }]}>{item.category}</Text>
         <Text style={[styles.productName, { color: colors.foreground }]} numberOfLines={2}>
           {item.name}
         </Text>
         <View style={styles.priceRow}>
-          <Text style={[styles.price, { color: colors.foreground }]}>{item.price} Coins</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={[styles.price, { color: colors.foreground }]}>{item.price} Coins</Text>
+            {(item.mrp ?? 0) > 0 && (
+              <Text style={[styles.mrp, { color: colors.mutedForeground }]}>
+                <Text style={{ textDecorationLine: "line-through" }}>{item.mrp} Coins</Text>
+              </Text>
+            )}
+          </View>
           <View style={styles.ratingRow}>
             <Feather name="star" size={10} color="#FFD700" />
             <Text style={[styles.rating, { color: colors.mutedForeground }]}>{item.rating}</Text>
           </View>
         </View>
       </View>
-      <Pressable 
-        style={[styles.buyBtn, { backgroundColor: colors.primary }]}
-        onPress={() => router.push({ pathname: "/product-detail", params: { id: item.id } })}
+      <Pressable
+        style={[styles.buyBtn, { backgroundColor: (item.stock ?? 0) > 0 ? colors.primary : "#999" }]}
+        onPress={() => (item.stock ?? 0) > 0 && router.push({ pathname: "/product-detail", params: { id: item.id } })}
       >
-        <Text style={styles.buyBtnText}>View Details</Text>
+        <Text style={styles.buyBtnText}>{(item.stock ?? 0) > 0 ? "View Details" : "Out of Stock"}</Text>
       </Pressable>
     </Pressable>
   );
@@ -180,10 +212,17 @@ const styles = StyleSheet.create({
   productName: { fontSize: 14, fontFamily: "Inter_600SemiBold", marginBottom: 6 },
   priceRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   price: { fontSize: 15, fontFamily: "Inter_700Bold" },
+  mrp: { fontSize: 11, fontFamily: "Inter_500Medium" },
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 3 },
   rating: { fontSize: 12, fontFamily: "Inter_500Medium" },
   buyBtn: { marginHorizontal: 10, marginTop: 8, paddingVertical: 8, borderRadius: 10, alignItems: "center" },
   buyBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_700Bold" },
+  discountBadge: { position: "absolute", top: 8, right: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, zIndex: 2 },
+  discountText: { color: "#fff", fontSize: 11, fontFamily: "Inter_700Bold" },
+  stockIndicator: { position: "absolute", bottom: 8, left: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, zIndex: 2 },
+  stockIndicatorText: { color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" },
+  brandTag: { position: "absolute", bottom: 8, right: 8, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, zIndex: 2 },
+  brandText: { color: "#fff", fontSize: 10, fontFamily: "Inter_600SemiBold" },
   emptyState: { flex: 1, alignItems: "center", justifyContent: "center", marginTop: 100, gap: 16 },
   emptyText: { fontSize: 16, fontFamily: "Inter_500Medium" },
 });

@@ -424,6 +424,8 @@ const HOST_SECTIONS: Section[] = [
       "Cart persistence: stored in AsyncStorage so items survive app restarts",
       "Revenue model: 100% of shop purchases go to Ridhi platform. Creator merchandise sold through shop earns 70% to creator, 30% to platform",
       "Diamond Elite VIP members get 15% discount on all shop purchases (automatically applied at checkout)",
+      "Product variants: each product supports sizes (e.g. S, M, L, XL), colors (e.g. Red, Gold, Black), and stock quantity. Admin panel shows discount badges, brand tags, and stock indicators (low / out of stock)",
+      "Size and color selectors on product detail page: users pick their preferred variant before checkout. MRP with strikethrough pricing shown alongside discounted coin price",
       "Product categories: Fashion (silk kurtas, sneakers, sunglasses), Beauty (makeup, skincare), Electronics (headphones, accessories), Home (decor, kitchen)",
       "Shop analytics: Super Admin tracks total shop revenue, top selling products, and cart abandonment rates in Feature Analytics tab",
     ],

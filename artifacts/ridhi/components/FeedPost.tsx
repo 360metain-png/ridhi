@@ -365,10 +365,13 @@ export const FeedPost = React.memo(function FeedPost({
         ) : null}
 
         {/* Tagged Product Card */}
-        {post.taggedProduct && post.taggedProduct.id && (
+        {post.taggedProduct?.id && (
           <Pressable
             style={[styles.productCard, { backgroundColor: colors.muted, borderColor: colors.border }]}
-            onPress={() => router.push({ pathname: "/product-detail", params: { id: post.taggedProduct.id } })}
+            onPress={() => {
+              const pid = post.taggedProduct?.id;
+              if (pid) router.push({ pathname: "/product-detail", params: { id: pid } });
+            }}
           >
             <Image source={{ uri: post.taggedProduct.image }} style={styles.productThumb} />
             <View style={{ flex: 1 }}>

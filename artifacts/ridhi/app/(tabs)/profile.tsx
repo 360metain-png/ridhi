@@ -12,6 +12,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  FlatList,
 } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,6 +29,7 @@ const COIN_IMAGE = require("../../assets/images/ridhi_coin.png");
 import { GradientButton } from "@/components/GradientButton";
 import { SubscriptionBadge, VipTier } from "@/components/SubscriptionBadge";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { INITIAL_POSTS } from "@/data/mockData";
 
 const { width } = Dimensions.get("window");
 
@@ -70,6 +72,43 @@ const POST_COLORS = [
   ["#1B5E20","#388E3C"], ["#4A148C","#880E4F"], ["#E65100","#F9A825"],
   ["#006064","#00838F"], ["#880E4F","#C2185B"], ["#1A237E","#3949AB"],
 ];
+
+// ── User content for profile tabs ──────────────────────────────────────────
+const USER_POSTS = INITIAL_POSTS.filter(p => p.userId === "me" || p.isOwn);
+
+const USER_VIDEOS = [
+  { id: "v1", thumbnail: "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=400", title: "Monsoon vlog", views: "1.2K", duration: "02:34" },
+  { id: "v2", thumbnail: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400", title: "Goa trip", views: "3.4K", duration: "04:12" },
+  { id: "v3", thumbnail: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400", title: "Morning run", views: "892", duration: "01:45" },
+  { id: "v4", thumbnail: "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=400", title: "Garba night", views: "5.1K", duration: "03:22" },
+  { id: "v5", thumbnail: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400", title: "Rain walk", views: "678", duration: "01:12" },
+  { id: "v6", thumbnail: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400", title: "Vada Pav hunt", views: "2.1K", duration: "02:08" },
+];
+
+const USER_REELS = [
+  { id: "ur1", thumbnail: "https://images.unsplash.com/photo-1604537529428-15bcbeecfe4d?w=400", likes: 45200, caption: "Bollywood night at Juhu!" },
+  { id: "ur2", thumbnail: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400", likes: 23100, caption: "OOTD — traditional edition" },
+  { id: "ur3", thumbnail: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400", likes: 18700, caption: "Dance reel challenge" },
+  { id: "ur4", thumbnail: "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=400", likes: 12400, caption: "Festival glow up" },
+  { id: "ur5", thumbnail: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400", likes: 8900, caption: "Monsoon vibes" },
+  { id: "ur6", thumbnail: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400", likes: 3400, caption: "Street food reel" },
+];
+
+const USER_DASHBOARD = [
+  { label: "Total Views", value: "24.8K", icon: "eye", color: "#7B2FBE" },
+  { label: "Avg Reach", value: "8.4K", icon: "radio", color: "#E91E8C" },
+  { label: "Engagement", value: "4.8%", icon: "heart", color: "#FF3B6F" },
+  { label: "New Followers", value: "342", icon: "user-plus", color: "#34C759" },
+];
+
+const USER_DASHBOARD_CONTENT = [
+  { id: "c1", title: "Mumbai street food vlog", views: "8.2K", likes: 412, type: "video" },
+  { id: "c2", title: "Sunrise at Marine Drive", views: "5.1K", likes: 287, type: "image" },
+  { id: "c3", title: "Morning run challenge", views: "3.4K", likes: 198, type: "reel" },
+  { id: "c4", title: "Monsoon mood", views: "2.8K", likes: 156, type: "image" },
+];
+
+type ProfileTab = "posts" | "videos" | "reels" | "dashboard";
 
 // ── Menu sections (grouped like iOS Settings) ──────────────────────────────
 const MENU_SECTIONS = [

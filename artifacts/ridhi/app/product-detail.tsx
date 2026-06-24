@@ -31,10 +31,14 @@ export default function ProductDetailScreen() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [inCart, setInCart] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     checkWishlist();
     checkCart();
+    setSelectedSize(product?.sizes?.[0]);
+    setSelectedColor(product?.colors?.[0]);
   }, [id]);
 
   const checkWishlist = async () => {
@@ -158,14 +162,35 @@ export default function ProductDetailScreen() {
         </View>
 
         <View style={styles.content}>
+          {/* Brand + Discount */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            {product.brand && (
+              <View style={[styles.brandChip, { backgroundColor: colors.primary + "15" }]}>
+                <Text style={[styles.brandChipText, { color: colors.primary }]}>{product.brand}</Text>
+              </View>
+            )}
+            {(product.discount ?? 0) > 0 && (
+              <View style={[styles.discountChip, { backgroundColor: colors.secondary }]}>
+                <Text style={styles.discountChipText}>{product.discount}% OFF</Text>
+              </View>
+            )}
+          </View>
+
           <View style={styles.titleRow}>
             <View style={{ flex: 1 }}>
               <Text style={[styles.category, { color: colors.primary }]}>{product.category}</Text>
               <Text style={[styles.title, { color: colors.foreground }]}>{product.name}</Text>
             </View>
-            <View style={styles.priceBadge}>
-              <Text style={styles.priceText}>{product.price} Coins</Text>
-            </View>
+          </View>
+
+          {/* Price with MRP */}
+          <View style={{ flexDirection: "row", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
+            <Text style={[styles.priceValue, { color: colors.foreground }]}>{product.price} Coins</Text>
+            {(product.mrp ?? 0) > 0 && (
+              <Text style={[styles.mrpValue, { color: colors.mutedForeground }]}>
+                <Text style={{ textDecorationLine: "line-through" }}>{product.mrp} Coins</Text>
+              </Text>
+            )}
           </View>
 
           <View style={styles.metaRow}>
@@ -174,10 +199,64 @@ export default function ProductDetailScreen() {
               <Text style={[styles.ratingText, { color: colors.foreground }]}>{product.rating}</Text>
               <Text style={[styles.reviewText, { color: colors.mutedForeground }]}>({product.reviews} reviews)</Text>
             </View>
-            <View style={[styles.stockBadge, { backgroundColor: colors.success + "15" }]}>
-              <Text style={[styles.stockText, { color: colors.success ?? "#34C759" }]}>In Stock</Text>
+            <View style={[styles.stockBadge, {
+              backgroundColor: (product.stock ?? 0) <= 0 ? "#FF3B30" + "20" : (product.stock ?? 0) < 10 ? "#FF9500" + "20" : colors.success + "15"
+            }]}>
+              <Text style={[styles.stockText, {
+                color: (product.stock ?? 0) <= 0 ? "#FF3B30" : (product.stock ?? 0) < 10 ? "#FF9500" : (colors.success ?? "#34C759")
+              }]}>
+                {(product.stock ?? 0) <= 0 ? "Out of Stock" : (product.stock ?? 0) < 10 ? `Low Stock (${product.stock})` : "In Stock"}
+              </Text>
             </View>
           </View>
+
+          {/* Size selector */}
+          {product.sizes && product.sizes.length > 0 && product.sizes[0] !== "Set" && product.sizes[0] !== "One Size" && (
+            <>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Size</Text>
+              <View style={styles.selectorRow}>
+                {product.sizes.map((sz) => (
+                  <Pressable
+                    key={sz}
+                    onPress={() => setSelectedSize(sz)}
+                    style={[styles.sizeChip, {
+                      borderColor: selectedSize === sz ? colors.primary : colors.border,
+                      backgroundColor: selectedSize === sz ? colors.primary + "15" : colors.card,
+                    }]}
+                  >
+                    <Text style={[styles.sizeChipText, { color: selectedSize === sz ? colors.primary : colors.foreground }]}>
+                      {sz}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          )}
+
+          {/* Color selector */}
+          {product.colors && product.colors.length > 0 && product.colors[0] !== "Amber" && (
+            <>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Color</Text>
+              <View style={styles.selectorRow}>
+                {product.colors.map((col) => (
+                  <Pressable
+                    key={col}
+                    onPress={() => setSelectedColor(col)}
+                    style={[styles.colorChip, {
+                      borderColor: selectedColor === col ? colors.primary : colors.border,
+                      backgroundColor: selectedColor === col ? colors.primary + "15" : colors.card,
+                    }]}
+                  >
+                    <Text style={[styles.colorChipText, { color: selectedColor === col ? colors.primary : colors.foreground }]}>
+                      {col}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          )}
 
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
@@ -228,12 +307,17 @@ export default function ProductDetailScreen() {
             </Text>
           </Pressable>
           <Pressable
-            style={[styles.buyButton, { backgroundColor: colors.primary }]}
+            style={[styles.buyButton, {
+              backgroundColor: (product.stock ?? 0) > 0 ? colors.primary : "#999",
+              opacity: (product.stock ?? 0) > 0 ? 1 : 0.6
+            }]}
             onPress={handleBuy}
-            disabled={loading}
+            disabled={loading || (product.stock ?? 0) <= 0}
           >
-            <LinearGradient colors={[colors.primary, colors.secondary]} style={styles.buyGradient}>
-              <Text style={styles.buyButtonText}>{loading ? "Processing..." : "Buy with Coins"}</Text>
+            <LinearGradient colors={(product.stock ?? 0) > 0 ? [colors.primary, colors.secondary] : ["#999", "#999"]} style={styles.buyGradient}>
+              <Text style={styles.buyButtonText}>
+                {(product.stock ?? 0) <= 0 ? "Out of Stock" : loading ? "Processing..." : "Buy with Coins"}
+              </Text>
             </LinearGradient>
           </Pressable>
         </View>
@@ -279,4 +363,15 @@ const styles = StyleSheet.create({
   buyButton: { flex: 2, height: 50, borderRadius: 14, overflow: "hidden" },
   buyGradient: { flex: 1, alignItems: "center", justifyContent: "center" },
   buyButtonText: { color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold" },
+  brandChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  brandChipText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  discountChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  discountChipText: { color: "#fff", fontSize: 12, fontFamily: "Inter_700Bold" },
+  priceValue: { fontSize: 24, fontFamily: "Inter_700Bold" },
+  mrpValue: { fontSize: 16, fontFamily: "Inter_500Medium" },
+  selectorRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  sizeChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5 },
+  sizeChipText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  colorChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5 },
+  colorChipText: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

@@ -437,6 +437,8 @@ export default function ShopProductsPage() {
             className="gap-1 text-xs"
             onClick={() => downloadCSV("shop_products.csv", products.map(p => ({
               ID: p.id, Name: p.name, Category: p.category, "Coins (Price)": p.price,
+              MRP: p.mrp ?? 0, "Discount %": p.discount ?? 0, Brand: p.brand ?? "",
+              Sizes: (p.sizes ?? []).join(" | "), Colors: (p.colors ?? []).join(" | "), Stock: p.stock ?? 0,
               Rating: p.rating, Reviews: p.reviews, Active: p.active ? "Yes" : "No",
             })))}
           >
@@ -531,14 +533,34 @@ export default function ShopProductsPage() {
                   className="w-full h-44 object-cover"
                   onError={e => { e.currentTarget.src = "https://placehold.co/400x300?text=No+Image"; }}
                 />
-                <div className="absolute top-2 left-2">
+                <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${CAT_COLOR[product.category]}`}>
                     {product.category}
                   </span>
+                  {product.brand && (
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/90 dark:bg-black/70 text-foreground border border-border/50 shadow-sm">
+                      {product.brand}
+                    </span>
+                  )}
+                  {product.discount ? product.discount > 0 && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500 text-white shadow-sm">
+                      -{product.discount}%
+                    </span>
+                  ) : null}
                 </div>
                 {!product.active && (
                   <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
                     Hidden
+                  </div>
+                )}
+                {(product.stock ?? 0) <= 0 && (
+                  <div className="absolute bottom-2 right-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                    Out of Stock
+                  </div>
+                )}
+                {(product.stock ?? 0) > 0 && (product.stock ?? 0) < 10 && (
+                  <div className="absolute bottom-2 right-2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+                    Low Stock ({product.stock})
                   </div>
                 )}
               </div>
