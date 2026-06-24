@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   ShoppingBag, Plus, Pencil, Trash2, Star, Search, Package,
-  Coins, Tag, Image, Save, X, Download, BarChart3, Eye,
+  Coins, Tag, Image, Save, X, Download, BarChart3, Eye, Percent,
 } from "lucide-react";
 import { downloadCSV } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -24,26 +24,32 @@ interface Product {
   id: string;
   name: string;
   price: number;       // in coins
+  mrp?: number;        // original MRP (for discount display)
+  discount?: number;   // discount % (0–100)
   category: Category;
   image: string;
   description: string;
   rating: number;
   reviews: number;
   active: boolean;
+  brand?: string;
+  sizes?: string[];
+  colors?: string[];
+  stock?: number;
 }
 
 // ── Initial data (mirrors artifacts/ridhi/data/mockData.ts PRODUCTS) ──────────
 const INITIAL_PRODUCTS: Product[] = [
-  { id: "prod1",  name: "Classic Silk Kurta Set",    price: 1200, category: "Fashion",     image: "https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?w=500",  description: "Elegant silk kurta set with intricate embroidery, perfect for festive occasions.", rating: 4.8, reviews: 124, active: true },
-  { id: "prod2",  name: "Canvas Sneakers",           price: 850,  category: "Fashion",     image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500",  description: "Comfortable and stylish canvas sneakers for everyday wear.", rating: 4.5, reviews: 89,  active: true },
-  { id: "prod3",  name: "Aviator Sunglasses",        price: 450,  category: "Fashion",     image: "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=500",  description: "Timeless aviator design with UV protection lenses.", rating: 4.2, reviews: 56,  active: true },
-  { id: "prod4",  name: "Matte Lipstick Set",        price: 600,  category: "Beauty",      image: "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=500",  description: "Long-lasting matte lipsticks in 5 trending shades.", rating: 4.7, reviews: 210, active: true },
-  { id: "prod5",  name: "Organic Face Serum",        price: 750,  category: "Beauty",      image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500",  description: "Vitamin C enriched serum for glowing and healthy skin.", rating: 4.6, reviews: 145, active: true },
-  { id: "prod6",  name: "Wireless Earbuds",          price: 1500, category: "Electronics", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",  description: "Noise-cancelling earbuds with 24-hour battery life.", rating: 4.4, reviews: 320, active: true },
-  { id: "prod7",  name: "Premium Phone Case",        price: 350,  category: "Electronics", image: "https://images.unsplash.com/photo-1559563458-527698bf5295?w=500",  description: "Durable and slim case for ultimate phone protection.", rating: 4.9, reviews: 78,  active: true },
-  { id: "prod8",  name: "Canvas Tote Bag",           price: 250,  category: "Fashion",     image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500",  description: "Spacious eco-friendly tote bag for all your essentials.", rating: 4.3, reviews: 42,  active: true },
-  { id: "prod9",  name: "Scented Soy Candle",        price: 300,  category: "Home",        image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500",  description: "Lavender scented hand-poured soy candle for a relaxing ambiance.", rating: 4.8, reviews: 65,  active: true },
-  { id: "prod10", name: "Smart Watch Band",          price: 400,  category: "Electronics", image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500",  description: "Silicone replacement band for most smartwatches.", rating: 4.1, reviews: 33,  active: true },
+  { id: "prod1",  name: "Classic Silk Kurta Set",    price: 1200, mrp: 1500, discount: 20, category: "Fashion",     image: "https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?w=500",  description: "Elegant silk kurta set with intricate embroidery, perfect for festive occasions.", rating: 4.8, reviews: 124, active: true, brand: "FabIndia", sizes: ["S","M","L","XL"], colors: ["Red","Gold","Cream","Black"], stock: 45 },
+  { id: "prod2",  name: "Canvas Sneakers",           price: 850,  mrp: 1000, discount: 15, category: "Fashion",     image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500",  description: "Comfortable and stylish canvas sneakers for everyday wear.", rating: 4.5, reviews: 89,  active: true, brand: "Roadster", sizes: ["7","8","9","10","11"], colors: ["White","Black","Grey"], stock: 120 },
+  { id: "prod3",  name: "Aviator Sunglasses",        price: 450,  mrp: 600,  discount: 25, category: "Fashion",     image: "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=500",  description: "Timeless aviator design with UV protection lenses.", rating: 4.2, reviews: 56,  active: true, brand: "Ray-Ban", sizes: ["One Size"], colors: ["Gold","Silver","Black"], stock: 32 },
+  { id: "prod4",  name: "Matte Lipstick Set",        price: 600,  mrp: 750,  discount: 20, category: "Beauty",      image: "https://images.unsplash.com/photo-1586776977607-310e9c725c37?w=500",  description: "Long-lasting matte lipsticks in 5 trending shades.", rating: 4.7, reviews: 210, active: true, brand: "Lakme", sizes: ["Set"], colors: ["Red","Pink","Nude","Berry"], stock: 200 },
+  { id: "prod5",  name: "Organic Face Serum",        price: 750,  mrp: 900,  discount: 17, category: "Beauty",      image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500",  description: "Vitamin C enriched serum for glowing and healthy skin.", rating: 4.6, reviews: 145, active: true, brand: "Forest Essentials", sizes: ["30ml","50ml"], colors: ["Amber"], stock: 85 },
+  { id: "prod6",  name: "Wireless Earbuds",          price: 1500, mrp: 2000, discount: 25, category: "Electronics", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",  description: "Noise-cancelling earbuds with 24-hour battery life.", rating: 4.4, reviews: 320, active: true, brand: "boAt", sizes: ["One Size"], colors: ["Black","Blue","White"], stock: 60 },
+  { id: "prod7",  name: "Premium Phone Case",        price: 350,  mrp: 450,  discount: 22, category: "Electronics", image: "https://images.unsplash.com/photo-1559563458-527698bf5295?w=500",  description: "Durable and slim case for ultimate phone protection.", rating: 4.9, reviews: 78,  active: true, brand: "Spigen", sizes: ["iPhone 15","iPhone 15 Pro","Galaxy S24"], colors: ["Clear","Black","Matte"], stock: 150 },
+  { id: "prod8",  name: "Canvas Tote Bag",           price: 250,  mrp: 350,  discount: 29, category: "Fashion",     image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500",  description: "Spacious eco-friendly tote bag for all your essentials.", rating: 4.3, reviews: 42,  active: true, brand: "DailyObjects", sizes: ["Standard"], colors: ["Beige","Olive","Navy"], stock: 90 },
+  { id: "prod9",  name: "Scented Soy Candle",        price: 300,  mrp: 400,  discount: 25, category: "Home",        image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500",  description: "Lavender scented hand-poured soy candle for a relaxing ambiance.", rating: 4.8, reviews: 65,  active: true, brand: "Bath & Body Works", sizes: ["Medium","Large"], colors: ["Lavender","Rose","Vanilla"], stock: 70 },
+  { id: "prod10", name: "Smart Watch Band",          price: 400,  mrp: 550,  discount: 27, category: "Electronics", image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500",  description: "Silicone replacement band for most smartwatches.", rating: 4.1, reviews: 33,  active: true, brand: "Noise", sizes: ["38mm","42mm","44mm"], colors: ["Black","Pink","Teal","Grey"], stock: 110 },
 ];
 
 const CATEGORIES: Category[] = ["Fashion", "Beauty", "Electronics", "Home"];
@@ -57,7 +63,7 @@ const CAT_COLOR: Record<Category, string> = {
 
 // ── Blank product template ─────────────────────────────────────────────────────
 const blank = (): Omit<Product, "id"> => ({
-  name: "", price: 500, category: "Fashion", image: "", description: "", rating: 4.5, reviews: 0, active: true,
+  name: "", price: 500, mrp: 0, discount: 0, category: "Fashion", image: "", description: "", rating: 4.5, reviews: 0, active: true, brand: "", sizes: [], colors: [], stock: 0,
 });
 
 // ── Inline price editor ────────────────────────────────────────────────────────
@@ -246,6 +252,90 @@ function ProductModal({
                 onChange={e => set("reviews", parseInt(e.target.value) || 0)}
               />
             </div>
+          </div>
+
+          {/* MRP & Discount */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5" /> MRP (Original Price)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="1500"
+                value={form.mrp ?? 0}
+                onChange={e => set("mrp", parseInt(e.target.value) || 0)}
+              />
+              <p className="text-xs text-muted-foreground">Original price before discount</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1">
+                <Percent className="w-3.5 h-3.5" /> Discount %
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                placeholder="20"
+                value={form.discount ?? 0}
+                onChange={e => set("discount", parseInt(e.target.value) || 0)}
+              />
+              <p className="text-xs text-muted-foreground">Shown as a discount badge in the app</p>
+            </div>
+          </div>
+
+          {/* Brand & Stock */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1">
+                <Package className="w-3.5 h-3.5" /> Brand
+              </Label>
+              <Input
+                placeholder="e.g. FabIndia"
+                value={form.brand ?? ""}
+                onChange={e => set("brand", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1">
+                <Package className="w-3.5 h-3.5" /> Stock Quantity
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="100"
+                value={form.stock ?? 0}
+                onChange={e => set("stock", parseInt(e.target.value) || 0)}
+              />
+              <p className="text-xs text-muted-foreground">0 = Out of stock</p>
+            </div>
+          </div>
+
+          {/* Sizes */}
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1">
+              <Package className="w-3.5 h-3.5" /> Sizes
+            </Label>
+            <Input
+              placeholder="e.g. S, M, L, XL (comma-separated)"
+              value={(form.sizes ?? []).join(", ")}
+              onChange={e => set("sizes", e.target.value.split(/[,，]/).map(s => s.trim()).filter(Boolean))}
+            />
+            <p className="text-xs text-muted-foreground">Leave empty for single-size products</p>
+          </div>
+
+          {/* Colors */}
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1">
+              <Package className="w-3.5 h-3.5" /> Colors
+            </Label>
+            <Input
+              placeholder="e.g. Red, Black, Blue (comma-separated)"
+              value={(form.colors ?? []).join(", ")}
+              onChange={e => set("colors", e.target.value.split(/[,，]/).map(s => s.trim()).filter(Boolean))}
+            />
+            <p className="text-xs text-muted-foreground">Leave empty for single-color products</p>
           </div>
 
           {/* Active toggle */}
