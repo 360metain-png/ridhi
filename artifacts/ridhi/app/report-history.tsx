@@ -12,9 +12,8 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColors } from "@/hooks/useColors"
+import { useColors } from "@/hooks/useColors";
 import { useTrackScreen } from "@/hooks/useAnalytics";
-;
 import { PrivateHead } from "@/components/PrivateHead";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -70,101 +69,107 @@ export default function ReportHistoryScreen() {
     new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: "#0D0D1A" }}>
       <PrivateHead />
+      {/* Top bar */}
       <View style={[styles.topBar, { paddingTop: Platform.OS === "web" ? 67 : insets.top + 4 }]}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={colors.foreground} />
+          <Feather name="arrow-left" size={22} color="#fff" />
         </Pressable>
-        <Text style={[styles.title, { color: colors.foreground }]}>My Reports</Text>
+        <Text style={styles.title}>My Reports</Text>
         <View style={{ width: 36 }} />
       </View>
 
-      {/* Filter tabs */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabs}>
-        {FILTER_TABS.map((t) => {
-          const active = activeTab === t.id;
-          return (
-            <Pressable
-              key={t.id}
-              style={[styles.tab, { backgroundColor: active ? colors.primary : colors.muted }]}
-              onPress={() => setActiveTab(t.id)}
-            >
-              <Text style={[styles.tabText, { color: active ? "#fff" : colors.foreground }]}>{t.label}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      {filtered.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={{ fontSize: 48 }}>🛡️</Text>
-          <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No reports found</Text>
-          <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-            {activeTab === "all"
-              ? "You haven't reported any content yet."
-              : `No ${STATUS_LABELS[activeTab].toLowerCase()} reports.`}
-          </Text>
-          <Pressable onPress={() => router.back()} style={[styles.backLink, { backgroundColor: colors.primary }]}>
-            <Text style={styles.backLinkText}>Back to Profile</Text>
-          </Pressable>
+      {/* Tabs + Content row */}
+      <View style={{ flex: 1, flexDirection: "row" }}>
+        {/* Vertical tab bar */}
+        <View style={styles.tabBar}>
+          {FILTER_TABS.map((t) => {
+            const active = activeTab === t.id;
+            return (
+              <Pressable
+                key={t.id}
+                style={[
+                  styles.vTab,
+                  active && { backgroundColor: "#E91E8C" },
+                ]}
+                onPress={() => setActiveTab(t.id)}
+              >
+                <Text style={[styles.vTabText, active && { color: "#fff" }]}>
+                  {t.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(r) => r.id}
-          contentContainerStyle={{ padding: 16, gap: 10 }}
-          renderItem={({ item }) => (
-            <Pressable
-              style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-              onPress={() => setSelected(item)}
-            >
-              <View style={styles.cardHeader}>
-                <View style={[styles.typeBadge, { backgroundColor: colors.primary + "18" }]}>
-                  <Feather
-                    name={TYPE_ICONS[item.targetType] as any}
-                    size={12}
-                    color={colors.primary}
-                  />
-                  <Text style={[styles.typeLabel, { color: colors.primary }]}>
-                    {item.targetType}
+
+        {/* Content area */}
+        <View style={{ flex: 1 }}>
+          {filtered.length === 0 ? (
+            <View style={styles.empty}>
+              <Text style={{ fontSize: 48 }}>🛡️</Text>
+              <Text style={styles.emptyTitle}>No reports found</Text>
+              <Text style={styles.emptySub}>
+                {activeTab === "all"
+                  ? "You haven't reported any content yet."
+                  : `No ${STATUS_LABELS[activeTab].toLowerCase()} reports.`}
+              </Text>
+              <Pressable onPress={() => router.back()} style={styles.backLink}>
+                <Text style={styles.backLinkText}>Back to Profile</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <FlatList
+              data={filtered}
+              keyExtractor={(r) => r.id}
+              contentContainerStyle={{ padding: 16, gap: 10 }}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={[styles.card, { backgroundColor: "#1A1A2E", borderColor: "#2A2A3E" }]}
+                  onPress={() => setSelected(item)}
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={[styles.typeBadge, { backgroundColor: "#E91E8C" + "18" }]}>
+                      <Feather name={TYPE_ICONS[item.targetType] as any} size={12} color="#E91E8C" />
+                      <Text style={[styles.typeLabel, { color: "#E91E8C" }]}>{item.targetType}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + "15" }]}>
+                      <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[item.status] }]} />
+                      <Text style={[styles.statusLabel, { color: STATUS_COLORS[item.status] }]}>
+                        {STATUS_LABELS[item.status]}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.targetTitle, { color: "#fff" }]}>
+                    {item.targetTitle || item.targetUser || "Unknown content"}
                   </Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: STATUS_COLORS[item.status] + "15" }]}>
-                  <View style={[styles.statusDot, { backgroundColor: STATUS_COLORS[item.status] }]} />
-                  <Text style={[styles.statusLabel, { color: STATUS_COLORS[item.status] }]}>
-                    {STATUS_LABELS[item.status]}
+                  <Text style={[styles.reason, { color: "#888" }]}>
+                    Reason: {item.reason}
                   </Text>
-                </View>
-              </View>
-              <Text style={[styles.targetTitle, { color: colors.foreground }]}>
-                {item.targetTitle || item.targetUser || "Unknown content"}
-              </Text>
-              <Text style={[styles.reason, { color: colors.mutedForeground }]}>
-                Reason: {item.reason}
-              </Text>
-              <Text style={[styles.date, { color: colors.mutedForeground }]}>
-                Reported {formatDate(item.createdAt)}
-              </Text>
-              {item.resolutionNote && (
-                <View style={[styles.resolution, { backgroundColor: colors.muted }]}>
-                  <Feather name="check-circle" size={12} color={colors.success} />
-                  <Text style={[styles.resolutionText, { color: colors.foreground }]}>{item.resolutionNote}</Text>
-                </View>
+                  <Text style={[styles.date, { color: "#888" }]}>
+                    Reported {formatDate(item.createdAt)}
+                  </Text>
+                  {item.resolutionNote && (
+                    <View style={[styles.resolution, { backgroundColor: "#1A1A2E" }]}>
+                      <Feather name="check-circle" size={12} color="#34C759" />
+                      <Text style={[styles.resolutionText, { color: "#fff" }]}>{item.resolutionNote}</Text>
+                    </View>
+                  )}
+                </Pressable>
               )}
-            </Pressable>
+            />
           )}
-        />
-      )}
+        </View>
+      </View>
 
       {/* Detail modal */}
       {selected && (
         <View style={[styles.detailOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
-          <View style={[styles.detailSheet, { backgroundColor: colors.card }]}>
+          <View style={[styles.detailSheet, { backgroundColor: "#1A1A2E" }]}>
             <View style={styles.detailHeader}>
-              <Text style={[styles.detailTitle, { color: colors.foreground }]}>Report Details</Text>
+              <Text style={[styles.detailTitle, { color: "#fff" }]}>Report Details</Text>
               <Pressable onPress={() => setSelected(null)}>
-                <Feather name="x" size={22} color={colors.foreground} />
+                <Feather name="x" size={22} color="#fff" />
               </Pressable>
             </View>
             <ScrollView showsVerticalScrollIndicator={false} style={styles.detailBody}>
@@ -174,34 +179,34 @@ export default function ReportHistoryScreen() {
                   {STATUS_LABELS[selected.status]}
                 </Text>
               </View>
-              <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Content</Text>
-              <Text style={[styles.detailValue, { color: colors.foreground }]}>
+              <Text style={[styles.detailLabel, { color: "#888" }]}>Content</Text>
+              <Text style={[styles.detailValue, { color: "#fff" }]}>
                 {selected.targetTitle || selected.targetUser || "Unknown"}
               </Text>
-              <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Type</Text>
-              <Text style={[styles.detailValue, { color: colors.foreground }]}>{selected.targetType}</Text>
-              <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Reason</Text>
-              <Text style={[styles.detailValue, { color: colors.foreground }]}>{selected.reason}</Text>
+              <Text style={[styles.detailLabel, { color: "#888" }]}>Type</Text>
+              <Text style={[styles.detailValue, { color: "#fff" }]}>{selected.targetType}</Text>
+              <Text style={[styles.detailLabel, { color: "#888" }]}>Reason</Text>
+              <Text style={[styles.detailValue, { color: "#fff" }]}>{selected.reason}</Text>
               {selected.description && (
                 <>
-                  <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Your Note</Text>
-                  <Text style={[styles.detailValue, { color: colors.foreground }]}>{selected.description}</Text>
+                  <Text style={[styles.detailLabel, { color: "#888" }]}>Your Note</Text>
+                  <Text style={[styles.detailValue, { color: "#fff" }]}>{selected.description}</Text>
                 </>
               )}
               {selected.resolutionNote && (
                 <>
-                  <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Resolution</Text>
-                  <Text style={[styles.detailValue, { color: colors.foreground }]}>{selected.resolutionNote}</Text>
+                  <Text style={[styles.detailLabel, { color: "#888" }]}>Resolution</Text>
+                  <Text style={[styles.detailValue, { color: "#fff" }]}>{selected.resolutionNote}</Text>
                 </>
               )}
               {selected.adminAction && (
                 <>
-                  <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Action Taken</Text>
-                  <Text style={[styles.detailValue, { color: colors.foreground }]}>{selected.adminAction}</Text>
+                  <Text style={[styles.detailLabel, { color: "#888" }]}>Action Taken</Text>
+                  <Text style={[styles.detailValue, { color: "#fff" }]}>{selected.adminAction}</Text>
                 </>
               )}
-              <Text style={[styles.detailLabel, { color: colors.mutedForeground }]}>Reported On</Text>
-              <Text style={[styles.detailValue, { color: colors.foreground }]}>{formatDate(selected.createdAt)}</Text>
+              <Text style={[styles.detailLabel, { color: "#888" }]}>Reported On</Text>
+              <Text style={[styles.detailValue, { color: "#fff" }]}>{formatDate(selected.createdAt)}</Text>
             </ScrollView>
           </View>
         </View>
@@ -219,16 +224,45 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   backBtn: { padding: 4 },
-  title: { fontSize: 18, fontFamily: "Inter_700Bold" },
+  title: { fontSize: 18, fontFamily: "Inter_700Bold", color: "#fff" },
 
-  tabs: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
-  tab: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20 },
-  tabText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
+  tabBar: {
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    gap: 8,
+  },
+  vTab: {
+    paddingHorizontal: 14,
+    paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: "#1A1A2E",
+    minHeight: 64,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  vTabText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
+    textAlign: "center",
+  },
 
-  empty: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, paddingHorizontal: 40 },
-  emptyTitle: { fontSize: 16, fontFamily: "Inter_700Bold" },
-  emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", textAlign: "center" },
-  backLink: { paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14, marginTop: 8 },
+  empty: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    paddingHorizontal: 40,
+  },
+  emptyTitle: { fontSize: 16, fontFamily: "Inter_700Bold", color: "#fff" },
+  emptySub: { fontSize: 13, fontFamily: "Inter_400Regular", color: "#888", textAlign: "center" },
+  backLink: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 8,
+    backgroundColor: "#E91E8C",
+  },
   backLinkText: { color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" },
 
   card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 6 },
