@@ -19,6 +19,8 @@ import friendRequestsRouter from "./friend_requests";
 import walletRouter from "./wallet";
 import plansRouter from "./plans";
 import adsRouter from "./ads";
+import reelsRouter from "./reels";
+import storiesRouter from "./stories";
 
 const router: IRouter = Router();
 
@@ -42,5 +44,7 @@ router.use(friendRequestsRouter);
 router.use(walletRouter);
 router.use(plansRouter);
 router.use(adsRouter);
+router.use(reelsRouter);
+router.use(storiesRouter);
 
 export default router;

@@ -30,7 +30,7 @@ import { StoryRow } from "@/components/StoryRow";
 import { CoinBadge } from "@/components/CoinBadge";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { Avatar } from "@/components/Avatar";
-import { INITIAL_POSTS, STORIES, REGIONAL_POSTS, POPUP_ADS, PRODUCTS, type BannerAdConfig } from "@/data/mockData";
+import { INITIAL_POSTS, STORIES as DEFAULT_STORIES, REGIONAL_POSTS, POPUP_ADS, PRODUCTS, type BannerAdConfig } from "@/data/mockData";
 import { BannerAd } from "@/components/BannerAd";
 import { PopupAd } from "@/components/PopupAd";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -190,6 +190,8 @@ export default function FeedScreen() {
   const [localComments, setLocalComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
   const [hiddenCommentIds, setHiddenCommentIds] = useState<Record<string, Set<string>>>({});
   const [storyViewId, setStoryViewId] = useState<string | null>(null);
+  const [stories, setStories] = useState<Array<{ id: string; userId: string; userName: string; userAvatar?: string; hasUnseen?: boolean }>>([]);
+  const [storiesLoading, setStoriesLoading] = useState(false);
 
   // ── Feed Ads (API) ────────────────────────────────────────────────────────
   const [feedAds, setFeedAds] = useState<BannerAdConfig[]>([]);
@@ -219,6 +221,33 @@ export default function FeedScreen() {
   useEffect(() => {
     loadFeedAds();
   }, [loadFeedAds]);
+
+  // ── Fetch stories from API ─────────────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    async function loadStories() {
+      setStoriesLoading(true);
+      try {
+        const data = await apiFetch<{ stories: any[] }>("/api/stories?limit=50");
+        if (!cancelled && data?.stories) {
+          const mapped = data.stories.map((s) => ({
+            id: s.id,
+            userId: s.userId || s.user_id || "",
+            userName: s.userName || s.user_name || "User",
+            userAvatar: s.userAvatar || s.user_avatar || "",
+            hasUnseen: s.hasUnseen ?? true,
+          }));
+          setStories(mapped);
+        }
+      } catch {
+        // Keep default mock stories on error
+      } finally {
+        if (!cancelled) setStoriesLoading(false);
+      }
+    }
+    loadStories();
+    return () => { cancelled = true; };
+  }, []);
 
   // ── Special Client Ads ────────────────────────────────────────────────────
   const activePopup = POPUP_ADS.find((a) => a.active) ?? null;
@@ -555,8 +584,9 @@ export default function FeedScreen() {
     setStoryViewId(storyId);
     Animated.timing(storyProgress, { toValue: 1, duration: 4000, useNativeDriver: false }).start(({ finished }) => {
       if (finished) {
-        const idx = STORIES.findIndex((s) => s.id === storyId);
-        const next = STORIES[idx + 1];
+        const activeStories = stories.length > 0 ? stories : DEFAULT_STORIES;
+        const idx = activeStories.findIndex((s) => s.id === storyId);
+        const next = activeStories[idx + 1];
         if (next) {
           handleOpenStory(next.id);
         } else {
@@ -619,7 +649,7 @@ export default function FeedScreen() {
       return (
         <>
           <StoryRow
-            stories={STORIES}
+            stories={stories.length > 0 ? stories : DEFAULT_STORIES}
             onAddStory={() => router.push({ pathname: "/create-post", params: { type: "story" } } as any)}
             onStory={handleOpenStory}
             selfName={user?.name ?? "Me"}
@@ -1179,8 +1209,9 @@ export default function FeedScreen() {
         onRequestClose={handleCloseStory}
       >
         {storyViewId !== null && (() => {
-          const story = STORIES.find((s) => s.id === storyViewId);
-          const idx = STORIES.findIndex((s) => s.id === storyViewId);
+          const activeStories = stories.length > 0 ? stories : DEFAULT_STORIES;
+          const story = activeStories.find((s) => s.id === storyViewId);
+          const idx = activeStories.findIndex((s) => s.id === storyViewId);
           if (!story) return null;
           const GRAD_PAIRS: [string, string][] = [
             ["#E91E8C", "#7B2FBE"], ["#FF6B35", "#E91E8C"], ["#7B2FBE", "#4A90E2"],
@@ -1192,7 +1223,7 @@ export default function FeedScreen() {
               <LinearGradient colors={["#000", "#0A0A18", "#000"]} style={StyleSheet.absoluteFill} />
               <LinearGradient colors={[c1 + "40", "transparent", c2 + "30"]} style={StyleSheet.absoluteFill} />
               <View style={[styles.storyProgressBar, { paddingTop: insets.top + 8 }]}>
-                {STORIES.map((s, i) => (
+                {activeStories.map((s, i) => (
                   <View key={s.id} style={[styles.storyProgressTrack, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
                     {i < idx && <View style={[styles.storyProgressFill, { backgroundColor: "#fff", width: "100%" }]} />}
                     {i === idx && (
@@ -1221,12 +1252,12 @@ export default function FeedScreen() {
               <Pressable
                 style={styles.storyTapLeft}
                 onPress={() => {
-                  const prev = STORIES[idx - 1];
+                  const prev = activeStories[idx - 1];
                   if (prev) handleOpenStory(prev.id); else handleCloseStory();
                 }}
               />
               <Pressable style={styles.storyTapRight} onPress={() => {
-                const next = STORIES[idx + 1];
+                const next = activeStories[idx + 1];
                 if (next) handleOpenStory(next.id); else handleCloseStory();
               }} />
             </View>

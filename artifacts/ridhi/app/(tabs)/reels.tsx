@@ -31,8 +31,25 @@ import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { ReelOptionsMenu } from "@/components/ReelOptionsMenu";
 import { DownloadService } from "@/components/DownloadService";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
+import { apiFetch } from "@/utils/api";
+import { useAuth } from "@/contexts/AuthContext";
 
-const REELS = [
+interface ReelItemData {
+  id: string;
+  userId: string;
+  userName: string;
+  userCity: string;
+  caption: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  isLiked: boolean;
+  gradient: [string, string];
+  emoji: string;
+  allowDuet: boolean;
+}
+
+const DEFAULT_REELS: ReelItemData[] = [
   {
     id: "r1",
     userId: "u1",
@@ -77,6 +94,7 @@ const REELS = [
   },
   {
     id: "r4",
+    userId: "u4",
     userName: "Arjun Kumar",
     userCity: "Bangalore",
     caption: "Morning runs > everything. 10km done. IYKYK 🏃",
@@ -90,6 +108,7 @@ const REELS = [
   },
   {
     id: "r5",
+    userId: "u5",
     userName: "Meera Patel",
     userCity: "Ahmedabad",
     caption: "My dadi's special kadhi recipe — passing it on! 👵",
@@ -103,6 +122,7 @@ const REELS = [
   },
   {
     id: "r6",
+    userId: "u6",
     userName: "Priya Sharma",
     userCity: "Mumbai",
     caption: "Bollywood night at Juhu! 🎬 #MumbaiNights",
@@ -130,6 +150,7 @@ const REELS = [
   },
   {
     id: "r8",
+    userId: "u8",
     userName: "Sneha Rao",
     userCity: "Chennai",
     caption: "Kolam art in front of my home — every morning ritual 🌸",
@@ -143,6 +164,7 @@ const REELS = [
   },
   {
     id: "r9",
+    userId: "u9",
     userName: "Vikram Iyer",
     userCity: "Kochi",
     caption: "Backwaters at sunset — God's Own Country is magic 🌴",
@@ -156,6 +178,7 @@ const REELS = [
   },
   {
     id: "r10",
+    userId: "u10",
     userName: "Pooja Verma",
     userCity: "Jaipur",
     caption: "Pink City at golden hour — why I love Jaipur 🌇",
@@ -169,6 +192,7 @@ const REELS = [
   },
   {
     id: "r11",
+    userId: "u11",
     userName: "Aryan Singh",
     userCity: "Lucknow",
     caption: "Chikan kari shopping in Hazratganj — the real deal 🧵",
@@ -182,6 +206,7 @@ const REELS = [
   },
   {
     id: "r12",
+    userId: "u12",
     userName: "Neha Gupta",
     userCity: "Pune",
     caption: "Monsoon evening chai and pakode in the hills 🌧️",
@@ -195,6 +220,7 @@ const REELS = [
   },
   {
     id: "r13",
+    userId: "u13",
     userName: "Karan Malhotra",
     userCity: "Chandigarh",
     caption: "Sukhna Lake at 6 AM — Punjabi mornings hit different 🌅",
@@ -208,6 +234,7 @@ const REELS = [
   },
   {
     id: "r14",
+    userId: "u14",
     userName: "Anjali Das",
     userCity: "Kolkata",
     caption: "Durga Puja prep at Kumartuli — art in motion 🎨",
@@ -221,6 +248,7 @@ const REELS = [
   },
   {
     id: "r15",
+    userId: "u15",
     userName: "Rohit Nair",
     userCity: "Bangalore",
     caption: "Tech Park to Nandi Hills — weekend escape 🏔️",
@@ -234,6 +262,7 @@ const REELS = [
   },
   {
     id: "r16",
+    userId: "u16",
     userName: "Fatima Khan",
     userCity: "Hyderabad",
     caption: "Biryani at Cafe Bahar — the best in the city! 🍗",
@@ -247,6 +276,7 @@ const REELS = [
   },
   {
     id: "r17",
+    userId: "u17",
     userName: "Rajesh Khanna",
     userCity: "Delhi",
     caption: "Old Delhi food walk — 10 places, one belly. 🥘",
@@ -260,6 +290,7 @@ const REELS = [
   },
   {
     id: "r18",
+    userId: "u18",
     userName: "Lakshmi Iyer",
     userCity: "Chennai",
     caption: "Carnatic music morning — nothing heals like this 🎵",
@@ -273,6 +304,7 @@ const REELS = [
   },
   {
     id: "r19",
+    userId: "u19",
     userName: "Kabir Sharma",
     userCity: "Mumbai",
     caption: "Street photography in Dharavi — raw talent everywhere 📸",
@@ -286,6 +318,7 @@ const REELS = [
   },
   {
     id: "r20",
+    userId: "u20",
     userName: "Divya Menon",
     userCity: "Kochi",
     caption: "Kerala houseboat stay — woke up to this view 🌴",
@@ -299,6 +332,7 @@ const REELS = [
   },
   {
     id: "r21",
+    userId: "u21",
     userName: "Harsh Vardhan",
     userCity: "Jaipur",
     caption: "Royal Rajputana wedding — 3 days of pure magic 💍",
@@ -312,6 +346,7 @@ const REELS = [
   },
   {
     id: "r22",
+    userId: "u22",
     userName: "Simran Kaur",
     userCity: "Chandigarh",
     caption: "Punjabi gym motivation — legs day! 🏋️",
@@ -325,6 +360,7 @@ const REELS = [
   },
   {
     id: "r23",
+    userId: "u23",
     userName: "Aditya Roy",
     userCity: "Mumbai",
     caption: "Bollywood dance class — mastering the hook step 💃",
@@ -338,6 +374,7 @@ const REELS = [
   },
   {
     id: "r24",
+    userId: "u24",
     userName: "Shalini Bhatt",
     userCity: "Ahmedabad",
     caption: "Dandiya night outfit — chaniya choli vibes ✨",
@@ -351,6 +388,7 @@ const REELS = [
   },
   {
     id: "r25",
+    userId: "u25",
     userName: "Manish Tiwari",
     userCity: "Lucknow",
     caption: "Tunday Kebabi — 100 years of taste in one bite 🥩",
@@ -364,6 +402,7 @@ const REELS = [
   },
   {
     id: "r26",
+    userId: "u26",
     userName: "Riya Sen",
     userCity: "Kolkata",
     caption: "Sundarbans boat safari — spotted a tiger! 🐅",
@@ -377,6 +416,7 @@ const REELS = [
   },
   {
     id: "r27",
+    userId: "u27",
     userName: "Nikhil Bansal",
     userCity: "Delhi",
     caption: "Stand-up comedy open mic — my first 5 minutes 🎤",
@@ -390,6 +430,7 @@ const REELS = [
   },
   {
     id: "r28",
+    userId: "u28",
     userName: "Tanya Mishra",
     userCity: "Pune",
     caption: "Mahabaleshwar strawberry picking — sweetest day 🍓",
@@ -403,6 +444,7 @@ const REELS = [
   },
   {
     id: "r29",
+    userId: "u29",
     userName: "Aravind Rao",
     userCity: "Hyderabad",
     caption: "Charminar at midnight — no crowd, all beauty 🕌",
@@ -416,6 +458,7 @@ const REELS = [
   },
   {
     id: "r30",
+    userId: "u30",
     userName: "Mehak Gupta",
     userCity: "Chandigarh",
     caption: "Rock Garden — Nek Chand's masterpiece in stone 🗿",
@@ -430,6 +473,23 @@ const REELS = [
 ];
 
 const ICON_HITSLOP = { top: 12, bottom: 12, left: 12, right: 12 };
+
+function mapApiReel(item: any): ReelItemData {
+  return {
+    id: item.id,
+    userId: item.userId || item.user_id || "",
+    userName: item.userName || item.user_name || "Unknown",
+    userCity: item.userCity || item.user_city || "India",
+    caption: item.caption || "",
+    likes: item.likesCount || item.likes_count || 0,
+    comments: item.commentsCount || item.comments_count || 0,
+    shares: item.sharesCount || item.shares_count || 0,
+    isLiked: item.isLiked || false,
+    gradient: item.gradient || ["#FF6B35", "#E91E8C"],
+    emoji: item.emoji || "🔥",
+    allowDuet: item.allowDuet !== false,
+  };
+}
 
 // ── Animated chevrons shown when the first reel is visible ───────────────────
 function SwipeChevrons({ visible }: { visible: boolean }) {
@@ -505,7 +565,7 @@ function ReelItem({
   isFirst,
   onComment,
 }: {
-  reel: (typeof REELS)[0];
+  reel: ReelItemData;
   isActive: boolean;
   screenHeight: number;
   screenWidth: number;
@@ -608,6 +668,8 @@ function ReelItem({
     } else {
       trackLike(reel.id, "reel");
     }
+    // API call
+    apiFetch(`/api/reels/${reel.id}/like`, { method: "POST" }).catch(() => {});
   }, [liked, reel.id, trackLike, trackUnlike]);
 
   const handleShare = useCallback(() => {
@@ -931,12 +993,37 @@ export default function ReelsScreen() {
   const colors  = useColors();
   const insets  = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const { user } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [commentReel, setCommentReel] = useState<(typeof REELS)[0] | null>(null);
+  const [reels, setReels] = useState<ReelItemData[]>([]);
+  const [reelsLoading, setReelsLoading] = useState(true);
+  const [commentReel, setCommentReel] = useState<ReelItemData | null>(null);
   const [commentText, setCommentText] = useState("");
   const [sentComments, setSentComments] = useState<Record<string, Array<{ id: string; name: string; text: string; timeAgo: string }>>>({});
   const [hiddenReelComments, setHiddenReelComments] = useState<Record<string, Set<string>>>({});
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  // ── Fetch reels from API ─────────────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setReelsLoading(true);
+      try {
+        const data = await apiFetch<{ reels: any[] }>("/api/reels?limit=50");
+        if (!cancelled && data?.reels) {
+          const mapped = data.reels.map(mapApiReel);
+          setReels(mapped);
+        }
+      } catch {
+        // Fallback to default mock reels if API fails
+        if (!cancelled) setReels(DEFAULT_REELS);
+      } finally {
+        if (!cancelled) setReelsLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleLongPressReelComment = useCallback((reelId: string, commentId: string, commentName: string) => {
     Alert.alert(
@@ -1006,7 +1093,7 @@ export default function ReelsScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item, index }: { item: (typeof REELS)[0]; index: number }) => (
+    ({ item, index }: { item: ReelItemData; index: number }) => (
       <ReelItem
         reel={item}
         isActive={index === activeIndex}
@@ -1052,7 +1139,7 @@ export default function ReelsScreen() {
       </View>
 
       <FlatList
-        data={REELS}
+        data={reels.length > 0 ? reels : DEFAULT_REELS}
         keyExtractor={(r) => r.id}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -1066,6 +1153,13 @@ export default function ReelsScreen() {
         maxToRenderPerBatch={3}
         windowSize={5}
         initialNumToRender={2}
+        ListEmptyComponent={
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingTop: screenHeight * 0.4 }}>
+            <Text style={{ color: "#fff", fontSize: 16, fontFamily: "Inter_500Medium" }}>
+              {reelsLoading ? "Loading reels..." : "No reels yet"}
+            </Text>
+          </View>
+        }
       />
 
       {/* ── Comment Modal ── */}

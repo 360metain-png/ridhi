@@ -449,12 +449,17 @@ export default function CreatePostScreen() {
           image: taggedProduct.image,
         };
       }
-      const res = await apiFetch<{ success: boolean; post?: any }>("/api/posts", {
+      // Route to correct endpoint based on content type
+      let endpoint = "/api/posts";
+      if (selectedType === "reel") endpoint = "/api/reels";
+      if (selectedType === "story") endpoint = "/api/stories";
+
+      const res = await apiFetch<{ success: boolean; post?: any; reel?: any; story?: any }>(endpoint, {
         method: "POST",
         body: JSON.stringify(body),
       });
-      if (res.success) {
-        Alert.alert("Posted! 🎉", "Your post is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
+      if (res.success || res.reel || res.story) {
+        Alert.alert("Posted! 🎉", "Your content is now live on Ridhi.", [{ text: "OK", onPress: () => router.back() }]);
         trackCreate(selectedType as "post" | "reel" | "story" | "live");
       } else {
         Alert.alert("Error", "Failed to post. Please try again.");
