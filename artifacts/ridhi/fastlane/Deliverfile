@@ -1,0 +1,9 @@
+app_identifier "com.ridhi.app"
+username ""
+
+# Automatically upload screenshots and metadata
+submit_for_review false
+automatic_release false
+
+# Screenshots
+screenshots_path "./fastlane/screenshots"
