@@ -61,7 +61,6 @@ export default function ReferralScreen() {
       await Share.share({
         message: `Join me on Ridhi — India's coolest social app! Use my referral code ${referralCode} and get 50 free coins after you sign up. Download: https://ridhi.app`,
         title: "Ridhi",
-        url: "https://ridhi.app",
       });
     } catch {}
   };
