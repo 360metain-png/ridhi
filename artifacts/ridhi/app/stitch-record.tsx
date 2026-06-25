@@ -11,9 +11,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors"
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useColors } from "@/hooks/useColors";
 import { useTrackScreen } from "@/hooks/useAnalytics";
-;
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,6 +33,8 @@ export default function StitchRecordScreen() {
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [step, setStep] = useState<"trim" | "record">("trim");
+  const [cameraFacing, setCameraFacing] = useState<"back" | "front">("front");
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   const topPad = insets.top + 8;
 
@@ -175,18 +177,22 @@ export default function StitchRecordScreen() {
             </View>
           </View>
 
-          {/* Camera placeholder */}
+          {/* Camera preview */}
           <View style={[styles.cameraArea, { backgroundColor: colors.card, borderColor: colors.border, marginHorizontal: 16, marginTop: 12, flex: 1 }]}>
-            <LinearGradient colors={[colors.primary + "10", colors.secondary + "10"]} style={[StyleSheet.absoluteFill, { borderRadius: 16 }]} />
-            <View style={{ alignItems: "center", justifyContent: "center" }}>
-              <Feather name="video" size={48} color={colors.primary} />
-              <Text style={{ fontSize: 14, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 12 }}>
-                Camera Preview
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 4 }}>
-                Your recording will be added after the original
-              </Text>
-            </View>
+            {cameraPermission?.granted ? (
+              <CameraView style={[StyleSheet.absoluteFill, { borderRadius: 16 }]} facing={cameraFacing} />
+            ) : (
+              <LinearGradient colors={[colors.primary + "10", colors.secondary + "10"]} style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}>
+                <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }}>
+                  <Feather name="video" size={48} color={colors.primary} />
+                  <Text style={{ fontSize: 14, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 12 }}>Camera Preview</Text>
+                  <Text style={{ fontSize: 12, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 4 }}>Allow camera to start recording</Text>
+                  <Pressable onPress={requestCameraPermission} style={{ marginTop: 12, paddingHorizontal: 20, paddingVertical: 8, backgroundColor: colors.primary, borderRadius: 20 }}>
+                    <Text style={{ fontSize: 14, color: "#fff", fontFamily: "Inter_600SemiBold" }}>Allow Camera</Text>
+                  </Pressable>
+                </View>
+              </LinearGradient>
+            )}
           </View>
 
           {/* Bottom record controls */}

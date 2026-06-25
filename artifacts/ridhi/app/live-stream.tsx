@@ -21,6 +21,8 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as ScreenCapture from "expo-screen-capture";
 import * as Haptics from "expo-haptics";
+import { Audio } from "expo-av";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
@@ -159,6 +161,12 @@ export default function LiveStreamScreen() {
   const [reposted, setReposted] = useState(false);
   const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
   const prevLiveCoins = useRef(0);
+
+  // Camera + mic state
+  const [cameraFacing, setCameraFacing] = useState<"back" | "front">("front");
+  const [cameraActive, setCameraActive] = useState(true);
+  const [micMuted, setMicMuted] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -497,38 +505,93 @@ export default function LiveStreamScreen() {
           </View>
         ) : (
           <View style={{ flex: 1 }}>
-            <LinearGradient colors={[colors.secondary + "80", colors.primary + "50"]} style={styles.hostVideo}>
-              <View style={[styles.hostHud, { paddingTop: topPad + 8 }]}>
-                <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
-                  <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
-                </View>
-                <View style={styles.hostHudRight}>
-                  <View style={styles.hostStats}>
-                    <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
-                    <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+            {cameraActive ? (
+              cameraPermission?.granted ? (
+                <CameraView style={styles.hostVideo} facing={cameraFacing}>
+                  <View style={[styles.hostHud, { paddingTop: topPad + 8 }]}>
+                    <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                      <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
+                    </View>
+                    <View style={styles.hostHudRight}>
+                      <View style={styles.hostStats}>
+                        <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                        <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+                      </View>
+                      <HostCoinPill coins={liveCoins} />
+                    </View>
                   </View>
-                  <HostCoinPill coins={liveCoins} />
-                </View>
-              </View>
-              <Text style={styles.hostVideoText}>Your camera</Text>
-              {/* Host view emoji reactions */}
-              <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
-                {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude0d", "\ud83d\ude4c", "\ud83d\udc4f"].map((emoji) => (
-                  <View key={emoji} style={{ flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
-                    <Text style={{ fontSize: 14 }}>{emoji}</Text>
-                    <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_500Medium" }}>
-                      {Math.floor(Math.random() * 200)}
-                    </Text>
+                  <Text style={styles.hostVideoText}>Your camera</Text>
+                  {/* Host view emoji reactions */}
+                  <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
+                    {["\u2764\ufe0f", "\ud83d\udd25", "\ud83d\ude02", "\ud83d\ude0d", "\ud83d\ude4c", "\ud83d\udc4f"].map((emoji) => (
+                      <View key={emoji} style={{ flexDirection: "row", alignItems: "center", gap: 2, backgroundColor: "rgba(0,0,0,0.4)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                        <Text style={{ fontSize: 14 }}>{emoji}</Text>
+                        <Text style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_500Medium" }}>
+                          {Math.floor(Math.random() * 200)}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </LinearGradient>
+                </CameraView>
+              ) : (
+                <LinearGradient colors={[colors.secondary + "80", colors.primary + "50"]} style={styles.hostVideo}>
+                  <View style={[styles.hostHud, { paddingTop: topPad + 8 }]}>
+                    <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                      <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
+                    </View>
+                    <View style={styles.hostHudRight}>
+                      <View style={styles.hostStats}>
+                        <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                        <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+                      </View>
+                      <HostCoinPill coins={liveCoins} />
+                    </View>
+                  </View>
+                  <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }}>
+                    <Feather name="camera" size={40} color="rgba(255,255,255,0.7)" />
+                    <Text style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>Camera access needed</Text>
+                    <Pressable onPress={requestCameraPermission} style={{ marginTop: 12, paddingHorizontal: 20, paddingVertical: 8, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 20 }}>
+                      <Text style={{ fontSize: 14, color: "#fff", fontFamily: "Inter_600SemiBold" }}>Allow Camera</Text>
+                    </Pressable>
+                  </View>
+                </LinearGradient>
+              )
+            ) : (
+              <LinearGradient colors={[colors.secondary + "80", colors.primary + "50"]} style={styles.hostVideo}>
+                <View style={[styles.hostHud, { paddingTop: topPad + 8 }]}>
+                  <View style={[styles.liveBadge, { backgroundColor: colors.destructive }]}>
+                    <Text style={styles.liveBadgeText}>LIVE  {fmt(hostDuration)}</Text>
+                  </View>
+                  <View style={styles.hostHudRight}>
+                    <View style={styles.hostStats}>
+                      <Feather name="eye" size={14} color="rgba(255,255,255,0.9)" />
+                      <Text style={styles.hostStatText}>{viewers.toLocaleString()}</Text>
+                    </View>
+                    <HostCoinPill coins={liveCoins} />
+                  </View>
+                </View>
+                <View style={{ alignItems: "center", justifyContent: "center", flex: 1 }}>
+                  <Feather name="camera-off" size={40} color="rgba(255,255,255,0.5)" />
+                  <Text style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>Camera is off</Text>
+                </View>
+              </LinearGradient>
+            )}
             <View style={[styles.hostControls, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => Alert.alert("Microphone", "Toggle mic mute/unmute")}>
-                <Feather name="mic" size={22} color={colors.foreground} />
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => setMicMuted((m) => !m)}>
+                <Feather name={micMuted ? "mic-off" : "mic"} size={22} color={micMuted ? colors.destructive : colors.foreground} />
               </Pressable>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => Alert.alert("Camera", "Toggle camera on/off")}>
-                <Feather name="camera" size={22} color={colors.foreground} />
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => {
+                if (cameraActive) {
+                  setCameraActive(false);
+                } else {
+                  if (cameraPermission?.granted) {
+                    setCameraActive(true);
+                  } else {
+                    requestCameraPermission();
+                  }
+                }
+              }}>
+                <Feather name={cameraActive ? "camera" : "camera-off"} size={22} color={cameraActive ? colors.foreground : colors.destructive} />
               </Pressable>
               <Pressable
                 onPress={() => {

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   Alert,
   Animated,
@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
 import { useColors } from "@/hooks/useColors";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
 import { useAuth } from "@/contexts/AuthContext";
@@ -169,6 +170,12 @@ export default function CreatePostScreen() {
   const [scheduledAt, setScheduledAt] = useState<string>("");
   const [showSchedulePicker, setShowSchedulePicker] = useState(false);
 
+  // ── Audio Recording state ──
+  const [audioRecording, setAudioRecording] = useState(false);
+  const [audioRecordingSeconds, setAudioRecordingSeconds] = useState(0);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const audioTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const captionPanelAnim = useRef(new Animated.Value(0)).current;
   const hashtagPanelAnim = useRef(new Animated.Value(0)).current;
   const schedulePanelAnim = useRef(new Animated.Value(0)).current;
@@ -252,7 +259,7 @@ export default function CreatePostScreen() {
       }
       if (type === "carousel") {
         const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: "images",
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsMultipleSelection: true,
           quality: 0.85,
         });
@@ -262,7 +269,7 @@ export default function CreatePostScreen() {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: type === "photo" ? "images" : "videos",
+        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: true,
         quality: 0.85,
       });
@@ -308,7 +315,7 @@ export default function CreatePostScreen() {
         return;
       }
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: type === "photo" ? "images" : "videos",
+        mediaTypes: type === "photo" ? ImagePicker.MediaTypeOptions.Images : ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: true,
         quality: 0.9,
       });
@@ -320,6 +327,70 @@ export default function CreatePostScreen() {
       Alert.alert("Camera Error", "Could not open camera. Please try again.");
     }
   };
+
+  // ── Audio Recording ──
+  const startAudioRecording = useCallback(async () => {
+    try {
+      const { granted } = await Audio.requestPermissionsAsync();
+      if (!granted) {
+        Alert.alert("Microphone needed", "Allow microphone access to record audio.", [{ text: "OK" }]);
+        return;
+      }
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const rec = new Audio.Recording();
+      await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      await rec.startAsync();
+      recordingRef.current = rec;
+      setAudioRecording(true);
+      setAudioRecordingSeconds(0);
+      let seconds = 0;
+      audioTimerRef.current = setInterval(() => {
+        seconds += 1;
+        setAudioRecordingSeconds(seconds);
+        if (seconds >= 300) {
+          audioTimerRef.current && clearInterval(audioTimerRef.current);
+          stopAudioRecording();
+        }
+      }, 1000);
+    } catch {
+      Alert.alert("Recording failed", "Could not start audio recording. Please try again.");
+    }
+  }, []);
+
+  const stopAudioRecording = useCallback(async () => {
+    audioTimerRef.current && clearInterval(audioTimerRef.current);
+    audioTimerRef.current = null;
+    const rec = recordingRef.current;
+    if (!rec) return;
+    try {
+      await rec.stopAndUnloadAsync();
+      const uri = rec.getURI();
+      recordingRef.current = null;
+      setAudioRecording(false);
+      setMediaUri(uri ?? null);
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+    } catch {
+      setAudioRecording(false);
+    }
+  }, []);
+
+  const discardAudioRecording = useCallback(() => {
+    audioTimerRef.current && clearInterval(audioTimerRef.current);
+    audioTimerRef.current = null;
+    recordingRef.current?.stopAndUnloadAsync().catch(() => {});
+    recordingRef.current = null;
+    setAudioRecording(false);
+    setAudioRecordingSeconds(0);
+    setMediaUri(null);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      audioTimerRef.current && clearInterval(audioTimerRef.current);
+      recordingRef.current?.stopAndUnloadAsync().catch(() => {});
+    };
+  }, []);
 
   const handleLocationTag = () => {
     const cities = ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Kolkata", "Chennai", "Pune", "Jaipur"];
@@ -725,35 +796,87 @@ export default function CreatePostScreen() {
         )}
 
         {selectedType !== "text" && selectedType !== "poll" && selectedType !== "carousel" && (
-          <Pressable
-            onPress={() => {
-              if (selectedType === "photo" || selectedType === "story") pickMedia("photo");
-              else if (selectedType === "video" || selectedType === "reel") pickMedia("video");
-              else if (selectedType === "audio") Alert.alert("Audio Recording", "Tap the microphone to start recording your voice note.", [{ text: "OK" }]);
-              else if (selectedType === "gif") Alert.alert("GIF Search", "Search for GIFs powered by GIPHY — coming soon!", [{ text: "OK" }]);
-            }}
-            style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: mediaUri ? colors.primary : colors.border }]}
-          >
-            <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={styles.mediaUploadInner}>
-              {mediaUri ? (
-                <>
-                  <Feather name="check-circle" size={32} color={colors.success ?? "#34C759"} />
-                  <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Media selected ✓</Text>
-                  <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Tap to change</Text>
-                </>
-              ) : (
-                <>
-                  <Feather name={selectedType === "audio" ? "mic" : selectedType === "gif" ? "film" : "upload-cloud"} size={32} color={colors.primary} />
-                  <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
-                    {selectedType === "audio" ? "Tap to record audio" : selectedType === "gif" ? "Search GIFs" : `Tap to add ${selectedType}`}
-                  </Text>
-                  <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>
-                    {selectedType === "reel" || selectedType === "story" ? "Max 60 seconds" : selectedType === "video" ? "Max 5 minutes" : selectedType === "audio" ? "MP3, WAV up to 10MB" : selectedType === "gif" ? "Powered by GIPHY" : "JPG, PNG up to 20MB"}
-                  </Text>
-                </>
-              )}
-            </LinearGradient>
-          </Pressable>
+          <>
+            {/* ── Audio Recording Controls ── */}
+            {selectedType === "audio" && (
+              <View style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: mediaUri ? colors.primary : colors.border }]}>
+                <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={styles.mediaUploadInner}>
+                  {audioRecording ? (
+                    <>
+                      <View style={[styles.recDot, { backgroundColor: "#FF3B30" }]} />
+                      <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
+                        Recording {Math.floor(audioRecordingSeconds / 60)}:{String(audioRecordingSeconds % 60).padStart(2, "0")}
+                      </Text>
+                      <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Tap to stop</Text>
+                    </>
+                  ) : mediaUri ? (
+                    <>
+                      <Feather name="check-circle" size={32} color={colors.success ?? "#34C759"} />
+                      <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Audio recorded ✓</Text>
+                      <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Tap to re-record</Text>
+                    </>
+                  ) : (
+                    <>
+                      <Feather name="mic" size={32} color={colors.primary} />
+                      <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Tap to record audio</Text>
+                      <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Max 5 minutes</Text>
+                    </>
+                  )}
+                </LinearGradient>
+                {/* Invisible Pressable overlay for interaction */}
+                <Pressable
+                  onPress={() => {
+                    if (audioRecording) {
+                      stopAudioRecording();
+                    } else {
+                      if (mediaUri) discardAudioRecording();
+                      startAudioRecording();
+                    }
+                  }}
+                  style={StyleSheet.absoluteFill}
+                />
+                {mediaUri && !audioRecording && (
+                  <Pressable
+                    onPress={discardAudioRecording}
+                    style={[styles.discardBtn, { backgroundColor: colors.destructive }]}>
+                    <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold" }}>Discard</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+
+            {/* ── Standard Media Upload (non-audio) ── */}
+            {selectedType !== "audio" && (
+              <Pressable
+                onPress={() => {
+                  if (selectedType === "photo" || selectedType === "story") pickMedia("photo");
+                  else if (selectedType === "video" || selectedType === "reel") pickMedia("video");
+                  else if (selectedType === "gif") Alert.alert("GIF Search", "Search for GIFs powered by GIPHY \u2014 coming soon!", [{ text: "OK" }]);
+                }}
+                style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: mediaUri ? colors.primary : colors.border }]}
+              >
+                <LinearGradient colors={[colors.primary + "20", colors.secondary + "10"]} style={styles.mediaUploadInner}>
+                  {mediaUri ? (
+                    <>
+                      <Feather name="check-circle" size={32} color={colors.success ?? "#34C759"} />
+                      <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>Media selected ✓</Text>
+                      <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>Tap to change</Text>
+                    </>
+                  ) : (
+                    <>
+                      <Feather name={selectedType === "gif" ? "film" : "upload-cloud"} size={32} color={colors.primary} />
+                      <Text style={[styles.mediaUploadText, { color: colors.foreground }]}>
+                        {selectedType === "gif" ? "Search GIFs" : `Tap to add ${selectedType}`}
+                      </Text>
+                      <Text style={[styles.mediaUploadSub, { color: colors.mutedForeground }]}>
+                        {selectedType === "reel" || selectedType === "story" ? "Max 60 seconds" : selectedType === "video" ? "Max 5 minutes" : selectedType === "gif" ? "Powered by GIPHY" : "JPG, PNG up to 20MB"}
+                      </Text>
+                    </>
+                  )}
+                </LinearGradient>
+              </Pressable>
+            )}
+          </>
         )}
 
         {/* Carousel initial upload button */}
@@ -1326,6 +1449,9 @@ const styles = StyleSheet.create({
   // Product Picker
   modalOverlay: { flex: 1, justifyContent: "flex-end" },
   productPickerSheet: { padding: 20, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 1 },
+  // Audio recording
+  recDot: { width: 14, height: 14, borderRadius: 7, marginBottom: 6 },
+  discardBtn: { position: "absolute", top: 10, right: 10, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10, zIndex: 5 },
   productPickerItem: { flexDirection: "row", alignItems: "center", paddingVertical: 12, gap: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   productPickerThumb: { width: 50, height: 50, borderRadius: 8 },
   productPickerName: { fontSize: 14, fontFamily: "Inter_600SemiBold" },

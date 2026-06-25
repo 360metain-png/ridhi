@@ -470,7 +470,7 @@ export default function AdsManagerScreen() {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: type === "video" ? "videos" : "images",
+        mediaTypes: type === "video" ? ImagePicker.MediaTypeOptions.Videos : ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.85,
         videoMaxDuration: 10,

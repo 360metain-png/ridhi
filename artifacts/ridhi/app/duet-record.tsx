@@ -12,9 +12,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useColors } from "@/hooks/useColors"
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useColors } from "@/hooks/useColors";
 import { useTrackScreen } from "@/hooks/useAnalytics";
-;
 import { useAuth } from "@/contexts/AuthContext";
 
 const { width, height } = Dimensions.get("window");
@@ -28,6 +28,8 @@ export default function DuetRecordScreen() {
   const [recording, setRecording] = useState(false);
   const [side, setSide] = useState<"left" | "right">("right");
   const [countdown, setCountdown] = useState(0);
+  const [cameraFacing, setCameraFacing] = useState<"back" | "front">("front");
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   const topPad = insets.top + 8;
 
@@ -100,29 +102,28 @@ export default function DuetRecordScreen() {
         {/* Left side */}
         {side === "left" ? (
           <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
-            <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <Feather name="camera" size={40} color={colors.primary} />
-                <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                  You
-                </Text>
-                <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                  Side-by-side duet
-                </Text>
-              </View>
-            </LinearGradient>
+            {cameraPermission?.granted ? (
+              <CameraView style={[styles.halfScreen, { borderRadius: 16, overflow: "hidden" }]} facing={cameraFacing} />
+            ) : (
+              <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                  <Feather name="camera" size={40} color={colors.primary} />
+                  <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>You</Text>
+                  <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>Side-by-side duet</Text>
+                  <Pressable onPress={requestCameraPermission} style={{ marginTop: 12, paddingHorizontal: 16, paddingVertical: 6, backgroundColor: colors.primary, borderRadius: 20 }}>
+                    <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold" }}>Allow Camera</Text>
+                  </Pressable>
+                </View>
+              </LinearGradient>
+            )}
           </View>
         ) : (
           <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
             <LinearGradient colors={["#FF6B35", "#E91E8C"]} style={[styles.halfScreen, { opacity: 0.3 }]}>
               <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <Feather name="film" size={40} color="#fff" />
-                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                  Original
-                </Text>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                  {params.reelUser || "Creator"}
-                </Text>
+                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>Original</Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>{params.reelUser || "Creator"}</Text>
               </View>
             </LinearGradient>
           </View>
@@ -138,29 +139,28 @@ export default function DuetRecordScreen() {
         {/* Right side */}
         {side === "right" ? (
           <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
-            <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <Feather name="camera" size={40} color={colors.primary} />
-                <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                  You
-                </Text>
-                <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                  Side-by-side duet
-                </Text>
-              </View>
-            </LinearGradient>
+            {cameraPermission?.granted ? (
+              <CameraView style={[styles.halfScreen, { borderRadius: 16, overflow: "hidden" }]} facing={cameraFacing} />
+            ) : (
+              <LinearGradient colors={[colors.primary + "30", colors.secondary + "20"]} style={[styles.halfScreen, { opacity: 0.5 }]}>
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                  <Feather name="camera" size={40} color={colors.primary} />
+                  <Text style={{ fontSize: 12, color: colors.foreground, fontFamily: "Inter_600SemiBold", marginTop: 8 }}>You</Text>
+                  <Text style={{ fontSize: 11, color: colors.mutedForeground, fontFamily: "Inter_400Regular", marginTop: 2 }}>Side-by-side duet</Text>
+                  <Pressable onPress={requestCameraPermission} style={{ marginTop: 12, paddingHorizontal: 16, paddingVertical: 6, backgroundColor: colors.primary, borderRadius: 20 }}>
+                    <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold" }}>Allow Camera</Text>
+                  </Pressable>
+                </View>
+              </LinearGradient>
+            )}
           </View>
         ) : (
           <View style={[styles.halfScreen, { backgroundColor: colors.card + "80" }]}>
             <LinearGradient colors={["#FF6B35", "#E91E8C"]} style={[styles.halfScreen, { opacity: 0.3 }]}>
               <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <Feather name="film" size={40} color="#fff" />
-                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>
-                  Original
-                </Text>
-                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                  {params.reelUser || "Creator"}
-                </Text>
+                <Text style={{ fontSize: 12, color: "#fff", fontFamily: "Inter_600SemiBold", marginTop: 8 }}>Original</Text>
+                <Text style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", fontFamily: "Inter_400Regular", marginTop: 2 }}>{params.reelUser || "Creator"}</Text>
               </View>
             </LinearGradient>
           </View>

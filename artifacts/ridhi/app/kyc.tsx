@@ -206,7 +206,7 @@ export default function KYCScreen() {
         return;
       }
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: "images",
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.7,
         base64: true,
@@ -231,7 +231,7 @@ export default function KYCScreen() {
         return;
       }
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.7,
         base64: true,
