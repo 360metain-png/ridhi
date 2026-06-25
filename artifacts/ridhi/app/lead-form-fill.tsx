@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  Platform, Pressable, ScrollView, StyleSheet,
+  Alert, Platform, Pressable, ScrollView, StyleSheet,
   Text, TextInput, View,
 } from "react-native";
 import { router } from "expo-router";
@@ -157,7 +157,7 @@ export default function LeadFormFillScreen() {
             </View>
             <Text style={[styles.advTagline, { color: colors.mutedForeground }]}>{ADVERTISER.tagline}</Text>
           </View>
-          <Pressable style={[styles.viewProfileBtn, { borderColor: "#2196F350" }]}>
+          <Pressable style={[styles.viewProfileBtn, { borderColor: "#2196F350" }]} onPress={() => Alert.alert("Advertiser Profile", `View ${ADVERTISER.name} profile and other ads`)}>
             <Text style={[styles.viewProfileText, { color: "#2196F3" }]}>Profile</Text>
           </Pressable>
         </View>

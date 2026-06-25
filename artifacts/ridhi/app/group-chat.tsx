@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   FlatList,
   Platform,
   Pressable,
@@ -91,10 +92,10 @@ export default function GroupChatScreen() {
             <Text style={[styles.chatGroupName, { color: colors.foreground }]}>{activeGroup.name}</Text>
             <Text style={[styles.chatGroupMeta, { color: colors.mutedForeground }]}>{activeGroup.members} members</Text>
           </View>
-          <Pressable style={styles.headerAction}>
+          <Pressable style={styles.headerAction} onPress={() => Alert.alert("Group Call", "Starting a group voice call...")}>
             <Feather name="phone" size={20} color={colors.primary} />
           </Pressable>
-          <Pressable style={styles.headerAction}>
+          <Pressable style={styles.headerAction} onPress={() => Alert.alert("Group Options", "Group info, members, and settings")}>
             <Feather name="more-vertical" size={20} color={colors.foreground} />
           </Pressable>
         </LinearGradient>
@@ -128,7 +129,7 @@ export default function GroupChatScreen() {
         />
 
         <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border, paddingBottom: bottomPad }]}>
-          <Pressable style={styles.inputAction}>
+          <Pressable style={styles.inputAction} onPress={() => Alert.alert("Attach", "Share photos, videos, or files")}>
             <Feather name="paperclip" size={20} color={colors.mutedForeground} />
           </Pressable>
           <TextInput
@@ -139,7 +140,7 @@ export default function GroupChatScreen() {
             onChangeText={setText}
             multiline
           />
-          <Pressable style={styles.inputAction}>
+          <Pressable style={styles.inputAction} onPress={() => Alert.alert("Voice Message", "Hold to record a voice message")}>
             <Feather name="mic" size={20} color={colors.mutedForeground} />
           </Pressable>
           <Pressable onPress={send} style={[styles.sendBtn, { backgroundColor: colors.primary }]}>

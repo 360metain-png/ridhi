@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -143,7 +144,7 @@ export default function ReferralScreen() {
           </View>
           <View style={[styles.codeBox, { backgroundColor: colors.muted, borderColor: colors.border }]}>
             <Text style={[styles.code, { color: colors.foreground }]}>{referralCode}</Text>
-            <Pressable style={[styles.copyBtn, { backgroundColor: colors.secondary + "18" }]}>
+            <Pressable style={[styles.copyBtn, { backgroundColor: colors.secondary + "18" }]} onPress={() => Alert.alert("Copied!", `Referral code ${referralCode} copied to clipboard`)}>
               <Feather name="copy" size={16} color={colors.secondary} />
             </Pressable>
           </View>

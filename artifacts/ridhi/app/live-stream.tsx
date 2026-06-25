@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   FlatList,
@@ -523,10 +524,10 @@ export default function LiveStreamScreen() {
               </View>
             </LinearGradient>
             <View style={[styles.hostControls, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => Alert.alert("Microphone", "Toggle mic mute/unmute")}>
                 <Feather name="mic" size={22} color={colors.foreground} />
               </Pressable>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => Alert.alert("Camera", "Toggle camera on/off")}>
                 <Feather name="camera" size={22} color={colors.foreground} />
               </Pressable>
               <Pressable

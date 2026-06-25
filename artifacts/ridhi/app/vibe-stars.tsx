@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Platform,
   Pressable,
@@ -380,7 +381,7 @@ export default function VibeStarsScreen() {
                 </View>
 
                 {/* Share nudge */}
-                <Pressable style={[styles.shareRow, { borderColor: sign.color + "30", backgroundColor: sign.color + "10" }]}>
+                <Pressable style={[styles.shareRow, { borderColor: sign.color + "30", backgroundColor: sign.color + "10" }]} onPress={() => Alert.alert("Share Horoscope", "Share your horoscope with friends")}>
                   <Feather name="share" size={14} color={sign.color} />
                   <Text style={[styles.shareText, { color: sign.color }]}>Share my horoscope</Text>
                 </Pressable>

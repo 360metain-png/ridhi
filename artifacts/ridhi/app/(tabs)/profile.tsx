@@ -313,7 +313,7 @@ export default function ProfileScreen() {
       return (
         <View style={styles.sheetPostGrid}>
           {MOCK_POSTS.map((p, i) => (
-            <Pressable key={p.id} style={[styles.sheetPostCell, { width: (width - 8) / 3 }]}>
+            <Pressable key={p.id} style={[styles.sheetPostCell, { width: (width - 8) / 3 }]} onPress={() => Alert.alert("Post", `View post with ${p.likes} likes`)}>
               <LinearGradient colors={POST_COLORS[i % POST_COLORS.length] as [string, string]} style={StyleSheet.absoluteFill} />
               <View style={styles.sheetPostOverlay}>
                 <Feather name="heart" size={13} color="rgba(255,255,255,0.9)" />

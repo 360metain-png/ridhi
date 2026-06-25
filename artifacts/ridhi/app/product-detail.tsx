@@ -154,7 +154,7 @@ export default function ProductDetailScreen() {
               <Pressable onPress={toggleWishlist} style={[styles.circleBtn, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
                 <Feather name="heart" size={22} color={isWishlisted ? "#FF3B30" : "#fff"} fill={isWishlisted ? "#FF3B30" : "transparent"} />
               </Pressable>
-              <Pressable style={[styles.circleBtn, { backgroundColor: "rgba(0,0,0,0.4)" }]}>
+              <Pressable style={[styles.circleBtn, { backgroundColor: "rgba(0,0,0,0.4)" }]} onPress={() => Alert.alert("Share", "Share this product with friends")}>
                 <Feather name="share-2" size={22} color="#fff" />
               </Pressable>
             </View>

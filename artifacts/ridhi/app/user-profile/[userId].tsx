@@ -376,7 +376,7 @@ export default function UserProfileScreen() {
               </View>
               <View style={styles.grid}>
                 {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <Pressable key={i} style={[styles.gridItem, { width: (width - 56) / 3, height: (width - 56) / 3 }]}>
+                  <Pressable key={i} style={[styles.gridItem, { width: (width - 56) / 3, height: (width - 56) / 3 }]} onPress={() => Alert.alert("Photo", `View photo ${i + 1}`)}>
                     <LinearGradient
                       colors={[i % 2 === 0 ? colors.primary : colors.secondary, i % 3 === 0 ? colors.secondary : colors.primary]}
                       style={[StyleSheet.absoluteFill, { borderRadius: 8, opacity: 0.3 }]}
@@ -429,7 +429,7 @@ export default function UserProfileScreen() {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 8 }}>
             <View style={styles.grid}>
               {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <Pressable key={i} style={[styles.gridItem, { width: (width - 56) / 3, height: (width - 56) / 3 }]}>
+                <Pressable key={i} style={[styles.gridItem, { width: (width - 56) / 3, height: (width - 56) / 3 }]} onPress={() => Alert.alert("Photo", `View photo ${i + 1}`)}>
                   <LinearGradient
                     colors={[i % 2 === 0 ? colors.primary : colors.secondary, i % 3 === 0 ? colors.secondary : colors.primary]}
                     style={[StyleSheet.absoluteFill, { borderRadius: 8, opacity: 0.3 }]}

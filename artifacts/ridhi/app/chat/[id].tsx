@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
+  Alert,
   FlatList,
   Platform,
   Pressable,
@@ -271,10 +272,10 @@ export default function ChatDetailScreen() {
           >
             <Feather name="clock" size={18} color={disappearMode ? colors.primary : colors.mutedForeground} />
           </Pressable>
-          <Pressable style={styles.headerBtn}>
+          <Pressable style={styles.headerBtn} onPress={() => Alert.alert("Voice Call", "Starting a voice call with this user...")}>
             <Feather name="phone" size={20} color={colors.primary} />
           </Pressable>
-          <Pressable style={styles.headerBtn}>
+          <Pressable style={styles.headerBtn} onPress={() => Alert.alert("Video Call", "Starting a video call with this user...")}>
             <Feather name="video" size={20} color={colors.primary} />
           </Pressable>
         </View>

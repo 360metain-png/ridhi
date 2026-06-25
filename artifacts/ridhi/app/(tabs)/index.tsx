@@ -824,6 +824,7 @@ export default function FeedScreen() {
                   <Pressable
                     key={post.id}
                     style={[styles.trendTopCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                    onPress={() => router.push({ pathname: "/post-detail", params: { id: post.id } } as any)}
                   >
                     <LinearGradient
                       colors={idx === 0

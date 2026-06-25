@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -45,7 +46,7 @@ export default function ChannelDetailScreen() {
              <Text style={styles.channelName}>{channel.name}</Text>
              <Text style={styles.subscriberCount}>{channel.subscribers.toLocaleString()} subscribers</Text>
           </View>
-          <Pressable style={styles.iconBtn}>
+          <Pressable style={styles.iconBtn} onPress={() => Alert.alert("Channel Options", "Subscribe, notifications, report")}>
             <Feather name="more-vertical" size={24} color="#fff" />
           </Pressable>
         </View>
@@ -109,7 +110,7 @@ export default function ChannelDetailScreen() {
                   multiline
                 />
               </View>
-              <Pressable style={[styles.sendBtn, { backgroundColor: colors.primary }]}>
+              <Pressable style={[styles.sendBtn, { backgroundColor: colors.primary }]} onPress={() => Alert.alert("Broadcast", "Send broadcast message to all subscribers")}>
                 <Feather name="send" size={20} color="#fff" />
               </Pressable>
             </View>

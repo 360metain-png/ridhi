@@ -278,7 +278,7 @@ export default function ChatroomDetailScreen() {
           >
             <Feather name="users" size={20} color={colors.mutedForeground} />
           </Pressable>
-          <Pressable style={styles.headerBtn} accessibilityLabel="Search in room">
+          <Pressable style={styles.headerBtn} onPress={() => Alert.alert("Search", "Search messages in this room")} accessibilityLabel="Search in room">
             <Feather name="search" size={20} color={colors.mutedForeground} />
           </Pressable>
         </View>

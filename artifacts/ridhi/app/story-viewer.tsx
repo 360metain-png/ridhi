@@ -297,12 +297,12 @@ export default function StoryViewerScreen() {
             onBlur={() => setPaused(false)}
           />
           {reply.length > 0 ? (
-            <Pressable style={styles.sendReplyBtn}>
+            <Pressable style={styles.sendReplyBtn} onPress={() => Alert.alert("Reply sent", `Reply: ${reply}`)}>
               <Feather name="send" size={18} color="#fff" />
             </Pressable>
           ) : (
             <View style={styles.replyActions}>
-              <Pressable style={styles.replyActionBtn}>
+              <Pressable style={styles.replyActionBtn} onPress={() => Alert.alert("Story Reaction", "Heart reaction sent")}>
                 <Feather name="heart" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
               <Pressable style={styles.replyActionBtn} onPress={() => setShowShare(true)}>

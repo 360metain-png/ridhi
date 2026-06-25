@@ -208,7 +208,7 @@ export default function ExploreScreen() {
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.discoveryChips}>
                   {LIVE_HOSTS.map((host) => (
-                    <Pressable key={host.id} style={[styles.liveChip, { borderColor: colors.border }]}>
+                    <Pressable key={host.id} style={[styles.liveChip, { borderColor: colors.border }]} onPress={() => router.push("/live-stream" as any)}>
                       <LinearGradient colors={host.gradient} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
                       <View style={styles.liveChipDot} />
                       <Text style={styles.liveChipName}>{host.name}</Text>
@@ -226,7 +226,7 @@ export default function ExploreScreen() {
                 </View>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.discoveryChips}>
                   {NEARBY_USERS.map((u) => (
-                    <Pressable key={u.id} style={[styles.nearbyChip, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                    <Pressable key={u.id} style={[styles.nearbyChip, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => router.push({ pathname: "/user-profile/[userId]", params: { userId: u.id } } as any)}>
                       <Avatar name={u.name} size={22} />
                       <Text style={[styles.nearbyChipName, { color: colors.foreground }]} numberOfLines={1}>{u.name}</Text>
                       <Text style={[styles.nearbyChipMeta, { color: colors.mutedForeground }]}>{u.likes >= 1000 ? `${(u.likes / 1000).toFixed(1)}k` : u.likes} ♥</Text>

@@ -467,7 +467,7 @@ export default function AgentDashboardScreen() {
                   { icon: "message-circle", label: "Host Chat", color: colors.secondary },
                   { icon: "shield", label: "Warnings", color: colors.destructive },
                 ].map((a) => (
-                  <Pressable key={a.label} style={[styles.quickActionBtn, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                  <Pressable key={a.label} style={[styles.quickActionBtn, { backgroundColor: colors.muted, borderColor: colors.border }]} onPress={() => Alert.alert(a.label, `${a.label} action triggered`)}>
                     <View style={[styles.quickActionIcon, { backgroundColor: a.color + "20" }]}>
                       <Feather name={a.icon as any} size={18} color={a.color} />
                     </View>

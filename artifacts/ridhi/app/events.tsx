@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -82,7 +83,7 @@ export default function EventsScreen() {
                <Text style={[styles.attendeeCount, { color: colors.mutedForeground }]}>+{event.attendees.length - 3}</Text>
              )}
           </View>
-          <Pressable style={[styles.rsvpMiniBtn, { backgroundColor: colors.primary + "15" }]}>
+          <Pressable style={[styles.rsvpMiniBtn, { backgroundColor: colors.primary + "15" }]} onPress={() => Alert.alert("RSVP", "You're now interested in this event")}>
             <Text style={[styles.rsvpMiniText, { color: colors.primary }]}>Interested</Text>
           </Pressable>
         </View>

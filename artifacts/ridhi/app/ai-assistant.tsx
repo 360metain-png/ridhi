@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   Easing,
@@ -154,7 +155,7 @@ export default function AIAssistantScreen() {
             <Text style={[styles.headerSub, { color: colors.success }]}>● Online · 7 features active</Text>
           </View>
         </View>
-        <Pressable style={[styles.clearBtn, { backgroundColor: colors.muted }]}>
+        <Pressable style={[styles.clearBtn, { backgroundColor: colors.muted }]} onPress={() => Alert.alert("Reset Chat", "Clear all AI conversation history")}>
           <Feather name="refresh-ccw" size={15} color={colors.mutedForeground} />
         </Pressable>
       </View>

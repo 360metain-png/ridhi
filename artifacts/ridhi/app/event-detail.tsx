@@ -105,7 +105,7 @@ export default function EventDetailScreen() {
 
           <View style={styles.attendeesHeader}>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Attendees ({event.attendees.length})</Text>
-            <Pressable>
+            <Pressable onPress={() => Alert.alert("Attendees", `View all ${event.attendees.length} attendees`)}>
               <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
             </Pressable>
           </View>
