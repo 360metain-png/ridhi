@@ -153,6 +153,8 @@ export default function LiveStreamScreen() {
   const [showGifts, setShowGifts] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showLiveSettings, setShowLiveSettings] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [bigGift, setBigGift] = useState<typeof LIVE_GIFTS[0] | null>(null);
   const prevLiveCoins = useRef(0);
@@ -343,8 +345,14 @@ export default function LiveStreamScreen() {
               <Text style={styles.watchHostName}>{selectedRoom.host}</Text>
               <Text style={styles.watchHostTitle}>{selectedRoom.title}</Text>
             </View>
-            <Pressable style={[styles.followBtn, { backgroundColor: colors.primary }]}>
-              <Text style={styles.followBtnText}>Follow</Text>
+            <Pressable
+              style={[styles.followBtn, { backgroundColor: isFollowing ? "#22C55E" : colors.primary }]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setIsFollowing((f) => !f);
+              }}
+            >
+              <Text style={styles.followBtnText}>{isFollowing ? "Following" : "Follow"}</Text>
             </Pressable>
           </View>
         </LinearGradient>
@@ -543,7 +551,7 @@ export default function LiveStreamScreen() {
               <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => setShowShare(true)}>
                 <Feather name="share-2" size={22} color={colors.foreground} />
               </Pressable>
-              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]}>
+              <Pressable style={[styles.controlBtn2, { backgroundColor: colors.muted }]} onPress={() => setShowLiveSettings(true)}>
                 <Feather name="settings" size={22} color={colors.foreground} />
               </Pressable>
             </View>

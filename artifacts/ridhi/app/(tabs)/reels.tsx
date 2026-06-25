@@ -585,6 +585,7 @@ function ReelItem({
   const [showAllFilters, setShowAllFilters] = useState(false);
   const { saveWithWatermark, saving, saved } = useWatermark();
   const [showDownload, setShowDownload] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   // ── Emoji reactions ────────────────────────────────────────────────────
   const [reactions, setReactions] = useState<{ emoji: string; count: number; selected: boolean }[]>([
@@ -678,6 +679,11 @@ function ReelItem({
     setShowShare(true);
   }, [reel.id, trackShare]);
 
+  const handleFollow = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsFollowing((f) => !f);
+  }, []);
+
   const handleSave = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     trackSave(reel.id, "reel");
@@ -749,12 +755,15 @@ function ReelItem({
               <Text style={styles.reelCity}>{reel.userCity}</Text>
             </Pressable>
             <Pressable
-              style={styles.followBtn}
+              style={[styles.followBtn, { borderColor: isFollowing ? "#22C55E" : "#fff" }]}
+              onPress={handleFollow}
               hitSlop={ICON_HITSLOP}
               accessibilityRole="button"
-              accessibilityLabel={`Follow ${reel.userName}`}
+              accessibilityLabel={isFollowing ? `Following ${reel.userName}` : `Follow ${reel.userName}`}
             >
-              <Text style={styles.followText}>Follow</Text>
+              <Text style={[styles.followText, isFollowing && { color: "#22C55E" }]}>
+                {isFollowing ? "Following" : "Follow"}
+              </Text>
             </Pressable>
           </View>
           <Text style={styles.reelCaption} numberOfLines={2}>
