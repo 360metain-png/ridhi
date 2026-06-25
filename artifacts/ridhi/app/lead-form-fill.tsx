@@ -43,7 +43,7 @@ const FORM = {
 // ── Pre-filled user values (from auth context in production) ─────────────────
 const PREFILL: Record<string, string> = {
   name:  "Rahul Kumar",
-  phone: "+91 98765 43210",
+  phone: "+91 XXXXX XXXXX",
   email: "rahul@example.com",
   city:  "Delhi",
 };

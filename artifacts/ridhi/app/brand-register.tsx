@@ -318,7 +318,7 @@ export default function BrandRegisterScreen() {
             <Field label="Phone *" icon="phone" color={colors.mutedForeground}>
               <TextInput
                 style={[styles.input, { color: colors.foreground, borderColor: colors.border, backgroundColor: colors.card }]}
-                placeholder="+91 98765 43210"
+                placeholder="+91 XXXXX XXXXX"
                 placeholderTextColor={colors.mutedForeground}
                 value={phone}
                 onChangeText={setPhone}

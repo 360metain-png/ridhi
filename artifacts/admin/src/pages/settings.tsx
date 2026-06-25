@@ -127,7 +127,7 @@ export default function Settings() {
                 <InputRow label="App Name"        desc="Displayed in headers, notifications, and store listings."       value="Ridhi" />
                 <InputRow label="Tagline"         desc="Short descriptor shown on onboarding and marketing."            value="India's First Social Universal App" />
                 <InputRow label="Support Email"   desc="Users see this for complaints and KYC queries."                value="hello@ridhi.app" />
-                <InputRow label="Support Phone"   desc="Toll-free or WhatsApp number for host/agent escalations."      value="+91 80000 00000" />
+                <InputRow label="Support Phone"   desc="Toll-free or WhatsApp number for host/agent escalations."      value="+91 XXXXX XXXXX" />
                 <InputRow label="Legal Entity"    desc="Used in invoices and T&Cs."                                     value="Ridhi Technologies Pvt. Ltd." />
                 <InputRow label="GST Number"      desc="For taxation and payout receipts."                             value="27AAAAA0000A1Z5" />
               </CardContent>

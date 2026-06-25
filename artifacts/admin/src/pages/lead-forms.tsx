@@ -20,14 +20,14 @@ const LEAD_FORMS = [
 ];
 
 const LEAD_SUBMISSIONS = [
-  { id: "ls1", form: "Business Inquiry", name: "Amit Sharma", email: "amit@techcorp.com", phone: "+91 98765 43210", city: "Mumbai", status: "new", submitted: "2025-06-11 14:00" },
-  { id: "ls2", form: "Partner Registration", name: "Sunita Patel", email: "sunita@partner.com", phone: "+91 98765 43211", city: "Ahmedabad", status: "contacted", submitted: "2025-06-11 13:00" },
-  { id: "ls3", form: "Creator Application", name: "Ravi Kumar", email: "ravi@creator.com", phone: "+91 98765 43212", city: "Bangalore", status: "approved", submitted: "2025-06-11 15:00" },
-  { id: "ls4", form: "Ad Campaign", name: "Priya Nair", email: "priya@mediamax.com", phone: "+91 98765 43213", city: "Chennai", status: "new", submitted: "2025-06-11 12:00" },
-  { id: "ls5", form: "Business Inquiry", name: "Karan Mehta", email: "karan@techcorp.com", phone: "+91 98765 43214", city: "Hyderabad", status: "contacted", submitted: "2025-06-11 11:00" },
-  { id: "ls6", form: "Creator Application", name: "Ananya Singh", email: "ananya@creator.com", phone: "+91 98765 43215", city: "Delhi", status: "pending", submitted: "2025-06-11 10:00" },
-  { id: "ls7", form: "Partner Registration", name: "Deepika Reddy", email: "deepika@partner.com", phone: "+91 98765 43216", city: "Pune", status: "new", submitted: "2025-06-11 09:00" },
-  { id: "ls8", form: "Ad Campaign", name: "Rohit Verma", email: "rohit@mediamax.com", phone: "+91 98765 43217", city: "Kolkata", status: "contacted", submitted: "2025-06-11 08:00" },
+  { id: "ls1", form: "Business Inquiry", name: "Amit Sharma", email: "amit@techcorp.com", phone: "+91 XXXXX XXXXX", city: "Mumbai", status: "new", submitted: "2025-06-11 14:00" },
+  { id: "ls2", form: "Partner Registration", name: "Sunita Patel", email: "sunita@partner.com", phone: "+91 XXXXX XXXXX", city: "Ahmedabad", status: "contacted", submitted: "2025-06-11 13:00" },
+  { id: "ls3", form: "Creator Application", name: "Ravi Kumar", email: "ravi@creator.com", phone: "+91 XXXXX XXXXX", city: "Bangalore", status: "approved", submitted: "2025-06-11 15:00" },
+  { id: "ls4", form: "Ad Campaign", name: "Priya Nair", email: "priya@mediamax.com", phone: "+91 XXXXX XXXXX", city: "Chennai", status: "new", submitted: "2025-06-11 12:00" },
+  { id: "ls5", form: "Business Inquiry", name: "Karan Mehta", email: "karan@techcorp.com", phone: "+91 XXXXX XXXXX", city: "Hyderabad", status: "contacted", submitted: "2025-06-11 11:00" },
+  { id: "ls6", form: "Creator Application", name: "Ananya Singh", email: "ananya@creator.com", phone: "+91 XXXXX XXXXX", city: "Delhi", status: "pending", submitted: "2025-06-11 10:00" },
+  { id: "ls7", form: "Partner Registration", name: "Deepika Reddy", email: "deepika@partner.com", phone: "+91 XXXXX XXXXX", city: "Pune", status: "new", submitted: "2025-06-11 09:00" },
+  { id: "ls8", form: "Ad Campaign", name: "Rohit Verma", email: "rohit@mediamax.com", phone: "+91 XXXXX XXXXX", city: "Kolkata", status: "contacted", submitted: "2025-06-11 08:00" },
 ];
 
 export default function LeadFormsPage() {

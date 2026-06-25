@@ -127,7 +127,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const DEFAULT_USER: UserProfile = {
   id: "user_" + Date.now(),
   name: "Priya Sharma",
-  phone: "+91 98765 43210",
+  phone: "+91 XXXXX XXXXX",
   age: 24,
   birthday: "2000-08-15",
   zodiacSign: "leo",

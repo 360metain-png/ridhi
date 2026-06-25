@@ -68,12 +68,12 @@ const AGENT_LEVELS = [
 ];
 
 const INITIAL_AGENTS: Agent[] = [
-  { id: "a1", name: "Vikram Rao",    city: "Delhi",     phone: "+91 98001 11111", level: "A5", hosts: 312, activeHosts: 289, commission: 10, totalHostEarnings: 2840000, earned: 284000, pendingPayout: 48000, status: "active",    joinDate: "Jan 2024", topHost: "Priya Sharma", adminId: "adm1" },
-  { id: "a2", name: "Sunita Joshi",  city: "Mumbai",    phone: "+91 98002 22222", level: "A4", hosts: 178, activeHosts: 142, commission: 8,  totalHostEarnings: 1775000, earned: 142000, pendingPayout: 21000, status: "active",    joinDate: "Mar 2024", topHost: "Rahul Verma",  adminId: "adm1" },
-  { id: "a3", name: "Deepak Singh",  city: "Bangalore", phone: "+91 98003 33333", level: "A3", hosts: 74,  activeHosts: 58,  commission: 6,  totalHostEarnings: 1400000, earned: 84000,  pendingPayout: 14000, status: "active",    joinDate: "May 2024", topHost: "Kavya R",      adminId: "adm2" },
-  { id: "a4", name: "Meena Kumari",  city: "Hyderabad", phone: "+91 98004 44444", level: "A2", hosts: 28,  activeHosts: 19,  commission: 4,  totalHostEarnings: 1050000, earned: 42000,  pendingPayout: 8000,  status: "active",    joinDate: "Jun 2024", topHost: "Dev T",        adminId: "adm2" },
-  { id: "a5", name: "Rajan Pillai",  city: "Kochi",     phone: "+91 98005 55555", level: "A1", hosts: 7,   activeHosts: 5,   commission: 2,  totalHostEarnings:  600000, earned: 12000,  pendingPayout: 3000,  status: "active",    joinDate: "Aug 2024", topHost: "Ananya S",     adminId: "adm3" },
-  { id: "a6", name: "Preethi Nair",  city: "Chennai",   phone: "+91 98006 66666", level: "A2", hosts: 24,  activeHosts: 16,  commission: 4,  totalHostEarnings:  950000, earned: 38000,  pendingPayout: 0,     status: "suspended", joinDate: "Apr 2024", topHost: "Kiran N",      adminId: "adm3" },
+  { id: "a1", name: "Vikram Rao",    city: "Delhi",     phone: "+91 XXXXX XXXXX", level: "A5", hosts: 312, activeHosts: 289, commission: 10, totalHostEarnings: 2840000, earned: 284000, pendingPayout: 48000, status: "active",    joinDate: "Jan 2024", topHost: "Priya Sharma", adminId: "adm1" },
+  { id: "a2", name: "Sunita Joshi",  city: "Mumbai",    phone: "+91 XXXXX XXXXX", level: "A4", hosts: 178, activeHosts: 142, commission: 8,  totalHostEarnings: 1775000, earned: 142000, pendingPayout: 21000, status: "active",    joinDate: "Mar 2024", topHost: "Rahul Verma",  adminId: "adm1" },
+  { id: "a3", name: "Deepak Singh",  city: "Bangalore", phone: "+91 XXXXX XXXXX", level: "A3", hosts: 74,  activeHosts: 58,  commission: 6,  totalHostEarnings: 1400000, earned: 84000,  pendingPayout: 14000, status: "active",    joinDate: "May 2024", topHost: "Kavya R",      adminId: "adm2" },
+  { id: "a4", name: "Meena Kumari",  city: "Hyderabad", phone: "+91 XXXXX XXXXX", level: "A2", hosts: 28,  activeHosts: 19,  commission: 4,  totalHostEarnings: 1050000, earned: 42000,  pendingPayout: 8000,  status: "active",    joinDate: "Jun 2024", topHost: "Dev T",        adminId: "adm2" },
+  { id: "a5", name: "Rajan Pillai",  city: "Kochi",     phone: "+91 XXXXX XXXXX", level: "A1", hosts: 7,   activeHosts: 5,   commission: 2,  totalHostEarnings:  600000, earned: 12000,  pendingPayout: 3000,  status: "active",    joinDate: "Aug 2024", topHost: "Ananya S",     adminId: "adm3" },
+  { id: "a6", name: "Preethi Nair",  city: "Chennai",   phone: "+91 XXXXX XXXXX", level: "A2", hosts: 24,  activeHosts: 16,  commission: 4,  totalHostEarnings:  950000, earned: 38000,  pendingPayout: 0,     status: "suspended", joinDate: "Apr 2024", topHost: "Kiran N",      adminId: "adm3" },
 ];
 
 // Names of all active hosts — used to block cross-role applications
@@ -83,12 +83,12 @@ const ACTIVE_HOST_NAMES = new Set([
 ]);
 
 const PENDING_AGENTS = [
-  { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 98765 43210", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years talent & influencer mgmt"   },
-  { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 87654 32109", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 yrs live experience"   },
-  { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 76543 21098", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform, event manager"     },
-  { id: "pa4", name: "Tanvir Ahmed",    city: "Lucknow",   phone: "+91 91234 56789", appliedAt: "1 day ago",    hosts: 5,  experience: "Social media manager, 3 yrs"        },
-  { id: "pa5", name: "Reena Kapoor",    city: "Jaipur",    phone: "+91 80123 45678", appliedAt: "2 days ago",   hosts: 18, experience: "Ran independent streaming studio"   },
-  { id: "pa6", name: "Sneha Kapoor",    city: "Mumbai",    phone: "+91 98887 77777", appliedAt: "20 min ago",   hosts: 0,  experience: "Currently an active host on Ridhi"  },
+  { id: "pa1", name: "Suresh Malhotra", city: "Pune",      phone: "+91 XXXXX XXXXX", appliedAt: "2 hours ago",  hosts: 12, experience: "2 years talent & influencer mgmt"   },
+  { id: "pa2", name: "Lakshmi Devi",    city: "Chennai",   phone: "+91 XXXXX XXXXX", appliedAt: "5 hours ago",  hosts: 8,  experience: "Ex-host, 1.5 yrs live experience"   },
+  { id: "pa3", name: "Gopal Reddy",     city: "Hyderabad", phone: "+91 XXXXX XXXXX", appliedAt: "1 day ago",    hosts: 0,  experience: "New to platform, event manager"     },
+  { id: "pa4", name: "Tanvir Ahmed",    city: "Lucknow",   phone: "+91 XXXXX XXXXX", appliedAt: "1 day ago",    hosts: 5,  experience: "Social media manager, 3 yrs"        },
+  { id: "pa5", name: "Reena Kapoor",    city: "Jaipur",    phone: "+91 XXXXX XXXXX", appliedAt: "2 days ago",   hosts: 18, experience: "Ran independent streaming studio"   },
+  { id: "pa6", name: "Sneha Kapoor",    city: "Mumbai",    phone: "+91 XXXXX XXXXX", appliedAt: "20 min ago",   hosts: 0,  experience: "Currently an active host on Ridhi"  },
 ];
 
 // ── Agent Complaints (from hosts) ──────────────────────────────────────────
@@ -282,7 +282,7 @@ function RecruitDialog({
             </div>
             <div className="space-y-1">
               <Label className="text-[11px] font-semibold text-gray-500 uppercase">Phone</Label>
-              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210" required />
+              <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 XXXXX XXXXX" required />
             </div>
           </div>
           <div className="space-y-1">

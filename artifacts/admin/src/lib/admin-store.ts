@@ -21,9 +21,9 @@ export interface SharedAdmin {
 const STORAGE_KEY = "ridhi_admin_accounts";
 
 const DEFAULT_ADMINS: SharedAdmin[] = [
-  { id: "adm1", name: "Priya Sharma", email: "priya@ridhi.app", phone: "+91 98765 43210", role: "Full Admin", status: "active", lastLogin: "1h ago", joinedAt: "Jan 2024", actionsToday: 12, actionsTotal: 3400, city: "Delhi", permissions: {} },
-  { id: "adm2", name: "Rahul Mehta", email: "rahul@ridhi.app", phone: "+91 87654 32109", role: "Full Admin", status: "active", lastLogin: "3h ago", joinedAt: "Feb 2024", actionsToday: 8, actionsTotal: 2100, city: "Mumbai", permissions: {} },
-  { id: "adm3", name: "Neha Gupta", email: "neha@ridhi.app", phone: "+91 76543 21098", role: "Creator Admin", status: "active", lastLogin: "5h ago", joinedAt: "Mar 2024", actionsToday: 5, actionsTotal: 980, city: "Bangalore", permissions: {} },
+  { id: "adm1", name: "Priya Sharma", email: "priya@ridhi.app", phone: "+91 XXXXX XXXXX", role: "Full Admin", status: "active", lastLogin: "1h ago", joinedAt: "Jan 2024", actionsToday: 12, actionsTotal: 3400, city: "Delhi", permissions: {} },
+  { id: "adm2", name: "Rahul Mehta", email: "rahul@ridhi.app", phone: "+91 XXXXX XXXXX", role: "Full Admin", status: "active", lastLogin: "3h ago", joinedAt: "Feb 2024", actionsToday: 8, actionsTotal: 2100, city: "Mumbai", permissions: {} },
+  { id: "adm3", name: "Neha Gupta", email: "neha@ridhi.app", phone: "+91 XXXXX XXXXX", role: "Creator Admin", status: "active", lastLogin: "5h ago", joinedAt: "Mar 2024", actionsToday: 5, actionsTotal: 980, city: "Bangalore", permissions: {} },
 ];
 
 function load(): SharedAdmin[] {

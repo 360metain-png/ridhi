@@ -221,7 +221,7 @@ async function createCashfreeOrder(
       customer_id: receipt,
       customer_name: notes.name || "Ridhi User",
       customer_email: notes.email || "user@ridhi.app",
-      customer_phone: notes.contact || "9999999999",
+      customer_phone: notes.contact || undefined,
     },
     order_meta: {
       return_url: `${process.env["REPLIT_DOMAINS"] || "https://ridhi.app"}/api/payments/callback?provider=cashfree&order_id=${orderId}`,
@@ -287,7 +287,7 @@ async function createPhonePeOrder(
     merchantUserId: receipt,
     amount,
     callbackUrl: `${process.env["REPLIT_DOMAINS"] || "https://ridhi.app"}/api/payments/callback?provider=phonepe&order_id=${orderId}`,
-    mobileNumber: notes.contact || "9999999999",
+    mobileNumber: notes.contact || undefined,
     deviceContext: { deviceOS: "ANDROID" },
     paymentInstrument: { type: "PAY_PAGE" },
   };
@@ -343,7 +343,7 @@ async function createInstamojoOrder(
     formData.append("purpose", notes.label || "Ridhi Payment");
     formData.append("buyer_name", notes.name || "Ridhi User");
     formData.append("email", notes.email || "user@ridhi.app");
-    formData.append("phone", notes.contact || "9999999999");
+    if (notes.contact) formData.append("phone", notes.contact);
     formData.append("redirect_url", `${process.env["REPLIT_DOMAINS"] || "https://ridhi.app"}/api/payments/callback?provider=instamojo`);
     formData.append("send_email", "false");
     formData.append("send_sms", "false");

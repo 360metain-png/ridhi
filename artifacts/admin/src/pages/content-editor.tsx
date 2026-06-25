@@ -87,7 +87,7 @@ Why was my account suspended?
 Accounts may be suspended for violating community guidelines, fake activity, harassment, spam, or illegal activities. To appeal: hello@ridhi.app`,
 
   contact: `hello@ridhi.app
-+91 98765 43210
++91 XXXXX XXXXX
 Krilo Digitech Pvt Ltd
 Mumbai, Maharashtra, India`,
 };

@@ -73,7 +73,7 @@ const ASSIGNED_AGENT = {
   level: "A3",
   levelLabel: "Super Agent",
   levelColor: "#FFB800",
-  phone: "+91 98765 43210",
+  phone: "+91 XXXXX XXXXX",
   email: "arjun.kumar@ridhi.app",
   hostCount: 14,
 };

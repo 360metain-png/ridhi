@@ -459,7 +459,7 @@ export default function Users() {
             <div className="space-y-1">
               <Label className="text-xs font-semibold text-gray-500 uppercase">Phone</Label>
               <Input
-                placeholder="+91 98765 43210"
+                placeholder="+91 XXXXX XXXXX"
                 value={newUser.phone}
                 onChange={(e) => { setNewUser({ ...newUser, phone: e.target.value }); setAddErrors({ ...addErrors, phone: "" }); }}
                 className={addErrors.phone ? "border-red-300" : ""}

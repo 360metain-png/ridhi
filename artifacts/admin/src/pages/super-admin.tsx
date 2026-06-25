@@ -43,14 +43,14 @@ const ADMIN_ROLES = [
 ];
 
 const SUPER_ADMIN_USERS = [
-  { id: "u1", name: "Rahul Sharma", phone: "+91 98765 43210", city: "Mumbai", status: "active", role: "user", joined: "2 days ago", coins: 12500 },
-  { id: "u2", name: "Priya Patel", phone: "+91 87654 32109", city: "Delhi", status: "active", role: "vip", joined: "1 month ago", coins: 89000 },
-  { id: "u3", name: "Amit Kumar", phone: "+91 76543 21098", city: "Bangalore", status: "banned", role: "user", joined: "3 months ago", coins: 0 },
-  { id: "u4", name: "Sneha Gupta", phone: "+91 65432 10987", city: "Chennai", status: "active", role: "creator", joined: "2 weeks ago", coins: 45000 },
-  { id: "u5", name: "Vikram Rao", phone: "+91 54321 09876", city: "Hyderabad", status: "suspended", role: "user", joined: "5 months ago", coins: 3200 },
-  { id: "u6", name: "Ananya Krishnan", phone: "+91 43210 98765", city: "Kochi", status: "active", role: "host", joined: "1 month ago", coins: 6200000 },
-  { id: "u7", name: "Karan Malhotra", phone: "+91 32109 87654", city: "Pune", status: "active", role: "user", joined: "4 days ago", coins: 500 },
-  { id: "u8", name: "Neha Iyer", phone: "+91 21098 76543", city: "Jaipur", status: "active", role: "vip", joined: "3 weeks ago", coins: 67000 },
+  { id: "u1", name: "Rahul Sharma", phone: "+91 XXXXX XXXXX", city: "Mumbai", status: "active", role: "user", joined: "2 days ago", coins: 12500 },
+  { id: "u2", name: "Priya Patel", phone: "+91 XXXXX XXXXX", city: "Delhi", status: "active", role: "vip", joined: "1 month ago", coins: 89000 },
+  { id: "u3", name: "Amit Kumar", phone: "+91 XXXXX XXXXX", city: "Bangalore", status: "banned", role: "user", joined: "3 months ago", coins: 0 },
+  { id: "u4", name: "Sneha Gupta", phone: "+91 XXXXX XXXXX", city: "Chennai", status: "active", role: "creator", joined: "2 weeks ago", coins: 45000 },
+  { id: "u5", name: "Vikram Rao", phone: "+91 XXXXX XXXXX", city: "Hyderabad", status: "suspended", role: "user", joined: "5 months ago", coins: 3200 },
+  { id: "u6", name: "Ananya Krishnan", phone: "+91 XXXXX XXXXX", city: "Kochi", status: "active", role: "host", joined: "1 month ago", coins: 6200000 },
+  { id: "u7", name: "Karan Malhotra", phone: "+91 XXXXX XXXXX", city: "Pune", status: "active", role: "user", joined: "4 days ago", coins: 500 },
+  { id: "u8", name: "Neha Iyer", phone: "+91 XXXXX XXXXX", city: "Jaipur", status: "active", role: "vip", joined: "3 weeks ago", coins: 67000 },
 ];
 
 const HOSTS_WITH_ACCESS = [
@@ -3108,7 +3108,7 @@ export default function SuperAdminPage() {
                 <div className="space-y-1.5">
                   <Label className="text-xs">User Phone / Email / ID</Label>
                   <Input
-                    placeholder="e.g. +91 98765 43210 or user@email.com"
+                    placeholder="e.g. +91 XXXXX XXXXX or user@email.com"
                     value={coinGenUser}
                     onChange={(e) => setCoinGenUser(e.target.value)}
                     className="h-9 text-xs"

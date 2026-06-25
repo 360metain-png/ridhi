@@ -82,12 +82,12 @@ interface PopupAd {
 
 // ── Mock Data ──────────────────────────────────────────────────────────────────
 const INITIAL_CLIENTS: SpecialClient[] = [
-  { id: "sc1", name: "Arjun Malhotra",     email: "arjun@malhotra.in",  phone: "+91 98201 11223", city: "Mumbai",    tier: "Diamond", joinedAt: "Jan 2024", activeCampaigns: 3, totalSpend: "₹4,80,000" },
-  { id: "sc2", name: "Priya Kapoor",       email: "priya@pkcorp.com",    phone: "+91 99110 44556", city: "Delhi",     tier: "Gold",    joinedAt: "Mar 2024", activeCampaigns: 2, totalSpend: "₹2,40,000" },
-  { id: "sc3", name: "Nisha Shah",         email: "nisha@shahgroup.com", phone: "+91 97229 88770", city: "Ahmedabad", tier: "Diamond", joinedAt: "Dec 2023", activeCampaigns: 4, totalSpend: "₹6,12,000" },
-  { id: "sc4", name: "Vikram Reddy",       email: "vikram@vtech.io",     phone: "+91 90001 55678", city: "Hyderabad", tier: "Gold",    joinedAt: "Feb 2024", activeCampaigns: 1, totalSpend: "₹1,20,000" },
-  { id: "sc5", name: "Kavitha Krishnan",   email: "kavi@kkcorp.com",     phone: "+91 88991 22334", city: "Bengaluru", tier: "Premium", joinedAt: "Apr 2024", activeCampaigns: 2, totalSpend: "₹96,000"   },
-  { id: "sc6", name: "Rohit Bansal",       email: "rohit@bansal.in",     phone: "+91 77118 99001", city: "Jaipur",    tier: "Gold",    joinedAt: "May 2024", activeCampaigns: 0, totalSpend: "₹0"         },
+  { id: "sc1", name: "Arjun Malhotra",     email: "arjun@malhotra.in",  phone: "+91 XXXXX XXXXX", city: "Mumbai",    tier: "Diamond", joinedAt: "Jan 2024", activeCampaigns: 3, totalSpend: "₹4,80,000" },
+  { id: "sc2", name: "Priya Kapoor",       email: "priya@pkcorp.com",    phone: "+91 XXXXX XXXXX", city: "Delhi",     tier: "Gold",    joinedAt: "Mar 2024", activeCampaigns: 2, totalSpend: "₹2,40,000" },
+  { id: "sc3", name: "Nisha Shah",         email: "nisha@shahgroup.com", phone: "+91 XXXXX XXXXX", city: "Ahmedabad", tier: "Diamond", joinedAt: "Dec 2023", activeCampaigns: 4, totalSpend: "₹6,12,000" },
+  { id: "sc4", name: "Vikram Reddy",       email: "vikram@vtech.io",     phone: "+91 XXXXX XXXXX", city: "Hyderabad", tier: "Gold",    joinedAt: "Feb 2024", activeCampaigns: 1, totalSpend: "₹1,20,000" },
+  { id: "sc5", name: "Kavitha Krishnan",   email: "kavi@kkcorp.com",     phone: "+91 XXXXX XXXXX", city: "Bengaluru", tier: "Premium", joinedAt: "Apr 2024", activeCampaigns: 2, totalSpend: "₹96,000"   },
+  { id: "sc6", name: "Rohit Bansal",       email: "rohit@bansal.in",     phone: "+91 XXXXX XXXXX", city: "Jaipur",    tier: "Gold",    joinedAt: "May 2024", activeCampaigns: 0, totalSpend: "₹0"         },
 ];
 
 const INITIAL_BANNERS: BannerAd[] = [

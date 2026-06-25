@@ -100,7 +100,7 @@ function genUsers(n = 500): Record<string, string | number>[] {
   return Array.from({ length: n }, (_, i) => ({
     user_id:       `USR${String(i + 1001).padStart(6, "0")}`,
     name:          `User ${i + 1}`,
-    phone:         `+91${randInt(7000000000, 9999999999)}`,
+    phone:         `+91${String(randInt(7000000000, 9999999999)).replace(/\d/g, "X")}`,
     city:          randOf(CITIES),
     gender:        randOf(GENDERS),
     age:           randInt(18, 45),

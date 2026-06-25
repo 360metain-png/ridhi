@@ -166,31 +166,31 @@ const buildPermMap = (perms: string[]): Record<string, boolean> =>
 // ── Mock data ──────────────────────────────────────────────────────────────
 const INITIAL_ADMINS: AdminAccount[] = [
   {
-    id: "a1", name: "Sneha Patel", email: "sneha@ridhi.app", phone: "+91 98765 43210",
+    id: "a1", name: "Sneha Patel", email: "sneha@ridhi.app", phone: "+91 XXXXX XXXXX",
     role: "Content Admin",   status: "active",    lastLogin: "1h ago",  joinedAt: "Jan 2025",
     actionsToday: 34, actionsTotal: 2840, city: "Bangalore",
     permissions: buildPermMap(PRESETS.content_admin.perms),
   },
   {
-    id: "a2", name: "Rohit Kumar",   email: "rohit@ridhi.app",   phone: "+91 87654 32109",
+    id: "a2", name: "Rohit Kumar",   email: "rohit@ridhi.app",   phone: "+91 XXXXX XXXXX",
     role: "Finance Admin",   status: "active",    lastLogin: "3h ago",  joinedAt: "Feb 2025",
     actionsToday: 18, actionsTotal: 1560, city: "Delhi",
     permissions: buildPermMap(PRESETS.finance_admin.perms),
   },
   {
-    id: "a3", name: "Priya Nair",    email: "priya@ridhi.app",   phone: "+91 76543 21098",
+    id: "a3", name: "Priya Nair",    email: "priya@ridhi.app",   phone: "+91 XXXXX XXXXX",
     role: "Support Admin",   status: "inactive",  lastLogin: "2d ago",  joinedAt: "Mar 2025",
     actionsToday: 0,  actionsTotal: 680,  city: "Chennai",
     permissions: buildPermMap(PRESETS.support_admin.perms),
   },
   {
-    id: "a4", name: "Vikash Singh",  email: "vikash@ridhi.app",  phone: "+91 65432 10987",
+    id: "a4", name: "Vikash Singh",  email: "vikash@ridhi.app",  phone: "+91 XXXXX XXXXX",
     role: "Marketing Admin", status: "active",    lastLogin: "30m ago", joinedAt: "Mar 2025",
     actionsToday: 22, actionsTotal: 1200, city: "Mumbai",
     permissions: buildPermMap(PRESETS.marketing_admin.perms),
   },
   {
-    id: "a5", name: "Kavya Reddy",   email: "kavya@ridhi.app",   phone: "+91 54321 09876",
+    id: "a5", name: "Kavya Reddy",   email: "kavya@ridhi.app",   phone: "+91 XXXXX XXXXX",
     role: "Creator Admin",   status: "active",    lastLogin: "20m ago", joinedAt: "Apr 2025",
     actionsToday: 41, actionsTotal: 920,  city: "Hyderabad",
     permissions: buildPermMap(PRESETS.creator_admin.perms),
