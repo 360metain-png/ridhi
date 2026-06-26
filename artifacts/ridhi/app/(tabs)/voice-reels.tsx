@@ -434,7 +434,7 @@ function VoiceReplySheet({
             { paddingBottom: insets.bottom + 16, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <Pressable onPress={() => {}}>
+          <Pressable onPress={() => {}} hitSlop={10}>
             {/* Handle */}
             <View style={replyStyles.handle} />
 

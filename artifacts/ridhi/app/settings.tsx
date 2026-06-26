@@ -226,7 +226,7 @@ export default function SettingsScreen() {
           <SettingRow icon="phone" label="Call Persona" subtitle="Fake name, city, bio for random calls" onPress={() => router.push("/call-persona" as any)} />
           <SettingRow icon="mic" label="Accept Audio Calls" subtitle="Users can call you via audio" value={user?.hostCallPrefs?.acceptAudio ?? true} onToggle={(v) => updateProfile({ hostCallPrefs: { ...(user?.hostCallPrefs ?? { acceptAudio: true, acceptVideo: true }), acceptAudio: v } })} />
           <SettingRow icon="video" label="Accept Video Calls" subtitle="Users can call you with video" value={user?.hostCallPrefs?.acceptVideo ?? true} onToggle={(v) => updateProfile({ hostCallPrefs: { ...(user?.hostCallPrefs ?? { acceptAudio: true, acceptVideo: true }), acceptVideo: v } })} />
-          <SettingRow icon="user-x" label="Call History" subtitle="View & report past calls" onPress={() => Alert.alert("Call History", "Feature coming soon. Reports are always logged to admin.", [{ text: "OK" }])} />
+          <SettingRow icon="user-x" label="Call History" subtitle="View & report past calls" onPress={() => Alert.alert("Call History", "Your call history and reports are always logged to admin. A detailed history view is coming soon.", [{ text: "OK" }])} />
         </View>
 
         <SectionHeader title="Business" />

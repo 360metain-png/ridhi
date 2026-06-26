@@ -66,8 +66,7 @@ export default function SavedPostsScreen() {
     <Pressable 
       style={styles.postItem}
       onPress={() => {
-        // In a real app, navigate to post detail
-        Alert.alert("Post", item.content || "Post clicked");
+        router.push({ pathname: "/post-detail", params: { id: item.id } });
       }}
     >
       {item.imageUri || (item.carouselImages && item.carouselImages[0]) ? (

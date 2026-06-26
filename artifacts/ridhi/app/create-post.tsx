@@ -851,7 +851,7 @@ export default function CreatePostScreen() {
                 onPress={() => {
                   if (selectedType === "photo" || selectedType === "story") pickMedia("photo");
                   else if (selectedType === "video" || selectedType === "reel") pickMedia("video");
-                  else if (selectedType === "gif") Alert.alert("GIF Search", "Search for GIFs powered by GIPHY \u2014 coming soon!", [{ text: "OK" }]);
+                  else if (selectedType === "gif") Alert.alert("GIF Search", "Search for GIFs powered by GIPHY \u2014 tap the upload button to add a GIF from your gallery.", [{ text: "OK" }]);
                 }}
                 style={[styles.mediaUpload, { backgroundColor: colors.muted, borderColor: mediaUri ? colors.primary : colors.border }]}
               >

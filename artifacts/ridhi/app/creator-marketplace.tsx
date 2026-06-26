@@ -704,7 +704,7 @@ export default function CreatorMarketplaceScreen() {
         onRequestClose={closeCoinModal}
       >
         <Pressable style={styles.modalOverlay} onPress={closeCoinModal}>
-          <Pressable style={[styles.modalBox, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={() => {}}>
+          <Pressable style={[styles.modalBox, { backgroundColor: colors.card, borderColor: colors.border }]} onPress={(e) => e.stopPropagation()}>
             {/* Icon */}
             <LinearGradient colors={["#7B2FBE", "#E91E8C"]} style={styles.modalIconBg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <RidhiCoin size={28} />

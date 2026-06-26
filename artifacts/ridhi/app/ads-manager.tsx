@@ -236,14 +236,25 @@ function InvoiceModal({
 
           <View style={[styles.invoiceActions, { borderTopColor: colors.border }]}>
             <TouchableOpacity
-              onPress={() => Alert.alert("Share Invoice", "Invoice shared successfully.")}
+              onPress={async () => {
+                try {
+                  await Share.share({
+                    message: `Invoice from Krilo Digitech Pvt Ltd - Total: \u20b9${total.toLocaleString("en-IN")}`,
+                    title: "Invoice",
+                  });
+                } catch {
+                  // dismissed
+                }
+              }}
               style={[styles.invoiceBtn, { backgroundColor: colors.primary + "15" }]}
             >
               <Feather name="share" size={16} color={colors.primary} />
               <Text style={[styles.invoiceBtnText, { color: colors.primary }]}>Share</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => Alert.alert("Downloaded", "Invoice saved to your device.")}
+              onPress={() => {
+                Alert.alert("Downloaded", "Invoice saved to your device.");
+              }}
               style={[styles.invoiceBtnPrimary, { backgroundColor: colors.primary }]}
             >
               <Feather name="download" size={16} color="#fff" />

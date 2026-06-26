@@ -191,6 +191,18 @@ export default function UserProfileScreen() {
     ]);
   };
 
+  const handleShareProfile = async () => {
+    const { Share } = await import("react-native");
+    try {
+      await Share.share({
+        message: `Check out ${profile?.name || "this user"} on Ridhi!`,
+        title: "Share Profile",
+      });
+    } catch {
+      // dismissed
+    }
+  };
+
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 84 : insets.bottom + 20;
 
@@ -404,7 +416,7 @@ export default function UserProfileScreen() {
             <Feather name="slash" size={18} color={colors.destructive} />
             <Text style={[styles.sheetRowText, { color: colors.destructive }]}>Block User</Text>
           </Pressable>
-          <Pressable onPress={() => { setShowMenu(false); Alert.alert("Share Profile", "Coming soon!"); }} style={styles.sheetRow}>
+          <Pressable onPress={() => { setShowMenu(false); handleShareProfile(); }} style={styles.sheetRow}>
             <Feather name="share-2" size={18} color={colors.foreground} />
             <Text style={[styles.sheetRowText, { color: colors.foreground }]}>Share Profile</Text>
           </Pressable>

@@ -389,6 +389,7 @@ export default function AudioRoomScreen() {
   const [reaction, setReaction]         = useState<string | null>(null);
   const [reportVisible, setReportVisible] = useState(false);
   const [reportDone, setReportDone]       = useState(false);
+  const [rooms, setRooms]               = useState(AUDIO_ROOMS);
   const reactionAnim                    = useRef(new Animated.Value(0)).current;
 
   // header wave
@@ -404,7 +405,7 @@ export default function AudioRoomScreen() {
     ]).start(() => setReaction(null));
   };
 
-  const filtered = category === "All" ? AUDIO_ROOMS : AUDIO_ROOMS.filter((r) => r.category === category);
+  const filtered = category === "All" ? rooms : rooms.filter((r) => r.category === category);
 
   // ── inside a room ──────────────────────────────────────────────────────────
   if (activeRoom) {
@@ -621,11 +622,23 @@ export default function AudioRoomScreen() {
           label="+ Create"
           small
           onPress={() => {
-            const { Alert } = require("react-native");
-            Alert.alert("Create Audio Room", "Start a live room for your community.", [
-              { text: "Cancel", style: "cancel" },
-              { text: "Create 🎤", onPress: () => Alert.alert("Room Live! 🎤", "Your room is now live.", [{ text: "OK" }]) },
-            ]);
+            const newRoom = {
+              id: `room-${Date.now()}`,
+              title: "My Room",
+              host: user?.name || "Host",
+              hostAvatar: (user?.name?.slice(0, 2) || "HR").toUpperCase(),
+              language: "English",
+              listeners: 0,
+              speakers: 1,
+              topic: "New room",
+              joined: false,
+              tags: ["Live"],
+              gradientA: "#7B2FBE",
+              gradientB: "#E91E8C",
+              category: "Music",
+            };
+            setRooms((prev) => [newRoom, ...prev]);
+            setActiveRoom(newRoom);
           }}
         />
       </LinearGradient>

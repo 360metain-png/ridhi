@@ -13,7 +13,7 @@ export type ScreenName =
   | "story_viewer" | "about" | "help_support" | "withdraw"
   | "creator_marketplace" | "agent_dashboard" | "host_dashboard"
   | "ai_assistant" | "brand_post_deal" | "brand_register" | "call_persona"
-  | "host_profile" | "kyc" | "my_gifts" | "referral" | "privacy_policy"
+  | "host_profile" | "kyc" | "my_gifts" | "referral" | "privacy_policy" | "post_detail"
   | "terms" | "not_found" | "onboarding" | "login" | "otp" | "profile_setup";
 
 export type EventType =
