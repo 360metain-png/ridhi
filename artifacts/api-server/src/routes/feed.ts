@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { posts, postLikes, postComments, follows, users } from "@workspace/db";
 import { eq, desc, sql, and, inArray, isNull } from "drizzle-orm";
-import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
+import { requireUser, getUserId, resolveUserId, type AuthenticatedRequest } from "../lib/auth";
 
 const router = Router();
 
@@ -112,7 +112,11 @@ let totalResult: any[];
 
 // ── POST /api/posts — create a new post ──
 router.post("/posts", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req) as string;
+  const userId = await resolveUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
 
   const { content, images, city, language } = req.body;
   if (!content || content.trim().length === 0) {
@@ -141,10 +145,10 @@ router.post("/posts", requireUser, async (req: AuthenticatedRequest, res) => {
 
 // ── POST /api/posts/:id/like — toggle like ──
 router.post("/posts/:id/like", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req) as string;
+  const userId = await resolveUserId(req);
   const postId = req.params.id as string;
   // Accept non-UUID user IDs for demo/test mode
-  const effectiveUserId = userId.startsWith("test") || userId.length < 36
+  const effectiveUserId = !userId || userId.startsWith("test") || userId.length < 36
     ? "00000000-0000-0000-0000-000000000000"
     : userId;
 
@@ -186,7 +190,11 @@ router.post("/posts/:id/like", requireUser, async (req: AuthenticatedRequest, re
 
 // ── POST /api/posts/:id/comment — add comment ──
 router.post("/posts/:id/comment", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req) as string;
+  const userId = await resolveUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Authentication required" });
+    return;
+  }
   const postId = req.params.id as string;
   const { content } = req.body;
   if (!content || content.trim().length === 0) {

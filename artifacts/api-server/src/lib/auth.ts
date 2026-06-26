@@ -10,6 +10,9 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import { logger } from "./logger";
+import { db } from "@workspace/db";
+import { users } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const JWT_SECRET = process.env["SESSION_SECRET"] || "ridhi-development-secret-change-in-production";
 
@@ -129,8 +132,32 @@ export function requireAdminOrSuper(req: AuthenticatedRequest, res: Response, ne
 
 // ── Helper: Extract user ID from request ────────────────────────────────────
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function getUserId(req: AuthenticatedRequest): string | undefined {
   return req.user?.sub;
+}
+
+/**
+ * Resolve the user identifier from the JWT `sub` to the canonical UUID.
+ * Supports both old tokens (sub = phone number) and new tokens (sub = UUID).
+ * Returns `undefined` if the user is not found.
+ */
+export async function resolveUserId(req: AuthenticatedRequest): Promise<string | undefined> {
+  const sub = req.user?.sub;
+  if (!sub) return undefined;
+
+  // Already a UUID — no translation needed
+  if (UUID_RE.test(sub)) return sub;
+
+  // Old token: sub is a phone number; look up the real UUID
+  try {
+    const rows = await db.select({ id: users.id }).from(users).where(eq(users.phone, sub)).limit(1);
+    return rows[0]?.id ?? undefined;
+  } catch (err) {
+    logger.warn({ err, sub }, "resolveUserId: failed to look up user by phone");
+    return undefined;
+  }
 }
 
 // ── Helper: Extract admin info from request ───────────────────────────────────

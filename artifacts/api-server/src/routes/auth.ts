@@ -7,6 +7,7 @@ import { auditFromRequest } from "../lib/audit";
 import { logger } from "../lib/logger";
 import { db } from "@workspace/db";
 import { users } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -21,7 +22,7 @@ function generateOtp(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-/** Ensure user row exists in DB, then mint a JWT. Safe to call on every login. */
+/** Ensure user row exists in DB, then mint a JWT with the real UUID. Safe to call on every login. */
 async function upsertUserAndMintToken(contact: string): Promise<string> {
   try {
     await db.insert(users)
@@ -30,7 +31,11 @@ async function upsertUserAndMintToken(contact: string): Promise<string> {
   } catch (err) {
     logger.warn({ err, contact }, "user upsert warning (non-fatal)");
   }
-  return signUserToken(contact);
+
+  // Fetch the user's actual UUID so the token sub is a valid FK
+  const rows = await db.select({ id: users.id }).from(users).where(eq(users.phone, contact)).limit(1);
+  const userId = rows[0]?.id ?? contact;
+  return signUserToken(userId);
 }
 
 function normalisePhone(contact: string): string {

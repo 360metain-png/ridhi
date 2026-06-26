@@ -13,9 +13,11 @@ import { paymentRateLimit } from "../lib/rateLimit";
 import { auditFromRequest } from "../lib/audit";
 import { logger } from "../lib/logger";
 
-// The JWT sub is the phone number (not UUID), so all lookups go by users.phone.
+// The JWT sub may be UUID (new tokens) or phone number (old tokens).
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function userBySub(sub: string) {
-  return eq(users.phone, sub);
+  return UUID_RE.test(sub) ? eq(users.id, sub) : eq(users.phone, sub);
 }
 
 const router = Router();

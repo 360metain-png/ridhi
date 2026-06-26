@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { reels, users } from "@workspace/db";
 import { eq, desc, sql, and } from "drizzle-orm";
-import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
+import { requireUser, getUserId, resolveUserId, type AuthenticatedRequest } from "../lib/auth";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -52,7 +52,7 @@ router.get("/reels", async (req, res) => {
 
 // ── POST /api/reels — create a reel (auth required) ──
 router.post("/reels", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
+  const userId = await resolveUserId(req);
   if (!userId) {
     return res.status(401).json({ error: "Authentication required" });
   }
@@ -83,7 +83,7 @@ router.post("/reels", requireUser, async (req: AuthenticatedRequest, res) => {
 
 // ── POST /api/reels/:id/like — like/unlike a reel ──
 router.post("/reels/:id/like", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
+  const userId = await resolveUserId(req);
   const reelId = req.params.id;
 
   if (!userId) return res.status(401).json({ error: "Authentication required" });
@@ -104,7 +104,7 @@ router.post("/reels/:id/like", requireUser, async (req: AuthenticatedRequest, re
 
 // ── PATCH /api/reels/:id/duet — toggle allowDuet (creator only) ──
 router.patch("/reels/:id/duet", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
+  const userId = await resolveUserId(req);
   const reelId = req.params.id;
   const { allowDuet } = req.body;
 

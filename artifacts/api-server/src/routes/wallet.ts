@@ -8,8 +8,11 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function userBySub(sub: string) {
-  return eq(users.phone, sub);
+  // New tokens: sub is UUID; old tokens: sub is phone number
+  return UUID_RE.test(sub) ? eq(users.id, sub) : eq(users.phone, sub);
 }
 
 // ── GET /api/wallet ─────────────────────────────────────────────────

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { stories, users } from "@workspace/db";
 import { eq, desc, sql, gt } from "drizzle-orm";
-import { requireUser, getUserId, type AuthenticatedRequest } from "../lib/auth";
+import { requireUser, resolveUserId, type AuthenticatedRequest } from "../lib/auth";
 import { logger } from "../lib/logger";
 
 const router = Router();
@@ -48,7 +48,7 @@ router.get("/stories", async (req, res) => {
 
 // ── POST /api/stories — create a story (auth required) ──
 router.post("/stories", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
+  const userId = await resolveUserId(req);
   if (!userId) {
     return res.status(401).json({ error: "Authentication required" });
   }
@@ -79,7 +79,7 @@ router.post("/stories", requireUser, async (req: AuthenticatedRequest, res) => {
 
 // ── POST /api/stories/:id/view — mark story as seen ──
 router.post("/stories/:id/view", requireUser, async (req: AuthenticatedRequest, res) => {
-  const userId = getUserId(req);
+  const userId = await resolveUserId(req);
   const storyId = req.params.id;
 
   if (!userId) return res.status(401).json({ error: "Authentication required" });
