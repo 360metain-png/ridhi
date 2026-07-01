@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { downloadCSV } from "@/lib/utils";
 import {
   BookOpen, Smartphone, Shield, ChevronDown, ChevronRight,
-  Star, Briefcase, Radio, Video, MessageSquare, IndianRupee,
+  Star, Briefcase, Radio, Video, MessageSquare, IndianRupee, Heart,
   LayoutDashboard, ShieldAlert, Phone, BarChart3, Megaphone,
   Cpu, ScanFace, ShieldCheck, Activity, Zap, CheckCircle,
   Info, LogIn, UserPlus, Edit, Code, Link,
@@ -13,7 +13,7 @@ import {
   Crown, Gift, Users, ToggleRight, Globe, Settings, ShoppingBag,
   Key, Webhook, AlertTriangle, Lock, CreditCard,
   UsersRound, ClipboardList, Percent, DollarSign, Download, Wallet,
-  Repeat, CheckSquare, GitMerge, MapPin, Calendar} from "lucide-react";
+  Repeat, CheckSquare, GitMerge, MapPin, Calendar, Printer} from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -91,6 +91,44 @@ function HandbookSection({ section }: { section: Section }) {
 // ── HOST GUIDE DATA ────────────────────────────────────────────────────────────
 
 const HOST_SECTIONS: Section[] = [
+  {
+    id: "h-vip-plans",
+    icon: Crown,
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    title: "VIP Subscription Plans",
+    subtitle: "4-tier premium plans with weekly, monthly, and yearly billing",
+    features: [
+      "Silver VIP (₹49/wk, ₹149/mo, ₹1499/yr): No ads, 20 saved posts, 2 story highlights, 2 Super Likes/day, join events, unlimited polls, 1 pinned post, basic story analytics. Bonus: 100 coins/month",
+      "Gold VIP (₹99/wk, ₹299/mo, ₹2999/yr): Silver + 50 saved posts, 5 highlights, 5 Super Likes/day, 5 profile prompts, broadcast join, group video calls at 100 coins/hr, advanced story analytics. Bonus: 350 coins/month",
+      "Platinum VIP (₹199/wk, ₹599/mo, ₹5999/yr): Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, 10% shop discount, cart checkout, AI content assistant unlimited, extra pinned posts at 100 coins. Bonus: 1000 coins/month",
+      "Diamond Elite VIP (₹299/wk, ₹999/mo, ₹9999/yr): Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, bulk cart checkout, broadcast create, event monetization, collab posts, advanced AI moderation, all analytics included. Bonus: 3000 coins/month",
+      "Billing: weekly auto-renews every 7 days, monthly every 30 days, yearly every 365 days. Cancel anytime — reverts to free tier at end of billing period",
+      "Upgrade path: Silver → Gold → Platinum → Diamond Elite. Prorated upgrade credit applied when upgrading mid-cycle",
+      "VIP badge shown on profile and in chat. VIP users get priority in live stream discovery and match suggestions",
+      "All VIP plans include: ad-free experience, higher upload quality, exclusive VIP-only events, and early access to new features",
+    ],
+    note: "VIP plans are user-facing subscriptions. They unlock premium social features, not host/creator tools. Creator Pass is a separate subscription for content creators.",
+  },
+  {
+    id: "h-creator-subscriptions",
+    icon: Video,
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    title: "Creator Subscription Plans",
+    subtitle: "3-tier Creator Pass for content creators — monthly billing with platform fee reduction",
+    features: [
+      "Creator Starter (₹199/mo): Go Live, Podcast Studio, Basic Analytics, 20% platform commission, unlimited polls, basic story analytics",
+      "Creator Pro (₹499/mo): HD Upload, Boost & Ads, Fan Club, Audience Demographics, Advanced Analytics, 13% commission, group video calls 100 coins/hr, AI content assistant unlimited, collab posts",
+      "Creator Elite (₹999/mo): Brand Deals, Ridhi Radio, Account Manager, Revenue Projection, 8% commission, all analytics included, advanced AI moderation, event monetization, broadcast monetization",
+      "Platform fee reduction: Free users pay 30% commission on earnings. Starter drops to 20%, Pro to 13%, Elite to 8%",
+      "Bonus coins: Starter gets 200/mo, Pro 500/mo, Elite 1500/mo — credited automatically on billing date",
+      "Creator badge shown on profile and content. Elite creators get featured placement in Explore and dedicated support channel",
+      "Creator tools (upload, drafts, analytics, schedule, music) are free to all users. Premium tools (live, podcast, HD, ads, fan-club, brand-deals, radio, manager) unlock via Creator Pass",
+      "Creator Pass and VIP Plans can be active simultaneously — they serve different purposes. VIP = social perks. Creator Pass = monetization tools",
+    ],
+    note: "Creator subscriptions are for users who want to monetise content. VIP subscriptions are for users who want premium social features. A user can have both active at the same time.",
+  },
   {
     id: "h-registration",
     icon: UserPlus,
@@ -247,6 +285,22 @@ const HOST_SECTIONS: Section[] = [
     note: "Story Analytics helps you understand what content resonates with your audience. Use it to optimize your story strategy.",
   },
   {
+    id: "h-story-reactions",
+    icon: Heart,
+    color: "text-rose-600",
+    bg: "bg-rose-50",
+    title: "Story Reactions",
+    subtitle: "React to stories with emoji and see reaction analytics",
+    features: [
+      "React to any story with emoji: Fire 🔥, Heart ❤️, Laugh 😂, Wow 😮, Clap 👏",
+      "Reactions appear instantly to the story creator and are tracked in Story Analytics",
+      "All users can react — no VIP or Creator Pass required. Unlimited reactions per day",
+      "Creators see a breakdown of emoji usage in their Story Analytics panel",
+      "Reactions are anonymous to other viewers; only the creator sees who reacted",
+    ],
+    note: "Story Reactions drive engagement and help creators understand audience sentiment in real time.",
+  },
+  {
     id: "h-collab-posts",
     icon: GitMerge,
     color: "text-indigo-600",
@@ -293,6 +347,42 @@ const HOST_SECTIONS: Section[] = [
       "Search events by title or location. Filter by category with quick chips",
     ],
     note: "Events are a great way to meet followers in person or host virtual fan gatherings.",
+  },
+  {
+    id: "h-read-receipts",
+    icon: CheckCircle,
+    color: "text-teal-600",
+    bg: "bg-teal-50",
+    title: "Read Receipts, Typing & Activity",
+    subtitle: "Real-time messaging indicators for chat and DMs",
+    features: [
+      "Read Receipts: blue double-check appears when your message is read by the recipient",
+      "Typing Indicator: '...' bubble shows when the other person is typing a message",
+      "Online / Active Now: green dot and 'Active now' status shown below the user's name in chat header",
+      "Last Seen: when a user is offline, their last active time is displayed (e.g. 'Last seen 5 min ago')",
+      "Activity Status: 'In a call', 'Live streaming', or 'Listening to music' shown on profile and in chat header",
+      "Privacy toggle in Settings → Privacy → Activity Status to hide your online/last-seen from others",
+      "All messaging indicators are free for all users. No VIP or coin cost required",
+    ],
+    note: "Messaging indicators improve chat engagement and reduce ghosting. Users can disable their own visibility in Privacy settings.",
+  },
+  {
+    id: "h-group-video-calls",
+    icon: UsersRound,
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    title: "Group Video Calls",
+    subtitle: "Multi-user video calls for friends, creators, and communities",
+    features: [
+      "Start a group video call from the Chat tab → New Call → Group Video. Add up to 8 participants",
+      "Coin cost: 100 coins/hour for Gold+ VIP or Creator Pro+. 200 coins/hour for standard users",
+      "Screen sharing: share your screen during the call for presentations, gaming, or tutorials",
+      "Virtual backgrounds: blur, solid color, or upload a custom background image",
+      "Call controls: mute/unmute, video on/off, raise hand, kick participant (host only)",
+      "Recording: host can record the call. Recording stored for 7 days, downloadable by host",
+      "Group calls support reactions (emoji float on screen) and text chat sidebar",
+    ],
+    note: "Group Video Calls are great for study groups, watch parties, creator Q&As, and community hangouts. Host controls ensure orderly sessions.",
   },
   {
     id: "h-ai-moderation",
@@ -1585,12 +1675,19 @@ export default function HandbookPage() {
         <TabsContent value="superadmin" className="mt-5 space-y-3">
           <div className="rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50 p-4 flex items-start gap-3 mb-4">
             <ShieldCheck className="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" />
-            <div>
+            <div className="flex-1">
               <p className="font-semibold text-rose-900">Ridhi Super Admin — Full Platform Control</p>
               <p className="text-sm text-rose-700 mt-1">
                 Super Admin has unrestricted access to all platform systems including user data, all financial operations, content moderation, community management, creative assets, live streams, creator deals, ads, system health, API integrations, and Admin Management. SA decides who becomes an Admin, what they are responsible for, and can revoke any Admin account instantly.
               </p>
             </div>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 transition-colors flex-shrink-0"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Download PDF
+            </button>
           </div>
           {SA_SECTIONS.map((s) => <HandbookSection key={s.id} section={s} />)}
 

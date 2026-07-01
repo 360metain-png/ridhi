@@ -254,6 +254,8 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "group-chat",   name: "Group Chat",               desc: "Create and manage group chats with friends and communities",               phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "chatrooms",    name: "Chatrooms",                desc: "Public themed chatrooms for community discussion and real-time messaging",   phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "friend-requests", name: "Friend Requests",      desc: "Send and manage friend connection requests with approval flow",             phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "group-video-calls", name: "Group Video Calls", desc: "Multi-user video calls up to 8 participants. Gold+ VIP / Creator Pro+ at 100 coins/hr; standard users at 200 coins/hr. Screen sharing, virtual backgrounds, recording, and reactions included.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "read-receipts-typing", name: "Read Receipts & Typing", desc: "Blue double-check read receipts, typing indicators (...), online/active-now status, last-seen, and activity status ('In a call', 'Live streaming'). Free for all users. Privacy toggle in Settings.", phase: "3", audience: "All Users", status: "live", enabled: true },
     ],
   },
   {
@@ -3276,10 +3278,10 @@ export default function SuperAdminPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {([
-                  { tier: "Silver", weekly: 49, monthly: 149, yearly: 1499, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200", features: "No ads, 20 saved posts, 2 story highlights, 2 Super Likes/day, join events" },
-                  { tier: "Gold", weekly: 99, monthly: 299, yearly: 2999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", features: "Silver + 50 saved posts, 5 highlights, 5 Super Likes/day, 5 profile prompts, broadcast join" },
-                  { tier: "Platinum", weekly: 199, monthly: 599, yearly: 5999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", features: "Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, 10% shop discount, cart checkout" },
-                  { tier: "Diamond Elite", weekly: 299, monthly: 999, yearly: 9999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", features: "Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, bulk cart checkout, broadcast create, event monetization" },
+                  { tier: "Silver", weekly: 49, monthly: 149, yearly: 1499, coins: 100, color: "text-gray-500", bg: "bg-gray-50", border: "border-gray-200", features: "No ads, 20 saved posts, 2 story highlights, 2 Super Likes/day, join events, unlimited polls, 1 pinned post, basic story analytics" },
+                  { tier: "Gold", weekly: 99, monthly: 299, yearly: 2999, coins: 350, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200", features: "Silver + 50 saved posts, 5 highlights, 5 Super Likes/day, 5 profile prompts, broadcast join, group video calls 100 coins/hr, advanced story analytics" },
+                  { tier: "Platinum", weekly: 199, monthly: 599, yearly: 5999, coins: 1000, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200", features: "Gold + 100 saved posts, 10 highlights, 10 Super Likes/day, 10 prompts, create events, 10% shop discount, cart checkout, group video calls 100 coins/hr, AI content assistant unlimited, extra pinned posts 100 coins" },
+                  { tier: "Diamond Elite", weekly: 299, monthly: 999, yearly: 9999, coins: 3000, color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200", features: "Platinum + unlimited saved posts, unlimited highlights, 10 Super Likes/day, unlimited prompts, 15% shop discount, bulk cart checkout, broadcast create, event monetization, group video calls 100 coins/hr, collab posts, advanced AI moderation, all analytics included" },
                 ] as const).map((plan) => (
                   <div key={plan.tier} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">
@@ -3325,9 +3327,9 @@ export default function SuperAdminPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {([
-                  { name: "Creator Starter", price: 199, features: "Go Live, Podcast Studio, Basic Analytics, Commission 20%", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-                  { name: "Creator Pro", price: 499, features: "HD Upload, Boost & Ads, Fan Club, Audience Demographics, Advanced Analytics, Commission 13%", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
-                  { name: "Creator Elite", price: 999, features: "Brand Deals, Ridhi Radio, Account Manager, Revenue Projection, Commission 8%", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
+                  { name: "Creator Starter", price: 199, features: "Go Live, Podcast Studio, Basic Analytics, Commission 20%, unlimited polls, basic story analytics", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+                  { name: "Creator Pro", price: 499, features: "HD Upload, Boost & Ads, Fan Club, Audience Demographics, Advanced Analytics, Commission 13%, group video 100 coins/hr, AI assistant unlimited, collab posts", color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-200" },
+                  { name: "Creator Elite", price: 999, features: "Brand Deals, Ridhi Radio, Account Manager, Revenue Projection, Commission 8%, all analytics included, advanced AI moderation, event monetization, broadcast monetization", color: "text-pink-600", bg: "bg-pink-50", border: "border-pink-200" },
                 ] as const).map((plan) => (
                   <div key={plan.name} className={`rounded-lg border p-3 space-y-2 ${plan.border} ${plan.bg}`}>
                     <div className="flex items-center justify-between">

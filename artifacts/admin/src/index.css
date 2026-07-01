@@ -336,3 +336,50 @@
     inset: -1px;
   }
 }
+
+/* ── Print styles for handbook PDF export ─────────────────────────────────── */
+@media print {
+  /* Hide the left sidebar navigation */
+  aside, nav, .sidebar, [role="navigation"] {
+    display: none !important;
+  }
+
+  /* Hide top-level page chrome (header bars, user menus) */
+  header, .header, .top-bar, [role="banner"] {
+    display: none !important;
+  }
+
+  /* Hide tab triggers so only the active tab content prints */
+  [data-state="inactive"] {
+    display: none !important;
+  }
+
+  /* Show all tab contents regardless of active tab for full handbook export */
+  [role="tabpanel"] {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Force light background, remove rounded corners, add page breaks */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .rounded-xl, .rounded-lg, .rounded-md {
+    border-radius: 0 !important;
+  }
+
+  /* Page break between major sections */
+  [role="tabpanel"] > * {
+    break-inside: avoid;
+  }
+
+  /* Hide print buttons */
+  button, [role="button"] {
+    display: none !important;
+  }
+}
