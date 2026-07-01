@@ -137,3 +137,9 @@ id = "ROf6bKDUdAZEFEqY14fXA"
 uri = "file://Ridhi_Information.md"
 type = "text"
 title = "Ridhi Information — India's First Social Universal App"
+
+[[outputs]]
+id = "XRxBhGB2R9OLi0agNNs2a"
+uri = "file://artifacts/ridhi/Ridhi_Platform_Document.md"
+type = "text"
+title = "Ridhi Platform Document — All Features, Income Sources & User Experience"
