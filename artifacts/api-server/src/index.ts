@@ -4,6 +4,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { handleCallSocket } from "./routes/calls";
 import { verifyToken } from "./lib/auth";
+import { pool } from "@workspace/db";
 
 const rawPort = process.env["PORT"];
 
@@ -46,4 +47,36 @@ wss.on("connection", (ws, req) => {
 
 server.listen(port, () => {
   logger.info({ port }, "Server listening with WebSocket calls");
+});
+
+// ── Graceful shutdown ───────────────────────────────────────────────────────
+async function gracefulShutdown(signal: string) {
+  logger.info({ signal }, "Shutting down gracefully");
+  server.close(() => {
+    logger.info("HTTP server closed");
+  });
+  wss.close(() => {
+    logger.info("WebSocket server closed");
+  });
+  try {
+    await pool.end();
+    logger.info("Database pool drained");
+  } catch {
+    /* ignore */
+  }
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err: err.message, stack: err.stack }, "Uncaught exception");
+  // Give logger time to flush before exiting
+  setTimeout(() => process.exit(1), 500);
+});
+
+process.on("unhandledRejection", (reason) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  logger.error({ reason: message }, "Unhandled promise rejection");
 });

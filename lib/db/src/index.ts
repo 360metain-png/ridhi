@@ -10,7 +10,18 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+});
+
+pool.on("error", (err) => {
+  // eslint-disable-next-line no-console
+  console.error("Unexpected DB pool error:", err.message);
+});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
