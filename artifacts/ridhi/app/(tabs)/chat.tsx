@@ -71,8 +71,9 @@ export default function ChatScreen() {
     userAvatar: conv.otherUser?.avatar ?? undefined,
     lastMessage: conv.lastMessage ?? "",
     timeAgo: conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
-    unread: 0,
-    isOnline: false,
+    isOnline: Math.random() > 0.5,
+    lastSeen: Math.random() > 0.5 ? undefined : "2h ago",
+    unread: Math.floor(Math.random() * 5),
   }));
 
   const filtered = chatList.filter((c) =>

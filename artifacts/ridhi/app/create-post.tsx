@@ -153,6 +153,24 @@ export default function CreatePostScreen() {
   const [aiHashtags, setAiHashtags] = useState<string[]>([]);
   const [hashtagTopic, setHashtagTopic] = useState<string>("");
 
+  // ── Poll state ──
+  const [pollOptions, setPollOptions] = useState<string[]>(["Option 1", "Option 2"]);
+  const [pollQuestion, setPollQuestion] = useState("");
+
+  // ── Collab state ──
+  const [collabPartner, setCollabPartner] = useState<{ name: string; userId: string; avatar?: string } | null>(null);
+  const [showCollabPicker, setShowCollabPicker] = useState(false);
+
+  // ── AI Assistant usage tracking ──
+  const [aiUsesRemaining, setAiUsesRemaining] = useState(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const lastReset = user?.lastAiResetDate;
+    if (lastReset === today && user?.aiAssistantUsesToday !== undefined) {
+      return Math.max(0, 3 - user.aiAssistantUsesToday);
+    }
+    return 3;
+  });
+
   // ── TTS (Text-to-Speech) state ──
   const [showTtsPanel, setShowTtsPanel] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(false);
@@ -440,6 +458,12 @@ export default function CreatePostScreen() {
 
   const { trackCreate } = useAnalytics();
 
+  const COIN_COSTS = {
+    extraPoll: 50,
+    collabPost: 1000,
+    aiAssistantExtra: 30,
+  };
+
   const handlePost = async () => {
     setLoading(true);
     try {
@@ -476,6 +500,37 @@ export default function CreatePostScreen() {
   const proceedWithPost = async (moderation: ModerationResult) => {
     setLoading(true);
     try {
+      // ── Poll Freemium Check ──
+      if (selectedType === "poll") {
+        const today = new Date().toISOString().split("T")[0];
+        const lastReset = user?.lastPollResetDate;
+        const weeklyCount = (lastReset === today ? user?.weeklyPollsCreated ?? 0 : 0);
+        const isVip = user?.plan && user.plan !== "free";
+        if (weeklyCount >= 1 && !isVip) {
+          setLoading(false);
+          Alert.alert(
+            "Poll Limit Reached",
+            "Free users get 1 poll per week. Unlock unlimited polls with VIP or pay 50 coins for this poll.",
+            [
+              { text: "Cancel", style: "cancel" },
+              { text: "Pay 50 Coins", onPress: () => { /* deduct coins */ } },
+              { text: "Upgrade to VIP", onPress: () => router.push("/subscription") },
+            ]
+          );
+          return;
+        }
+      }
+
+      // ── Collab Post Coin Check ──
+      if (collabPartner && (user?.coins ?? 0) < COIN_COSTS.collabPost) {
+        setLoading(false);
+        Alert.alert("Not Enough Coins", `Collab posts cost ${COIN_COSTS.collabPost} coins. Recharge your wallet to continue.`, [
+          { text: "Cancel", style: "cancel" },
+          { text: "Recharge", onPress: () => router.push("/wallet") },
+        ]);
+        return;
+      }
+
       const body: any = {
         content: text.trim(),
         images: selectedType === "carousel" ? carouselImages : (mediaUri ? [mediaUri] : []),
@@ -489,6 +544,13 @@ export default function CreatePostScreen() {
           flagged: moderation.flagged,
           confidence: moderation.confidence,
         },
+        // Poll
+        pollOptions: selectedType === "poll" ? pollOptions.filter(o => o.trim()).map((o, i) => ({ id: `opt_${i}`, label: o, votes: 0 })) : undefined,
+        pollQuestion: selectedType === "poll" ? pollQuestion || text.trim() : undefined,
+        // Collab
+        collabWith: collabPartner ?? undefined,
+        // Coin spend tracking
+        coinSpent: collabPartner ? COIN_COSTS.collabPost : 0,
       };
       if (selectedType === "duet" || selectedType === "stitch") {
         body.duetWith = params?.duetWith ? { reelId: params.duetWith, reelTitle: params.duetTitle, reelUser: params.duetUser } : undefined;
@@ -714,13 +776,56 @@ export default function CreatePostScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => router.push("/ai-assistant")}
+            onPress={() => {
+              if (aiUsesRemaining > 0) {
+                router.push("/ai-assistant");
+                setAiUsesRemaining((prev) => prev - 1);
+              } else {
+                Alert.alert(
+                  "AI Assistant Limit Reached",
+                  "You've used all 3 free AI suggestions today. Unlock unlimited with VIP or pay 30 coins per extra use.",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Upgrade to VIP", onPress: () => router.push("/subscription") },
+                  ]
+                );
+              }
+            }}
             style={[styles.aiChip, { backgroundColor: "#3B82F6" + "18", borderColor: "#3B82F6" + "35" }]}
           >
             <View style={[styles.aiChipIcon, { backgroundColor: "#3B82F6" }]}>
               <Feather name="cpu" size={11} color="#fff" />
             </View>
-            <Text style={[styles.aiChipText, { color: "#3B82F6" }]}>AI Assistant</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Text style={[styles.aiChipText, { color: "#3B82F6" }]}>AI Assistant</Text>
+              {aiUsesRemaining > 0 && (
+                <View style={{ backgroundColor: "#3B82F630", borderRadius: 8, paddingHorizontal: 5, paddingVertical: 1 }}>
+                  <Text style={{ color: "#3B82F6", fontSize: 9, fontFamily: "Inter_700Bold" }}>{aiUsesRemaining} left</Text>
+                </View>
+              )}
+            </View>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              Alert.alert(
+                "Collab Partner",
+                "Select a creator to collaborate with on this post. Collab posts cost 1000 coins and appear on both profiles.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Ananya Singh", onPress: () => setCollabPartner({ name: "Ananya Singh", userId: "u1" }) },
+                  { text: "Rahul Mehta", onPress: () => setCollabPartner({ name: "Rahul Mehta", userId: "u2" }) },
+                ]
+              );
+            }}
+            style={[styles.aiChip, { backgroundColor: collabPartner ? colors.primary + "25" : colors.primary + "18", borderColor: collabPartner ? colors.primary : colors.primary + "35" }]}
+          >
+            <View style={[styles.aiChipIcon, { backgroundColor: colors.primary }]}>
+              <Feather name="users" size={11} color="#fff" />
+            </View>
+            <Text style={[styles.aiChipText, { color: colors.primary }]}>
+              {collabPartner ? `Collab: ${collabPartner.name}` : "Collab Post"}
+            </Text>
           </Pressable>
 
           <Pressable
@@ -927,11 +1032,33 @@ export default function CreatePostScreen() {
 
         {selectedType === "poll" && (
           <View style={styles.pollOptions}>
-            {["Option 1", "Option 2"].map((opt) => (
-              <View key={opt} style={[styles.pollOption, { backgroundColor: colors.muted, borderColor: colors.border }]}>
-                <TextInput style={[styles.pollInput, { color: colors.foreground }]} placeholder={opt} placeholderTextColor={colors.mutedForeground} />
+            <TextInput
+              style={[styles.pollInput, { color: colors.foreground, borderColor: colors.border, marginBottom: 8 }]}
+              placeholder="Ask a question..."
+              placeholderTextColor={colors.mutedForeground}
+              value={pollQuestion}
+              onChangeText={setPollQuestion}
+            />
+            {pollOptions.map((opt, i) => (
+              <View key={i} style={[styles.pollOption, { backgroundColor: colors.muted, borderColor: colors.border }]}>
+                <TextInput
+                  style={[styles.pollInput, { color: colors.foreground }]}
+                  placeholder={`Option ${i + 1}`}
+                  placeholderTextColor={colors.mutedForeground}
+                  value={opt}
+                  onChangeText={(text) => {
+                    const next = [...pollOptions];
+                    next[i] = text;
+                    setPollOptions(next);
+                  }}
+                />
               </View>
             ))}
+            {pollOptions.length < 4 && (
+              <Pressable onPress={() => setPollOptions([...pollOptions, `Option ${pollOptions.length + 1}`])} style={{ padding: 8, alignSelf: "center" }}>
+                <Text style={{ color: colors.primary, fontSize: 13, fontFamily: "Inter_600SemiBold" }}>+ Add Option</Text>
+              </Pressable>
+            )}
           </View>
         )}
 

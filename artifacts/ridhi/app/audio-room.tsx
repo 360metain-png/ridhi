@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Alert,
   Animated,
   Easing,
   Modal,
@@ -390,6 +391,8 @@ export default function AudioRoomScreen() {
   const [reportVisible, setReportVisible] = useState(false);
   const [reportDone, setReportDone]       = useState(false);
   const [rooms, setRooms]               = useState(AUDIO_ROOMS);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [groupVideoMode, setGroupVideoMode] = useState(false);
   const reactionAnim                    = useRef(new Animated.Value(0)).current;
 
   // header wave
@@ -526,6 +529,37 @@ export default function AudioRoomScreen() {
             >
               <Feather name="flag" size={20} color="#FF9500" />
               <Text style={[styles.sideCtrlLabel, { color: "#FF9500" }]}>Report</Text>
+            </Pressable>
+
+            {/* Video toggle */}
+            <Pressable
+              onPress={() => setVideoEnabled((prev) => !prev)}
+              style={[styles.sideCtrlBtn, { borderColor: videoEnabled ? "rgba(52,199,89,0.35)" : "rgba(255,255,255,0.2)" }]}
+            >
+              <Feather name={videoEnabled ? "video" : "video-off"} size={22} color={videoEnabled ? "#34C759" : "rgba(255,255,255,0.6)"} />
+              <Text style={[styles.sideCtrlLabel, { color: videoEnabled ? "#34C759" : "rgba(255,255,255,0.6)" }]}>{videoEnabled ? "Video On" : "Video"}</Text>
+            </Pressable>
+
+            {/* Group Video Mode */}
+            <Pressable
+              onPress={() => {
+                if (!groupVideoMode) {
+                  Alert.alert(
+                    "Group Video Call",
+                    "Enable group video for up to 8 participants. Cost: 100 coins/hour for Creator+ or 200 coins/hour for regular users.",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Enable (200 coins)", onPress: () => setGroupVideoMode(true) },
+                    ]
+                  );
+                } else {
+                  setGroupVideoMode(false);
+                }
+              }}
+              style={[styles.sideCtrlBtn, { borderColor: groupVideoMode ? "rgba(233,30,140,0.35)" : "rgba(255,255,255,0.2)" }]}
+            >
+              <Feather name="users" size={22} color={groupVideoMode ? colors.secondary : "rgba(255,255,255,0.6)"} />
+              <Text style={[styles.sideCtrlLabel, { color: groupVideoMode ? colors.secondary : "rgba(255,255,255,0.6)" }]}>{groupVideoMode ? "Group On" : "Group"}</Text>
             </Pressable>
 
             {/* leave */}

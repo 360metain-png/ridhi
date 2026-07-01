@@ -56,15 +56,15 @@ const MOCK_FOLLOWING = [
 ];
 
 const MOCK_POSTS = [
-  { id: "p1", likes: 284, comments: 42  },
-  { id: "p2", likes: 512, comments: 89  },
-  { id: "p3", likes: 167, comments: 95  },
-  { id: "p4", likes: 98,  comments: 23  },
-  { id: "p5", likes: 743, comments: 156 },
-  { id: "p6", likes: 431, comments: 67  },
-  { id: "p7", likes: 628, comments: 112 },
-  { id: "p8", likes: 215, comments: 38  },
-  { id: "p9", likes: 389, comments: 74  },
+  { id: "p1", likes: 284, comments: 42, isPinned: true },
+  { id: "p2", likes: 512, comments: 89, isPinned: false },
+  { id: "p3", likes: 167, comments: 95, isPinned: false },
+  { id: "p4", likes: 98,  comments: 23, isPinned: false },
+  { id: "p5", likes: 743, comments: 156, isPinned: false },
+  { id: "p6", likes: 431, comments: 67, isPinned: false },
+  { id: "p7", likes: 628, comments: 112, isPinned: false },
+  { id: "p8", likes: 215, comments: 38, isPinned: false },
+  { id: "p9", likes: 389, comments: 74, isPinned: false },
 ];
 
 const POST_COLORS = [
@@ -312,9 +312,22 @@ export default function ProfileScreen() {
     if (sheet === "posts") {
       return (
         <View style={styles.sheetPostGrid}>
-          {MOCK_POSTS.map((p, i) => (
-            <Pressable key={p.id} style={[styles.sheetPostCell, { width: (width - 8) / 3 }]} onPress={() => Alert.alert("Post", `View post with ${p.likes} likes`)}>
+          {/* Pinned post indicator */}
+          {MOCK_POSTS.filter(p => p.isPinned).map((p, i) => (
+            <Pressable key={`pinned-${p.id}`} style={[styles.sheetPostCell, { width: (width - 8) / 3, borderWidth: 2, borderColor: colors.primary }]} onPress={() => Alert.alert("Pinned Post", `This is your pinned post with ${p.likes} likes. Only 1 free pin — extra pins cost 100 coins.`)}>
               <LinearGradient colors={POST_COLORS[i % POST_COLORS.length] as [string, string]} style={StyleSheet.absoluteFill} />
+              <View style={[styles.pinnedBadge, { backgroundColor: colors.primary }]}>
+                <Feather name="map-pin" size={10} color="#fff" />
+              </View>
+              <View style={styles.sheetPostOverlay}>
+                <Feather name="heart" size={13} color="rgba(255,255,255,0.9)" />
+                <Text style={styles.sheetPostStat}>{p.likes}</Text>
+              </View>
+            </Pressable>
+          ))}
+          {MOCK_POSTS.filter(p => !p.isPinned).map((p, i) => (
+            <Pressable key={p.id} style={[styles.sheetPostCell, { width: (width - 8) / 3 }]} onPress={() => Alert.alert("Post", `View post with ${p.likes} likes`)}>
+              <LinearGradient colors={POST_COLORS[(i + MOCK_POSTS.filter(p2 => p2.isPinned).length) % POST_COLORS.length] as [string, string]} style={StyleSheet.absoluteFill} />
               <View style={styles.sheetPostOverlay}>
                 <Feather name="heart" size={13} color="rgba(255,255,255,0.9)" />
                 <Text style={styles.sheetPostStat}>{p.likes}</Text>
@@ -1192,6 +1205,7 @@ const styles = StyleSheet.create({
   sheetPostCell: { height: 110, borderRadius: 8, overflow: "hidden", alignItems: "center", justifyContent: "flex-end" },
   sheetPostOverlay: { flexDirection: "row", alignItems: "center", gap: 4, padding: 8, width: "100%" },
   sheetPostStat: { fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#fff" },
+  pinnedBadge: { position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", zIndex: 10 },
   personRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
   personNameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   personName: { fontSize: 14, fontFamily: "Inter_600SemiBold" },

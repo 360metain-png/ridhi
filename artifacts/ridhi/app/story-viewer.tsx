@@ -5,6 +5,7 @@ import {
   Dimensions,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -21,6 +22,7 @@ import { Avatar } from "@/components/Avatar";
 import { PrivateHead } from "@/components/PrivateHead";
 import { ShareWithWatermark } from "@/components/ShareWithWatermark";
 import { DownloadService } from "@/components/DownloadService";
+import { CoinBadge } from "@/components/CoinBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
 const { width, height } = Dimensions.get("window");
@@ -67,6 +69,20 @@ export default function StoryViewerScreen() {
   const [reposted, setReposted] = useState(false);
   const [storyReactions, setStoryReactions] = useState<Record<string, string[]>>({});
   const [lastReaction, setLastReaction] = useState("");
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  // Mock analytics data
+  const [storyAnalytics] = useState({
+    views: 1247,
+    uniqueViewers: 892,
+    reactions: { "❤️": 342, "🔥": 156, "😍": 89, "👏": 67, "🥰": 45 },
+    tapForwards: 523,
+    tapBackwards: 127,
+    exits: 89,
+    replies: 34,
+    shares: 28,
+    peakTime: "7:30 PM",
+    topCities: ["Delhi", "Mumbai", "Bangalore"],
+  });
   const reactionAnim = useRef(new Animated.Value(0)).current;
   const progress = useRef(new Animated.Value(0)).current;
   const animRef = useRef<Animated.CompositeAnimation | null>(null);
@@ -297,13 +313,13 @@ export default function StoryViewerScreen() {
             onBlur={() => setPaused(false)}
           />
           {reply.length > 0 ? (
-            <Pressable style={styles.sendReplyBtn} onPress={() => Alert.alert("Reply sent", `Reply: ${reply}`)}>
+            <Pressable style={styles.sendReplyBtn} onPress={() => { setReply(""); setPaused(false); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}>
               <Feather name="send" size={18} color="#fff" />
             </Pressable>
           ) : (
             <View style={styles.replyActions}>
-              <Pressable style={styles.replyActionBtn} onPress={() => Alert.alert("Story Reaction", "Heart reaction sent")}>
-                <Feather name="heart" size={22} color="rgba(255,255,255,0.9)" />
+              <Pressable style={styles.replyActionBtn} onPress={() => handleReaction("❤️")}>
+                <Feather name="heart" size={22} color={reposted ? colors.primary : "rgba(255,255,255,0.9)"} />
               </Pressable>
               <Pressable style={styles.replyActionBtn} onPress={() => setShowShare(true)}>
                 <Feather name="share" size={22} color="rgba(255,255,255,0.9)" />
@@ -315,15 +331,78 @@ export default function StoryViewerScreen() {
                 <Feather name="download" size={22} color="rgba(255,255,255,0.9)" />
               </Pressable>
               {isMyStory && (
-                <Pressable style={styles.replyActionBtn} onPress={handleHighlight}>
-                  <Feather name="plus-circle" size={22} color="rgba(255,255,255,0.9)" />
-                </Pressable>
+                <>
+                  <Pressable style={styles.replyActionBtn} onPress={handleHighlight}>
+                    <Feather name="plus-circle" size={22} color="rgba(255,255,255,0.9)" />
+                  </Pressable>
+                  <Pressable style={styles.replyActionBtn} onPress={() => { setPaused(true); setShowAnalytics(true); }}>
+                    <Feather name="bar-chart-2" size={22} color="rgba(255,255,255,0.9)" />
+                  </Pressable>
+                </>
               )}
             </View>
           )}
         </View>
       </LinearGradient>
     </View>
+
+    {/* Story Analytics Overlay */}
+    {showAnalytics && (
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.85)", zIndex: 100, paddingTop: topPad + 20, paddingHorizontal: 20 }]}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <Text style={{ color: "#fff", fontSize: 22, fontFamily: "Inter_700Bold" }}>Story Analytics</Text>
+          <Pressable onPress={() => { setPaused(false); setShowAnalytics(false); }} style={{ padding: 8 }}>
+            <Feather name="x" size={24} color="#fff" />
+          </Pressable>
+        </View>
+        <View style={{ backgroundColor: "rgba(123,47,190,0.3)", borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: "rgba(123,47,190,0.5)" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Feather name="lock" size={14} color={colors.secondary} />
+            <Text style={{ color: colors.secondary, fontSize: 12, fontFamily: "Inter_600SemiBold" }}>Premium Feature</Text>
+          </View>
+          <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, fontFamily: "Inter_400Regular" }}>
+            Unlock full analytics with VIP or 200 coins/month
+          </Text>
+        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+            {[
+              { label: "Views", value: storyAnalytics.views.toLocaleString(), icon: "eye", color: "#4A90E2" },
+              { label: "Unique", value: storyAnalytics.uniqueViewers.toLocaleString(), icon: "users", color: "#34C759" },
+              { label: "Replies", value: storyAnalytics.replies.toString(), icon: "message-circle", color: "#FF6B35" },
+              { label: "Shares", value: storyAnalytics.shares.toString(), icon: "share-2", color: "#E91E8C" },
+            ].map((stat) => (
+              <View key={stat.label} style={{ width: (width - 52) / 2, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 12, padding: 14, alignItems: "center" }}>
+                <Feather name={stat.icon as any} size={18} color={stat.color} />
+                <Text style={{ color: "#fff", fontSize: 20, fontFamily: "Inter_700Bold", marginTop: 6 }}>{stat.value}</Text>
+                <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontFamily: "Inter_400Regular" }}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, fontFamily: "Inter_600SemiBold", marginBottom: 12 }}>Top Reactions</Text>
+          <View style={{ flexDirection: "row", gap: 16, marginBottom: 20 }}>
+            {Object.entries(storyAnalytics.reactions).map(([emoji, count]) => (
+              <View key={emoji} style={{ alignItems: "center" }}>
+                <Text style={{ fontSize: 28 }}>{emoji}</Text>
+                <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_600SemiBold", marginTop: 4 }}>{count}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, fontFamily: "Inter_600SemiBold", marginBottom: 12 }}>Top Cities</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {storyAnalytics.topCities.map((city) => (
+              <View key={city} style={{ backgroundColor: "rgba(255,255,255,0.12)", borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 }}>
+                <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_500Medium" }}>{city}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={{ marginTop: 20, backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 12, padding: 14 }}>
+            <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontFamily: "Inter_400Regular" }}>Peak View Time</Text>
+            <Text style={{ color: "#fff", fontSize: 16, fontFamily: "Inter_700Bold", marginTop: 4 }}>{storyAnalytics.peakTime}</Text>
+          </View>
+        </ScrollView>
+      </View>
+    )}
 
     <ShareWithWatermark
       visible={showShare}

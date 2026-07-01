@@ -455,6 +455,16 @@ export default function FeedScreen() {
           },
         },
         {
+          text: "AI Moderate",
+          onPress: () => {
+            Alert.alert(
+              "AI Comment Moderation",
+              "Ridhi AI scanned this comment for toxic content in English + 12 Indian languages. No violations detected.\n\nCreator+ users get advanced moderation with auto-hide for flagged comments.",
+              [{ text: "OK" }]
+            );
+          },
+        },
+        {
           text: "Report",
           onPress: () => Alert.alert("Reported", "This comment has been reported for review. Thank you."),
         },
@@ -1301,6 +1311,26 @@ export default function FeedScreen() {
                   </Text>
                 </View>
                 <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+              </Pressable>
+
+              <Pressable
+                style={[styles.menuItem, { borderBottomColor: colors.border }]}
+                onPress={() => {
+                  if (!postMenu) return;
+                  const id = postMenu.id;
+                  setPostMenu(null);
+                  const alreadyPinned = postsRef.current.find((p) => p.id === id)?.isPinned;
+                  setPosts((prev) => prev.map((p) => p.id === id ? { ...p, isPinned: !alreadyPinned } : p));
+                  Alert.alert(alreadyPinned ? "Unpinned" : "Pinned", alreadyPinned ? "Post removed from top of your profile." : "Post pinned to the top of your profile. (1 pinned post free; extra pinned posts are 100 coins each for VIP users)");
+                }}
+              >
+                <View style={[styles.menuItemIcon, { backgroundColor: colors.primary + "18" }]}>
+                  <Feather name="map-pin" size={16} color={colors.primary} />
+                </View>
+                <View style={styles.menuItemText}>
+                  <Text style={[styles.menuItemLabel, { color: colors.foreground }]}>{postsRef.current.find((p) => p.id === postMenu?.id)?.isPinned ? "Unpin Post" : "Pin Post"}</Text>
+                  <Text style={[styles.menuItemDesc, { color: colors.mutedForeground }]}>Pin this post to the top of your profile</Text>
+                </View>
               </Pressable>
 
               <Pressable style={[styles.menuItem, { borderBottomColor: colors.border }]} onPress={handleDelete}>

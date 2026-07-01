@@ -229,6 +229,14 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "whatsapp-status-share", name: "WhatsApp Status Share", desc: "One-tap share Ridhi content (posts, reels, stories, live, voice reels) to WhatsApp Status. Native share sheet on mobile; WhatsApp Web fallback on web.", phase: "2", audience: "All Users", status: "live", enabled: true },
       { id: "repost", name: "Repost (All Content Types)", desc: "Repost any content — posts, video reels, voice reels, stories, live streams, and explore trending posts — to your followers with a repost badge. Toggle repost state with haptic feedback. Count displayed on action buttons.", phase: "2", audience: "All Users", status: "live", enabled: true },
       { id: "duet-permission", name: "Duet Permission Control", desc: "Creators can toggle whether other users can duet on their reels. Duet button shows disabled state (greyed out + 'Duet Off' label) when disallowed. 'Creator Controls' section in More Options menu shows toggle for reel owners. Default: enabled. Stored in allowDuet field on reel objects.", phase: "2", audience: "Creators", status: "live", enabled: true },
+      { id: "polls-quizzes", name: "Polls & Quizzes", desc: "Create interactive polls with up to 4 options. Free users get 1 poll per week; VIP/Creator+ get unlimited. Extra polls cost 50 coins. Polls appear in the feed with real-time vote counts and progress bars.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "collab-posts", name: "Collab Posts", desc: "Collaborate with another creator on a single post that appears on both profiles. Costs 1000 coins. Partner picker shows followed creators and suggested collaborators.", phase: "3", audience: "Creators", status: "live", enabled: true },
+      { id: "pinned-posts", name: "Pinned Posts", desc: "Pin up to 1 post to the top of your profile for free; extra pinned posts cost 100 coins each (VIP only). Pinned posts show a pin icon and appear before all other content.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "story-reactions", name: "Story Reactions", desc: "React to stories with emoji (🔥 ❤️ 😂 😮 👏). Reactions appear in story analytics for creators. All users can react; creators see the breakdown.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "story-analytics", name: "Story Analytics", desc: "View detailed story analytics: views, reactions breakdown, top cities, peak time, completion rate. Free users get basic stats; advanced analytics are 200 coins/month or included with VIP/Creator+.", phase: "3", audience: "Creators", status: "live", enabled: true },
+      { id: "ai-comment-moderation", name: "AI Comment Moderation", desc: "AI scans comments for toxic content across English + 12 Indian languages. Creator+ users get advanced moderation with auto-hide for flagged comments. Available on long-press of any comment.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "ai-content-assistant", name: "AI Content Assistant", desc: "AI-powered caption generation, hashtag suggestions, and content ideas. 3 free uses per day; extra uses cost 30 coins. Tracks usage with daily reset.", phase: "3", audience: "All Users", status: "live", enabled: true },
+      { id: "nearby-events", name: "Nearby Events", desc: "Discover and RSVP to events near you or trending online events. Categories: Music, Food, Sports, Tech, Art, Social, Dating. Host an event for 500 coins. Tabs: Nearby, Trending, My Events.", phase: "3", audience: "All Users", status: "live", enabled: true },
     ],
   },
   {
@@ -460,6 +468,13 @@ export default function SuperAdminPage() {
     shopItemCost:           "100",
     eventCreationCost:      "50",
     broadcastMsgCost:       "10",
+    extraPollCost:          "50",
+    collabPostCost:         "1000",
+    extraPinnedCost:        "100",
+    storyAnalyticsCost:     "200",
+    groupVideoRegularCost:  "200",
+    groupVideoCreatorCost:  "100",
+    aiAssistantExtraCost:   "30",
     creatorRevShare:        "70",
     platformRevShare:       "20",
     agentRevShare:          "10",
@@ -2727,6 +2742,13 @@ export default function SuperAdminPage() {
                         <NumField label="Shop Purchase" field="shopItemCost" suffix="coins" min={1} />
                         <NumField label="Event Creation" field="eventCreationCost" suffix="coins" min={1} />
                         <NumField label="Broadcast Msg" field="broadcastMsgCost" suffix="coins" min={1} />
+                        <NumField label="Extra Poll" field="extraPollCost" suffix="coins" min={1} />
+                        <NumField label="Collab Post" field="collabPostCost" suffix="coins" min={1} />
+                        <NumField label="Extra Pinned Post" field="extraPinnedCost" suffix="coins" min={1} />
+                        <NumField label="Story Analytics" field="storyAnalyticsCost" suffix="coins/mo" min={1} />
+                        <NumField label="Group Video (Regular)" field="groupVideoRegularCost" suffix="coins/hr" min={1} />
+                        <NumField label="Group Video (Creator+)" field="groupVideoCreatorCost" suffix="coins/hr" min={1} />
+                        <NumField label="AI Assistant Extra" field="aiAssistantExtraCost" suffix="coins" min={1} />
                       </div>
                     </div>
 

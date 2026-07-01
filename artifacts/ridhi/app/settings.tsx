@@ -20,6 +20,7 @@ import { PrivateHead } from "@/components/PrivateHead";
 import { useApp, LANGUAGES } from "@/contexts/AppContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/Avatar";
+import { CoinBadge } from "@/components/CoinBadge";
 
 function SettingRow({
   icon,
@@ -207,7 +208,8 @@ export default function SettingsScreen() {
         <SectionHeader title="Privacy" />
         <View style={[styles.section, { borderColor: colors.border }]}>
           <SettingRow icon="eye" label="Public Profile" subtitle="Anyone can view your profile" value={profilePublic} onToggle={setProfilePublic} />
-          <SettingRow icon="activity" label="Show Online Status" value={showOnline} onToggle={setShowOnline} />
+          <SettingRow icon="activity" label="Show Online Status" subtitle="Friends see when you're active" value={showOnline} onToggle={setShowOnline} />
+          <SettingRow icon="clock" label="Show Last Seen" subtitle="Friends see when you were last active" value={user?.showLastSeen ?? true} onToggle={(v) => updateProfile({ showLastSeen: v })} />
           <SettingRow icon="map-pin" label="Share Location (City)" value={locationShared} onToggle={setLocationShared} />
           <SettingRow icon="slash" label="Blocked Users" subtitle="Manage blocked accounts" onPress={() => Alert.alert("Blocked Users", "You have no blocked users.\n\nTo block someone, visit their profile and tap ⋮ → Block.", [{ text: "OK" }])} />
           <SettingRow icon="flag" label="Reported Accounts" onPress={() => Alert.alert("Reported Accounts", "You haven't reported any accounts yet.\n\nUse the report button on any post or profile to flag inappropriate content.", [{ text: "OK" }])} />

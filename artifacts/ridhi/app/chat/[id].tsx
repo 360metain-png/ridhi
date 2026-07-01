@@ -34,6 +34,17 @@ interface Message {
   duration?: string;
   translated?: string;
   showTranslation?: boolean;
+  isRead?: boolean;
+  isDelivered?: boolean;
+}
+
+interface ChatUser {
+  id: string;
+  name: string;
+  avatar?: string;
+  isOnline?: boolean;
+  lastSeen?: string;
+  isTyping?: boolean;
 }
 
 interface ApiMessage {
@@ -71,7 +82,9 @@ export default function ChatDetailScreen() {
   const [showAttach, setShowAttach] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [disappearMode, setDisappearMode] = useState(false);
-  const [otherUser, setOtherUser] = useState<{ name: string; avatar?: string } | null>(null);
+  const [otherUser, setOtherUser] = useState<ChatUser | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flatRef = useRef<FlatList>(null);
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
@@ -98,8 +111,11 @@ export default function ChatDetailScreen() {
       // Try to get other user's info from first message
       const firstOther = apiMsgs.find((m) => m.senderId !== userId);
       if (firstOther) {
-        setOtherUser({ name: firstOther.senderName ?? "Unknown", avatar: firstOther.senderAvatar ?? undefined });
+        setOtherUser({ id: firstOther.senderId, name: firstOther.senderName ?? "Unknown", avatar: firstOther.senderAvatar ?? undefined });
       }
+
+      // Mark my sent messages as read when conversation opens
+      setMessages((prev) => prev.map((m) => (m.fromMe ? { ...m, isDelivered: true, isRead: true } : m)));
     } catch {
       // keep empty on error
     }
@@ -117,11 +133,17 @@ export default function ChatDetailScreen() {
       fromMe: true,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       duration: type === "voice" ? "0:05" : undefined,
+      isDelivered: true,
     };
     setMessages((prev) => [msg, ...prev]);
     setInput("");
     setShowStickers(false);
     trackChat(type);
+
+    // Simulate read receipt after delay
+    setTimeout(() => {
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, isRead: true } : m)));
+    }, 2500);
 
     // Send to API
     if (userId && id) {
@@ -160,6 +182,16 @@ export default function ChatDetailScreen() {
     );
   };
 
+  const handleInputChange = (text: string) => {
+    setInput(text);
+    // Simulate typing indicator
+    if (text.length > 0 && !isTyping) {
+      setIsTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
+    }
+  };
+
   const renderMessage = ({ item }: { item: Message }) => (
     <View style={[styles.msgRow, item.fromMe && styles.msgRowMe]}>
       {item.fromMe ? (
@@ -183,7 +215,14 @@ export default function ChatDetailScreen() {
             ) : (
               <Text style={styles.bubbleTextMe}>{item.text}</Text>
             )}
-            <Text style={styles.bubbleTime}>{item.time}</Text>
+            <View style={styles.bubbleFooterMe}>
+              <Text style={styles.bubbleTime}>{item.time}</Text>
+              {item.isRead ? (
+                <Feather name="check-circle" size={10} color="#fff" style={{ marginLeft: 4, opacity: 0.8 }} />
+              ) : item.isDelivered ? (
+                <Feather name="check" size={10} color="rgba(255,255,255,0.6)" style={{ marginLeft: 4 }} />
+              ) : null}
+            </View>
           </LinearGradient>
           {item.showTranslation && item.translated && (
             <View style={[styles.translationBox, { backgroundColor: colors.muted }]}>
@@ -260,8 +299,8 @@ export default function ChatDetailScreen() {
                 </View>
               )}
             </View>
-            <Text style={[styles.headerStatus, { color: colors.mutedForeground }]}>
-              Offline
+            <Text style={[styles.headerStatus, { color: otherUser?.isOnline ? "#34C759" : colors.mutedForeground }]}>
+              {isTyping ? "typing..." : otherUser?.isOnline ? "Online" : otherUser?.lastSeen ? `Last seen ${otherUser.lastSeen}` : "Offline"}
             </Text>
           </View>
         </View>
@@ -366,7 +405,7 @@ export default function ChatDetailScreen() {
             placeholder={isRecording ? "Recording…" : "Type a message..."}
             placeholderTextColor={isRecording ? colors.destructive : colors.mutedForeground}
             value={input}
-            onChangeText={setInput}
+            onChangeText={handleInputChange}
             multiline
             maxLength={1000}
             editable={!isRecording}
@@ -428,6 +467,7 @@ const styles = StyleSheet.create({
   bubbleMe: { borderBottomRightRadius: 4 },
   bubbleText: { fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 20 },
   bubbleTextMe: { color: "#fff", fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 20 },
+  bubbleFooterMe: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 2 },
   bubbleTime: { fontSize: 10, fontFamily: "Inter_400Regular", alignSelf: "flex-end", color: "rgba(255,255,255,0.7)" },
   bubbleFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   bubbleTimeOther: { fontSize: 10, fontFamily: "Inter_400Regular" },

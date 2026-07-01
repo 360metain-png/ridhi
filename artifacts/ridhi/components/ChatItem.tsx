@@ -13,6 +13,7 @@ export interface ChatPreview {
   timeAgo: string;
   unread: number;
   isOnline: boolean;
+  lastSeen?: string;
   isLocked?: boolean;
   vipTier?: VipTier;
 }

@@ -21,6 +21,13 @@ export interface PostReaction {
   selected?: boolean;
 }
 
+export interface PollOption {
+  id: string;
+  label: string;
+  votes: number;
+  votedBy?: string[];
+}
+
 export interface Post {
   id: string;
   userId?: string;
@@ -59,6 +66,15 @@ export interface Post {
   taggedProduct?: { id: string; name: string; price: number; image: string };
   // Emoji reactions
   reactions?: PostReaction[];
+  // Polls
+  pollOptions?: PollOption[];
+  pollTotalVotes?: number;
+  // Collab
+  collabWith?: { userName: string; userId: string; userAvatar?: string };
+  // Pinned
+  isPinned?: boolean;
+  // Poll
+  pollQuestion?: string;
 }
 
 interface FeedPostProps {
@@ -69,6 +85,7 @@ interface FeedPostProps {
   onMenuPress?: (id: string, isOwn: boolean) => void;
   onBoostPress?: (id: string) => void;
   onRepost?: (id: string) => void;
+  onPinPost?: (id: string) => void;
 }
 
 // ─── Privacy badge ─────────────────────────────────────────────────────────────
@@ -365,6 +382,48 @@ export const FeedPost = React.memo(function FeedPost({
         ) : null}
 
         {/* Tagged Product Card */}
+        {/* Poll UI */}
+        {post.pollOptions && post.pollOptions.length > 0 && (
+          <View style={{ marginTop: 8, gap: 8 }}>
+            {post.pollQuestion && (
+              <Text style={[styles.content, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>{post.pollQuestion}</Text>
+            )}
+            {post.pollOptions.map((opt) => {
+              const total = post.pollTotalVotes ?? Math.max(1, opt.votes);
+              const pct = total > 0 ? Math.round((opt.votes / total) * 100) : 0;
+              const votedByMe = opt.votedBy?.includes(user?.id ?? "") ?? false;
+              return (
+                <Pressable
+                  key={opt.id}
+                  style={[styles.pollOption, { backgroundColor: colors.muted + "40", borderColor: colors.border }]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    if (!votedByMe) {
+                      opt.votes += 1;
+                      opt.votedBy = [...(opt.votedBy ?? []), user?.id ?? ""];
+                    }
+                  }}
+                >
+                  <View style={[styles.pollBar, { width: `${pct}%`, backgroundColor: votedByMe ? colors.primary + "60" : colors.primary + "30" }]} />
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12, paddingVertical: 10 }}>
+                    <Text style={[styles.pollLabel, { color: colors.foreground }]}>{opt.label}</Text>
+                    <Text style={[styles.pollCount, { color: colors.mutedForeground }]}>{pct}% · {opt.votes}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+            <Text style={[styles.pollTotal, { color: colors.mutedForeground }]}>{post.pollTotalVotes ?? post.pollOptions.reduce((sum, o) => sum + o.votes, 0)} votes</Text>
+          </View>
+        )}
+
+        {/* Collab badge */}
+        {post.collabWith && (
+          <View style={[styles.collabBadge, { backgroundColor: colors.primary + "12" }]}>
+            <Feather name="users" size={12} color={colors.primary} />
+            <Text style={[styles.collabText, { color: colors.primary }]}>Collab with {post.collabWith.userName}</Text>
+          </View>
+        )}
+
         {post.taggedProduct?.id && (
           <Pressable
             style={[styles.productCard, { backgroundColor: colors.muted, borderColor: colors.border }]}
@@ -592,6 +651,12 @@ const styles = StyleSheet.create({
   reactionChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 16 },
   reactionEmoji: { fontSize: 16 },
   reactionCount: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  // Poll
+  pollOption: { borderRadius: 10, borderWidth: 1, overflow: "hidden", marginHorizontal: 14 },
+  pollBar: { position: "absolute", top: 0, left: 0, bottom: 0 },
+  pollLabel: { fontSize: 14, fontFamily: "Inter_500Medium", flex: 1 },
+  pollCount: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
+  pollTotal: { fontSize: 11, fontFamily: "Inter_400Regular", marginHorizontal: 14, marginTop: 4 },
   emojiPicker: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 14, paddingVertical: 10, gap: 8, borderBottomWidth: 1 },
   emojiPickerItem: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.06)" },
   emojiPickerEmoji: { fontSize: 20 },

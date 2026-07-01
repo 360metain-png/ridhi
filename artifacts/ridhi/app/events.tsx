@@ -103,6 +103,9 @@ export default function EventsScreen() {
           <Pressable onPress={() => setCreateModalVisible(true)} style={styles.createBtnHeader}>
             <Feather name="plus" size={20} color="#fff" />
           </Pressable>
+          <Pressable onPress={() => router.push("/events-nearby")} style={styles.createBtnHeader}>
+            <Feather name="map-pin" size={20} color="#fff" />
+          </Pressable>
         </View>
         
         <View style={styles.searchBarWrap}>
@@ -205,7 +208,20 @@ export default function EventsScreen() {
                  <Text style={[styles.inputLabel, { color: colors.mutedForeground }]}>Description</Text>
                  <TextInput style={[styles.input, { borderColor: colors.border, color: colors.foreground, height: 80 }]} multiline placeholder="What's the event about?" placeholderTextColor={colors.muted} />
 
-                 <GradientButton label="Post Event" onPress={() => setCreateModalVisible(false)} style={{ marginTop: 20 }} />
+                 <GradientButton
+                   label="Post Event"
+                   onPress={() => {
+                     Alert.alert(
+                       "Host Event",
+                       "Hosting an event costs 500 Ridhi Coins. Your event will be reviewed within 24 hours.",
+                       [
+                         { text: "Cancel", style: "cancel", onPress: () => setCreateModalVisible(false) },
+                         { text: "Pay 500 Coins", onPress: () => setCreateModalVisible(false) },
+                       ]
+                     );
+                   }}
+                   style={{ marginTop: 20 }}
+                 />
               </ScrollView>
            </View>
         </View>

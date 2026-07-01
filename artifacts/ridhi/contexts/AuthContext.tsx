@@ -78,6 +78,16 @@ export interface UserProfile {
   kycVerifiedAt?: string;
   // PK Battle host approval
   pkBattleStatus?: "not_requested" | "requested" | "approved" | "rejected";
+  // Activity Status
+  isOnline?: boolean;
+  lastSeen?: string;
+  showActivityStatus?: boolean;
+  showLastSeen?: boolean;
+  // Feature Usage Tracking (for freemium limits)
+  weeklyPollsCreated?: number;
+  lastPollResetDate?: string;
+  aiAssistantUsesToday?: number;
+  lastAiResetDate?: string;
   pkBattleRequestedAt?: string;
   pkBattleApprovedAt?: string;
   pkBattleRejectionReason?: string;
@@ -426,6 +436,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const resp = await apiFetch<{
         success: boolean;
         pkBattleStatus?: "not_requested" | "requested" | "approved" | "rejected";
+  // Activity Status
+  isOnline?: boolean;
+  lastSeen?: string;
+  showActivityStatus?: boolean;
+  showLastSeen?: boolean;
+  // Feature Usage Tracking (for freemium limits)
+  weeklyPollsCreated?: number;
+  lastPollResetDate?: string;
+  aiAssistantUsesToday?: number;
+  lastAiResetDate?: string;
         requestedAt?: string;
         approvedAt?: string;
         rejectionReason?: string;
