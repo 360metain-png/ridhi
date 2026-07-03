@@ -68,7 +68,7 @@ export default function ReferralScreen() {
 
   const claimDailyBonus = () => {
     if (claimedToday) return;
-    addCoins(1 + streak);
+    addCoins(1 + streak, "free");
     setClaimedToday(true);
   };
 

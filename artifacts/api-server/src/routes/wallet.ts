@@ -52,6 +52,7 @@ router.post("/wallet/coins/deduct", requireUser, apiRateLimit, async (req: Authe
   const userId = getUserId(req);
   const amount = typeof req.body?.amount === "number" ? Math.max(0, Math.floor(req.body.amount)) : 0;
   const reason = typeof req.body?.reason === "string" ? req.body.reason : "spend";
+  const requirePaid = req.body?.requirePaid === true; // calls pass this to enforce paid-coin-only
 
   if (!userId) {
     res.status(401).json({ error: "Authentication required" });
@@ -74,31 +75,57 @@ router.post("/wallet/coins/deduct", requireUser, apiRateLimit, async (req: Authe
       res.status(404).json({ error: "User not found" });
       return;
     }
-    if (user.coins < amount) {
-      res.status(402).json({ error: "Insufficient coins", coins: user.coins, freeCoins: user.freeCoins, paidCoins: user.paidCoins });
-      return;
+
+    let result;
+    let deductFromFree = 0;
+    let deductFromPaid = 0;
+    let newFreeCoins = user.freeCoins;
+    let newPaidCoins = user.paidCoins;
+
+    if (requirePaid) {
+      // Calls and other paid-only features: only paid coins accepted
+      if (user.paidCoins < amount) {
+        res.status(402).json({ error: "Insufficient paid coins", coins: user.coins, freeCoins: user.freeCoins, paidCoins: user.paidCoins });
+        return;
+      }
+      deductFromPaid = amount;
+      newPaidCoins = user.paidCoins - amount;
+      const newCoins = user.freeCoins + newPaidCoins;
+      result = await db.update(users)
+        .set({
+          coins: newCoins,
+          paidCoins: newPaidCoins,
+        })
+        .where(and(userBySub(userId), gte(users.paidCoins, amount)))
+        .returning({
+          coins: users.coins,
+          freeCoins: users.freeCoins,
+          paidCoins: users.paidCoins,
+        });
+    } else {
+      // General spends: free coins first, then paid coins
+      if (user.coins < amount) {
+        res.status(402).json({ error: "Insufficient coins", coins: user.coins, freeCoins: user.freeCoins, paidCoins: user.paidCoins });
+        return;
+      }
+      deductFromFree = Math.min(user.freeCoins, amount);
+      deductFromPaid = amount - deductFromFree;
+      newFreeCoins = user.freeCoins - deductFromFree;
+      newPaidCoins = user.paidCoins - deductFromPaid;
+      const newCoins = newFreeCoins + newPaidCoins;
+      result = await db.update(users)
+        .set({
+          coins: newCoins,
+          freeCoins: newFreeCoins,
+          paidCoins: newPaidCoins,
+        })
+        .where(and(userBySub(userId), gte(users.coins, amount)))
+        .returning({
+          coins: users.coins,
+          freeCoins: users.freeCoins,
+          paidCoins: users.paidCoins,
+        });
     }
-
-    // 2. Compute free/paid split for this deduction
-    const deductFromFree = Math.min(user.freeCoins, amount);
-    const deductFromPaid = amount - deductFromFree;
-    const newFreeCoins = user.freeCoins - deductFromFree;
-    const newPaidCoins = user.paidCoins - deductFromPaid;
-    const newCoins = newFreeCoins + newPaidCoins;
-
-    // 3. Atomic update
-    const result = await db.update(users)
-      .set({
-        coins: newCoins,
-        freeCoins: newFreeCoins,
-        paidCoins: newPaidCoins,
-      })
-      .where(and(userBySub(userId), gte(users.coins, amount)))
-      .returning({
-        coins: users.coins,
-        freeCoins: users.freeCoins,
-        paidCoins: users.paidCoins,
-      });
 
     if (result.length === 0) {
       // Race condition: balance changed between read and write
@@ -107,25 +134,30 @@ router.post("/wallet/coins/deduct", requireUser, apiRateLimit, async (req: Authe
         freeCoins: users.freeCoins,
         paidCoins: users.paidCoins,
       }).from(users).where(userBySub(userId));
-      res.status(402).json({ error: "Insufficient coins", coins: latest?.coins ?? 0, freeCoins: latest?.freeCoins ?? 0, paidCoins: latest?.paidCoins ?? 0 });
+      res.status(402).json({
+        error: requirePaid ? "Insufficient paid coins" : "Insufficient coins",
+        coins: latest?.coins ?? 0,
+        freeCoins: latest?.freeCoins ?? 0,
+        paidCoins: latest?.paidCoins ?? 0,
+      });
       return;
     }
 
     // 4. Record transaction
     await db.insert(coinTransactions).values({
       userId: user.id,
-      type: "paid_spend",
+      type: requirePaid ? "paid_spend" : "spend",
       direction: "debit",
       amount: amount,
       freeAmount: deductFromFree,
       paidAmount: deductFromPaid,
       balanceFree: newFreeCoins,
       balancePaid: newPaidCoins,
-      source: "spend",
+      source: requirePaid ? "paid_call" : "spend",
       description: reason,
     });
 
-    logger.info({ userId, amount, freeDeduct: deductFromFree, paidDeduct: deductFromPaid, newBalance: result[0].coins }, "coins deducted (dual-coin)");
+    logger.info({ userId, amount, requirePaid, freeDeduct: deductFromFree, paidDeduct: deductFromPaid, newBalance: result[0].coins }, "coins deducted (dual-coin)");
     res.json({
       success: true,
       coins: result[0].coins,
@@ -186,7 +218,6 @@ router.post("/wallet/coins/credit", requireUser, apiRateLimit, async (req: Authe
         freeCoins: users.freeCoins,
         paidCoins: users.paidCoins,
       });
-
     if (result.length === 0) {
       res.status(500).json({ error: "Failed to credit coins" });
       return;

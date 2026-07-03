@@ -116,8 +116,8 @@ interface AuthContextValue {
   logout: () => Promise<void>;
   deleteAccount: () => Promise<boolean>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  addCoins: (amount: number) => Promise<void>;
-  deductCoins: (amount: number) => Promise<boolean>;
+  addCoins: (amount: number, source?: "free" | "paid") => Promise<void>;
+  deductCoins: (amount: number, requirePaid?: boolean) => Promise<boolean>;
   cancelPlan: () => Promise<void>;
   syncKycStatus: (userId: string) => Promise<void>;
   syncPkBattleStatus: (userId: string) => Promise<void>;
@@ -151,6 +151,8 @@ const DEFAULT_USER: UserProfile = {
   interests: ["Music", "Travel", "Food", "Fitness", "Books"],
   avatar: "https://api.dicebear.com/7.x/avataaars/png?seed=priya&size=200&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf",
   coins: 250,
+  freeCoins: 250, // new users start with free coins (earnable, expire in 30 days)
+  paidCoins: 0,    // paid coins only from real money recharges
   followers: 128,
   following: 94,
   posts: 12,
@@ -176,6 +178,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.getItem("ridhi_user").then(async (data) => {
       if (data) {
         const parsed = JSON.parse(data) as UserProfile;
+        // Migrate legacy profiles that lack freeCoins/paidCoins fields
+        if (parsed.freeCoins === undefined || parsed.paidCoins === undefined) {
+          const migrated = {
+            ...parsed,
+            freeCoins: parsed.coins,
+            paidCoins: 0,
+          };
+          AsyncStorage.setItem("ridhi_user", JSON.stringify(migrated));
+          setUser(migrated);
+          return;
+        }
         // Check brand registration expiry (30-day rule)
         if (parsed.isBrandRegistered && parsed.brandActiveUntil) {
           const now = new Date();
@@ -330,41 +343,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addCoins = useCallback(async (amount: number) => {
+  const addCoins = useCallback(async (amount: number, source: "free" | "paid" = "free") => {
     // Server-authoritative: coins are only added after verified payment on the server.
-    // For non-payment credits (missions, rewards, daily bonus), update locally.
-    // For payment-related credits, the server auto-credits after /api/payments/verify or callback.
+    // For non-payment credits (missions, ads, daily bonus), update locally as free coins.
+    // For payment-related credits, the server auto-credits as paid coins.
+    // For creator earnings (gifts, downloads), treat as paid coins (real monetary value).
     if (amount < 0) {
       throw new Error("addCoins does not support negative amounts. Use deductCoins instead.");
     }
     setUser((prev) => {
       if (!prev) return prev;
-      const updated = { ...prev, coins: prev.coins + amount };
+      const isPaid = source === "paid";
+      const updated: UserProfile = {
+        ...prev,
+        coins: prev.coins + amount,
+        freeCoins: Math.max(0, (prev.freeCoins ?? 0) + (isPaid ? 0 : amount)),
+        paidCoins: Math.max(0, (prev.paidCoins ?? 0) + (isPaid ? amount : 0)),
+      };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
       return updated;
     });
   }, []);
 
-  const deductCoins = useCallback(async (amount: number): Promise<boolean> => {
+  const deductCoins = useCallback(async (amount: number, requirePaid = false): Promise<boolean> => {
     // Server-first: only deduct locally after server confirms
     let success = false;
     try {
-      const resp = await apiFetch<{ success: boolean; coins: number; error?: string }>("/api/wallet/coins/deduct", {
+      const resp = await apiFetch<{
+        success: boolean;
+        coins: number;
+        freeCoins?: number;
+        paidCoins?: number;
+        error?: string;
+      }>("/api/wallet/coins/deduct", {
         method: "POST",
-        body: JSON.stringify({ amount, reason: "client" }),
+        body: JSON.stringify({ amount, reason: "client", requirePaid }),
       });
       if (!resp.success || resp.error) {
         return false;
       }
       success = true;
-      if (resp.coins !== undefined) {
-        setUser((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev, coins: resp.coins };
-          AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
-          return updated;
-        });
-      }
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated: UserProfile = { ...prev, coins: resp.coins };
+        if (resp.freeCoins !== undefined) updated.freeCoins = resp.freeCoins;
+        if (resp.paidCoins !== undefined) updated.paidCoins = resp.paidCoins;
+        AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));
+        return updated;
+      });
     } catch {
       // offline: cannot verify server deduction — reject
       return false;
@@ -479,6 +505,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const updated: UserProfile = {
         ...prev,
         coins: prev.coins + amount,
+        paidCoins: (prev.paidCoins ?? 0) + amount, // creator earnings are real monetary value
         downloadEarnings: (prev.downloadEarnings ?? 0) + amount,
       };
       AsyncStorage.setItem("ridhi_user", JSON.stringify(updated));

@@ -297,7 +297,7 @@ export default function WalletScreen() {
                 <Text style={styles.coinSplitText}>
                   <Feather name="shield" size={12} color="#60A5FA" /> {user?.paidCoins ?? 0} Paid
                 </Text>
-                <Text style={styles.coinSplitSub}>Never expires</Text>
+                <Text style={styles.coinSplitSub}>Never expires · Call & withdraw only</Text>
               </View>
             </View>
           </View>

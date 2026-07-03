@@ -41,7 +41,15 @@ const FAQS = [
   },
   {
     q: "What are Ridhi Coins?",
-    a: "Ridhi Coins are virtual digital credits used for:\n\n• Gifts\n• Premium Features\n• Audio & Video Calls\n• Creator Support\n• Games & Interactive Features\n\nCoins are non-transferable and may not be refundable except where required by applicable law.",
+    a: "Ridhi Coins are virtual digital credits used for:\n\n• Gifts\n• Premium Features\n• Creator Support\n• Games & Interactive Features\n\nCoins are non-transferable and may not be refundable except where required by applicable law.",
+  },
+  {
+    q: "Free Coins vs Paid Coins — what is the difference?",
+    a: "Your wallet has two types of coins:\n\n• Free Coins (green badge) — earned from watching ads, completing missions, and daily rewards. Can be spent on gifts, boosts, shop items, brand registration, and most features. Expire in 30 days.\n• Paid Coins (blue badge) — bought via recharge with real money. Can be used for everything free coins can do PLUS audio/video calls. Also the only coins that can be withdrawn as cash. Never expire.\n\nImportant: Calls always require Paid Coins only. If you have free coins but zero paid coins, you cannot place calls even if your total balance looks sufficient.",
+  },
+  {
+    q: "Why can't I call even though I have coins?",
+    a: "Audio and Video Calls require Paid Coins only — Free Coins are NOT accepted for calling.\n\n• Check your Paid Coin balance (blue badge) in your Wallet\n• If your Paid Coins are 0, you need to recharge coins first\n• New users get a one-time 3-minute free audio call trial even with 0 paid coins\n• After the trial, all calls require purchased (paid) coins\n• Free Coins can still be used for gifts, boosts, shop purchases, and other features",
   },
   {
     q: "How do I report abusive users or inappropriate content?",

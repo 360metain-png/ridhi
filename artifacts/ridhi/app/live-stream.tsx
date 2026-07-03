@@ -219,7 +219,7 @@ export default function LiveStreamScreen() {
 
   const sendGift = async (gift: typeof LIVE_GIFTS[0]) => {
     if ((user?.coins ?? 0) < gift.cost) return;
-    const ok = await deductCoins(gift.cost);
+    const ok = await deductCoins(gift.cost, false);
     if (!ok) return;
     const newMsg = {
       id: `m${Date.now()}`,

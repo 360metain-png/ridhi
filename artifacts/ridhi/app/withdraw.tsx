@@ -130,7 +130,8 @@ export default function WithdrawScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [successAnim] = useState(new Animated.Value(0));
 
-  const balance = user?.coins ?? 0;
+  // Withdrawals are paid-coin only — free coins cannot be converted to cash
+  const balance = user?.paidCoins ?? 0;
   const coinAmt = parseInt(coins) || 0;
   const { gross, platformFee, gst, totalDeduct, net } = calc(coinAmt);
 
@@ -198,7 +199,7 @@ export default function WithdrawScreen() {
           {step !== "kyc_gate" && step !== "success" && (
             <View style={st.balancePill}>
               <Image source={COIN_IMAGE} style={{ width: 18, height: 18 }} resizeMode="contain" />
-              <Text style={st.balancePillText}>{balance.toLocaleString()} coins available</Text>
+              <Text style={st.balancePillText}>{balance.toLocaleString()} paid coins available (free coins cannot be withdrawn)</Text>
             </View>
           )}
         </LinearGradient>

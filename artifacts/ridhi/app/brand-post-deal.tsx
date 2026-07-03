@@ -140,7 +140,7 @@ export default function BrandPostDealScreen() {
 
   const handleConfirmPost = async () => {
     closeCoinModal();
-    const ok = await deductCoins(DEAL_POST_COST);
+    const ok = await deductCoins(DEAL_POST_COST, false);
     if (ok) {
       setSubmitted(true);
     } else {

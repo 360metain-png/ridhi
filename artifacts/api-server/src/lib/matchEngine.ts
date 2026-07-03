@@ -191,18 +191,22 @@ function resolveCoinRate(type: "audio" | "video"): number {
 export async function deductCoinsFromUser(
   userId: string,
   amount: number,
+  requirePaid = false,
 ): Promise<{ success: true; newBalance: number } | { success: false; error: string }> {
   if (amount === 0) return { success: true, newBalance: 0 }; // no-op
   if (amount < 0) {
-    // Refund: add coins back unconditionally
+    // Refund: add coins back unconditionally (refunds always restore paid coins)
     try {
       const { db } = await import("@workspace/db");
       const { users } = await import("@workspace/db");
       const { eq, sql } = await import("drizzle-orm");
       const result = await db.update(users)
-        .set({ coins: sql`${users.coins} - ${amount}` })
+        .set({
+          coins: sql`${users.coins} - ${amount}`,
+          paidCoins: sql`${users.paidCoins} - ${amount}`,
+        })
         .where(eq(users.phone, userId))
-        .returning({ coins: users.coins });
+        .returning({ coins: users.coins, paidCoins: users.paidCoins });
       if (result.length === 0) return { success: false, error: "User not found" };
       return { success: true, newBalance: result[0].coins };
     } catch {
@@ -213,12 +217,30 @@ export async function deductCoinsFromUser(
     const { db } = await import("@workspace/db");
     const { users } = await import("@workspace/db");
     const { eq, and, gte, sql } = await import("drizzle-orm");
+
+    if (requirePaid) {
+      // Calls: only paid coins allowed — free coins are NOT accepted
+      const result = await db.update(users)
+        .set({
+          coins: sql`${users.coins} - ${amount}`,
+          paidCoins: sql`${users.paidCoins} - ${amount}`,
+        })
+        .where(and(eq(users.phone, userId), gte(users.paidCoins, amount)))
+        .returning({ coins: users.coins, paidCoins: users.paidCoins });
+      if (result.length === 0) {
+        const [user] = await db.select({ coins: users.coins, paidCoins: users.paidCoins }).from(users).where(eq(users.phone, userId));
+        if (!user) return { success: false, error: "User not found" };
+        return { success: false, error: "Insufficient paid coins" };
+      }
+      return { success: true, newBalance: result[0].coins };
+    }
+
+    // Non-call spends: free first, then paid
     const result = await db.update(users)
       .set({ coins: sql`${users.coins} - ${amount}` })
       .where(and(eq(users.phone, userId), gte(users.coins, amount)))
       .returning({ coins: users.coins });
     if (result.length === 0) {
-      // Check if user exists or just insufficient
       const [user] = await db.select({ coins: users.coins }).from(users).where(eq(users.phone, userId));
       if (!user) return { success: false, error: "User not found" };
       return { success: false, error: "Insufficient coins" };
@@ -267,11 +289,12 @@ export async function startCallWithDeduct(
   const upfront = Math.max(rate, 5); // deduct 1 minute worth upfront
 
   // Deduct sequentially: if A fails, call cannot start. If B fails, refund A.
-  const aDeduction = await deductCoinsFromUser(userA.id, upfront);
+  // Calls require paid coins only — free coins are not accepted for calls
+  const aDeduction = await deductCoinsFromUser(userA.id, upfront, true);
   if (!aDeduction.success) {
     return { ok: false, error: `User A failed: ${aDeduction.error}` };
   }
-  const bDeduction = await deductCoinsFromUser(userB.id, upfront);
+  const bDeduction = await deductCoinsFromUser(userB.id, upfront, true);
   if (!bDeduction.success) {
     // Refund A so they are not charged for a cancelled call
     await deductCoinsFromUser(userA.id, -upfront).catch(() => {});
@@ -383,16 +406,17 @@ export async function tickAndChargeCoins(): Promise<{
       // that ran before this async task resumed.
       if (call.finalized || !activeCalls.has(call.callId)) return;
 
+      // Call ticks always require paid coins only
       const [aResult, bResult] = await Promise.all([
-        deductCoinsFromUser(call.userA.id, increment),
-        deductCoinsFromUser(call.userB.id, increment),
+        deductCoinsFromUser(call.userA.id, increment, true),
+        deductCoinsFromUser(call.userB.id, increment, true),
       ]);
 
       // Post-deduction guard: if call was finalized while deductions were in-flight,
       // refund both users and bail — settleCall will not run again for this call.
       if (call.finalized || !activeCalls.has(call.callId)) {
-        if (aResult.success) await deductCoinsFromUser(call.userA.id, -increment).catch(() => {});
-        if (bResult.success) await deductCoinsFromUser(call.userB.id, -increment).catch(() => {});
+        if (aResult.success) await deductCoinsFromUser(call.userA.id, -increment, true).catch(() => {});
+        if (bResult.success) await deductCoinsFromUser(call.userB.id, -increment, true).catch(() => {});
         return;
       }
 

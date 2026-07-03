@@ -105,7 +105,7 @@ export default function CartScreen() {
           text: "Buy Now",
           onPress: async () => {
             setLoading(true);
-            const success = await deductCoins(totalCoins);
+            const success = await deductCoins(totalCoins, false);
             setLoading(false);
             if (success) {
               await clearCart();

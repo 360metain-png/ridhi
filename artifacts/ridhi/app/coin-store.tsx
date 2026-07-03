@@ -105,7 +105,7 @@ export default function CoinStoreScreen() {
       );
       return;
     }
-    const ok = await deductCoins(gift.coins);
+    const ok = await deductCoins(gift.coins, false);
     if (!ok) {
       Alert.alert("Payment Failed", "Could not deduct coins. Please try again.");
       return;

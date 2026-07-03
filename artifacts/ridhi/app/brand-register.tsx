@@ -152,7 +152,7 @@ export default function BrandRegisterScreen() {
       return;
     }
     setShowCoinConfirm(false);
-    const ok = await deductCoins(BRAND_REGISTRATION_COINS);
+    const ok = await deductCoins(BRAND_REGISTRATION_COINS, false);
     if (!ok) {
       Alert.alert("Payment Failed", "Could not deduct coins. Please try again.");
       return;

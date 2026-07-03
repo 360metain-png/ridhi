@@ -110,7 +110,7 @@ export default function ProductDetailScreen() {
           text: "Buy Now",
           onPress: async () => {
             setLoading(true);
-            const success = await deductCoins(product.price);
+            const success = await deductCoins(product.price, false);
             setLoading(false);
             if (success) {
               Alert.alert("Purchase Successful! 🎉", "Your order has been placed. You will receive a notification shortly.", [

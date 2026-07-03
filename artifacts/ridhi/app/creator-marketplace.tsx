@@ -236,7 +236,7 @@ export default function CreatorMarketplaceScreen() {
       cost: PITCH_COST,
       onConfirm: async () => {
         closeCoinModal();
-        const ok = await deductCoins(PITCH_COST);
+        const ok = await deductCoins(PITCH_COST, false);
         if (ok) {
           setPitched((p) => ({ ...p, [deal.id]: true }));
         } else {
@@ -262,7 +262,7 @@ export default function CreatorMarketplaceScreen() {
       cost: CONNECT_COST,
       onConfirm: async () => {
         closeCoinModal();
-        const ok = await deductCoins(CONNECT_COST);
+        const ok = await deductCoins(CONNECT_COST, false);
         if (ok) {
           setConnected((p) => ({ ...p, [pitchId]: true }));
         } else {

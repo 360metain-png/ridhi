@@ -141,7 +141,8 @@ export default function RandomCallScreen() {
   // ── Trial state (computed AFTER useState declarations) ──────────────────
   // Trial is one-time lifetime: new users get 3 min free audio ONCE.
   // Video calls NEVER free — always require coins regardless of trial status.
-  const trialActive = !user?.callTrialUsed && (user?.coins ?? 0) === 0;
+  // Trial only applies to users who have never purchased coins (paidCoins = 0).
+  const trialActive = !user?.callTrialUsed && (user?.paidCoins ?? 0) === 0;
   const trialSecondsRemaining = trialActive ? Math.max(0, FREE_TRIAL_MINUTES * 60 - duration) : 0;
   const trialConsumed = trialActive && trialSecondsRemaining <= 0;
 
@@ -434,8 +435,11 @@ export default function RandomCallScreen() {
   ];
 
   // ── Actions ──────────────────────────────────────────────────────────────────────
-  // Coins check: trial users can start audio without coins. Video always requires coins.
-  const canStart = callType === "audio" ? trialActive || (user?.coins ?? 0) >= rate : (user?.coins ?? 0) >= rate;
+  // Coins check: Calls require PAID coins only — free coins are NOT accepted for calls.
+  // Trial users can start audio without paid coins (one-time 3 min).
+  // Video calls ALWAYS require paid coins regardless of trial status.
+  const paidCoins = user?.paidCoins ?? 0;
+  const canStart = callType === "audio" ? trialActive || paidCoins >= rate : paidCoins >= rate;
 
   const startSearch = () => {
     if (!canStart) return;

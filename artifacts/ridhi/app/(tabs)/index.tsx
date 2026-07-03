@@ -553,7 +553,7 @@ export default function FeedScreen() {
       { label: "Max",  views: 5000, coins: 100, price: "₹80" },
     ];
     const selected = tiers[boostTier - 1];
-    const ok = await deductCoins(selected.coins);
+    const ok = await deductCoins(selected.coins, false);
     if (!ok) {
       setBoostTarget(null);
       return;

@@ -144,13 +144,13 @@ export default function MissionsScreen() {
   const earnedWeekly = MISSIONS.filter((m) => m.type === "weekly" && m.completed).reduce((s, m) => s + m.reward, 0);
 
   const handleClaim = (mission: Mission) => {
-    addCoins(mission.reward);
+    addCoins(mission.reward, "free");
     setClaimedCoins((prev) => prev + mission.reward);
     setMissions((prev) => prev.map((m) => m.id === mission.id ? { ...m, completed: true } : m));
   };
 
   const handleWatchAd = (ad: AdReward) => {
-    addCoins(ad.reward);
+    addCoins(ad.reward, "free");
     setClaimedCoins((prev) => prev + ad.reward);
   };
 
