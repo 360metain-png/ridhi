@@ -33,11 +33,10 @@ type BillingPeriod = "weekly" | "monthly" | "yearly";
 //   2. Ads revenue (ads-manager) → SECONDARY revenue (already built ✅)
 //   3. VIP subscriptions → recurring, predictable (this screen)
 //
-// AUDIO & VIDEO UNLIMITED STRATEGY:
-//   Free users get a hard daily call limit → they feel the wall → upgrade.
-//   Gold+ removes the wall entirely. This is the #1 real upgrade trigger in
-//   social apps because users hate being cut off mid-conversation.
-//   All call screens (random-call.tsx, audio-room.tsx) are already built.
+// CALL PRICING MODEL:
+//   All audio/video calls are coin-based for ALL users. No "unlimited" calls.
+//   Backend rates: audio = 10 coins/min, video = 25 coins/min.
+//   VIP tiers get discounted call rates (not free/unlimited calls).
 //
 // ONLY FEATURES THAT ARE ACTUALLY BUILT IN THE APP ARE LISTED HERE.
 // No aspirational / backend-only features. Every perk maps to a real screen.
@@ -48,12 +47,12 @@ const PLANS = [
     bonusCoins: 0,
     yearlySaving: 0,
     color: "#888888", gradient: ["#555", "#333"] as [string, string],
-    highlights: ["Basic feed & reels", "3 audio calls/day"],
+    highlights: ["Basic feed & reels", "Coin-based calls"],
     features: [
       "Home Feed, Reels, Voice Reels & Explore",
       "5 stories/day · up to 5 communities",
-      "3 random audio calls/day (standard quality)",
-      "No video calls",
+      "Audio calls at 10 coins/min (standard quality)",
+      "Video calls at 25 coins/min (standard quality)",
       "Basic match swipes (20/day)",
       "Chat with all your matches",
       "Daily missions & ad rewards (earn coins)",
@@ -64,7 +63,7 @@ const PLANS = [
       "Ad-free experience",
       "VIP badge",
       "Super Likes",
-      "HD audio & video calls (unlimited)",
+      "Discounted call rates",
       "Ghost Mode",
       "Bonus coins monthly",
       "Profile boost",
@@ -113,15 +112,15 @@ const PLANS = [
     bonusCoins: 15,
     yearlySaving: 44,
     color: "#A0A0A0", gradient: ["#9E9E9E", "#616161"] as [string, string],
-    highlights: ["Ad-free", "5 Super Likes/day", "10 audio + 5 video calls/day"],
+    highlights: ["Ad-free", "5 Super Likes/day", "Call discount 20%"],
     features: [
       "Ad-free Feed, Reels, Voice Reels & Explore",
       "Silver VIP badge on profile, chat & swipes",
       "15 bonus coins/month (≈₹15 value)",
       "5 Super Likes/day on Match screen",
       "Unlimited stories & up to 20 communities",
-      "10 audio calls/day (HD quality)",
-      "5 video calls/day (HD quality)",
+      "Audio calls at 8 coins/min (20% discount)",
+      "Video calls at 20 coins/min (20% discount)",
       "Unlimited match swipes",
       "Weekly profile boost (1×/week on Explore)",
       "Profile highlight badge",
@@ -148,7 +147,7 @@ const PLANS = [
       "Broadcast Channels — join all channels",
     ],
     locked: [
-      "Unlimited audio & video calls",
+      "Higher call discounts (Gold+)",
       "Ghost Mode",
       "Host audio rooms",
       "VIP Podcast rooms",
@@ -194,13 +193,13 @@ const PLANS = [
     yearlySaving: 44,
     color: "#FFB800", gradient: ["#FFB800", "#FF8F00"] as [string, string],
     popular: true,
-    highlights: ["Unlimited HD calls", "Ghost Mode", "Host audio rooms"],
+    highlights: ["40% call discount", "Ghost Mode", "Host audio rooms"],
     features: [
       "Everything in Silver VIP, plus:",
       "Gold VIP badge (animated glow)",
       "40 bonus coins/month (≈₹40 value)",
-      "UNLIMITED audio calls (no cap, HD)",
-      "UNLIMITED video calls (no cap, HD)",
+      "Audio calls at 6 coins/min (40% discount)",
+      "Video calls at 15 coins/min (40% discount)",
       "10 Super Likes/day",
       "Ghost Mode — browse invisibly",
       "Host audio rooms (up to 20 listeners)",
@@ -277,6 +276,8 @@ const PLANS = [
       "Platinum VIP badge (shimmer effect)",
       "100 bonus coins/month (≈₹100 value)",
       "15 Super Likes/day",
+      "Audio calls at 5 coins/min (50% discount)",
+      "Video calls at 12 coins/min (52% discount)",
       "Host audio rooms up to 100 listeners",
       "AI Matchmaking — advanced + reasons",
       "AI Assistant — unlimited queries",
@@ -342,6 +343,8 @@ const PLANS = [
       "Everything in Platinum VIP, plus:",
       "Diamond Elite badge (animated + glow ring)",
       "300 bonus coins/month (≈₹300 value)",
+      "Audio calls at 4 coins/min (60% discount)",
+      "Video calls at 10 coins/min (60% discount)",
       "Unlimited Super Likes",
       "Go Live — unlimited streaming (no Creator Pass)",
       "VIP Leaderboard position (top 100)",
@@ -463,10 +466,12 @@ const UNLOCK_CATEGORIES = [
     icon: "phone",
     color: "#2196F3",
     items: [
-      { label: "10 audio calls/day (HD)",       plan: "silver",   icon: "phone"      },
-      { label: "5 video calls/day (HD)",         plan: "silver",   icon: "video"      },
-      { label: "Unlimited audio calls (HD)",     plan: "gold",     icon: "phone"      },
-      { label: "Unlimited video calls (HD)",     plan: "gold",     icon: "video"      },
+      { label: "Audio calls 10 coins/min",       plan: "free",     icon: "phone"      },
+      { label: "Video calls 25 coins/min",       plan: "free",     icon: "video"      },
+      { label: "20% call discount (Silver)",      plan: "silver",   icon: "phone"      },
+      { label: "40% call discount (Gold)",       plan: "gold",     icon: "video"      },
+      { label: "50% call discount (Platinum)",   plan: "platinum", icon: "phone"      },
+      { label: "60% call discount (Diamond)",    plan: "diamond",  icon: "video"      },
       { label: "Host audio rooms (100 people)",  plan: "platinum", icon: "mic"        },
       { label: "Go Live — unlimited",             plan: "diamond",  icon: "radio"      },
     ],
