@@ -645,7 +645,7 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>EARN ON RIDHI</Text>
         <View style={styles.earnRow}>
-          {/* Host — active if registered, or show "Apply" if not */}
+          {/* Host — active if registered, unavailable if already Agent, else Apply */}
           {user.isHost ? (
             <Pressable
               onPress={() => router.push("/host-profile" as any)}
@@ -658,10 +658,22 @@ export default function ProfileScreen() {
               <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
               <View style={styles.activeDot} />
             </Pressable>
+          ) : user.isAgent ? (
+            <View style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: 0.5 }]}>
+              <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
+                <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.mutedForeground }]}>Host</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground, fontSize: 10 }]}>Agent only</Text>
+              <View style={[styles.unavailableBadge, { backgroundColor: "#9CA3AF" }]}>
+                <Feather name="lock" size={8} color="#fff" />
+              </View>
+            </View>
           ) : (
             <Pressable
               onPress={() => router.push("/kyc" as any)}
-              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+            >
               <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
                 <Image source={COIN_IMAGE} style={{ width: 20, height: 20 }} resizeMode="contain" />
               </View>
@@ -673,7 +685,7 @@ export default function ProfileScreen() {
             </Pressable>
           )}
 
-          {/* Agent — active if registered, or show "Apply" if not */}
+          {/* Agent — active if registered, unavailable if already Host, else Apply */}
           {user.isAgent ? (
             <Pressable
               onPress={() => router.push("/agent-dashboard" as any)}
@@ -686,6 +698,17 @@ export default function ProfileScreen() {
               <Text style={[styles.earnCardSub, { color: colors.mutedForeground }]}>Active</Text>
               <View style={[styles.activeDot, { backgroundColor: "#00BCD4" }]} />
             </Pressable>
+          ) : user.isHost ? (
+            <View style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: 0.5 }]}>
+              <View style={[styles.earnIcon, { backgroundColor: "#00BCD420" }]}>
+                <Feather name="briefcase" size={20} color="#00BCD4" />
+              </View>
+              <Text style={[styles.earnCardTitle, { color: colors.mutedForeground }]}>Agent</Text>
+              <Text style={[styles.earnCardSub, { color: colors.mutedForeground, fontSize: 10 }]}>Host only</Text>
+              <View style={[styles.unavailableBadge, { backgroundColor: "#9CA3AF" }]}>
+                <Feather name="lock" size={8} color="#fff" />
+              </View>
+            </View>
           ) : (
             <Pressable
               onPress={() => router.push("/kyc" as any)}
@@ -1143,6 +1166,7 @@ const styles = StyleSheet.create({
   earnCardSub: { fontSize: 11, fontFamily: "Inter_400Regular", textAlign: "center" },
   activeDot: { position: "absolute", top: 10, right: 10, width: 8, height: 8, borderRadius: 4, backgroundColor: "#22C55E" },
   applyBadge: { position: "absolute", top: 8, right: 8, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2 },
+  unavailableBadge: { position: "absolute", top: 8, right: 8, borderRadius: 6, width: 18, height: 18, alignItems: "center", justifyContent: "center" },
 
   // ── Menu groups ───────────────────────────────────────────────────────────
   menuGroup: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, overflow: "hidden" },
