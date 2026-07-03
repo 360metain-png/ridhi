@@ -981,6 +981,7 @@ function ReelItem({
             enabled ? "Others can now duet on this reel." : "Others can no longer duet on this reel."
           );
         }}
+        onDownload={() => setShowDownload(true)}
       />
 
       {/* Paid download service */}

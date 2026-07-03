@@ -32,6 +32,7 @@ export interface ReelOptionsMenuProps {
   onHide?: () => void;
   onNotInterested?: () => void;
   onToggleDuet?: (enabled: boolean) => void;
+  onDownload?: () => void;
 }
 
 interface MenuOption {
@@ -50,6 +51,7 @@ export function ReelOptionsMenu({
   onHide,
   onNotInterested,
   onToggleDuet,
+  onDownload,
 }: ReelOptionsMenuProps) {
   const colors = useColors();
   const { user } = useAuth();
@@ -167,7 +169,12 @@ export function ReelOptionsMenu({
         setAutoScroll((s) => !s);
         return;
       case "save":
-        handleSave();
+        if (onDownload) {
+          onClose();
+          onDownload();
+        } else {
+          handleSave();
+        }
         return;
       case "copyLink":
         handleCopyLink();

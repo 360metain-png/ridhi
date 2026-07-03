@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
   Alert,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -12,6 +13,8 @@ import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { DOWNLOAD_PRICING, type ContentType } from "@/data/coinEconomy";
+
+const RIDHI_LOGO = require("../assets/images/ridhi_logo.png");
 
 interface DownloadServiceProps {
   visible: boolean;
@@ -39,6 +42,7 @@ export function DownloadService({
   const [success, setSuccess] = useState(false);
 
   const price = DOWNLOAD_PRICING[contentType]?.price ?? 5;
+  const totalCoins = (user?.freeCoins ?? 0) + (user?.paidCoins ?? 0);
 
   const handleDownload = useCallback(async () => {
     if (!user) {
@@ -47,10 +51,11 @@ export function DownloadService({
       return;
     }
 
-    if (user.coins < price) {
+    const totalCoins = (user.freeCoins ?? 0) + (user.paidCoins ?? 0);
+    if (totalCoins < price) {
       Alert.alert(
         "Not Enough Coins",
-        `You need ${price} coins to download this. Your balance: ${user.coins} coins.`,
+        `You need ${price} coins to download this. Your balance: ${totalCoins} coins.`,
         [
           { text: "Cancel", style: "cancel" },
           { text: "Recharge", onPress: () => onClose() },
@@ -63,10 +68,10 @@ export function DownloadService({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     // Server-side deduct first (authoritative); if it fails, don't deduct locally
-    let resp: { success?: boolean; data?: { coins?: number } } = {};
+    let resp: { success?: boolean; data?: { coins?: number; freeCoins?: number; paidCoins?: number } } = {};
     try {
       const { apiFetch } = await import("@/utils/api");
-      resp = await apiFetch<{ success: boolean; data?: { coins?: number } }>("/api/downloads", {
+      resp = await apiFetch<{ success: boolean; data?: { coins?: number; freeCoins?: number; paidCoins?: number } }>("/api/downloads", {
         method: "POST",
         body: JSON.stringify({ contentId, contentType }),
       });
@@ -85,11 +90,18 @@ export function DownloadService({
       return;
     }
 
-    // Reflect server-side deduction in local state
-    if (resp.data?.coins !== undefined) {
+    // Reflect server-side deduction in local state (dual coin update)
+    if (resp.data?.freeCoins !== undefined && resp.data?.paidCoins !== undefined) {
+      await updateProfile({
+        coins: resp.data.coins,
+        freeCoins: resp.data.freeCoins,
+        paidCoins: resp.data.paidCoins,
+      });
+    } else if (resp.data?.coins !== undefined) {
       await updateProfile({ coins: resp.data.coins });
     } else {
-      await deductCoins(price);
+      // Server already deducted but didn't return coin breakdown — sync total only
+      await updateProfile({ coins: (user?.coins ?? 0) - price });
     }
 
     // Record download transaction in AsyncStorage
@@ -122,7 +134,7 @@ export function DownloadService({
       onDownloadComplete?.();
       Alert.alert(
         "Download Complete",
-        `${contentTitle} downloaded successfully!\n\n${price} coins deducted from your balance.`,
+        `${contentTitle} downloaded with the Ridhi watermark!\n\n${price} coins deducted. Every download is protected with the Ridhi logo watermark.`,
       );
     }, 1200);
   }, [user, deductCoins, contentId, contentType, contentTitle, ownerName, ownerId, price, onClose, onDownloadComplete]);
@@ -137,6 +149,12 @@ export function DownloadService({
             </View>
             <Text style={styles.successTitle}>Downloaded!</Text>
             <Text style={styles.successSub}>{contentTitle}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", marginTop: 10 }}>
+              <Image source={RIDHI_LOGO} style={{ width: 20, height: 20 }} resizeMode="contain" />
+              <Text style={{ fontSize: 12, color: "#E91E8C", marginLeft: 6, fontWeight: "600" }}>
+                Watermarked by Ridhi
+              </Text>
+            </View>
           </View>
         </View>
       </Modal>
@@ -152,6 +170,15 @@ export function DownloadService({
         <Text style={styles.title}>Download Content</Text>
         <Text style={styles.subtitle} numberOfLines={1}>{contentTitle}</Text>
 
+        {/* Watermark notice */}
+        <View style={styles.watermarkBanner}>
+          <Image source={RIDHI_LOGO} style={styles.watermarkLogo} resizeMode="contain" />
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.watermarkTitle}>Ridhi Watermark</Text>
+            <Text style={styles.watermarkSub}>All downloaded media carries the Ridhi logo watermark to protect creator content.</Text>
+          </View>
+        </View>
+
         {/* Price */}
         <View style={styles.priceCard}>
           <View style={styles.priceRow}>
@@ -163,12 +190,12 @@ export function DownloadService({
         {/* Balance */}
         <View style={styles.balanceRow}>
           <Text style={styles.balanceLabel}>Your Balance</Text>
-          <Text style={styles.balanceValue}>{user?.coins ?? 0} coins</Text>
+          <Text style={styles.balanceValue}>{totalCoins} coins</Text>
         </View>
         <View style={styles.balanceRow}>
           <Text style={styles.balanceLabel}>After Download</Text>
-          <Text style={[styles.balanceValue, (user?.coins ?? 0) < price && { color: "#F43F5E" }]}>
-            {(user?.coins ?? 0) - price} coins
+          <Text style={[styles.balanceValue, totalCoins < price && { color: "#F43F5E" }]}>
+            {totalCoins - price} coins
           </Text>
         </View>
 
@@ -180,7 +207,7 @@ export function DownloadService({
           <Pressable
             style={[styles.downloadBtn, processing && { opacity: 0.6 }]}
             onPress={handleDownload}
-            disabled={processing || (user?.coins ?? 0) < price}
+            disabled={processing || totalCoins < price}
           >
             {processing ? (
               <Text style={styles.downloadText}>Processing...</Text>
@@ -342,5 +369,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8E8E93",
     marginTop: 4,
+  },
+  watermarkBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2C2C2E",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+  },
+  watermarkLogo: {
+    width: 32,
+    height: 32,
+  },
+  watermarkTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#E91E8C",
+  },
+  watermarkSub: {
+    fontSize: 12,
+    color: "#8E8E93",
+    marginTop: 2,
   },
 });

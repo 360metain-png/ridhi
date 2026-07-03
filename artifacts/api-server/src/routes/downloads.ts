@@ -58,26 +58,49 @@ router.post(
     }
 
     try {
-      // Atomic conditional update: deduct only if balance >= price
-      const result = await db.update(users)
-        .set({ coins: sql`${users.coins} - ${price}` })
-        .where(and(userBySub(userId), gte(users.coins, price)))
-        .returning({ coins: users.coins });
-      if (result.length === 0) {
-        const [user] = await db.select({ coins: users.coins }).from(users).where(userBySub(userId));
-        if (!user) {
-          res.status(404).json({ error: "User not found" });
-        } else {
-          res.status(402).json({ error: "Insufficient coins", coins: user.coins });
-        }
+      // Server-side dual-coin deduction: free coins first, then paid coins.
+      // Downloads (unlike calls/withdrawals) accept both free and paid coins.
+      const [userRow] = await db.select({
+        freeCoins: users.freeCoins,
+        paidCoins: users.paidCoins,
+        coins: users.coins,
+      }).from(users).where(userBySub(userId));
+
+      if (!userRow) {
+        res.status(404).json({ error: "User not found" });
         return;
       }
-      const newBalance = result[0].coins;
+
+      const free = userRow.freeCoins ?? 0;
+      const paid = userRow.paidCoins ?? 0;
+      const total = free + paid;
+
+      if (total < price) {
+        res.status(402).json({ error: "Insufficient coins", freeCoins: free, paidCoins: paid, total });
+        return;
+      }
+
+      // Deduct from free first, remainder from paid
+      const deductFromFree = Math.min(free, price);
+      const deductFromPaid = price - deductFromFree;
+
+      const newFree = free - deductFromFree;
+      const newPaid = paid - deductFromPaid;
+      const newTotal = newFree + newPaid;
+
+      await db.update(users)
+        .set({
+          freeCoins: newFree,
+          paidCoins: newPaid,
+          coins: newTotal,
+        })
+        .where(userBySub(userId));
+
       const creatorShare = Math.floor(price * 0.6);
       const platformShare = price - creatorShare;
 
       logger.info(
-        { userId, contentId, contentType, price, creatorShare, platformShare, newBalance },
+        { userId, contentId, contentType, price, creatorShare, platformShare, newFree, newPaid },
         "Download transaction"
       );
 
@@ -90,7 +113,9 @@ router.post(
           price,
           creatorShare,
           platformShare,
-          coins: newBalance,
+          coins: newTotal,
+          freeCoins: newFree,
+          paidCoins: newPaid,
           downloadedAt: new Date().toISOString(),
         },
       });
