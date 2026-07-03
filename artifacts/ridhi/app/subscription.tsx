@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {
-  Dimensions, Modal, Platform, Pressable, ScrollView,
+  Alert, Dimensions, Modal, Platform, Pressable, ScrollView,
   StyleSheet, Text, View, Image,
 } from "react-native";
 import { router } from "expo-router";
