@@ -671,7 +671,7 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <Pressable
-              onPress={() => router.push("/kyc" as any)}
+              onPress={() => router.push("/host-profile" as any)}
               style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
             >
               <View style={[styles.earnIcon, { backgroundColor: "#FFB80020" }]}>
@@ -711,7 +711,7 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <Pressable
-              onPress={() => router.push("/kyc" as any)}
+              onPress={() => router.push("/agent-dashboard" as any)}
               style={[styles.earnCard, { backgroundColor: colors.card, borderColor: colors.border }]}
             >
               <View style={[styles.earnIcon, { backgroundColor: "#00BCD420" }]}>
