@@ -527,15 +527,17 @@ export const FeedPost = React.memo(function FeedPost({
             </View>
           </Pressable>
 
-          <Pressable
-            onPress={() => { trackSave(post.id, "post_download"); setShowDownload(true); }}
-            accessibilityRole="button"
-            accessibilityLabel="Download post"
-          >
-            <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
-              <Feather name="download" size={14} color={colors.mutedForeground} />
-            </View>
-          </Pressable>
+          {(post.imageUri || (post.carouselImages && post.carouselImages.length > 0) || post.type === "video" || post.type === "reel") && (
+            <Pressable
+              onPress={() => { trackSave(post.id, "post_download"); setShowDownload(true); }}
+              accessibilityRole="button"
+              accessibilityLabel="Download post"
+            >
+              <View style={[styles.actionIcon, { backgroundColor: colors.muted }]}>
+                <Feather name="download" size={14} color={colors.mutedForeground} />
+              </View>
+            </Pressable>
+          )}
         </View>
       </View>
 

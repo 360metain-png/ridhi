@@ -495,9 +495,10 @@ const HOST_SECTIONS: Section[] = [
     title: "Paid Downloads — New Revenue Stream",
     subtitle: "Users pay coins to download your content. You earn 60% of every download.",
     features: [
-      "Download pricing: Reel = 5 coins · Post (photo/video) = 10 coins · Story = 3 coins · Live Recording = 20 coins · Audio Room = 8 coins",
+      "Download is only available for media posts — photos, videos, carousels, reels, stories, live recordings, and audio rooms. Text-only posts cannot be downloaded.",
+      "Download pricing: Reel = 5 coins · Post (photo/video/carousel) = 10 coins · Story = 3 coins · Live Recording = 20 coins · Audio Room = 8 coins",
       "Revenue split: 60% to you (the creator), 40% to Ridhi platform",
-      "Example: a user downloads your post for 10 coins → you earn 6 coins, Ridhi keeps 4 coins",
+      "Example: a user downloads your photo post for 10 coins → you earn 6 coins, Ridhi keeps 4 coins",
       "Download earnings are tracked in your Creator Dashboard → Download Earnings tab",
       "Download count appears on each post/reel/story — shows how many users have downloaded it",
       "All downloads are watermarked with the user's username to prevent unauthorized redistribution",
