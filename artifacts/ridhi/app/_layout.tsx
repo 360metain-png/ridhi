@@ -19,13 +19,11 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppProvider } from "@/contexts/AppContext";
 import { SplashAnimation } from "@/components/SplashAnimation";
-import { configureIap } from "@/lib/iap";
 
 SplashScreen.preventAutoHideAsync();
 
-/* Initialize IAP and ATT once at app startup (native only) */
+/* Initialize ATT once at app startup (native only) */
 if (Platform.OS !== "web") {
-  configureIap();
   import("expo-tracking-transparency").then((mod) =>
     mod.requestTrackingPermissionsAsync().catch(() => {})
   );

@@ -13,7 +13,6 @@ import { PaymentSheet } from "@/components/PaymentSheet";
 import { RidhiCoin } from "@/components/RidhiCoin";
 import { SubscriptionBadge } from "@/components/SubscriptionBadge";
 import { useTrackScreen, useAnalytics } from "@/hooks/useAnalytics";
-import { isIapAvailable, purchasePackage, getOfferings, restorePurchases } from "@/lib/iap";
 import { PRODUCTS } from "@/data/mockData";
 const COIN_IMAGE = require("../assets/images/ridhi_coin.png");
 import type { VipTier } from "@/components/SubscriptionBadge";
@@ -1143,36 +1142,6 @@ export default function SubscriptionScreen() {
   const creatorExpiry   = user?.creatorPlanExpiresAt;
 
   const { trackSubscription } = useAnalytics();
-  const [iapLoading, setIapLoading] = useState(false);
-  const [iapError, setIapError] = useState("");
-
-  const handleIapPurchase = async (planId: string, billing: string) => {
-    if (!isIapAvailable()) return false;
-    setIapLoading(true);
-    setIapError("");
-    try {
-      const offerings = await getOfferings();
-      const packages = offerings?.vipPackages ?? [];
-      const pkg = packages.find((p) => p.identifier.includes(planId) && p.identifier.includes(billing));
-      if (!pkg) {
-        setIapError("This plan is not available on App Store yet.");
-        return false;
-      }
-      const result = await purchasePackage(pkg);
-      if (result.success) {
-        return true;
-      }
-      if (result.error && result.error !== "User cancelled") {
-        setIapError(result.error);
-      }
-      return false;
-    } catch {
-      setIapError("Purchase failed. Please try again.");
-      return false;
-    } finally {
-      setIapLoading(false);
-    }
-  };
 
   const handlePlanSuccess = async (txnId: string) => {
     // Server auto-activates plan after verified payment. Sync from server.
@@ -1416,18 +1385,6 @@ export default function SubscriptionScreen() {
 
                   {plan.id !== "free" && !unavail && activePlanId !== plan.id && (
                     <Pressable onPress={async () => {
-                      if (Platform.OS === "ios" && isIapAvailable()) {
-                        const ok = await handleIapPurchase(plan.id, billing);
-                        if (ok) {
-                          setPendingPlanId(plan.id);
-                          setPendingBilling(billing);
-                          setPendingBonus(plan.bonusCoins);
-                          handlePlanSuccess("iap_" + Date.now());
-                          return;
-                        }
-                        // IAP unavailable or plan not on App Store — fall through to Razorpay
-                        setIapError("");
-                      }
                       setPendingPlanId(plan.id);
                       setPendingBilling(billing);
                       setPendingBonus(plan.bonusCoins);
@@ -1470,32 +1427,11 @@ export default function SubscriptionScreen() {
 
             {/* Payment methods */}
             <View style={[styles.payCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Text style={[styles.payTitle, { color: colors.foreground }]}>
-                  {Platform.OS === "ios" ? "Apple In-App Purchase" : "Secure Indian Payments"}
-                </Text>
-                {Platform.OS === "ios" && isIapAvailable() && (
-                  <Pressable onPress={async () => {
-                    const { restorePurchases } = await import("@/lib/iap");
-                    const result = await restorePurchases();
-                    Alert.alert(
-                      result.success ? "Restored ✓" : "Restore Failed",
-                      result.success ? "Your previous purchases have been restored." : (result.error || "Could not restore purchases."),
-                    );
-                  }}>
-                    <Text style={{ color: colors.primary, fontFamily: "Inter_500Medium", fontSize: 13 }}>Restore Purchases</Text>
-                  </Pressable>
-                )}
-              </View>
+              <Text style={[styles.payTitle, { color: colors.foreground }]}>
+                Secure Indian Payments
+              </Text>
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
-                {Platform.OS === "ios" ? [
-                  { label: "App Store", icon: "smartphone", color: "#007AFF" },
-                ].map(pm => (
-                  <View key={pm.label} style={[styles.payMethod, { backgroundColor: colors.muted }]}>
-                    <Feather name={pm.icon as any} size={15} color={pm.color} />
-                    <Text style={[styles.payMethodTxt, { color: colors.foreground }]}>{pm.label}</Text>
-                  </View>
-                )) : [
+                {[
                   { label: "UPI",        icon: "smartphone",  color: "#00BCD4" },
                   { label: "Razorpay",   icon: "credit-card", color: "#2962FF" },
                   { label: "Google Pay", icon: "globe",       color: "#34A853" },
@@ -1508,11 +1444,8 @@ export default function SubscriptionScreen() {
                   </View>
                 ))}
               </View>
-              {!!iapError && (
-                <Text style={[styles.payNote, { color: "#FF3B30" }]}>{iapError}</Text>
-              )}
               <Text style={[styles.payNote, { color: colors.mutedForeground }]}>
-                Auto-renews monthly. Cancel anytime. {Platform.OS === "ios" ? "Manage via Settings > Apple ID > Subscriptions." : ""}
+                Auto-renews monthly. Cancel anytime.
               </Text>
             </View>
           </View>

@@ -466,7 +466,7 @@ export default function WalletScreen() {
             </Text>
           </View>
           <View style={styles.paymentRow}>
-            {[
+            {
               { label: "UPI", icon: "smartphone", color: "#00BCD4" },
               { label: "Razorpay", icon: "credit-card", color: "#2962FF" },
               { label: "GPay", icon: "globe", color: "#34A853" },
