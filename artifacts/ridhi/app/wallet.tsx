@@ -30,7 +30,6 @@ import { COIN_PACKAGES } from "@/data/mockData";
 import { SPEND_CATEGORIES } from "@/data/coinEconomy";
 import { CoinFountainOverlay, AnimatedCoinBalance, useCoinToasts } from "@/components/CoinFountain";
 import { PaymentSheet } from "@/components/PaymentSheet";
-import { isIapAvailable, purchasePackage, getOfferings, restorePurchases } from "@/lib/iap";
 
 const { width } = Dimensions.get("window");
 
@@ -204,50 +203,8 @@ export default function WalletScreen() {
   const [showPayment, setShowPayment] = useState(false);
 
   const onRecharge = (pack: typeof COIN_PACKAGES[0]) => {
-    if (Platform.OS === "ios" && isIapAvailable()) {
-      handleIapCoinPurchase(pack);
-      return;
-    }
     setPendingPack(pack);
     setShowPayment(true);
-  };
-
-  const [iapLoading, setIapLoading] = useState(false);
-  const [iapError, setIapError] = useState("");
-
-  const handleIapCoinPurchase = async (pack: typeof COIN_PACKAGES[0]) => {
-    if (!isIapAvailable()) return;
-    setIapLoading(true);
-    setIapError("");
-    try {
-      const offerings = await getOfferings();
-      const packages = offerings?.coinPackages ?? [];
-      const pkg = packages.find((p) => p.identifier.includes(String(pack.coins)));
-      if (!pkg) {
-        setIapError("This coin pack is not available on App Store yet.");
-        setPendingPack(pack);
-        setShowPayment(true);
-        return;
-      }
-      const result = await purchasePackage(pkg);
-      if (result.success) {
-        const total = pack.coins + ((pack as any).bonus ?? 0);
-        // Sync authoritative server wallet state after IAP success (server auto-credits)
-        syncWallet().catch(() => {});
-        fire({ type: "credit", amount: total, label: "Recharge", sublabel: pack.label, large: total >= 500, bottom: 200 });
-        trackCoinRecharge(total);
-      } else if (result.error && result.error !== "User cancelled") {
-        setIapError(result.error);
-        setPendingPack(pack);
-        setShowPayment(true);
-      }
-    } catch {
-      setIapError("Purchase failed. Please try again.");
-      setPendingPack(pack);
-      setShowPayment(true);
-    } finally {
-      setIapLoading(false);
-    }
   };
 
   const { trackCoinRecharge } = useAnalytics();
@@ -505,32 +462,11 @@ export default function WalletScreen() {
         <View style={styles.section}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-              {Platform.OS === "ios" ? "Apple In-App Purchase" : "Pay Via"}
+              Pay Via
             </Text>
-            {Platform.OS === "ios" && isIapAvailable() && (
-              <Pressable onPress={async () => {
-                const result = await restorePurchases();
-                Alert.alert(
-                  result.success ? "Restored ✓" : "Restore Failed",
-                  result.success ? "Your previous purchases have been restored." : (result.error || "Could not restore purchases."),
-                );
-              }}>
-                <Text style={{ color: colors.primary, fontFamily: "Inter_500Medium", fontSize: 13 }}>Restore Purchases</Text>
-              </Pressable>
-            )}
           </View>
           <View style={styles.paymentRow}>
-            {Platform.OS === "ios" ? [
-              { label: "App Store", icon: "smartphone", color: "#007AFF" },
-            ].map((pm) => (
-              <Pressable
-                key={pm.label}
-                style={[styles.paymentMethod, { backgroundColor: colors.card, borderColor: colors.border }]}
-              >
-                <Feather name={pm.icon as any} size={18} color={pm.color} />
-                <Text style={[styles.paymentLabel, { color: colors.foreground }]}>{pm.label}</Text>
-              </Pressable>
-            )) : [
+            {
               { label: "UPI", icon: "smartphone", color: "#00BCD4" },
               { label: "Razorpay", icon: "credit-card", color: "#2962FF" },
               { label: "GPay", icon: "globe", color: "#34A853" },
