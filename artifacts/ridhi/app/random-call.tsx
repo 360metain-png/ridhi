@@ -96,12 +96,13 @@ const DEMO_PEERS: PeerInfo[] = [
 // ── Coin pricing ─────────────────────────────────────────────────────────────────────────
 const AUDIO_RATE = 10;
 const VIDEO_RATE = 25;
+const FREE_TRIAL_MINUTES = 3; // one-time free audio trial for new users (not recurring)
 
 export default function RandomCallScreen() {
   useTrackScreen("random_call");
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, syncWallet } = useAuth();
+  const { user, syncWallet, updateProfile } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   // ── State ───────────────────────────────────────────────────────────────
@@ -137,10 +138,33 @@ export default function RandomCallScreen() {
   const orbitAnim = useRef(new Animated.Value(0)).current;
   const coinAnim  = useRef(new Animated.Value(0)).current;
 
+  // ── Trial state (computed AFTER useState declarations) ──────────────────
+  // Trial is one-time lifetime: new users get 3 min free audio ONCE.
+  // Video calls NEVER free — always require coins regardless of trial status.
+  const trialActive = !user?.callTrialUsed && (user?.coins ?? 0) === 0;
+  const trialSecondsRemaining = trialActive ? Math.max(0, FREE_TRIAL_MINUTES * 60 - duration) : 0;
+  const trialConsumed = trialActive && trialSecondsRemaining <= 0;
+
   const rate = callType === "audio" ? AUDIO_RATE : VIDEO_RATE;
   const est5min = rate * 5;
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  // ── Mark trial used when it expires ─────────────────────────────────────
+  useEffect(() => {
+    if (trialConsumed && mode === "connected" && !user?.callTrialUsed) {
+      updateProfile({ callTrialUsed: true, callTrialStartedAt: new Date().toISOString() });
+      // Show alert that trial ended
+      Alert.alert(
+        "Free trial ended",
+        "Your 3-minute free audio trial is over. Recharge coins to continue calling.",
+        [
+          { text: "Recharge", onPress: () => router.push("/wallet") },
+          { text: "End Call", onPress: endCall },
+        ]
+      );
+    }
+  }, [trialConsumed, mode, user?.callTrialUsed]);
 
   // ── Gender preference (internal only, not shown to user) ────────────────
   const matchGender = preferGender;
@@ -410,8 +434,11 @@ export default function RandomCallScreen() {
   ];
 
   // ── Actions ──────────────────────────────────────────────────────────────────────
+  // Coins check: trial users can start audio without coins. Video always requires coins.
+  const canStart = callType === "audio" ? trialActive || (user?.coins ?? 0) >= rate : (user?.coins ?? 0) >= rate;
+
   const startSearch = () => {
-    if ((user?.coins ?? 0) < rate) return;
+    if (!canStart) return;
     setDuration(0);
     setMatched(null);
     setCoinsSpent(0);
@@ -523,27 +550,34 @@ export default function RandomCallScreen() {
             {/* ── Call Type ── */}
             <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Call Type</Text>
             <View style={styles.typeRow}>
-              {(["audio", "video"] as CallType[]).map((t) => (
-                <Pressable
-                  key={t}
-                  onPress={() => setCallType(t)}
-                  style={[
-                    styles.typeBtn,
-                    {
-                      backgroundColor: callType === t ? (t === "audio" ? colors.secondary : colors.primary) : colors.card,
-                      borderColor: callType === t ? "transparent" : colors.border,
-                    },
-                  ]}
-                >
-                  <Feather name={t === "audio" ? "mic" : "video"} size={26} color={callType === t ? "#fff" : colors.mutedForeground} />
-                  <Text style={[styles.typeName, { color: callType === t ? "#fff" : colors.foreground }]}>
-                    {t === "audio" ? "🎙️ Audio" : "📹 Video"}
-                  </Text>
-                  <Text style={[styles.typeSub, { color: callType === t ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>
-                    from {t === "audio" ? AUDIO_RATE : VIDEO_RATE} coins/min
-                  </Text>
-                </Pressable>
-              ))}
+              {(["audio", "video"] as CallType[]).map((t) => {
+                const isTrialVideoBlocked = trialActive && t === "video";
+                return (
+                  <Pressable
+                    key={t}
+                    onPress={() => {
+                      if (!isTrialVideoBlocked) setCallType(t);
+                    }}
+                    disabled={isTrialVideoBlocked}
+                    style={[
+                      styles.typeBtn,
+                      {
+                        backgroundColor: callType === t ? (t === "audio" ? colors.secondary : colors.primary) : colors.card,
+                        borderColor: callType === t ? "transparent" : colors.border,
+                        opacity: isTrialVideoBlocked ? 0.5 : 1,
+                      },
+                    ]}
+                  >
+                    <Feather name={t === "audio" ? "mic" : "video"} size={26} color={callType === t ? "#fff" : colors.mutedForeground} />
+                    <Text style={[styles.typeName, { color: callType === t ? "#fff" : colors.foreground }]}>
+                      {t === "audio" ? "🎙️ Audio" : "📹 Video"}
+                    </Text>
+                    <Text style={[styles.typeSub, { color: callType === t ? "rgba(255,255,255,0.75)" : colors.mutedForeground }]}>
+                      {t === "audio" && trialActive ? "3 min free trial" : `from ${t === "audio" ? AUDIO_RATE : VIDEO_RATE} coins/min`}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             {/* ── Category ── */}
@@ -602,37 +636,47 @@ export default function RandomCallScreen() {
               <View style={styles.costRow}>
                 <Text style={[styles.costLabel, { color: colors.mutedForeground }]}>Rate</Text>
                 <Text style={[styles.costVal, { color: colors.foreground }]}>
-                  <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                  {rate}/min
+                  {trialActive && callType === "audio" ? (
+                    <Text style={{ color: colors.success, fontFamily: "Inter_600SemiBold" }}>
+                      ⭐ 3 min free trial (audio only)
+                    </Text>
+                  ) : (
+                    <>
+                      <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                      {rate}/min
+                    </>
+                  )}
                 </Text>
               </View>
-              <View style={[styles.costRow, styles.costTotal]}>
-                <Text style={[styles.costLabel, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
-                  Estimated 5-min cost
-                </Text>
-                <Text style={[styles.costVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 16 }]}>
-                  <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                  {est5min}
-                </Text>
-              </View>
+              {!trialActive && (
+                <View style={[styles.costRow, styles.costTotal]}>
+                  <Text style={[styles.costLabel, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
+                    Estimated 5-min cost
+                  </Text>
+                  <Text style={[styles.costVal, { color: colors.primary, fontFamily: "Inter_700Bold", fontSize: 16 }]}>
+                    <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                    {est5min}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Start button */}
-            <Pressable onPress={startSearch} disabled={(user?.coins ?? 0) < rate} style={[styles.startBtn, { opacity: (user?.coins ?? 0) < rate ? 0.5 : 1 }]}>
+            <Pressable onPress={startSearch} disabled={!canStart} style={[styles.startBtn, { opacity: canStart ? 1 : 0.5 }]}>
               <LinearGradient colors={[colors.secondary, colors.primary]} style={styles.startBtnInner}>
                 <Feather name={callType === "audio" ? "mic" : "video"} size={20} color="#fff" />
                 <Text style={styles.startBtnText}>
-                  Start {callType === "audio" ? "Audio" : "Video"} Call
+                  {trialActive && callType === "audio" ? "Start Free Audio Call" : `Start ${callType === "audio" ? "Audio" : "Video"} Call`}
                 </Text>
               </LinearGradient>
             </Pressable>
 
-            {(user?.coins ?? 0) < rate && (
+            {!canStart && (
               <Pressable onPress={() => router.push("/wallet")}
                 style={[styles.rechargeHint, { backgroundColor: colors.gold + "15", borderColor: colors.gold + "40" }]}>
                 <Feather name="alert-circle" size={14} color={colors.gold} />
                 <Text style={[styles.rechargeText, { color: colors.gold }]}>
-                  Not enough coins · Tap to recharge
+                  {trialActive && callType === "video" ? "Video calls require coins during trial · Tap to recharge" : "Not enough coins · Tap to recharge"}
                 </Text>
               </Pressable>
             )}
@@ -739,8 +783,10 @@ export default function RandomCallScreen() {
               )}
             </LinearGradient>
             <View style={[styles.previewPanel, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <View style={[styles.previewCountdown, { backgroundColor: colors.primary }]}>
-                <Text style={styles.previewCountdownText}>FREE PREVIEW — {previewLeft}s</Text>
+              <View style={[styles.previewCountdown, { backgroundColor: trialActive ? colors.success : colors.primary }]}>
+                <Text style={styles.previewCountdownText}>
+                  {trialActive ? `⭐ FREE TRIAL — ${FREE_TRIAL_MINUTES} min audio` : `FREE PREVIEW — ${previewLeft}s`}
+                </Text>
               </View>
               <Avatar name={matched.name} size={72} />
               <View style={styles.previewNameRow}>
@@ -752,10 +798,18 @@ export default function RandomCallScreen() {
                 {matched.age ? ` · ${matched.age}` : ""}
                 {matched.bio ? ` · ${matched.bio}` : ""}
               </Text>
-              <View style={[styles.costInfoBox, { backgroundColor: colors.muted }]}>
-                <Text style={[styles.costInfoText, { color: colors.mutedForeground }]}>
-                  <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
-                  {rate}/min · Est. 5 min = {est5min} coins
+              <View style={[styles.costInfoBox, { backgroundColor: trialActive ? colors.success + "15" : colors.muted }]}>
+                <Text style={[styles.costInfoText, { color: trialActive ? colors.success : colors.mutedForeground }]}>
+                  {trialActive ? (
+                    <>
+                      ⭐ Free audio trial — {FREE_TRIAL_MINUTES} minutes
+                    </>
+                  ) : (
+                    <>
+                      <Image source={COIN_IMAGE} style={{ width: 16, height: 16 }} resizeMode="contain" />
+                      {rate}/min · Est. 5 min = {est5min} coins
+                    </>
+                  )}
                 </Text>
               </View>
               <View style={styles.previewBtns}>
@@ -848,25 +902,33 @@ export default function RandomCallScreen() {
                   }],
                   opacity: coinAnim.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }),
                 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                    {/* User spending */}
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
-                      <Text style={{ color: "#FF8C42", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
-                        -{coinsSpent}
-                      </Text>
-                      <Text style={{ color: "#888", fontSize: 10, fontFamily: "Inter_400Regular" }}>spent</Text>
-                    </View>
-                    <Text style={{ color: "#444", fontSize: 10 }}>|</Text>
-                    {/* Host earning */}
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                      <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                  {trialActive && callType === "audio" ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text style={{ color: "#34C759", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
-                        +{coinsEarned}
+                        ⭐ Free trial — {Math.ceil(trialSecondsRemaining / 60)}:{String(trialSecondsRemaining % 60).padStart(2, "0")} left
                       </Text>
-                      <Text style={{ color: "#888", fontSize: 10, fontFamily: "Inter_400Regular" }}>earned</Text>
                     </View>
-                  </View>
+                  ) : (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                      {/* User spending */}
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                        <Text style={{ color: "#FF8C42", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
+                          -{coinsSpent}
+                        </Text>
+                        <Text style={{ color: "#888", fontSize: 10, fontFamily: "Inter_400Regular" }}>spent</Text>
+                      </View>
+                      <Text style={{ color: "#444", fontSize: 10 }}>|</Text>
+                      {/* Host earning */}
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <Image source={COIN_IMAGE} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                        <Text style={{ color: "#34C759", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>
+                          +{coinsEarned}
+                        </Text>
+                        <Text style={{ color: "#888", fontSize: 10, fontFamily: "Inter_400Regular" }}>earned</Text>
+                      </View>
+                    </View>
+                  )}
                 </Animated.View>
               </View>
             )}

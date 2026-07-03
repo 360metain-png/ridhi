@@ -51,8 +51,9 @@ const PLANS = [
     features: [
       "Home Feed, Reels, Voice Reels & Explore",
       "5 stories/day · up to 5 communities",
+      "One-time 3-min free audio call trial (new users only)",
       "Audio calls at 10 coins/min (standard quality)",
-      "Video calls at 25 coins/min (standard quality)",
+      "Video calls at 25 coins/min — always requires coins",
       "Basic match swipes (20/day)",
       "Chat with all your matches",
       "Daily missions & ad rewards (earn coins)",

@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: "How do Audio & Video Calls work?",
-    a: "Ridhi offers Random Audio Calling, Random Video Calling, One-to-One Chat Calls, and Coin-Based Calling Features.\n\nCertain premium calling features may require virtual coin usage or subscriptions.",
+    a: "Ridhi offers coin-based calling for all users.\n\n• New users get a one-time 3-minute FREE audio call trial (lifetime, not daily)\n• After the trial, audio calls cost 10 coins/min\n• Video calls ALWAYS require coins at 25 coins/min — never free\n• VIP subscribers get discounted call rates (20–60% off)\n• All coin deductions are server-verified in real-time\n\nRecharge coins in your Wallet to continue calling after your trial.",
   },
   {
     q: "What are Ridhi Coins?",

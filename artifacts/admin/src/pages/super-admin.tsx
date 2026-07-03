@@ -246,7 +246,7 @@ const FEATURE_FLAGS: FeatureCategory[] = [
       { id: "dating-swipe", name: "Dating Swipe (Match Tab)", desc: "Tinder-style card swipe for dating & friend matching",                        phase: "1", audience: "All Users",      status: "live",  enabled: true  },
       { id: "chat",         name: "Chat & Messaging",         desc: "1-on-1 chat with text, emoji, coin gifts, media sharing",                    phase: "1", audience: "All Users",      status: "live",  enabled: true  },
       { id: "live-streams", name: "Live Streams",             desc: "Real-time broadcasting with gifts, chat, co-host & PK battles",              phase: "2", audience: "Hosts",          status: "live",  enabled: true  },
-      { id: "random-calls", name: "Random Video / Audio Calls","desc": "Stranger matching for coin-based random calls. Server-authoritative billing: coinRate (audio=10, video=25) is resolved server-side from call type; client coinRate is ignored. Upfront coins deducted at match start; remaining balance settled on call end via atomic SQL conditional update.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
+      { id: "random-calls", name: "Random Video / Audio Calls","desc": "Stranger matching for coin-based random calls. New users get a ONE-TIME 3-minute free audio call trial (lifetime, not recurring). Video calls ALWAYS require coins. Server-authoritative billing: coinRate (audio=10, video=25) is resolved server-side from call type; client coinRate is ignored. Upfront coins deducted at match start; remaining balance settled on call end via atomic SQL conditional update.", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "audio-rooms",  name: "Audio Rooms",              desc: "Multi-user audio rooms — podcast, Q&A, karaoke style",                      phase: "2", audience: "All Users",      status: "beta",  enabled: true  },
       { id: "super-like",   name: "Super Like & Backtrack",   desc: "Stand out in dating with Super Like (5 coins) and undo last swipe (1 coin)", phase: "2", audience: "All Users",      status: "live",  enabled: true  },
       { id: "profile-prompts", name: "Profile Prompts",       desc: "Desi dating icebreakers — 10 prompts for better profile matching",         phase: "2", audience: "All Users",      status: "live",  enabled: true  },
@@ -464,6 +464,8 @@ export default function SuperAdminPage() {
     backtrackCost:          "1",
     audioCallCostPerMin:    "10",
     videoCallCostPerMin:    "25",
+    freeTrialMinutes:       "3",
+    freeTrialAudioOnly:     true,
     boostPostCostPerHr:     "50",
     unlockMsgCost:          "50",
     aiQueryCost:            "5",
@@ -2738,6 +2740,11 @@ export default function SuperAdminPage() {
                         <NumField label="Backtrack" field="backtrackCost" suffix="coins" min={1} />
                         <NumField label="Audio Call" field="audioCallCostPerMin" suffix="coins/min" min={1} />
                         <NumField label="Video Call" field="videoCallCostPerMin" suffix="coins/min" min={1} />
+                        <NumField label="Free Trial Minutes" field="freeTrialMinutes" suffix="min" min={0} max={30} />
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Free Trial Audio Only</span>
+                          <Switch checked={coinConfig.freeTrialAudioOnly} onCheckedChange={(v) => setCoinConfig(p => ({...p, freeTrialAudioOnly: v}))} />
+                        </div>
                         <NumField label="Boost Post" field="boostPostCostPerHr" suffix="coins/hr" min={1} />
                         <NumField label="Unlock Message" field="unlockMsgCost" suffix="coins" min={1} />
                         <NumField label="AI Query" field="aiQueryCost" suffix="coins" min={1} />

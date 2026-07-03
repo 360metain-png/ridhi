@@ -93,6 +93,9 @@ export interface UserProfile {
   pkBattleRejectionReason?: string;
   lastPostDate?: string;
   downloadEarnings?: number;
+  // Free call trial (one-time, lifetime) — only for newly registered users
+  callTrialUsed?: boolean;     // true = trial consumed (default false on signup)
+  callTrialStartedAt?: string; // ISO timestamp when trial was used
   // Saved posts / Collections
   savedPosts?: string[];
   savedCollections?: { id: string; name: string; coverUri?: string; postIds: string[]; createdAt?: string }[];
@@ -161,6 +164,7 @@ const DEFAULT_USER: UserProfile = {
   superLikesRemaining: 2,
   backtracksRemaining: 1,
   profilePrompts: [],
+  callTrialUsed: false,
   createdAt: new Date().toISOString(),
 };
 

@@ -130,6 +130,27 @@ const HOST_SECTIONS: Section[] = [
     note: "Creator subscriptions are for users who want to monetise content. VIP subscriptions are for users who want premium social features. A user can have both active at the same time.",
   },
   {
+    id: "h-coins-calling",
+    icon: Phone,
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    title: "Coins & Calling Policy",
+    subtitle: "How audio and video calls work for all user tiers",
+    features: [
+      "All calls are coin-based for every user. There is no 'free calling' or 'unlimited calling' — coins are deducted in real-time from the caller's wallet",
+      "New users receive a ONE-TIME 3-minute free audio call trial (lifetime, not daily). Only audio calls are covered by the trial — video calls always require coins from the very first call",
+      "Free tier (no VIP): audio 10 coins/min, video 25 coins/min. Base rates — no discounts",
+      "Silver VIP: audio 8 coins/min (20% off), video 20 coins/min (20% off) + 100 bonus coins/month",
+      "Gold VIP: audio 6 coins/min (40% off), video 15 coins/min (40% off) + 350 bonus coins/month",
+      "Platinum VIP: audio 5 coins/min (50% off), video 12 coins/min (52% off) + 1000 bonus coins/month",
+      "Diamond Elite VIP: audio 4 coins/min (60% off), video 10 coins/min (60% off) + 3000 bonus coins/month",
+      "Coin deductions are server-authoritative: the backend resolves call type, computes per-minute cost, and deducts coins atomically. Client never determines price",
+      "When a user's trial expires mid-call or coins run out, the call is auto-terminated by the server. An alert prompts the user to recharge coins",
+      "VIP bonus coins are credited automatically on the billing anniversary date and appear in the user's Wallet as 'VIP Bonus' transactions"
+    ],
+    note: "This policy applies to Random Calls, 1-to-1 Chat Calls, and any future voice/video feature. Hosts on the receiving end earn a revenue share from call coins (60% creator / 40% platform).",
+  },
+  {
     id: "h-registration",
     icon: UserPlus,
     color: "text-pink-600",
