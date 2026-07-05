@@ -20,7 +20,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ridhi.app",
+      "bundleIdentifier": "app.replit.ridhi",
       "buildNumber": "2",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Ridhi uses your location to show people and events near you.",
