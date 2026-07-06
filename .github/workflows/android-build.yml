@@ -36,8 +36,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
-          cache-dependency-path: artifacts/ridhi/pnpm-lock.yaml
 
       - name: Setup EAS CLI
         uses: expo/expo-github-action@v8
@@ -46,7 +44,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Decode Google Service Account Key
         run: |
@@ -63,7 +61,7 @@ jobs:
             --platform android \
             --profile production \
             --non-interactive \
-            ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_submit == 'true') || github.event_name == 'push' && '--auto-submit' || '' }}
+            --auto-submit
 
       - name: Build completed
         if: always()
