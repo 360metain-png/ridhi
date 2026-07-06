@@ -166,4 +166,10 @@ title = "Keystore in ALL formats (.jks + .p12 + .keystore + passwords)"
 id = "tUZLZ94kvkQkyAqDfNy_w"
 uri = "file://artifacts/screenshots/android-build-fixed.yml"
 type = "unspecified"
-title = "Clean Fixed Android Build Workflow"
+title = "Clean Android Build Workflow (Replace on GitHub)"
+
+[[outputs]]
+id = "LcGPSPzXWqQZnGlHiA15g"
+uri = "file://artifacts/screenshots/ios-build-fixed.yml"
+type = "unspecified"
+title = "Clean iOS Build Workflow (Replace on GitHub)"
