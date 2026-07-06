@@ -56,6 +56,7 @@ import AdminManagement     from "@/pages/admin-management";
 import PkBattleApprovals   from "@/pages/pk-battle-approvals";
 import ShopProducts        from "@/pages/shop-products";
 import AdminActivity       from "@/pages/admin-activity";
+import MyReport            from "@/pages/my-report";
 import AppStore            from "@/pages/app-store";
 import BackendAccess       from "@/pages/backend-access";
 import ChatModeration      from "@/pages/chat-moderation";
@@ -251,6 +252,7 @@ function Router() {
       <Route path="/pk-battle-approvals" component={() => <RoleRoute component={PkBattleApprovals} path="/pk-battle-approvals" />} />
       <Route path="/shop-products"      component={() => <RoleRoute component={ShopProducts}      path="/shop-products" />} />
       <Route path="/admin-activity"      component={() => <RoleRoute component={AdminActivity}      path="/admin-activity" />} />
+      <Route path="/my-report"           component={() => <RoleRoute component={MyReport}           path="/my-report" />} />
       <Route path="/app-store"            component={() => <RoleRoute component={AppStore}            path="/app-store" />} />
       <Route path="/backend-access"      component={() => <RoleRoute component={BackendAccess}      path="/backend-access" />} />
       <Route path="/chat-moderation"     component={() => <RoleRoute component={ChatModeration}     path="/chat-moderation" />} />

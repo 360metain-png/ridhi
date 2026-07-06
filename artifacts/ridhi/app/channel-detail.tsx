@@ -30,7 +30,20 @@ export default function ChannelDetailScreen() {
   const [message, setMessage] = useState("");
   const scrollRef = useRef<ScrollView>(null);
 
-  if (!channel) return null;
+  if (!channel) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + 20, paddingHorizontal: 24, alignItems: "center", justifyContent: "center", gap: 16 }]}>
+        <Text style={{ fontSize: 48 }}>📡</Text>
+        <Text style={{ fontSize: 18, fontFamily: "Inter_700Bold", color: colors.text }}>Channel not found</Text>
+        <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.mutedForeground, textAlign: "center" }}>
+          This channel doesn't exist or may have been removed.
+        </Text>
+        <Pressable onPress={() => router.back()} style={[styles.fallbackBtn, { backgroundColor: colors.primary }]}>
+          <Text style={{ color: "#fff", fontSize: 14, fontFamily: "Inter_700Bold" }}>Go Back</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   const isCreator = channel.creatorName === user?.name;
 
@@ -154,6 +167,7 @@ const styles = StyleSheet.create({
   creatorInputRow: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
   inputWrapper: { flex: 1, borderRadius: 24, borderWidth: 1, paddingHorizontal: 16, paddingVertical: 8, maxHeight: 100 },
   input: { fontSize: 15, padding: 0 },
+  fallbackBtn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 },
   sendBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   readOnlyNote: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 8 },
   readOnlyText: { fontSize: 13 },
