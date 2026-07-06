@@ -209,3 +209,15 @@ id = "96KId9JfL0AqaoXusxNWS"
 uri = "file://artifacts/screenshots/v3-android-build.yml"
 type = "unspecified"
 title = "Android Build v3 (with .npmrc fix)"
+
+[[outputs]]
+id = "e569j2K5G4ppaW5S1pPlp"
+uri = "file://artifacts/screenshots/SETUP_ASC_API_KEY.md"
+type = "text"
+title = "Complete ASC API Key Setup Guide (Step-by-Step)"
+
+[[outputs]]
+id = "RsX1RxfA_qEpoXHtf8h7D"
+uri = "file://artifacts/screenshots/ios-build-auto-submit.yml"
+type = "unspecified"
+title = "Updated iOS Workflow with Auto-Submit Option"
