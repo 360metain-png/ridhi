@@ -185,3 +185,15 @@ id = "7tAhwu1awEU2RdrgAoBUq"
 uri = "file://artifacts/screenshots/final-android-build.yml"
 type = "unspecified"
 title = "Final Android Build Workflow (Replace on GitHub)"
+
+[[outputs]]
+id = "m_jw9qeJciCeAyzSTavD5"
+uri = "file://artifacts/screenshots/v2-ios-build.yml"
+type = "unspecified"
+title = "iOS Build v2 (with lockfile fix)"
+
+[[outputs]]
+id = "th5p2JwFEBlpzA_JDvHMK"
+uri = "file://artifacts/screenshots/v2-android-build.yml"
+type = "unspecified"
+title = "Android Build v2 (with lockfile fix)"
