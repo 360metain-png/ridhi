@@ -1,0 +1,54 @@
+name: EAS Android Build
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'artifacts/ridhi/**'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/ridhi
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build Android App
+        env:
+          EAS_NO_VCS: 1
+        run: |
+          npx eas build \
+            --platform android \
+            --profile production \
+            --non-interactive
+
+      - name: Build completed
+        if: always()
+        run: echo "Build finished with status ${{ job.status }}"
