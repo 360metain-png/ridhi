@@ -155,3 +155,9 @@ id = "Ghdw9szX3NHSlL1ittChJ"
 uri = "file://artifacts/screenshots/ridhi-android-keystore.tar.gz"
 type = "unspecified"
 title = "Android Keystore + Passwords (Download & Unzip First)"
+
+[[outputs]]
+id = "PWI6e7qM5Fh5__M-cf7MV"
+uri = "file://artifacts/screenshots/ridhi-keystore-all.tar.gz"
+type = "unspecified"
+title = "Keystore in ALL formats (.jks + .p12 + .keystore + passwords)"
