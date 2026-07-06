@@ -952,8 +952,6 @@ function ReelItem({
         </View>
       )}
 
-      {/* Stacked swipe-up chevrons — only on first reel */}
-      {isFirst && isActive && <SwipeChevrons visible={isActive} />}
       </VideoFilter>
 
       {/* Share modal */}
@@ -1135,7 +1133,7 @@ export default function ReelsScreen() {
         },
       ]}
     >
-      <SwipeUpHint label="Swipe up for next reel" bottomOffset={100} delay={1000} />
+      <SwipeUpHint label="Swipe up" bottomOffset={220} delay={2000} bounces={2} />
       <View style={[styles.topBar, { top: topPad + 8 }]}>
         <Text style={styles.topTitle}>Reels</Text>
         <Pressable
