@@ -1,0 +1,80 @@
+name: EAS Android Build & Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      auto_submit:
+        description: 'Auto-submit to Google Play after build'
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    name: Build Android App & Submit to Google Play
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: artifacts/ridhi
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Decode Google Service Account Key (if configured)
+        id: decode_gplay_key
+        continue-on-error: true
+        run: |
+          mkdir -p ~/gplay
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 -d > ~/gplay/google-service-account.json || true
+          if [ -s ~/gplay/google-service-account.json ]; then
+            echo "GOOGLE_SERVICE_ACCOUNT_KEY_PATH=$HOME/gplay/google-service-account.json" >> $GITHUB_ENV
+            echo "has_key=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_key=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Android App
+        env:
+          EAS_NO_VCS: 1
+        run: |
+          npx eas build \
+            --platform android \
+            --profile production \
+            --non-interactive
+
+      - name: Submit to Google Play (if key available and requested)
+        if: steps.decode_gplay_key.outputs.has_key == 'true' && github.event.inputs.auto_submit == 'true'
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY_PATH: ${{ env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH }}
+          EAS_NO_VCS: 1
+        run: |
+          echo "Submitting to Google Play..."
+          npx eas submit \
+            --platform android \
+            --profile production \
+            --non-interactive
+
+      - name: Build completed
+        if: always()
+        run: echo "Build finished with status ${{ job.status }}"
