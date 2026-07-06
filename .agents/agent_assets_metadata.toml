@@ -197,3 +197,15 @@ id = "th5p2JwFEBlpzA_JDvHMK"
 uri = "file://artifacts/screenshots/v2-android-build.yml"
 type = "unspecified"
 title = "Android Build v2 (with lockfile fix)"
+
+[[outputs]]
+id = "dmbsDwUdiPfBIkwtmaWp2"
+uri = "file://artifacts/screenshots/v3-ios-build.yml"
+type = "unspecified"
+title = "iOS Build v3 (with .npmrc fix)"
+
+[[outputs]]
+id = "96KId9JfL0AqaoXusxNWS"
+uri = "file://artifacts/screenshots/v3-android-build.yml"
+type = "unspecified"
+title = "Android Build v3 (with .npmrc fix)"
