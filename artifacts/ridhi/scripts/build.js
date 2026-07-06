@@ -143,11 +143,19 @@ async function main() {
     copyDirectory(exportAssets, path.join(staticBuild, "assets"));
   }
 
-  // Copy HTML files
+  // Copy HTML files and public static assets (images, icons, manifests)
+  const STATIC_ROOT_EXTS = new Set([
+    ".html", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico",
+    ".webp", ".txt", ".xml", ".json", ".webmanifest",
+  ]);
+  const STATIC_ROOT_FILES = new Set(["robots.txt", "sitemap.xml"]);
   const entries = fs.readdirSync(exportDir, { withFileTypes: true });
   for (const entry of entries) {
-    if (entry.isFile() && (entry.name.endsWith(".html") || entry.name === "robots.txt" || entry.name === "sitemap.xml")) {
-      fs.copyFileSync(path.join(exportDir, entry.name), path.join(staticBuild, entry.name));
+    if (entry.isFile()) {
+      const ext = path.extname(entry.name).toLowerCase();
+      if (STATIC_ROOT_FILES.has(entry.name) || STATIC_ROOT_EXTS.has(ext)) {
+        fs.copyFileSync(path.join(exportDir, entry.name), path.join(staticBuild, entry.name));
+      }
     } else if (entry.isDirectory() && entry.name !== "_expo" && entry.name !== "assets") {
       copyDirectory(path.join(exportDir, entry.name), path.join(staticBuild, entry.name));
     }
