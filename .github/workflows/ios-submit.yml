@@ -1,0 +1,54 @@
+name: EAS iOS Production Build & Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      ascAppId:
+        description: 'Apple App Store Connect App ID (override)'
+        required: false
+        type: string
+
+jobs:
+  build-and-submit:
+    name: Build & Submit iOS to App Store Connect
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build & Submit iOS App
+        working-directory: artifacts/ridhi
+        env:
+          EAS_NO_VCS: 1
+        run: |
+          npx eas build \
+            --platform ios \
+            --profile production \
+            --non-interactive \
+            --auto-submit \
+            --submit-profile production
+
+      - name: Build completed
+        if: always()
+        run: echo "Build & submit finished with status ${{ job.status }}"
