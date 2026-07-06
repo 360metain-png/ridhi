@@ -143,3 +143,9 @@ id = "XRxBhGB2R9OLi0agNNs2a"
 uri = "file://artifacts/ridhi/Ridhi_Platform_Document.md"
 type = "text"
 title = "Ridhi Platform Document — All Features, Income Sources & User Experience"
+
+[[outputs]]
+id = "88Os9EIepmx60Isylbuje"
+uri = "file://artifacts/screenshots/play-store-listing.md"
+type = "text"
+title = "Google Play Store Listing - Ready to Copy"
