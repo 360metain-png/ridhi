@@ -49,7 +49,7 @@
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "production",
         "releaseStatus": "completed",
-        "applicationId": "com.ridhi.app"
+        "applicationId": "com.pt.ridhi"
       }
     }
   }

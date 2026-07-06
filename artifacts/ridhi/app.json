@@ -45,8 +45,8 @@
       "usesAppleSignIn": true
     },
     "android": {
-      "package": "com.ridhi.app",
-      "versionCode": 10,
+      "package": "com.pt.ridhi",
+      "versionCode": 11,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/ridhi_logo.png",
         "backgroundColor": "#1A0533"
