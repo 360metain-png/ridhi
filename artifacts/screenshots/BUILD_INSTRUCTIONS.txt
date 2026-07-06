@@ -1,0 +1,22 @@
+# EAS Build Instructions
+
+## iOS Build
+1. Go to: https://github.com/360metain-png/ridhi/blob/main/.github/workflows/ios-build.yml
+2. Click Edit (pencil)
+3. Select ALL and delete
+4. Copy contents from: artifacts/screenshots/final-ios-build.yml
+5. Paste
+6. Commit: 'fix: clean iOS build workflow without auto-submit'
+
+## Android Build
+1. Go to: https://github.com/360metain-png/ridhi/blob/main/.github/workflows/android-build.yml
+2. Click Edit (pencil)
+3. Select ALL and delete
+4. Copy contents from: artifacts/screenshots/final-android-build.yml
+5. Paste
+6. Commit: 'fix: clean Android build workflow without auto-submit'
+
+## After committing both:
+- iOS: https://github.com/360metain-png/ridhi/actions/workflows/ios-build.yml → Run workflow
+- Android: https://github.com/360metain-png/ridhi/actions/workflows/android-build.yml → Run workflow
+

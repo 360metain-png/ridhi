@@ -173,3 +173,15 @@ id = "LcGPSPzXWqQZnGlHiA15g"
 uri = "file://artifacts/screenshots/ios-build-fixed.yml"
 type = "unspecified"
 title = "Clean iOS Build Workflow (Replace on GitHub)"
+
+[[outputs]]
+id = "BKz0--uus9s1nj1X2Ik5d"
+uri = "file://artifacts/screenshots/final-ios-build.yml"
+type = "unspecified"
+title = "Final iOS Build Workflow (Replace on GitHub)"
+
+[[outputs]]
+id = "7tAhwu1awEU2RdrgAoBUq"
+uri = "file://artifacts/screenshots/final-android-build.yml"
+type = "unspecified"
+title = "Final Android Build Workflow (Replace on GitHub)"
