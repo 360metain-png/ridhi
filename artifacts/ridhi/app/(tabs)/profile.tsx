@@ -126,6 +126,12 @@ const MENU_SECTIONS = [
     ],
   },
   {
+    title: "Games",
+    items: [
+      { icon: "grid",        label: "Play Games",   route: "/gaming",              color: "#E91E8C" },
+    ],
+  },
+  {
     title: "Create & Live",
     items: [
       { icon: "video",       label: "Go Live",         route: "/live-stream",      color: "#FF3B30" },
