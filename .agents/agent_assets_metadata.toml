@@ -148,4 +148,10 @@ title = "Ridhi Platform Document — All Features, Income Sources & User Experie
 id = "88Os9EIepmx60Isylbuje"
 uri = "file://artifacts/screenshots/play-store-listing.md"
 type = "text"
-title = "Google Play Store Listing - Ready to Copy"
+title = "Google Play Store Listing Text"
+
+[[outputs]]
+id = "Ghdw9szX3NHSlL1ittChJ"
+uri = "file://artifacts/screenshots/ridhi-android-keystore.tar.gz"
+type = "unspecified"
+title = "Android Keystore + Secrets (DOWNLOAD & BACKUP NOW)"
